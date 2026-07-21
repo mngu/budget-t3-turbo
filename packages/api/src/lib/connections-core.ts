@@ -1,15 +1,17 @@
 // Gestion des connexions bancaires Enable Banking (sessions PSD2 en DB).
 import { randomUUID } from "node:crypto";
+
 import { and, eq, inArray, lt, sql } from "@budget/db";
 import { db } from "@budget/db/client";
 import { accounts, authRequests, bankConnections } from "@budget/db/schema";
+
+import type { ConsentBadge } from "./eb-domain";
 import { appJwt, ebApi, getAllAspsps, requireSettings } from "./eb-client";
 import {
   clampValidUntil,
   consentBadge,
   parseSessionAccounts,
   reconcileAccounts,
-  type ConsentBadge,
 } from "./eb-domain";
 
 export interface AspspOption {
@@ -18,7 +20,9 @@ export interface AspspOption {
   logo: string | null;
 }
 
-export async function searchAspspsCore(q: string | undefined): Promise<AspspOption[]> {
+export async function searchAspspsCore(
+  q: string | undefined,
+): Promise<AspspOption[]> {
   const settings = await requireSettings();
   const all = await getAllAspsps(appJwt(settings));
   const needle = (q ?? "").trim().toLowerCase();
@@ -27,7 +31,8 @@ export async function searchAspspsCore(q: string | undefined): Promise<AspspOpti
     .filter((a) => !needle || a.name.toLowerCase().includes(needle))
     .sort(
       (x, y) =>
-        Number(y.country === "FR") - Number(x.country === "FR") || x.name.localeCompare(y.name),
+        Number(y.country === "FR") - Number(x.country === "FR") ||
+        x.name.localeCompare(y.name),
     )
     .slice(0, 30)
     .map(({ name, country, logo }) => ({ name, country, logo }));
@@ -39,12 +44,16 @@ export interface StartAuthInput {
   connectionId?: number;
 }
 
-export async function startAuthCore(input: StartAuthInput): Promise<{ url: string }> {
+export async function startAuthCore(
+  input: StartAuthInput,
+): Promise<{ url: string }> {
   const settings = await requireSettings();
   const jwt = appJwt(settings);
 
   // Purge des demandes abandonnées (SCA refusé, onglet fermé…).
-  await db.delete(authRequests).where(lt(authRequests.createdAt, sql`now() - interval '1 hour'`));
+  await db
+    .delete(authRequests)
+    .where(lt(authRequests.createdAt, sql`now() - interval '1 hour'`));
 
   const aspsp = (await getAllAspsps(jwt)).find(
     (a) => a.name === input.name && a.country === input.country,
@@ -54,7 +63,12 @@ export async function startAuthCore(input: StartAuthInput): Promise<{ url: strin
   const auth = await ebApi("/auth", jwt, {
     method: "POST",
     body: JSON.stringify({
-      access: { valid_until: clampValidUntil(aspsp?.maximum_consent_validity, new Date()) },
+      access: {
+        valid_until: clampValidUntil(
+          aspsp?.maximum_consent_validity,
+          new Date(),
+        ),
+      },
       aspsp: { name: input.name, country: input.country },
       state,
       redirect_url: settings.redirectUrl,
@@ -77,17 +91,28 @@ export interface CompleteAuthResult {
   renewed: boolean;
 }
 
-export async function completeAuthCore(code: string, state: string): Promise<CompleteAuthResult> {
+export async function completeAuthCore(
+  code: string,
+  state: string,
+): Promise<CompleteAuthResult> {
   // Consommation atomique du state : un delete...returning échoue à la seconde
   // tentative (replay, double effet React) sans fenêtre de course.
-  const [request] = await db.delete(authRequests).where(eq(authRequests.state, state)).returning();
+  const [request] = await db
+    .delete(authRequests)
+    .where(eq(authRequests.state, state))
+    .returning();
   if (!request) {
-    throw new Error("Demande d'autorisation inconnue ou déjà traitée — relancez la connexion.");
+    throw new Error(
+      "Demande d'autorisation inconnue ou déjà traitée — relancez la connexion.",
+    );
   }
 
   const settings = await requireSettings();
   const jwt = appJwt(settings);
-  const session = await ebApi("/sessions", jwt, { method: "POST", body: JSON.stringify({ code }) });
+  const session = await ebApi("/sessions", jwt, {
+    method: "POST",
+    body: JSON.stringify({ code }),
+  });
 
   const validUntil = session.access?.valid_until
     ? new Date(session.access.valid_until)
@@ -101,7 +126,12 @@ export async function completeAuthCore(code: string, state: string): Promise<Com
   if (connectionId) {
     await db
       .update(bankConnections)
-      .set({ sessionId: session.session_id, validUntil, status: "active", logoUrl: logo })
+      .set({
+        sessionId: session.session_id,
+        validUntil,
+        status: "active",
+        logoUrl: logo,
+      })
       .where(eq(bankConnections.id, connectionId));
   } else {
     const [row] = await db
@@ -125,7 +155,10 @@ export async function completeAuthCore(code: string, state: string): Promise<Com
   const { updates, creates } = reconcileAccounts(existing, discovered);
 
   for (const u of updates) {
-    await db.update(accounts).set({ uid: u.uid, connectionId }).where(eq(accounts.id, u.id));
+    await db
+      .update(accounts)
+      .set({ uid: u.uid, connectionId })
+      .where(eq(accounts.id, u.id));
   }
   if (creates.length > 0) {
     await db.insert(accounts).values(
@@ -166,13 +199,21 @@ export async function listConnectionsCore(): Promise<ConnectionSummary[]> {
   await db
     .update(bankConnections)
     .set({ status: "expired" })
-    .where(and(eq(bankConnections.status, "active"), lt(bankConnections.validUntil, new Date())));
+    .where(
+      and(
+        eq(bankConnections.status, "active"),
+        lt(bankConnections.validUntil, new Date()),
+      ),
+    );
 
   const connections = await db.select().from(bankConnections);
   const ids = connections.map((c) => c.id);
   const accountRows =
     ids.length > 0
-      ? await db.select().from(accounts).where(inArray(accounts.connectionId, ids))
+      ? await db
+          .select()
+          .from(accounts)
+          .where(inArray(accounts.connectionId, ids))
       : [];
 
   const now = new Date();
@@ -199,8 +240,13 @@ export async function listConnectionsCore(): Promise<ConnectionSummary[]> {
   }));
 }
 
-export async function getConnectionAccountsCore(connectionId: number): Promise<AccountSummary[]> {
-  const rows = await db.select().from(accounts).where(eq(accounts.connectionId, connectionId));
+export async function getConnectionAccountsCore(
+  connectionId: number,
+): Promise<AccountSummary[]> {
+  const rows = await db
+    .select()
+    .from(accounts)
+    .where(eq(accounts.connectionId, connectionId));
   return rows.map((a) => ({
     id: a.id,
     uid: a.uid,
@@ -216,7 +262,9 @@ export interface AccountUpdate {
   enabled: boolean;
 }
 
-export async function updateAccountsCore(updates: AccountUpdate[]): Promise<void> {
+export async function updateAccountsCore(
+  updates: AccountUpdate[],
+): Promise<void> {
   for (const u of updates) {
     await db
       .update(accounts)
@@ -225,7 +273,9 @@ export async function updateAccountsCore(updates: AccountUpdate[]): Promise<void
   }
 }
 
-export async function revokeConnectionCore(connectionId: number): Promise<void> {
+export async function revokeConnectionCore(
+  connectionId: number,
+): Promise<void> {
   const [conn] = await db
     .select()
     .from(bankConnections)
@@ -234,10 +284,15 @@ export async function revokeConnectionCore(connectionId: number): Promise<void> 
 
   const settings = await requireSettings();
   try {
-    await ebApi(`/sessions/${conn.sessionId}`, appJwt(settings), { method: "DELETE" });
+    await ebApi(`/sessions/${conn.sessionId}`, appJwt(settings), {
+      method: "DELETE",
+    });
   } catch (err) {
     // Session déjà invalide côté Enable Banking : on marque quand même révoquée.
-    console.warn(`⚠️  Révocation Enable Banking échouée (session déjà invalide ?) :`, err);
+    console.warn(
+      `⚠️  Révocation Enable Banking échouée (session déjà invalide ?) :`,
+      err,
+    );
   }
   await db
     .update(bankConnections)

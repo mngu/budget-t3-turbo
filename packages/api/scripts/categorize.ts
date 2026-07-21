@@ -3,20 +3,21 @@
 // Best-effort : sans clé API ou en cas d'erreur API, warning + exit 0
 // (l'import ne doit jamais échouer à cause de la catégorisation).
 // Usage : npm run categorize
-
+import { fileURLToPath } from "node:url";
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
+
 import { and, count, eq, isNull } from "@budget/db";
 import { db } from "@budget/db/client";
 import { accounts, categories, transactions } from "@budget/db/schema";
-import { fileURLToPath } from "node:url";
+
+import type { TxnForLlm } from "./categorize-core";
 import {
   buildCategorizationOutputSchema,
   buildSystemPrompt,
   buildUserMessage,
   chunkTransactions,
   filterValidResults,
-  type TxnForLlm,
 } from "./categorize-core";
 
 // tsx ne charge pas .env tout seul (même logique que src/db/client.ts).
@@ -30,7 +31,9 @@ if (!process.env.ANTHROPIC_API_KEY) {
 
 export async function main(): Promise<void> {
   if (!process.env.ANTHROPIC_API_KEY) {
-    console.warn("⚠️  ANTHROPIC_API_KEY absente (.env) — catégorisation sautée.");
+    console.warn(
+      "⚠️  ANTHROPIC_API_KEY absente (.env) — catégorisation sautée.",
+    );
     return;
   }
 
@@ -44,7 +47,8 @@ export async function main(): Promise<void> {
   const categoryNames = categoryRows.map((c) => c.name);
   const categoryIdByName = new Map(categoryRows.map((c) => [c.name, c.id]));
   const systemPrompt = buildSystemPrompt(categoryNames);
-  const categorizationOutputSchema = buildCategorizationOutputSchema(categoryNames);
+  const categorizationOutputSchema =
+    buildCategorizationOutputSchema(categoryNames);
 
   const rows: TxnForLlm[] = await db
     .select({
@@ -89,7 +93,11 @@ export async function main(): Promise<void> {
       }
 
       const batchIds = new Set(batch.map((t) => t.id));
-      const valid = filterValidResults(response.parsed_output.resultats, batchIds, categoryNames);
+      const valid = filterValidResults(
+        response.parsed_output.resultats,
+        batchIds,
+        categoryNames,
+      );
 
       for (const { id, categorie } of valid) {
         const categoryId = categoryIdByName.get(categorie);
@@ -117,7 +125,9 @@ export async function main(): Promise<void> {
     .select({ remaining: count() })
     .from(transactions)
     .where(isNull(transactions.categoryId));
-  console.log(`✅ ${categorized} catégorisées, ${row?.remaining ?? 0} restantes.`);
+  console.log(
+    `✅ ${categorized} catégorisées, ${row?.remaining ?? 0} restantes.`,
+  );
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

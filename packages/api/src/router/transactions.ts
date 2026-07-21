@@ -2,6 +2,7 @@ import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod/v4";
 
 import type { SQL } from "@budget/db";
+import type { TransactionsSearch } from "@budget/validators";
 import {
   and,
   asc,
@@ -16,7 +17,6 @@ import {
   sql,
 } from "@budget/db";
 import { accounts, categories, transactions } from "@budget/db/schema";
-import type { TransactionsSearch } from "@budget/validators";
 import {
   FALLBACK_CATEGORY_COLOR,
   PAGE_SIZE,
@@ -58,11 +58,13 @@ const transactionsFilterQuery = (
   if (query.direction)
     conditions.push(eq(transactions.direction, query.direction));
   if (query.status) conditions.push(eq(transactions.status, query.status));
-  if (query.category === "none") conditions.push(isNull(transactions.categoryId));
+  if (query.category === "none")
+    conditions.push(isNull(transactions.categoryId));
   else if (query.category) conditions.push(eq(categories.name, query.category));
   if (query.dateFrom)
     conditions.push(gte(transactions.bookingDate, query.dateFrom));
-  if (query.dateTo) conditions.push(lte(transactions.bookingDate, query.dateTo));
+  if (query.dateTo)
+    conditions.push(lte(transactions.bookingDate, query.dateTo));
   if (query.q) {
     const qFilter = or(
       ilike(transactions.description, `%${query.q}%`),

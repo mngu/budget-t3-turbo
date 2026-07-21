@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { normalizeTransaction, type EbTransaction } from "./normalize";
+
+import type { EbTransaction } from "./normalize";
+import { normalizeTransaction } from "./normalize";
 
 const base: EbTransaction = {
   entry_reference: "750000000000002026-07-10-14.16.45.085503",
@@ -46,7 +48,11 @@ describe("normalizeTransaction", () => {
       booking_date: "2026-07-12",
       remittance_information: ["CARREFOUR PARIS"],
       creditor: { name: "CARREFOUR" },
-      bank_transaction_code: { code: "CARD_PAYMENT", sub_code: null, description: null },
+      bank_transaction_code: {
+        code: "CARD_PAYMENT",
+        sub_code: null,
+        description: null,
+      },
       merchant_category_code: "5411",
     };
     const row = normalizeTransaction(revolut, 3);
@@ -63,14 +69,18 @@ describe("normalizeTransaction", () => {
     const multi = { ...base, remittance_information: ["LIGNE 1", "LIGNE 2"] };
     expect(normalizeTransaction(multi, 1).description).toBe("LIGNE 1 LIGNE 2");
 
-    const vide = { ...base, remittance_information: null, debtor: { name: "EMPLOYEUR SAS" } };
+    const vide = {
+      ...base,
+      remittance_information: null,
+      debtor: { name: "EMPLOYEUR SAS" },
+    };
     expect(normalizeTransaction(vide, 1).description).toBe("EMPLOYEUR SAS");
   });
 
   it("rejette une transaction sans entry_reference", () => {
-    expect(() => normalizeTransaction({ ...base, entry_reference: "" }, 1)).toThrow(
-      /entry_reference/,
-    );
+    expect(() =>
+      normalizeTransaction({ ...base, entry_reference: "" }, 1),
+    ).toThrow(/entry_reference/);
   });
 
   it("normalise un paiement carte OTHR (Caisse d'Épargne) sans booking_date, en attente, avec transaction_date en repli", () => {

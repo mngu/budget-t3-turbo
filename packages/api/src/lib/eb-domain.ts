@@ -5,8 +5,13 @@ export const CONSENT_DAYS = 180;
 export const CONSENT_WARNING_DAYS = 30;
 
 // JWT RS256 signé avec la clé privée de l'application (sans dépendance, via node:crypto).
-export function makeJwt(applicationId: string, privateKeyPem: string, now = new Date()): string {
-  const b64 = (obj: object) => Buffer.from(JSON.stringify(obj)).toString("base64url");
+export function makeJwt(
+  applicationId: string,
+  privateKeyPem: string,
+  now = new Date(),
+): string {
+  const b64 = (obj: object) =>
+    Buffer.from(JSON.stringify(obj)).toString("base64url");
 
   const iat = Math.floor(now.getTime() / 1000);
   const header = b64({ typ: "JWT", alg: "RS256", kid: applicationId });
@@ -42,7 +47,9 @@ export interface ConsentBadge {
 }
 
 export function consentBadge(validUntil: Date, now: Date): ConsentBadge {
-  const daysLeft = Math.ceil((validUntil.getTime() - now.getTime()) / (24 * 3600 * 1000));
+  const daysLeft = Math.ceil(
+    (validUntil.getTime() - now.getTime()) / (24 * 3600 * 1000),
+  );
   if (daysLeft <= 0) return { level: "expired", daysLeft: 0 };
   if (daysLeft <= CONSENT_WARNING_DAYS) return { level: "warning", daysLeft };
   return { level: "ok", daysLeft };
@@ -55,11 +62,14 @@ export interface DiscoveredAccount {
 
 // Les sessions Enable Banking renvoient les comptes sous forme de string (uid)
 // ou d'objet — même tolérance que l'ancien script CLI.
-export function parseSessionAccounts(raw: unknown[] | undefined): DiscoveredAccount[] {
+export function parseSessionAccounts(
+  raw: unknown[] | undefined,
+): DiscoveredAccount[] {
   return (raw ?? []).flatMap((acc: any) => {
     const uid = typeof acc === "string" ? acc : acc?.uid;
     if (!uid) return [];
-    const iban = typeof acc === "object" ? (acc?.account_id?.iban ?? null) : null;
+    const iban =
+      typeof acc === "object" ? (acc?.account_id?.iban ?? null) : null;
     return [{ uid, iban }];
   });
 }
@@ -81,7 +91,9 @@ export function reconcileAccounts(
   existing: ExistingAccount[],
   discovered: DiscoveredAccount[],
 ): AccountReconciliation {
-  const byIban = new Map(existing.filter((a) => a.iban).map((a) => [a.iban as string, a]));
+  const byIban = new Map(
+    existing.filter((a) => a.iban).map((a) => [a.iban as string, a]),
+  );
   const byUid = new Map(existing.map((a) => [a.uid, a]));
 
   const updates: AccountReconciliation["updates"] = [];

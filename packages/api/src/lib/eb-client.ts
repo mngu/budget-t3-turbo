@@ -1,6 +1,7 @@
 // Accès à l'API Enable Banking : settings (DB), appels HTTP signés, cache ASPSPs.
 import { db } from "@budget/db/client";
 import { appSettings } from "@budget/db/schema";
+
 import { makeJwt } from "./eb-domain";
 
 const API = "https://api.enablebanking.com";
@@ -41,7 +42,11 @@ export function appJwt(settings: EbSettings): string {
   return makeJwt(settings.applicationId, settings.privateKeyPem);
 }
 
-export async function ebApi(path: string, jwt: string, init: RequestInit = {}): Promise<any> {
+export async function ebApi(
+  path: string,
+  jwt: string,
+  init: RequestInit = {},
+): Promise<any> {
   const resp = await fetch(`${API}${path}`, {
     ...init,
     headers: {
@@ -53,7 +58,9 @@ export async function ebApi(path: string, jwt: string, init: RequestInit = {}): 
   if (!resp.ok) {
     const retryAfter = resp.headers.get("retry-after");
     if (retryAfter) {
-      console.warn(`⚠️  Retry-After reçu de l'API Enable Banking : ${retryAfter} (${path})`);
+      console.warn(
+        `⚠️  Retry-After reçu de l'API Enable Banking : ${retryAfter} (${path})`,
+      );
     }
     throw new EbApiError(
       resp.status,

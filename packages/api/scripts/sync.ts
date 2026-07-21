@@ -6,8 +6,12 @@ import { performSync } from "../src/lib/sync-core";
 performSync()
   .then(({ expired, rateLimited }) => {
     if (expired.length > 0) {
-      console.log(`\nℹ️  ${expired.length} banque(s) à renouveler : ${expired.join(", ")}`);
-      console.log("   Rendez-vous sur la page Banques de l'app pour ré-autoriser.");
+      console.log(
+        `\nℹ️  ${expired.length} banque(s) à renouveler : ${expired.join(", ")}`,
+      );
+      console.log(
+        "   Rendez-vous sur la page Banques de l'app pour ré-autoriser.",
+      );
     }
     if (rateLimited.length > 0) {
       console.log(

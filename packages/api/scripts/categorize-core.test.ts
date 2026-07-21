@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
+
+import type { TxnForLlm } from "./categorize-core";
 import {
   buildCategorizationOutputSchema,
   buildUserMessage,
   chunkTransactions,
   filterValidResults,
-  type TxnForLlm,
 } from "./categorize-core";
 
 const CATEGORY_NAMES = ["Alimentation", "Transport"];
@@ -23,7 +24,9 @@ const txn = (id: number): TxnForLlm => ({
 
 describe("chunkTransactions", () => {
   it("découpe en lots de 50 par défaut", () => {
-    const chunks = chunkTransactions(Array.from({ length: 120 }, (_, i) => txn(i)));
+    const chunks = chunkTransactions(
+      Array.from({ length: 120 }, (_, i) => txn(i)),
+    );
     expect(chunks.map((c) => c.length)).toEqual([50, 50, 20]);
   });
 
@@ -55,12 +58,14 @@ describe("buildUserMessage", () => {
 describe("buildCategorizationOutputSchema", () => {
   it("accepte une catégorie valide et rejette une inconnue", () => {
     const schema = buildCategorizationOutputSchema(CATEGORY_NAMES);
-    expect(schema.safeParse({ resultats: [{ id: 1, categorie: "Alimentation" }] }).success).toBe(
-      true,
-    );
-    expect(schema.safeParse({ resultats: [{ id: 1, categorie: "Cryptomonnaie" }] }).success).toBe(
-      false,
-    );
+    expect(
+      schema.safeParse({ resultats: [{ id: 1, categorie: "Alimentation" }] })
+        .success,
+    ).toBe(true);
+    expect(
+      schema.safeParse({ resultats: [{ id: 1, categorie: "Cryptomonnaie" }] })
+        .success,
+    ).toBe(false);
   });
 });
 

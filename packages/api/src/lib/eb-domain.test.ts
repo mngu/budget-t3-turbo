@@ -1,5 +1,6 @@
 import { createVerify, generateKeyPairSync } from "node:crypto";
 import { describe, expect, it } from "vitest";
+
 import {
   clampValidUntil,
   consentBadge,
@@ -20,19 +21,29 @@ describe("makeJwt", () => {
 
   it("produit un JWT RS256 signé, avec kid = application_id", () => {
     const jwt = makeJwt("app-123", privateKey, NOW);
-    const [header, payload, signature] = jwt.split(".") as [string, string, string];
+    const [header, payload, signature] = jwt.split(".") as [
+      string,
+      string,
+      string,
+    ];
 
-    const decodedHeader = JSON.parse(Buffer.from(header, "base64url").toString());
+    const decodedHeader = JSON.parse(
+      Buffer.from(header, "base64url").toString(),
+    );
     expect(decodedHeader).toEqual({ typ: "JWT", alg: "RS256", kid: "app-123" });
 
-    const decodedPayload = JSON.parse(Buffer.from(payload, "base64url").toString());
+    const decodedPayload = JSON.parse(
+      Buffer.from(payload, "base64url").toString(),
+    );
     expect(decodedPayload.iss).toBe("enablebanking.com");
     expect(decodedPayload.aud).toBe("api.enablebanking.com");
     expect(decodedPayload.exp - decodedPayload.iat).toBe(3600);
 
     const verifier = createVerify("RSA-SHA256");
     verifier.update(`${header}.${payload}`);
-    expect(verifier.verify(publicKey, Buffer.from(signature, "base64url"))).toBe(true);
+    expect(
+      verifier.verify(publicKey, Buffer.from(signature, "base64url")),
+    ).toBe(true);
   });
 
   it("rejette une clé privée invalide", () => {
@@ -42,8 +53,12 @@ describe("makeJwt", () => {
 
 describe("clampValidUntil", () => {
   it("demande 180 jours quand l'ASPSP n'annonce pas de maximum", () => {
-    expect(clampValidUntil(null, NOW)).toBe(new Date(NOW.getTime() + 180 * DAY).toISOString());
-    expect(clampValidUntil(undefined, NOW)).toBe(new Date(NOW.getTime() + 180 * DAY).toISOString());
+    expect(clampValidUntil(null, NOW)).toBe(
+      new Date(NOW.getTime() + 180 * DAY).toISOString(),
+    );
+    expect(clampValidUntil(undefined, NOW)).toBe(
+      new Date(NOW.getTime() + 180 * DAY).toISOString(),
+    );
   });
 
   it("borne à maximum_consent_validity quand il est plus court (ex. 90 j)", () => {
@@ -72,7 +87,9 @@ describe("consentBadge", () => {
       level: "warning",
       daysLeft: 30,
     });
-    expect(consentBadge(new Date(NOW.getTime() + 1 * DAY), NOW).level).toBe("warning");
+    expect(consentBadge(new Date(NOW.getTime() + 1 * DAY), NOW).level).toBe(
+      "warning",
+    );
   });
 
   it("expired quand la date est passée, daysLeft à 0", () => {
@@ -88,7 +105,10 @@ describe("parseSessionAccounts", () => {
     expect(
       parseSessionAccounts([
         "uid-simple",
-        { uid: "uid-objet", account_id: { iban: "FR7600000000000000000000000" } },
+        {
+          uid: "uid-objet",
+          account_id: { iban: "FR7600000000000000000000000" },
+        },
         { pas_de_uid: true },
       ]),
     ).toEqual([
@@ -117,13 +137,17 @@ describe("reconcileAccounts", () => {
   });
 
   it("réconcilie par uid quand il n'y a pas d'IBAN", () => {
-    const { updates, creates } = reconcileAccounts(existing, [{ uid: "ancien-uid-b", iban: null }]);
+    const { updates, creates } = reconcileAccounts(existing, [
+      { uid: "ancien-uid-b", iban: null },
+    ]);
     expect(updates).toEqual([{ id: 2, uid: "ancien-uid-b" }]);
     expect(creates).toEqual([]);
   });
 
   it("crée les comptes inconnus", () => {
-    const { updates, creates } = reconcileAccounts(existing, [{ uid: "uid-c", iban: "FR76CCCC" }]);
+    const { updates, creates } = reconcileAccounts(existing, [
+      { uid: "uid-c", iban: "FR76CCCC" },
+    ]);
     expect(updates).toEqual([]);
     expect(creates).toEqual([{ uid: "uid-c", iban: "FR76CCCC" }]);
   });

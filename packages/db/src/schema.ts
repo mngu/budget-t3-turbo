@@ -18,7 +18,9 @@ export const appSettings = pgTable("app_settings", {
   applicationId: text("application_id").notNull(),
   privateKeyPem: text("private_key_pem").notNull(),
   redirectUrl: text("redirect_url").notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
 
 // Une session PSD2 par banque — remplace data/session-*.json.
@@ -32,7 +34,9 @@ export const bankConnections = pgTable("bank_connections", {
   status: text("status", { enum: ["active", "expired", "revoked"] })
     .notNull()
     .default("active"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
 
 // Flux d'autorisation en cours (anti-CSRF via state, survit à un redémarrage).
@@ -42,7 +46,9 @@ export const authRequests = pgTable("auth_requests", {
   aspspName: text("aspsp_name").notNull(),
   aspspCountry: text("aspsp_country").notNull(),
   connectionId: integer("connection_id").references(() => bankConnections.id),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
 
 export const accounts = pgTable("accounts", {
@@ -57,7 +63,9 @@ export const accounts = pgTable("accounts", {
   // Nom d'affichage choisi par l'utilisateur ; bank_name garde le nom ASPSP.
   displayName: text("display_name"),
   enabled: boolean("enabled").notNull().default(true),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
 
 export const categories = pgTable("categories", {
@@ -88,10 +96,15 @@ export const transactions = pgTable(
     // 'manual' (future UI de correction) ne doit jamais être écrasé par un re-run LLM.
     categorySource: text("category_source", { enum: ["llm", "manual"] }),
     raw: jsonb("raw").notNull(),
-    importedAt: timestamp("imported_at", { withTimezone: true }).notNull().defaultNow(),
+    importedAt: timestamp("imported_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
   },
   (t) => [
-    uniqueIndex("transactions_account_entry_ref_uq").on(t.accountId, t.entryReference),
+    uniqueIndex("transactions_account_entry_ref_uq").on(
+      t.accountId,
+      t.entryReference,
+    ),
     index("transactions_booking_date_idx").on(t.bookingDate),
     index("transactions_direction_idx").on(t.direction),
     index("transactions_status_idx").on(t.status),

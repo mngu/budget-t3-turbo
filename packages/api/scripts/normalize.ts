@@ -22,18 +22,25 @@ export interface EbTransaction {
   [key: string]: unknown;
 }
 
-export function normalizeTransaction(raw: EbTransaction, accountId: number): NewTransaction {
+export function normalizeTransaction(
+  raw: EbTransaction,
+  accountId: number,
+): NewTransaction {
   if (!raw.entry_reference) throw new Error("entry_reference manquant");
   if (!raw.transaction_amount?.amount)
     throw new Error(`transaction_amount manquant (${raw.entry_reference})`);
 
-  const bookingDate = raw.booking_date ?? raw.transaction_date ?? raw.value_date;
+  const bookingDate =
+    raw.booking_date ?? raw.transaction_date ?? raw.value_date;
   if (!bookingDate)
-    throw new Error(`aucune date (booking/transaction/value) (${raw.entry_reference})`);
+    throw new Error(
+      `aucune date (booking/transaction/value) (${raw.entry_reference})`,
+    );
 
   const direction = raw.credit_debit_indicator === "DBIT" ? "debit" : "credit";
   // Pour un débit l'argent va au créancier ; pour un crédit il vient du débiteur.
-  const counterparty = (direction === "debit" ? raw.creditor?.name : raw.debtor?.name) ?? null;
+  const counterparty =
+    (direction === "debit" ? raw.creditor?.name : raw.debtor?.name) ?? null;
   const joined = (raw.remittance_information ?? []).join(" ").trim();
 
   return {

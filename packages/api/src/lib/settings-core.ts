@@ -2,7 +2,9 @@
 // Source de vérité unique : la table app_settings (pas de fallback fichiers).
 import { db } from "@budget/db/client";
 import { appSettings } from "@budget/db/schema";
-import { ebApi, loadSettings, type EbSettings } from "./eb-client";
+
+import type { EbSettings } from "./eb-client";
+import { ebApi, loadSettings } from "./eb-client";
 import { makeJwt } from "./eb-domain";
 
 export interface SetupStatus {
@@ -76,7 +78,8 @@ async function upsertSettings(settings: EbSettings): Promise<void> {
 }
 
 export async function getSetupStatusCore(): Promise<SetupStatus> {
-  if (statusCache && Date.now() - statusCache.at < STATUS_TTL_MS) return statusCache.status;
+  if (statusCache && Date.now() - statusCache.at < STATUS_TTL_MS)
+    return statusCache.status;
 
   const settings = await loadSettings();
   if (!settings) return NOT_CONFIGURED;
@@ -88,7 +91,9 @@ export async function getSetupStatusCore(): Promise<SetupStatus> {
   return status;
 }
 
-export async function saveSettingsCore(input: EbSettings): Promise<SetupStatus> {
+export async function saveSettingsCore(
+  input: EbSettings,
+): Promise<SetupStatus> {
   try {
     makeJwt(input.applicationId, input.privateKeyPem);
   } catch {

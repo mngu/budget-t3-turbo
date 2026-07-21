@@ -61,5 +61,7 @@ export function filterValidResults(
   batchIds: Set<number>,
   categoryNames: string[],
 ): { id: number; categorie: string }[] {
-  return resultats.filter((r) => batchIds.has(r.id) && categoryNames.includes(r.categorie));
+  return resultats.filter(
+    (r) => batchIds.has(r.id) && categoryNames.includes(r.categorie),
+  );
 }

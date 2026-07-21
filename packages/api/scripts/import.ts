@@ -1,21 +1,25 @@
 #!/usr/bin/env tsx
 // Import idempotent des JSON Enable Banking (data/) vers PostgreSQL.
 // Usage : npm run import
-
-import { readFileSync, readdirSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+
 import { sql } from "@budget/db";
 import { db } from "@budget/db/client";
 import { accounts, transactions } from "@budget/db/schema";
+
+import type { EbTransaction } from "./normalize";
 import { DATA_DIR } from "../src/lib/data-dir";
-import { normalizeTransaction, type EbTransaction } from "./normalize";
+import { normalizeTransaction } from "./normalize";
 
 const DATA = DATA_DIR;
 
 export async function main(): Promise<boolean> {
   // 1. Comptes connus (créés par le wizard de connexion, ou import historique)
-  const dbAccounts = await db.select({ id: accounts.id, uid: accounts.uid }).from(accounts);
+  const dbAccounts = await db
+    .select({ id: accounts.id, uid: accounts.uid })
+    .from(accounts);
   const uidToAccountId = new Map(dbAccounts.map((a) => [a.uid, a.id]));
 
   // 2. Transactions
@@ -28,14 +32,18 @@ export async function main(): Promise<boolean> {
     const uid = file.replace(/^transactions-/, "").replace(/\.json$/, "");
     const accountId = uidToAccountId.get(uid);
     if (!accountId) {
-      console.warn(`⚠️  ${file} : compte inconnu en base — reconnectez la banque via le wizard`);
+      console.warn(
+        `⚠️  ${file} : compte inconnu en base — reconnectez la banque via le wizard`,
+      );
       continue;
     }
 
     let rows;
     let skipped = 0;
     try {
-      const rawTxns: EbTransaction[] = JSON.parse(readFileSync(resolve(DATA, file), "utf-8"));
+      const rawTxns: EbTransaction[] = JSON.parse(
+        readFileSync(resolve(DATA, file), "utf-8"),
+      );
       rows = rawTxns.flatMap((t) => {
         try {
           return [normalizeTransaction(t, accountId)];

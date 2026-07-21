@@ -2,11 +2,13 @@
 // Le pipeline aval (import → categorize) reste inchangé.
 import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+
 import { and, eq } from "@budget/db";
 import { db } from "@budget/db/client";
 import { accounts, bankConnections } from "@budget/db/schema";
-import { appJwt, ebApi, EbApiError, requireSettings } from "./eb-client";
+
 import { DATA_DIR } from "./data-dir";
+import { appJwt, ebApi, EbApiError, requireSettings } from "./eb-client";
 
 const SYNC_DAYS = 90;
 
@@ -19,10 +21,14 @@ export interface SyncOutcome {
 // par l'utilisateur dans l'app — la requête est alors classée « PSU présent » et
 // échappe au plafond PSD2 des accès non-assistés (~4/jour par banque). Le CLI/cron
 // n'en envoie pas (accès en arrière-plan assumé).
-export async function syncBanks(psuHeaders: Record<string, string> = {}): Promise<SyncOutcome> {
+export async function syncBanks(
+  psuHeaders: Record<string, string> = {},
+): Promise<SyncOutcome> {
   const settings = await requireSettings();
   const jwt = appJwt(settings);
-  const dateFrom = new Date(Date.now() - SYNC_DAYS * 24 * 3600 * 1000).toISOString().slice(0, 10);
+  const dateFrom = new Date(Date.now() - SYNC_DAYS * 24 * 3600 * 1000)
+    .toISOString()
+    .slice(0, 10);
   const dataDir = DATA_DIR;
   mkdirSync(dataDir, { recursive: true });
 
@@ -38,7 +44,9 @@ export async function syncBanks(psuHeaders: Record<string, string> = {}): Promis
     const enabledAccounts = await db
       .select({ uid: accounts.uid })
       .from(accounts)
-      .where(and(eq(accounts.connectionId, conn.id), eq(accounts.enabled, true)));
+      .where(
+        and(eq(accounts.connectionId, conn.id), eq(accounts.enabled, true)),
+      );
 
     console.log(`🏦 ${conn.aspspName} (transactions depuis ${dateFrom})`);
 
@@ -51,16 +59,22 @@ export async function syncBanks(psuHeaders: Record<string, string> = {}): Promis
           const params = new URLSearchParams({ date_from: dateFrom });
           if (continuationKey) params.set("continuation_key", continuationKey);
 
-          const page = await ebApi(`/accounts/${account.uid}/transactions?${params}`, jwt, {
-            headers: psuHeaders,
-          });
+          const page = await ebApi(
+            `/accounts/${account.uid}/transactions?${params}`,
+            jwt,
+            {
+              headers: psuHeaders,
+            },
+          );
           transactions.push(...page.transactions);
           continuationKey = page.continuation_key ?? undefined;
         } while (continuationKey);
 
         const outPath = resolve(dataDir, `transactions-${account.uid}.json`);
         writeFileSync(outPath, JSON.stringify(transactions, null, 2), "utf-8");
-        console.log(`   ✅ compte ${account.uid} : ${transactions.length} transactions`);
+        console.log(
+          `   ✅ compte ${account.uid} : ${transactions.length} transactions`,
+        );
       }
     } catch (err) {
       // 401 = session PSD2 expirée ou invalidée : la connexion passe en expired,
@@ -71,14 +85,18 @@ export async function syncBanks(psuHeaders: Record<string, string> = {}): Promis
           .set({ status: "expired" })
           .where(eq(bankConnections.id, conn.id));
         expired.push(conn.aspspName);
-        console.warn(`   ⚠️  session expirée — ${conn.aspspName} est à renouveler`);
+        console.warn(
+          `   ⚠️  session expirée — ${conn.aspspName} est à renouveler`,
+        );
         continue;
       }
       // 429 (ASPSP_RATE_LIMIT_EXCEEDED) = quota d'accès de la banque atteint :
       // rien à renouveler, réessayer plus tard (~6 h recommandées par Enable Banking).
       if (err instanceof EbApiError && err.status === 429) {
         rateLimited.push(conn.aspspName);
-        console.warn(`   ⚠️  limite d'accès atteinte — ${conn.aspspName} : ${err.message}`);
+        console.warn(
+          `   ⚠️  limite d'accès atteinte — ${conn.aspspName} : ${err.message}`,
+        );
         continue;
       }
       throw err;
