@@ -1,10 +1,13 @@
 import { useState } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LegendList } from "@legendapp/list";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { SlidersHorizontalIcon } from "lucide-react-native";
 
+import type { TransactionFilters } from "~/components/transaction-filters-sheet";
 import { CategoryPickerSheet } from "~/components/category-picker-sheet";
+import { TransactionFiltersSheet } from "~/components/transaction-filters-sheet";
 import { TransactionListItem } from "~/components/transaction-list-item";
 import { trpc, trpcClient } from "~/utils/api";
 
@@ -18,6 +21,8 @@ export function getNextTransactionsPageParam(
 
 export default function TransactionsScreen() {
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [filters, setFilters] = useState<TransactionFilters>({});
 
   const { data: categories = [] } = useQuery(
     trpc.categories.list.queryOptions(),
@@ -25,9 +30,10 @@ export default function TransactionsScreen() {
 
   const { data, isPending, isError, fetchNextPage, isFetchingNextPage } =
     useInfiniteQuery({
-      queryKey: ["transactions.list.infinite"],
+      queryKey: ["transactions.list.infinite", filters],
       queryFn: ({ pageParam }) =>
         trpcClient.transactions.list.query({
+          ...filters,
           page: pageParam,
           sort: "date",
           order: "desc",
@@ -59,6 +65,12 @@ export default function TransactionsScreen() {
 
   return (
     <SafeAreaView className="bg-background flex-1">
+      <View className="flex-row items-center justify-between px-4 py-2">
+        <Text className="text-foreground text-lg font-bold">Transactions</Text>
+        <Pressable onPress={() => setFiltersOpen(true)}>
+          <SlidersHorizontalIcon className="text-foreground" />
+        </Pressable>
+      </View>
       {rows.length === 0 ? (
         <View className="flex-1 items-center justify-center">
           <Text className="text-muted-foreground">Aucune transaction.</Text>
@@ -88,6 +100,13 @@ export default function TransactionsScreen() {
         transactionId={selectedId}
         categories={categories}
         onClose={() => setSelectedId(null)}
+      />
+      <TransactionFiltersSheet
+        isOpen={filtersOpen}
+        value={filters}
+        categories={categories}
+        onClose={() => setFiltersOpen(false)}
+        onApply={setFilters}
       />
     </SafeAreaView>
   );
