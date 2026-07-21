@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Stack } from "expo-router";
+import { Redirect, Stack } from "expo-router";
 
 import { authClient } from "~/utils/auth";
 
@@ -51,6 +51,10 @@ function LoginForm() {
 export default function Index() {
   const { data: session } = authClient.useSession();
 
+  if (session) {
+    return <Redirect href="/(tabs)" />;
+  }
+
   return (
     <SafeAreaView className="bg-background">
       <Stack.Screen options={{ title: "Budget" }} />
@@ -58,24 +62,7 @@ export default function Index() {
         <Text className="text-foreground pb-2 text-center text-5xl font-bold">
           Budget
         </Text>
-        {session ? (
-          <>
-            <Text className="text-foreground pb-2 text-center text-xl font-semibold">
-              Bonjour, {session.user.name}
-            </Text>
-            <Text className="text-muted-foreground pb-4 text-center">
-              Écrans mobiles à venir
-            </Text>
-            <Pressable
-              className="bg-primary flex items-center rounded-sm p-2"
-              onPress={() => void authClient.signOut()}
-            >
-              <Text className="text-foreground">Se déconnecter</Text>
-            </Pressable>
-          </>
-        ) : (
-          <LoginForm />
-        )}
+        <LoginForm />
       </View>
     </SafeAreaView>
   );
