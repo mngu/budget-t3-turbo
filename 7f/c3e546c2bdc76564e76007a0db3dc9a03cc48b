@@ -1,0 +1,148 @@
+package.json
+  s_6c98a9df4898c4::t_7b0983bab88db0 13-15,29,36
+tooling/prettier/tsconfig.json
+  s_6c98a9df4898c4::t_7b0983bab88db0 2
+docs/superpowers/plans/2026-07-21-migration-budget-tracker.md
+  s_6c98a9df4898c4::t_7b0983bab88db0 20,54,68
+apps/expo/tsconfig.json
+  s_6c98a9df4898c4::t_7b0983bab88db0 2
+packages/auth/eslint.config.ts
+  s_6c98a9df4898c4::t_7b0983bab88db0 3
+apps/expo/src/utils/api.tsx
+  s_6c98a9df4898c4::t_7b0983bab88db0 6,50
+packages/db/eslint.config.ts
+  s_6c98a9df4898c4::t_7b0983bab88db0 3
+apps/tanstack-start/src/routes/api/trpc.$.ts
+  s_6c98a9df4898c4::t_7b0983bab88db0 4
+packages/validators/tsconfig.json
+  s_6c98a9df4898c4::t_7b0983bab88db0 2
+tooling/typescript/package.json
+  s_6c98a9df4898c4::t_7b0983bab88db0 2
+.github/renovate.json
+  s_6c98a9df4898c4::t_7b0983bab88db0 6
+packages/api/eslint.config.ts
+  s_6c98a9df4898c4::t_7b0983bab88db0 3
+tooling/github/package.json
+  s_6c98a9df4898c4::t_7b0983bab88db0 2
+packages/api/tsconfig.json
+  s_6c98a9df4898c4::t_7b0983bab88db0 2
+packages/api/package.json
+  s_6c98a9df4898c4::t_7b0983bab88db0 2,21-23,29-31,36
+turbo/generators/templates/eslint.config.ts.hbs
+  s_6c98a9df4898c4::t_7b0983bab88db0 3
+packages/auth/tsconfig.json
+  s_6c98a9df4898c4::t_7b0983bab88db0 2
+packages/api/src/trpc.ts
+  s_6c98a9df4898c4::t_7b0983bab88db0 13-14
+packages/auth/src/index.ts
+  s_6c98a9df4898c4::t_7b0983bab88db0 7
+packages/ui/tsconfig.json
+  s_6c98a9df4898c4::t_7b0983bab88db0 2
+packages/ui/package.json
+  s_6c98a9df4898c4::t_7b0983bab88db0 2,32-34,46
+packages/db/package.json
+  s_6c98a9df4898c4::t_7b0983bab88db0 2,38-40,46
+docs/superpowers/specs/2026-07-21-migration-budget-tracker-t3-turbo-design.md
+  s_6c98a9df4898c4::t_7b0983bab88db0 48
+apps/expo/package.json
+  s_6c98a9df4898c4::t_7b0983bab88db0 2,47-51,58
+tooling/tailwind/tsconfig.json
+  s_6c98a9df4898c4::t_7b0983bab88db0 2
+apps/tanstack-start/src/routes/__root.tsx
+  s_6c98a9df4898c4::t_7b0983bab88db0 13-15
+packages/ui/src/input.tsx
+  s_6c98a9df4898c4::t_7b0983bab88db0 1
+turbo/generators/config.ts
+  s_6c98a9df4898c4::t_7b0983bab88db0 19,31-32
+apps/tanstack-start/src/lib/trpc.ts
+  s_6c98a9df4898c4::t_7b0983bab88db0 12
+packages/ui/components.json
+  s_6c98a9df4898c4::t_7b0983bab88db0 13
+packages/ui/src/field.tsx
+  s_6c98a9df4898c4::t_7b0983bab88db0 7-9
+apps/tanstack-start/src/auth/server.ts
+  s_6c98a9df4898c4::t_7b0983bab88db0 3
+turbo/generators/templates/package.json.hbs
+  s_6c98a9df4898c4::t_7b0983bab88db0 2,18-20,25
+packages/api/src/router/post.ts
+  s_6c98a9df4898c4::t_7b0983bab88db0 4-5
+packages/auth/package.json
+  s_6c98a9df4898c4::t_7b0983bab88db0 2,28-30,35
+  s_6c98a9df4898c4::t_7e2bffd558d7d7 21
+tooling/eslint/tsconfig.json
+  s_6c98a9df4898c4::t_7b0983bab88db0 2
+tooling/tailwind/eslint.config.ts
+  s_6c98a9df4898c4::t_7b0983bab88db0 3
+apps/tanstack-start/src/env.ts
+  s_6c98a9df4898c4::t_7b0983bab88db0 5
+tooling/prettier/index.js
+  s_6c98a9df4898c4::t_6a4b75a48254db 19
+  s_6c98a9df4898c4::t_7b0983bab88db0 20
+apps/expo/src/styles.css
+  s_6c98a9df4898c4::t_7b0983bab88db0 7
+tooling/tailwind/package.json
+  s_6c98a9df4898c4::t_7b0983bab88db0 2,22-24,30
+packages/ui/src/label.tsx
+  s_6c98a9df4898c4::t_7b0983bab88db0 5
+packages/ui/src/button.tsx
+  s_6c98a9df4898c4::t_7b0983bab88db0 5
+tooling/eslint/package.json
+  s_6c98a9df4898c4::t_7b0983bab88db0 2,27-28,34
+apps/tanstack-start/package.json
+  s_6c98a9df4898c4::t_7b0983bab88db0 2,16-19,40-43,56
+apps/tanstack-start/tsconfig.json
+  s_6c98a9df4898c4::t_7b0983bab88db0 2
+packages/ui/src/separator.tsx
+  s_6c98a9df4898c4::t_7b0983bab88db0 5
+packages/validators/package.json
+  s_6c98a9df4898c4::t_7b0983bab88db0 2,24-26,31
+turbo/generators/templates/tsconfig.json.hbs
+  s_6c98a9df4898c4::t_7b0983bab88db0 2
+apps/tanstack-start/src/component/auth-showcase.tsx
+  s_6c98a9df4898c4::t_7b0983bab88db0 3
+apps/expo/eslint.config.mts
+  s_6c98a9df4898c4::t_7b0983bab88db0 3-4
+packages/db/tsconfig.json
+  s_6c98a9df4898c4::t_7b0983bab88db0 2
+tooling/prettier/package.json
+  s_6c98a9df4898c4::t_7b0983bab88db0 2,19,23
+apps/expo/postcss.config.mjs
+  s_6c98a9df4898c4::t_7b0983bab88db0 1
+apps/tanstack-start/src/styles.css
+  s_6c98a9df4898c4::t_7b0983bab88db0 2
+packages/ui/src/dropdown-menu.tsx
+  s_6c98a9df4898c4::t_7b0983bab88db0 10
+apps/tanstack-start/src/routes/index.tsx
+  s_6c98a9df4898c4::t_7b0983bab88db0 10-13,20-22
+packages/ui/eslint.config.ts
+  s_6c98a9df4898c4::t_7b0983bab88db0 3-4
+packages/validators/eslint.config.ts
+  s_6c98a9df4898c4::t_7b0983bab88db0 3
+apps/tanstack-start/eslint.config.ts
+  s_6c98a9df4898c4::t_7b0983bab88db0 3-4
+README.md
+  s_6c98a9df4898c4::t_7b0983bab88db0 105,117
+pnpm-lock.yaml
+  s_6c98a9df4898c4::t_d9a48ca262aa06 86,192,195,198,201,204,225,228,231,234,292,295,298,301,340,343,346,359,362,365,383-385,396-399,402,405,433,436,439,473,476,479,507,510,513,556,559,589,611,614,617
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "7fc3e546c2bdc76564e76007a0db3dc9a03cc48b",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_6c98a9df4898c4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d81e7ed6-4926-497c-abfa-57b5ecb45c2e",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
