@@ -1,0 +1,46 @@
+packages/ui/src/field.tsx
+  s_6c98a9df4898c4::t_aec30fded742e3 1,3,6,54-67,70,92-95,101-104,109,136,138,166,193-195,203-206,219
+packages/ui/src/popover.tsx
+  s_6c98a9df4898c4::t_aec30fded742e3 24-27,40,70-73,83-90
+packages/ui/src/button.tsx
+  s_6c98a9df4898c4::t_aec30fded742e3 1,3,8,16
+packages/ui/src/badge.tsx
+  s_6c98a9df4898c4::t_aec30fded742e3 1,4,9,14-15,18-21
+packages/ui/src/card.tsx
+  s_6c98a9df4898c4::t_aec30fded742e3 15,53,63-66,74-78,87,95-103
+packages/ui/src/table.tsx
+  s_6c98a9df4898c4::t_aec30fded742e3 7-10,21-27,44-47,58,71,83-86,92-95,99,105-114
+packages/ui/src/toast.tsx
+  s_6c98a9df4898c4::t_aec30fded742e3 2,10
+packages/ui/src/button-group.tsx
+  s_6c98a9df4898c4::t_aec30fded742e3 1,4,7,43-47,53,76,84-89
+packages/ui/src/calendar.tsx
+  s_6c98a9df4898c4::t_aec30fded742e3 3,5-10,13,43-44,49-52,76-83,88,94,98-101,103,114,119,123,130-133,139-146,150-152,156-161,164-166,168-170,216
+packages/ui/src/separator.tsx
+  s_6c98a9df4898c4::t_aec30fded742e3 5-9,15
+packages/ui/src/input.tsx
+  s_6c98a9df4898c4::t_aec30fded742e3 12
+packages/ui/src/select.tsx
+  s_6c98a9df4898c4::t_aec30fded742e3 3,42,49-51,85,99-102,106,112-116,121,140-143,147,161,179
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "52b77ebebc1ea22c8255eceddf30fe63c45ff92e",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_6c98a9df4898c4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d81e7ed6-4926-497c-abfa-57b5ecb45c2e",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
