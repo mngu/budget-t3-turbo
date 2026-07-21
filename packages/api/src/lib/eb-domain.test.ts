@@ -20,7 +20,7 @@ describe("makeJwt", () => {
 
   it("produit un JWT RS256 signé, avec kid = application_id", () => {
     const jwt = makeJwt("app-123", privateKey, NOW);
-    const [header, payload, signature] = jwt.split(".");
+    const [header, payload, signature] = jwt.split(".") as [string, string, string];
 
     const decodedHeader = JSON.parse(Buffer.from(header, "base64url").toString());
     expect(decodedHeader).toEqual({ typ: "JWT", alg: "RS256", kid: "app-123" });

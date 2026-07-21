@@ -114,6 +114,7 @@ export async function completeAuthCore(code: string, state: string): Promise<Com
         validUntil,
       })
       .returning({ id: bankConnections.id });
+    if (!row) throw new Error("Échec de la création de la connexion bancaire.");
     connectionId = row.id;
   }
 
