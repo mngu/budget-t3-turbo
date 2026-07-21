@@ -13,7 +13,7 @@ This is a pnpm + Turborepo monorepo (migrated from the single-package `budget-tr
 - `@budget/db` — schéma Drizzle + `pg`, base **`budget_t3`**.
 - `@budget/api` — routeurs tRPC (`auth`, `transactions`, `categories`, `connections`, `settings`, `sync`), logique Enable Banking dans `src/lib/` (`eb-client.ts`, `eb-domain.ts`, `eb-sync.ts`, `connections-core.ts`, `settings-core.ts`, `sync-core.ts`), scripts CLI dans `scripts/` (`import.ts`, `categorize.ts`, `sync.ts`, `normalize.ts`, `slug.ts`), tests Vitest.
 - `@budget/auth` — Better Auth, email/mot de passe.
-- `@budget/ui` — composants Base UI.
+- `@budget/ui` — composants Base UI. Déviation assumée par rapport au template create-t3-turbo : le `ThemeProvider` maison a été conservé (pas `next-themes`), `ThemeToggle` réécrit sans dropdown.
 - `@budget/validators` — schémas Zod partagés.
 - `apps/tanstack-start` — app web, routes `/`, `/banques`, `/banques/ajouter`, `/callback`, `/login` sous le layout `_authed`.
 - `apps/expo` — placeholder + login (mobile).
@@ -35,6 +35,19 @@ Pipeline métier inchangé : connexions bancaires configurées dans l'app (`/ban
 ## Base de données — ne jamais confondre avec l'ancien repo
 
 La base de ce projet est **`budget_t3`** (instance Docker **partagée** avec `budget-tracker`, port hôte 5436). Ne JAMAIS lancer un push (`db:push` / `drizzle-kit push`) ou toute commande destructive avec une `POSTGRES_URL` pointant sur la base `budget` (celle de l'ancien repo) — vérifier systématiquement le nom de la base dans `POSTGRES_URL`/`.env` avant toute opération de schéma.
+
+### Seed initial de la table `categories`
+
+Sur un clone neuf, la table `categories` est vide tant qu'elle n'a pas été seedée — `pnpm categorize` fonctionne quand même (no-op silencieux, les transactions restent sans catégorie). Seeder avant la première catégorisation :
+
+```sql
+INSERT INTO categories (name, color) VALUES
+  ('Revenus', '#16a34a'), ('Logement', '#6366f1'), ('Alimentation', '#f59e0b'),
+  ('Restaurants & bars', '#10b981'), ('Transport', '#3b82f6'), ('Santé', '#ec4899'),
+  ('Abonnements', '#84cc16'), ('Loisirs & shopping', '#8b5cf6'),
+  ('Épargne & virements internes', '#f97316'), ('Frais & impôts', '#6366f1'), ('Autres', '#94a3b8')
+ON CONFLICT (name) DO NOTHING;
+```
 
 ## Bank data provider: Enable Banking (not GoCardless)
 

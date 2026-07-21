@@ -84,8 +84,8 @@ export const Route = createFileRoute("/_authed/")({
     <main className="p-8">
       <p>❌ Impossible de charger les transactions.</p>
       <p className="text-sm opacity-70">
-        Vérifiez que PostgreSQL tourne (npm run db:up) et que l'import a été
-        fait (npm run import).
+        Vérifiez que PostgreSQL tourne (docker compose up -d) et que l'import a
+        été fait (pnpm run import).
       </p>
       <pre className="mt-4 text-xs opacity-50">{error.message}</pre>
     </main>
