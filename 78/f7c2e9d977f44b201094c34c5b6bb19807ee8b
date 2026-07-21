@@ -1,0 +1,68 @@
+packages/api/package.json
+  s_6c98a9df4898c4::t_27ec7649af15f8 7
+apps/tanstack-start/src/routes/_authed/index.tsx
+  s_6c98a9df4898c4::t_61a886d12e7562 14
+  s_6c98a9df4898c4::t_b8906bd8ef0f7d 51-57
+  s_6c98a9df4898c4::t_0e609b84986c25 149
+  s_6c98a9df4898c4::t_17b5946f8e9708 1-2,9-13,25-30,32-38,49-50,58-59,82-86,89-93,100-104,113-115,124-136,140-148,150-166,169,175-189,193-198,200-207,212-216,225-248,250-267,269-275,279-285,289-293,297-307,309-317,322-346,348-358,360-362,366-375,383-406,412,414-418,420-421,423-470,480-482,486-500
+  s_6c98a9df4898c4::t_e37a2dcbe8c771 308
+  s_6c98a9df4898c4::t_87bbafbd154c1b 347,359
+  s_6c98a9df4898c4::t_815bed98de0747 419,422
+  s_6c98a9df4898c4::t_39d09ee4034596 15-16,23-24,31,39-40,42-43,45-46,60
+  s_6c98a9df4898c4::t_0c6c646124cb81 3-8,17-22,41,44,61-81,87-88,96-99,105-112,116-123,137-139,167-168,170-174,191-192,208-211,217-224,249,268,276-278,286-288,318-321,363-365,376-382,407-411,413,471-479,483-485
+  s_6c98a9df4898c4::t_d2849a1b937757 199
+apps/tanstack-start/src/component/range-picker.tsx
+  s_6c98a9df4898c4::t_0c6c646124cb81 3,32-35
+  s_6c98a9df4898c4::t_17b5946f8e9708 1-2,4-6,11-31,36-65
+  s_6c98a9df4898c4::t_c83b79e762b860 7-10
+apps/tanstack-start/package.json
+  s_6c98a9df4898c4::t_311d781f682d37 20
+apps/tanstack-start/src/lib/date.ts
+  s_6c98a9df4898c4::t_0c6c646124cb81 8-11
+  s_6c98a9df4898c4::t_17b5946f8e9708 1-7,12
+apps/tanstack-start/src/routes/_authed/-components/calendar-filter.tsx
+  s_6c98a9df4898c4::t_17b5946f8e9708 1-3,10-11,13-20,24-47,54-58
+  s_6c98a9df4898c4::t_57edcf5b90ce81 4-9
+  s_6c98a9df4898c4::t_05f8fde39c247b 12
+  s_6c98a9df4898c4::t_0c6c646124cb81 21-22,48-53
+  s_6c98a9df4898c4::t_02b29528d0d307 23
+apps/tanstack-start/src/component/search-input.tsx
+  s_6c98a9df4898c4::t_4bb6a0f9cebfad 33
+  s_6c98a9df4898c4::t_8a2fdf02ee2688 19-21
+  s_6c98a9df4898c4::t_17b5946f8e9708 1-6,8-18,23-25,27-32,34-52,61
+  s_6c98a9df4898c4::t_1d0563a68600b1 7
+  s_6c98a9df4898c4::t_4f1a2481e36df2 22,26
+  s_6c98a9df4898c4::t_0c6c646124cb81 53-60
+apps/tanstack-start/src/routes/_authed/-components/transactions-filters.tsx
+  s_6c98a9df4898c4::t_209270cc1eda97 21
+  s_6c98a9df4898c4::t_0c6c646124cb81 2,95-99
+  s_6c98a9df4898c4::t_d7977715b2133a 3,10-12
+  s_6c98a9df4898c4::t_17b5946f8e9708 1,4-9,13-20,22-94,100-105
+apps/tanstack-start/src/lib/sync-toast.ts
+  s_6c98a9df4898c4::t_1bdd9bb33a1a25 1-2
+  s_6c98a9df4898c4::t_0c6c646124cb81 11-13,20-21
+  s_6c98a9df4898c4::t_17b5946f8e9708 3-10,14-19,22-23
+pnpm-lock.yaml
+  s_6c98a9df4898c4::t_15da03f9acc1b3 237-239,1334,1338,3593,3661,3970,5606,5611,5820,6405,7246,7716,8199,8314,8635,8789,10533,10568,11401,11415,12908,14238,14296,14435,15784,15789,15961-15980,16102,16141,16188
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "78f7c2e9d977f44b201094c34c5b6bb19807ee8b",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_6c98a9df4898c4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d81e7ed6-4926-497c-abfa-57b5ecb45c2e",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
