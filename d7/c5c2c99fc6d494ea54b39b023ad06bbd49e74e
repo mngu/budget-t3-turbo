@@ -1,0 +1,28 @@
+docs/superpowers/plans/2026-07-21-migration-budget-tracker.md
+  s_6c98a9df4898c4::t_c50467c7fc283c 68
+  s_6c98a9df4898c4::t_a473730f93e746 20
+  s_6c98a9df4898c4::t_310164e109607a 54
+docs/superpowers/specs/2026-07-21-migration-budget-tracker-t3-turbo-design.md
+  s_6c98a9df4898c4::t_8725899ca0912f 48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "d7c5c2c99fc6d494ea54b39b023ad06bbd49e74e",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_6c98a9df4898c4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d81e7ed6-4926-497c-abfa-57b5ecb45c2e",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
