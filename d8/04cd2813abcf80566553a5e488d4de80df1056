@@ -1,0 +1,59 @@
+packages/api/scripts/import.ts
+  s_6c98a9df4898c4::t_226ba65f33338c 4,7,11-12,14,20-22,35-37,44-46
+packages/api/scripts/normalize.test.ts
+  s_6c98a9df4898c4::t_226ba65f33338c 3-4,51-55,72-76,81-83
+  s_6c98a9df4898c4::t_2e5e3457ed2a85 2
+packages/api/src/router/transactions.ts
+  s_6c98a9df4898c4::t_226ba65f33338c 5,61-62,66-67
+packages/api/scripts/normalize.ts
+  s_6c98a9df4898c4::t_226ba65f33338c 25-28,33-34,36-38,42-43
+packages/api/src/lib/eb-client.ts
+  s_6c98a9df4898c4::t_226ba65f33338c 4,45-49,61-63
+packages/api/src/lib/eb-domain.test.ts
+  s_6c98a9df4898c4::t_226ba65f33338c 3,24-32,35-37,44-46,56-61,90-92,108-111,140-142,148-150
+packages/api/src/lib/eb-domain.ts
+  s_6c98a9df4898c4::t_226ba65f33338c 8-14,50-52,65-67,71-72,94-96
+packages/api/scripts/categorize-core.test.ts
+  s_6c98a9df4898c4::t_226ba65f33338c 2-3,27-29,61-68
+packages/api/src/lib/sync-core.test.ts
+  s_6c98a9df4898c4::t_226ba65f33338c 3-7,41-44,51-54,65-68,76-78,93-96,112-115
+packages/api/src/lib/sync-core.ts
+  s_6c98a9df4898c4::t_226ba65f33338c 1,3-4,8-10,26-29
+packages/db/src/schema.ts
+  s_6c98a9df4898c4::t_226ba65f33338c 21-23,37-39,49-51,66-68,99-101,104-107
+packages/api/scripts/categorize.ts
+  s_6c98a9df4898c4::t_226ba65f33338c 6,9,13-14,34-36,50-51,96-100,128-130
+packages/api/src/lib/eb-sync.ts
+  s_6c98a9df4898c4::t_226ba65f33338c 5,9,11,24-26,29-31,47-49,62-68,75-77,88-90,97-99
+packages/api/scripts/categorize-core.ts
+  s_6c98a9df4898c4::t_226ba65f33338c 64-66
+packages/api/src/lib/settings-core.ts
+  s_6c98a9df4898c4::t_226ba65f33338c 5-7,81-82,94-96
+packages/api/src/lib/connections-core.ts
+  s_6c98a9df4898c4::t_226ba65f33338c 3,7-8,23-25,34-35,47-49,54-56,66-71,94-97,100-103,105-107,112-115,129-134,158-161,202-207,213-216,243-249,265-267,276-278,287-289,292-295
+packages/db/src/auth-schema.ts
+  s_6c98a9df4898c4::t_226ba65f33338c 2
+packages/api/scripts/sync.ts
+  s_6c98a9df4898c4::t_226ba65f33338c 9-14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "d804cd2813abcf80566553a5e488d4de80df1056",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_6c98a9df4898c4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d81e7ed6-4926-497c-abfa-57b5ecb45c2e",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
