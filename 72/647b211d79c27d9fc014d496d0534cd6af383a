@@ -1,0 +1,28 @@
+packages/api/eslint.config.ts
+  s_6c98a9df4898c4::t_192c813b07c63b 10-23
+turbo.json
+  s_6c98a9df4898c4::t_de9b0b10ab9581 58
+packages/api/tsconfig.json
+  s_6c98a9df4898c4::t_ee9b2805d5f125 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "72647b211d79c27d9fc014d496d0534cd6af383a",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_6c98a9df4898c4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d81e7ed6-4926-497c-abfa-57b5ecb45c2e",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
