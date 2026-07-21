@@ -146,7 +146,9 @@ function TransactionsPage() {
       header: "Nom",
       cell: ({ getValue }) => {
         const value = getValue();
-        return value.debtor?.name ?? "-";
+        // Ternaire truthy comme la source : un nom vide ("") s'affiche aussi "-".
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+        return value.debtor?.name ? value.debtor.name : "-";
       },
     }),
     columnHelper.accessor("category", {
