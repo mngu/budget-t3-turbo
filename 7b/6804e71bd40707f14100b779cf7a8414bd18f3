@@ -1,0 +1,35 @@
+packages/db/src/schema.ts
+  s_6c98a9df4898c4::t_c7f445f71b94d8 1-35,38-107
+  s_6c98a9df4898c4::t_9b31d17bb1c1d3 108
+apps/expo/src/app/index.tsx
+  s_6c98a9df4898c4::t_4b892cabbdb6c8 1,3,8,11
+packages/db/package.json
+  s_6c98a9df4898c4::t_bcd72f6bff09d7 33,40
+apps/tanstack-start/src/routes/index.tsx
+  s_6c98a9df4898c4::t_28ce2912cd6d2e 9-10
+packages/db/src/client.ts
+  s_6c98a9df4898c4::t_2aae9507669ce2 1-2,6-12,14
+pnpm-lock.yaml
+  s_6c98a9df4898c4::t_584ae02c0d1c95 278,398,422-425,439-441,3626-3628,3728,6714-6719,6728-6732,6736-6742,6747-6758,6804-6807,6812-6815,6820-6823,6828-6831,7511-7514,8315-8318,9012,9029,10038,11974,11981,11985,12128,12628,12977,12980,13132,13139,13145,13150,13157,13163,15521,15525,15536,15581-15582,15679-15680,15929-15933,15936-15941,15945-15954,15964-15978,16020-16025,16030,16032,16034-16035,16037-16045,16935-16936,17382,17386,17649-17650
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "7b6804e71bd40707f14100b779cf7a8414bd18f3",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_6c98a9df4898c4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d81e7ed6-4926-497c-abfa-57b5ecb45c2e",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
