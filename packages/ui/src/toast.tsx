@@ -1,4 +1,5 @@
 import type * as React from "react";
+import type { ToasterProps } from "sonner";
 import {
   CircleCheckIcon,
   InfoIcon,
@@ -6,8 +7,7 @@ import {
   OctagonXIcon,
   TriangleAlertIcon,
 } from "lucide-react";
-import { Toaster as Sonner  } from "sonner";
-import type {ToasterProps} from "sonner";
+import { Toaster as Sonner } from "sonner";
 
 import { useTheme } from "./theme";
 
