@@ -6,6 +6,7 @@ import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { SlidersHorizontalIcon } from "lucide-react-native";
 
 import type { TransactionFilters } from "~/components/transaction-filters-sheet";
+import { CategoryBreakdownChart } from "~/components/category-breakdown-chart";
 import { CategoryPickerSheet } from "~/components/category-picker-sheet";
 import { TransactionFiltersSheet } from "~/components/transaction-filters-sheet";
 import { TransactionListItem } from "~/components/transaction-list-item";
@@ -27,6 +28,30 @@ export default function TransactionsScreen() {
   const { data: categories = [] } = useQuery(
     trpc.categories.list.queryOptions(),
   );
+
+  const { data: expensesByCategory = [] } = useQuery({
+    queryKey: ["transactions.byCategory", filters, "debit"],
+    queryFn: () =>
+      trpcClient.transactions.byCategory.query({
+        ...filters,
+        direction: "debit",
+        // byCategory agrège sans pagination — champs requis par le schéma partagé.
+        page: 1,
+        sort: "date",
+        order: "desc",
+      }),
+  });
+  const { data: revenuesByCategory = [] } = useQuery({
+    queryKey: ["transactions.byCategory", filters, "credit"],
+    queryFn: () =>
+      trpcClient.transactions.byCategory.query({
+        ...filters,
+        direction: "credit",
+        page: 1,
+        sort: "date",
+        order: "desc",
+      }),
+  });
 
   const { data, isPending, isError, fetchNextPage, isFetchingNextPage } =
     useInfiniteQuery({
@@ -70,6 +95,16 @@ export default function TransactionsScreen() {
         <Pressable onPress={() => setFiltersOpen(true)}>
           <SlidersHorizontalIcon className="text-foreground" />
         </Pressable>
+      </View>
+      <View className="flex-row gap-4">
+        <CategoryBreakdownChart
+          title="Dépenses par catégorie"
+          items={expensesByCategory}
+        />
+        <CategoryBreakdownChart
+          title="Revenus par catégorie"
+          items={revenuesByCategory}
+        />
       </View>
       {rows.length === 0 ? (
         <View className="flex-1 items-center justify-center">
