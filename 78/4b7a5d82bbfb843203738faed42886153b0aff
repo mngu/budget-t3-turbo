@@ -1,0 +1,24 @@
+docs/superpowers/plans/2026-07-21-mobile-app-gluestack-ui.md
+  s_18ee1fb96e3bd4::t_bbc697305062a2 1-1419
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "784b7a5d82bbfb843203738faed42886153b0aff",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_18ee1fb96e3bd4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e7c9d402-1ead-4a95-8300-61379f5bc61d",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
