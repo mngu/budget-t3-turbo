@@ -16,5 +16,9 @@
     "expo-env.d.ts",
     "nativewind-env.d.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "src/**/*.web.tsx",
+    "src/components/ui/gluestack-ui-provider/script.ts"
+  ]
 }
