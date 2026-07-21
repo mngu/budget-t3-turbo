@@ -1,0 +1,25 @@
+apps/tanstack-start/src/routes/_authed/index.tsx
+  s_6c98a9df4898c4::t_277ac2fb85bda5 149,151
+  s_6c98a9df4898c4::t_1b3b3ef09e4027 150
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "8171cfd8ceb4df0353fd12b4a2e994f4a0e8d423",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_6c98a9df4898c4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d81e7ed6-4926-497c-abfa-57b5ecb45c2e",
+        "model": "claude-fable-5"
+      },
+      "human_author": null
+    }
+  }
+}
