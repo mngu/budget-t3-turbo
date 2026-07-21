@@ -3,6 +3,11 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
 
+/* Les composants @budget/ui vivent hors de l'app : Tailwind v4 ne les scanne
+   pas automatiquement (workspace via node_modules) — sans ce @source, leurs
+   classes utilitaires ne sont pas générées. */
+@source "../../../packages/ui/src/*.{ts,tsx}";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
