@@ -17,6 +17,7 @@
     "@budget/auth": "workspace:*",
     "@budget/db": "workspace:*",
     "@budget/ui": "workspace:*",
+    "@budget/validators": "workspace:*",
     "@fontsource-variable/geist": "^5.2.9",
     "@fontsource-variable/geist-mono": "^5.2.7",
     "@t3-oss/env-core": "^0.13.8",
