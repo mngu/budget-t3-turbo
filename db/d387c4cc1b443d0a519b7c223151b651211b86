@@ -1,0 +1,41 @@
+packages/api/src/root.ts
+  s_6c98a9df4898c4::t_935a92e52dadd1 2-6,11-15
+packages/api/src/router/categories.ts
+  s_6c98a9df4898c4::t_912d8100c53903 1-25
+packages/api/src/index.ts
+  s_6c98a9df4898c4::t_bbe9ca34c5a4b5 24-36
+packages/api/src/router/sync.ts
+  s_6c98a9df4898c4::t_080006cb1df0ca 1-19
+packages/validators/src/index.ts
+  s_6c98a9df4898c4::t_1e28905b966765 3-32
+packages/api/src/trpc.ts
+  s_6c98a9df4898c4::t_df1549c56d2a1d 41
+packages/api/src/router/transactions.ts
+  s_6c98a9df4898c4::t_517bb4333c300e 67-69,71-73
+  s_6c98a9df4898c4::t_f609c6567f7fcc 1-66,70,74-173
+packages/api/src/router/settings.ts
+  s_6c98a9df4898c4::t_ae9df032dcc4c6 1-19
+packages/api/src/router/connections.ts
+  s_6c98a9df4898c4::t_04b230782f55fd 1-57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "dbd387c4cc1b443d0a519b7c223151b651211b86",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_6c98a9df4898c4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d81e7ed6-4926-497c-abfa-57b5ecb45c2e",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
