@@ -22,7 +22,7 @@ export function getRouter() {
 
   const router = createRouter({
     routeTree,
-    context: { queryClient, trpc },
+    context: { queryClient, trpc, trpcClient },
     defaultPreload: "intent",
     Wrap: (props) => (
       <TRPCProvider

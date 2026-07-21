@@ -52,4 +52,5 @@ export const makeTRPCClient = createIsomorphicFn()
     });
   });
 
-export const { useTRPC, TRPCProvider } = createTRPCContext<Api.AppRouter>();
+export const { useTRPC, useTRPCClient, TRPCProvider } =
+  createTRPCContext<Api.AppRouter>();

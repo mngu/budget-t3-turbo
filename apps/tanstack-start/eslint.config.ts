@@ -10,4 +10,23 @@ export default defineConfig(
   baseConfig,
   reactConfig,
   restrictEnvAccess,
+  {
+    // TanStack Router's `redirect()`/`notFound()` return a `Response`-based
+    // value (not an `Error`) that routes are expected to `throw`.
+    files: ["src/routes/**/*.{ts,tsx}"],
+    rules: {
+      "@typescript-eslint/only-throw-error": [
+        "error",
+        {
+          allow: [
+            {
+              from: "package",
+              package: "@tanstack/router-core",
+              name: "Redirect",
+            },
+          ],
+        },
+      ],
+    },
+  },
 );

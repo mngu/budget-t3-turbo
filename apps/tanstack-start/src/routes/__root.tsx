@@ -1,5 +1,6 @@
 /// <reference types="vite/client" />
 import type { QueryClient } from "@tanstack/react-query";
+import type { TRPCClient } from "@trpc/client";
 import type { TRPCOptionsProxy } from "@trpc/tanstack-react-query";
 import type * as React from "react";
 import {
@@ -19,8 +20,14 @@ import appCss from "~/styles.css?url";
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
   trpc: TRPCOptionsProxy<AppRouter>;
+  trpcClient: TRPCClient<AppRouter>;
 }>()({
   head: () => ({
+    meta: [
+      { charSet: "utf-8" },
+      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { title: "Budget Tracker" },
+    ],
     links: [{ rel: "stylesheet", href: appCss }],
   }),
   component: RootComponent,
@@ -37,7 +44,7 @@ function RootComponent() {
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider>
-      <html lang="en" suppressHydrationWarning>
+      <html lang="fr" suppressHydrationWarning>
         <head>
           <HeadContent />
         </head>
