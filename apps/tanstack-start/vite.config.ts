@@ -7,7 +7,10 @@ import tsConfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
   server: {
-    port: 3001,
+    // 3000 comme l'ancienne app : l'URL de callback Enable Banking enregistrée
+    // (http://localhost:3000/callback) doit correspondre. Ne pas lancer les deux
+    // apps (budget-tracker et celle-ci) en même temps.
+    port: 3000,
   },
   plugins: [
     tsConfigPaths({
