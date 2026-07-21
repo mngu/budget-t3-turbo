@@ -198,7 +198,6 @@ function TransactionsPage() {
             variant="outline"
             size="icon"
             aria-label="Banques"
-            // @ts-expect-error — /banques route is added in task 11 (not yet in the route tree).
             render={<Link to="/banques" />}
           >
             <LandmarkIcon />

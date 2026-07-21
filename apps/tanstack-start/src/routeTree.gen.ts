@@ -12,8 +12,11 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as AuthedIndexRouteImport } from './routes/_authed/index'
+import { Route as AuthedCallbackRouteImport } from './routes/_authed/callback'
+import { Route as AuthedBanquesIndexRouteImport } from './routes/_authed/banques/index'
 import { Route as ApiTrpcSplatRouteImport } from './routes/api/trpc.$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
+import { Route as AuthedBanquesAjouterRouteImport } from './routes/_authed/banques/ajouter'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -29,6 +32,16 @@ const AuthedIndexRoute = AuthedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedCallbackRoute = AuthedCallbackRouteImport.update({
+  id: '/callback',
+  path: '/callback',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedBanquesIndexRoute = AuthedBanquesIndexRouteImport.update({
+  id: '/banques/',
+  path: '/banques/',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
   id: '/api/trpc/$',
   path: '/api/trpc/$',
@@ -39,39 +52,70 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthedBanquesAjouterRoute = AuthedBanquesAjouterRouteImport.update({
+  id: '/banques/ajouter',
+  path: '/banques/ajouter',
+  getParentRoute: () => AuthedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
+  '/callback': typeof AuthedCallbackRoute
   '/': typeof AuthedIndexRoute
+  '/banques/ajouter': typeof AuthedBanquesAjouterRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
+  '/banques': typeof AuthedBanquesIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
+  '/callback': typeof AuthedCallbackRoute
   '/': typeof AuthedIndexRoute
+  '/banques/ajouter': typeof AuthedBanquesAjouterRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
+  '/banques': typeof AuthedBanquesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authed': typeof AuthedRouteWithChildren
   '/login': typeof LoginRoute
+  '/_authed/callback': typeof AuthedCallbackRoute
   '/_authed/': typeof AuthedIndexRoute
+  '/_authed/banques/ajouter': typeof AuthedBanquesAjouterRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
+  '/_authed/banques/': typeof AuthedBanquesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/login' | '/' | '/api/auth/$' | '/api/trpc/$'
+  fullPaths:
+    | '/login'
+    | '/callback'
+    | '/'
+    | '/banques/ajouter'
+    | '/api/auth/$'
+    | '/api/trpc/$'
+    | '/banques'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/' | '/api/auth/$' | '/api/trpc/$'
+  to:
+    | '/login'
+    | '/callback'
+    | '/'
+    | '/banques/ajouter'
+    | '/api/auth/$'
+    | '/api/trpc/$'
+    | '/banques'
   id:
     | '__root__'
     | '/_authed'
     | '/login'
+    | '/_authed/callback'
     | '/_authed/'
+    | '/_authed/banques/ajouter'
     | '/api/auth/$'
     | '/api/trpc/$'
+    | '/_authed/banques/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -104,6 +148,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedIndexRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/callback': {
+      id: '/_authed/callback'
+      path: '/callback'
+      fullPath: '/callback'
+      preLoaderRoute: typeof AuthedCallbackRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/banques/': {
+      id: '/_authed/banques/'
+      path: '/banques'
+      fullPath: '/banques'
+      preLoaderRoute: typeof AuthedBanquesIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/api/trpc/$': {
       id: '/api/trpc/$'
       path: '/api/trpc/$'
@@ -118,15 +176,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authed/banques/ajouter': {
+      id: '/_authed/banques/ajouter'
+      path: '/banques/ajouter'
+      fullPath: '/banques/ajouter'
+      preLoaderRoute: typeof AuthedBanquesAjouterRouteImport
+      parentRoute: typeof AuthedRoute
+    }
   }
 }
 
 interface AuthedRouteChildren {
+  AuthedCallbackRoute: typeof AuthedCallbackRoute
   AuthedIndexRoute: typeof AuthedIndexRoute
+  AuthedBanquesAjouterRoute: typeof AuthedBanquesAjouterRoute
+  AuthedBanquesIndexRoute: typeof AuthedBanquesIndexRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
+  AuthedCallbackRoute: AuthedCallbackRoute,
   AuthedIndexRoute: AuthedIndexRoute,
+  AuthedBanquesAjouterRoute: AuthedBanquesAjouterRoute,
+  AuthedBanquesIndexRoute: AuthedBanquesIndexRoute,
 }
 
 const AuthedRouteWithChildren =
