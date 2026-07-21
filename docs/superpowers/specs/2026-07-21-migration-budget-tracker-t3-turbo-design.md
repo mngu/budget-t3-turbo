@@ -45,7 +45,7 @@ Perdu :
 | Auth | Better Auth conservé, **email + mot de passe** (Discord OAuth retiré). Nécessaire car le serveur sera joignable depuis le mobile. |
 | Base de données | Postgres local docker (compose repris de budget-tracker, port 5436). **Nouvelle base `budget_t3`** dans la même instance pour ne plus jamais pousser un schéma sur la base d'un autre projet. Données ré-importées depuis les JSON. |
 | Périmètre | Iso-fonctionnel. Pas d'approche B, pas d'écrans mobiles. |
-| Scope packages | Renommage global `@budget/*` → `@budget/*`. |
+| Scope packages | Renommage global `@acme/*` → `@budget/*`. |
 | Couche serveur | **Option A : tout en tRPC** dans `@budget/api`. Seule exception : `/callback` (redirection navigateur OAuth) reste une route HTTP de l'app web. |
 
 ## Architecture cible
