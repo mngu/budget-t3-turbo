@@ -1,0 +1,58 @@
+packages/api/package.json
+  s_6c98a9df4898c4::t_477b2d1e71d00f 18,35-36
+packages/api/src/lib/settings-core.ts
+  s_6c98a9df4898c4::t_18c967d75d0194 3-6
+  s_6c98a9df4898c4::t_8b21854518841b 1-2,7-106
+packages/api/src/lib/sync-core.ts
+  s_6c98a9df4898c4::t_e38205b8d6991b 1
+  s_6c98a9df4898c4::t_8b21854518841b 2-30
+packages/api/src/lib/eb-client.ts
+  s_6c98a9df4898c4::t_8b21854518841b 1,5-94
+  s_6c98a9df4898c4::t_3e198d4885020a 2-4
+packages/api/src/lib/eb-sync.ts
+  s_6c98a9df4898c4::t_fa37e0adda2716 5-9
+  s_6c98a9df4898c4::t_8b21854518841b 1-4,10-25,27-89
+  s_6c98a9df4898c4::t_fca27127f4699c 26
+packages/api/src/lib/eb-domain.test.ts
+  s_6c98a9df4898c4::t_8b21854518841b 1-8,10-130
+  s_6c98a9df4898c4::t_1885202955d19c 9
+packages/api/src/lib/eb-domain.ts
+  s_6c98a9df4898c4::t_8b21854518841b 1-97
+packages/api/src/lib/connections-core.ts
+  s_6c98a9df4898c4::t_bafe0992c2e47c 3-6,13
+  s_6c98a9df4898c4::t_8b21854518841b 1-2,7-12,14-245
+packages/api/src/lib/data-dir.ts
+  s_6c98a9df4898c4::t_62ca67a75b037e 1-10
+turbo.json
+  s_6c98a9df4898c4::t_5b294181b12ddf 29-32
+packages/api/vitest.config.ts
+  s_6c98a9df4898c4::t_db454e49e2d7dd 1-7
+package.json
+  s_6c98a9df4898c4::t_2de36631a45ef8 23
+packages/api/src/lib/sync-core.test.ts
+  s_6c98a9df4898c4::t_36c2ec73a88d0d 6,10,13
+  s_6c98a9df4898c4::t_8b21854518841b 1-5,7-9,11-12,14-100
+pnpm-lock.yaml
+  s_6c98a9df4898c4::t_dad877854140ec 377-379,3234-3236,3590-3595,3748-3776,3944-3947,4211-4214,4908-4910,5070-5072,5096-5099,6602-6605,7497-7499,7602-7604,7620-7622,7795-7797,7807-7810,7818-7821,8250-8290,8351-8355,11285,11570-11571,12063-12069,12115,12280-12320,12527-12528,12862-12863,13477-13478,13755-13758,13781-13782,15201-15215,15605,15888-15889,17070-17071,17160-17161,17172-17173,17378-17379,17386-17387,17398-17399,17712-17728,17733-17760,17841-17845
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "2542146d4b852e31016b0e518b2d9f16922f33c6",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_6c98a9df4898c4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d81e7ed6-4926-497c-abfa-57b5ecb45c2e",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
