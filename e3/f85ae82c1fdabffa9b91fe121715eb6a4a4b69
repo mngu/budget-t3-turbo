@@ -1,0 +1,36 @@
+README.md
+  s_6c98a9df4898c4::t_6c9139189833dd 72
+.vscode/launch.json
+  s_6c98a9df4898c4::t_6f90c21e06ffaa 3
+turbo/generators/config.ts
+  s_6c98a9df4898c4::t_e83de3a5a4e2c7 13
+CLAUDE.md
+  s_6c98a9df4898c4::t_877c848046ea55 16
+  s_6c98a9df4898c4::t_2f5013d1b7992c 39-50
+  s_6c98a9df4898c4::t_74aaa65f601887 51
+apps/tanstack-start/src/routes/_authed/index.tsx
+  s_6c98a9df4898c4::t_6400f7c739febc 87-88
+packages/api/src/router/auth.ts
+  s_6c98a9df4898c4::t_903bf3d889c7e7 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "e3f85ae82c1fdabffa9b91fe121715eb6a4a4b69",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_6c98a9df4898c4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d81e7ed6-4926-497c-abfa-57b5ecb45c2e",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
