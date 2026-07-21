@@ -17,7 +17,7 @@
 - **Base de données : `budget_t3`** — avant tout `db:push`, vérifier que `POSTGRES_URL` se termine par `/budget_t3`. Ne jamais pousser sur la base `budget`.
 - Strings utilisateur, noms de catégories, commentaires : **en français**.
 - Iso-fonctionnel : aucune évolution de comportement par rapport à la source.
-- Scope packages : `@budget/*` (jamais `@acme/*` dans du nouveau code).
+- Scope packages : `@budget/*` (jamais `@budget/*` dans du nouveau code).
 - Nouveau code : imports zod en `zod/v4` (style template), pas `zod`.
 - Après chaque tâche : `pnpm typecheck` vert avant commit.
 - `SOURCE` désigne ci-dessous `/Users/max/WebstormProjects/budget-tracker`.
@@ -51,7 +51,7 @@ L'alias de chemin du template web est `~/` (pas `@/`).
 
 **Files:**
 - Delete: `apps/nextjs/`
-- Modify: tous les fichiers contenant `@acme/` (package.json, sources, tooling), `package.json` racine
+- Modify: tous les fichiers contenant `@budget/` (package.json, sources, tooling), `package.json` racine
 
 **Interfaces:**
 - Produces: packages `@budget/db`, `@budget/api`, `@budget/auth`, `@budget/ui`, `@budget/validators`, apps `@budget/tanstack-start`, `@budget/expo` — noms utilisés par toutes les tâches suivantes.
@@ -65,7 +65,7 @@ git rm -r apps/nextjs
 - [ ] **Step 2 : Renommer le scope partout**
 
 ```bash
-grep -rl '@acme/' --exclude-dir=node_modules --exclude=pnpm-lock.yaml . | xargs sed -i '' 's|@acme/|@budget/|g'
+grep -rl '@budget/' --exclude-dir=node_modules --exclude=pnpm-lock.yaml . | xargs sed -i '' 's|@budget/|@budget/|g'
 ```
 
 - [ ] **Step 3 : Nettoyer les scripts racine**

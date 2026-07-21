@@ -1,5 +1,5 @@
 {
-  "name": "@acme/tanstack-start",
+  "name": "@budget/tanstack-start",
   "private": true,
   "sideEffects": false,
   "type": "module",
@@ -13,10 +13,10 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
-    "@acme/api": "workspace:*",
-    "@acme/auth": "workspace:*",
-    "@acme/db": "workspace:*",
-    "@acme/ui": "workspace:*",
+    "@budget/api": "workspace:*",
+    "@budget/auth": "workspace:*",
+    "@budget/db": "workspace:*",
+    "@budget/ui": "workspace:*",
     "@fontsource-variable/geist": "^5.2.8",
     "@fontsource-variable/geist-mono": "^5.2.7",
     "@t3-oss/env-core": "^0.13.8",
@@ -37,10 +37,10 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@acme/eslint-config": "workspace:*",
-    "@acme/prettier-config": "workspace:*",
-    "@acme/tailwind-config": "workspace:*",
-    "@acme/tsconfig": "workspace:*",
+    "@budget/eslint-config": "workspace:*",
+    "@budget/prettier-config": "workspace:*",
+    "@budget/tailwind-config": "workspace:*",
+    "@budget/tsconfig": "workspace:*",
     "@tailwindcss/vite": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:react19",
@@ -53,5 +53,5 @@
     "vite": "catalog:",
     "vite-tsconfig-paths": "^5.1.4"
   },
-  "prettier": "@acme/prettier-config"
+  "prettier": "@budget/prettier-config"
 }
