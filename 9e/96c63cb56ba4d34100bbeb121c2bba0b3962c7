@@ -1,0 +1,26 @@
+CLAUDE.md
+  s_6c98a9df4898c4::t_5475abf89bfdb4 1-13,15-34,36-64
+  s_6c98a9df4898c4::t_33512e60bae5ac 14
+  s_6c98a9df4898c4::t_e7a78dae1a3e51 35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "9e96c63cb56ba4d34100bbeb121c2bba0b3962c7",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_6c98a9df4898c4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d81e7ed6-4926-497c-abfa-57b5ecb45c2e",
+        "model": "claude-fable-5"
+      },
+      "human_author": null
+    }
+  }
+}
