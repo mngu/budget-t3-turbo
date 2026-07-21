@@ -1,0 +1,26 @@
+docs/superpowers/plans/2026-07-21-migration-budget-tracker.md
+  s_6c98a9df4898c4::t_36b909394d5f43 1533-1618
+  s_6c98a9df4898c4::t_10b274b711921d 268-287
+  s_6c98a9df4898c4::t_5313c5c7eee9a8 1-267,288-1532,1619-1741
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "5f98cedf5993a0dafe4e16758ea11d4da7b7e160",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_6c98a9df4898c4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d81e7ed6-4926-497c-abfa-57b5ecb45c2e",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
