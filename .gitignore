@@ -53,3 +53,9 @@ dist/
 
 # tanstack
 .tanstack
+
+# IDE
+.idea/
+
+# data
+data/

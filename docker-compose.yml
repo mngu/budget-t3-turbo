@@ -1,0 +1,19 @@
+# Réutilise l'instance Postgres locale de budget-tracker (même conteneur, même volume).
+# La base de CE projet est `budget_t3` — la base `budget` appartient à l'ancien repo.
+name: budget-tracker
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: budget
+      POSTGRES_PASSWORD: budget
+      POSTGRES_DB: budget
+    ports:
+      # 5436 côté hôte : 5432-5435 occupés par d'autres projets locaux
+      - "5436:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
