@@ -1,0 +1,26 @@
+packages/db/src/auth-schema.ts
+  s_6c98a9df4898c4::t_4a04efe31b27d5 1-2,4-74,76-78,81-85,88-92
+packages/auth/src/index.ts
+  s_6c98a9df4898c4::t_ed550d35f25078 21-22,24
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "9991a887f88458edf7f71975e5eb2488d5ff84d5",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_6c98a9df4898c4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d81e7ed6-4926-497c-abfa-57b5ecb45c2e",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
