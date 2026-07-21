@@ -55,6 +55,7 @@
     "AUTH_DISCORD_SECRET",
     "AUTH_REDIRECT_PROXY_URL",
     "AUTH_SECRET",
+    "ANTHROPIC_API_KEY",
     "PORT"
   ],
   "globalPassThroughEnv": [
