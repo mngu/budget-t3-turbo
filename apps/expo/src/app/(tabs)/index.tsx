@@ -1,10 +1,12 @@
+import { useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LegendList } from "@legendapp/list";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
+import { CategoryPickerSheet } from "~/components/category-picker-sheet";
 import { TransactionListItem } from "~/components/transaction-list-item";
-import { trpcClient } from "~/utils/api";
+import { trpc, trpcClient } from "~/utils/api";
 
 export function getNextTransactionsPageParam(
   pages: { rows: unknown[]; total: number }[],
@@ -15,6 +17,12 @@ export function getNextTransactionsPageParam(
 }
 
 export default function TransactionsScreen() {
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+
+  const { data: categories = [] } = useQuery(
+    trpc.categories.list.queryOptions(),
+  );
+
   const { data, isPending, isError, fetchNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ["transactions.list.infinite"],
@@ -60,7 +68,10 @@ export default function TransactionsScreen() {
           data={rows}
           keyExtractor={(t) => String(t.id)}
           renderItem={({ item }) => (
-            <TransactionListItem transaction={item} onPress={() => undefined} />
+            <TransactionListItem
+              transaction={item}
+              onPress={() => setSelectedId(item.id)}
+            />
           )}
           estimatedItemSize={72}
           recycleItems
@@ -73,6 +84,11 @@ export default function TransactionsScreen() {
           }
         />
       )}
+      <CategoryPickerSheet
+        transactionId={selectedId}
+        categories={categories}
+        onClose={() => setSelectedId(null)}
+      />
     </SafeAreaView>
   );
 }
