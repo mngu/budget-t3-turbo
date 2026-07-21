@@ -1,16 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { DesktopIcon, MoonIcon, SunIcon } from "@radix-ui/react-icons";
+import { Moon, Sun } from "lucide-react";
 import * as z from "zod/v4";
 
 import { Button } from "./button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "./dropdown-menu";
 
 const ThemeModeSchema = z.enum(["light", "dark", "auto"]);
 
@@ -152,33 +146,19 @@ export function useTheme() {
 }
 
 export function ThemeToggle() {
-  const { setTheme } = useTheme();
+  const { toggleMode } = useTheme();
 
+  // Icône pilotée uniquement par la variante `dark:` (classe posée sur <html>),
+  // pour rester correcte quel que soit le CSS de l'app et sans mismatch d'hydratation.
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          size="icon"
-          className="[&>svg]:absolute [&>svg]:size-5 [&>svg]:scale-0"
-        >
-          <SunIcon className="light:scale-100! auto:scale-0!" />
-          <MoonIcon className="auto:scale-0! dark:scale-100!" />
-          <DesktopIcon className="auto:scale-100!" />
-          <span className="sr-only">Toggle theme</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>
-          Light
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
-          Dark
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("auto")}>
-          System
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Button
+      variant="outline"
+      size="icon"
+      onClick={toggleMode}
+      aria-label="Basculer le thème"
+    >
+      <Sun className="size-5 dark:hidden" />
+      <Moon className="hidden size-5 dark:block" />
+    </Button>
   );
 }
