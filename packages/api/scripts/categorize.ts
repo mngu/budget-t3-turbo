@@ -11,12 +11,15 @@ import { and, count, eq, isNull } from "@budget/db";
 import { db } from "@budget/db/client";
 import { accounts, categories, transactions } from "@budget/db/schema";
 
+import type { SimilarTxn } from "../src/lib/similar-transactions";
+import { findSimilar } from "../src/lib/similar-transactions";
 import type { TxnForLlm } from "./categorize-core";
 import {
   buildCategorizationOutputSchema,
+  buildFewShotUserMessage,
   buildSystemPrompt,
-  buildUserMessage,
   chunkTransactions,
+  FEW_SHOT_BATCH_SIZE,
   filterValidResults,
 } from "./categorize-core";
 
@@ -76,12 +79,24 @@ export async function main(): Promise<void> {
   let categorized = 0;
 
   try {
-    for (const batch of chunkTransactions(rows)) {
+    for (const batch of chunkTransactions(rows, FEW_SHOT_BATCH_SIZE)) {
+      const similarsByTxnId = new Map<number, SimilarTxn[]>(
+        await Promise.all(
+          batch.map(
+            async (txn) => [txn.id, await findSimilar(txn)] as const,
+          ),
+        ),
+      );
       const response = await client.messages.parse({
         model: "claude-haiku-4-5",
         max_tokens: 8192,
         system: systemPrompt,
-        messages: [{ role: "user", content: buildUserMessage(batch) }],
+        messages: [
+          {
+            role: "user",
+            content: buildFewShotUserMessage(batch, similarsByTxnId),
+          },
+        ],
         output_config: { format: zodOutputFormat(categorizationOutputSchema) },
       });
 

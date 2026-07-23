@@ -16,6 +16,7 @@ import { Route as AuthedCallbackRouteImport } from './routes/_authed/callback'
 import { Route as AuthedBanquesIndexRouteImport } from './routes/_authed/banques/index'
 import { Route as ApiTrpcSplatRouteImport } from './routes/api/trpc.$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
+import { Route as AuthedCategoriesSuggestionsRouteImport } from './routes/_authed/categories.suggestions'
 import { Route as AuthedBanquesAjouterRouteImport } from './routes/_authed/banques/ajouter'
 
 const LoginRoute = LoginRouteImport.update({
@@ -52,6 +53,12 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthedCategoriesSuggestionsRoute =
+  AuthedCategoriesSuggestionsRouteImport.update({
+    id: '/categories/suggestions',
+    path: '/categories/suggestions',
+    getParentRoute: () => AuthedRoute,
+  } as any)
 const AuthedBanquesAjouterRoute = AuthedBanquesAjouterRouteImport.update({
   id: '/banques/ajouter',
   path: '/banques/ajouter',
@@ -63,6 +70,7 @@ export interface FileRoutesByFullPath {
   '/callback': typeof AuthedCallbackRoute
   '/': typeof AuthedIndexRoute
   '/banques/ajouter': typeof AuthedBanquesAjouterRoute
+  '/categories/suggestions': typeof AuthedCategoriesSuggestionsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
   '/banques': typeof AuthedBanquesIndexRoute
@@ -72,6 +80,7 @@ export interface FileRoutesByTo {
   '/callback': typeof AuthedCallbackRoute
   '/': typeof AuthedIndexRoute
   '/banques/ajouter': typeof AuthedBanquesAjouterRoute
+  '/categories/suggestions': typeof AuthedCategoriesSuggestionsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
   '/banques': typeof AuthedBanquesIndexRoute
@@ -83,6 +92,7 @@ export interface FileRoutesById {
   '/_authed/callback': typeof AuthedCallbackRoute
   '/_authed/': typeof AuthedIndexRoute
   '/_authed/banques/ajouter': typeof AuthedBanquesAjouterRoute
+  '/_authed/categories/suggestions': typeof AuthedCategoriesSuggestionsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
   '/_authed/banques/': typeof AuthedBanquesIndexRoute
@@ -94,6 +104,7 @@ export interface FileRouteTypes {
     | '/callback'
     | '/'
     | '/banques/ajouter'
+    | '/categories/suggestions'
     | '/api/auth/$'
     | '/api/trpc/$'
     | '/banques'
@@ -103,6 +114,7 @@ export interface FileRouteTypes {
     | '/callback'
     | '/'
     | '/banques/ajouter'
+    | '/categories/suggestions'
     | '/api/auth/$'
     | '/api/trpc/$'
     | '/banques'
@@ -113,6 +125,7 @@ export interface FileRouteTypes {
     | '/_authed/callback'
     | '/_authed/'
     | '/_authed/banques/ajouter'
+    | '/_authed/categories/suggestions'
     | '/api/auth/$'
     | '/api/trpc/$'
     | '/_authed/banques/'
@@ -176,6 +189,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authed/categories/suggestions': {
+      id: '/_authed/categories/suggestions'
+      path: '/categories/suggestions'
+      fullPath: '/categories/suggestions'
+      preLoaderRoute: typeof AuthedCategoriesSuggestionsRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/banques/ajouter': {
       id: '/_authed/banques/ajouter'
       path: '/banques/ajouter'
@@ -190,6 +210,7 @@ interface AuthedRouteChildren {
   AuthedCallbackRoute: typeof AuthedCallbackRoute
   AuthedIndexRoute: typeof AuthedIndexRoute
   AuthedBanquesAjouterRoute: typeof AuthedBanquesAjouterRoute
+  AuthedCategoriesSuggestionsRoute: typeof AuthedCategoriesSuggestionsRoute
   AuthedBanquesIndexRoute: typeof AuthedBanquesIndexRoute
 }
 
@@ -197,6 +218,7 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedCallbackRoute: AuthedCallbackRoute,
   AuthedIndexRoute: AuthedIndexRoute,
   AuthedBanquesAjouterRoute: AuthedBanquesAjouterRoute,
+  AuthedCategoriesSuggestionsRoute: AuthedCategoriesSuggestionsRoute,
   AuthedBanquesIndexRoute: AuthedBanquesIndexRoute,
 }
 

@@ -1,3 +1,4 @@
+import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import {
   boolean,
   date,
@@ -72,6 +73,8 @@ export const categories = pgTable("categories", {
   id: serial("id").primaryKey(),
   name: text("name").notNull().unique(),
   color: text("color"),
+  // NULL = catégorie parente ; sinon sous-catégorie (feuille, seule assignable à une transaction).
+  parentId: integer("parent_id").references((): AnyPgColumn => categories.id),
 });
 
 export const transactions = pgTable(

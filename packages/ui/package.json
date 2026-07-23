@@ -9,6 +9,8 @@
     "./button-group": "./src/button-group.tsx",
     "./calendar": "./src/calendar.tsx",
     "./card": "./src/card.tsx",
+    "./checkbox": "./src/checkbox.tsx",
+    "./dialog": "./src/dialog.tsx",
     "./field": "./src/field.tsx",
     "./input": "./src/input.tsx",
     "./label": "./src/label.tsx",

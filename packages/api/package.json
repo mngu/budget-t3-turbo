@@ -17,6 +17,7 @@
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "import": "pnpm with-env tsx scripts/import.ts && pnpm with-env tsx scripts/categorize.ts",
     "lint": "eslint --flag unstable_native_nodejs_ts_config",
+    "suggest-categories": "pnpm with-env tsx scripts/suggest-categories.ts",
     "sync": "pnpm with-env tsx scripts/sync.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",

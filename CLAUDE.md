@@ -11,7 +11,10 @@ This is a pnpm + Turborepo monorepo (migrated from the single-package `budget-tr
 ## Architecture
 
 - `@budget/db` — schéma Drizzle + `pg`, base **`budget_t3`**.
-- `@budget/api` — routeurs tRPC (`auth`, `transactions`, `categories`, `connections`, `settings`, `sync`), logique Enable Banking dans `src/lib/` (`eb-client.ts`, `eb-domain.ts`, `eb-sync.ts`, `connections-core.ts`, `settings-core.ts`, `sync-core.ts`), scripts CLI dans `scripts/` (`import.ts`, `categorize.ts`, `sync.ts`, `normalize.ts`, `slug.ts`), tests Vitest.
+- `@budget/api` — routeurs tRPC (`auth`, `transactions`, `categories`, `connections`, `settings`, `sync`), logique Enable Banking dans `src/lib/` (`eb-client.ts`, `eb-domain.ts`, `eb-sync.ts`, `connections-core.ts`, `settings-core.ts`, `sync-core.ts`), scripts CLI dans `scripts/` (`import.ts`, `categorize.ts`, `sync.ts`, `normalize.ts`, `slug.ts`, `suggest-categories.ts`), tests Vitest.
+  - **Catégories intelligentes** (arborescence parent/enfant, `categories.parent_id`) : le routeur `categoriesRouter` expose `tree` (arborescence complète) en plus de `list`.
+    - **Suggestions** (`src/lib/suggest-categories-core.ts`, `suggest-categories-schema.ts`) — un LLM (Claude Sonnet) analyse un échantillon de transactions récentes (6 derniers mois, max 500) et propose une arborescence parent → sous-catégories avec les `txnIds` correspondants, exposée via `categoriesRouter.suggestions.{generate,status,apply}` et la page `/categories/suggestions` (`apps/tanstack-start`). L'état du dernier run est **en mémoire process** (pas de table dédiée) — se perd au redémarrage du serveur, il suffit de relancer l'analyse. `pnpm suggest-categories` lance l'analyse en CLI (affichage only, l'application se fait depuis l'UI).
+    - **Catégorisation few-shot** (`src/lib/similar-transactions.ts`, `scripts/categorize-core.ts`) — avant l'appel LLM, `findSimilar()` cherche des transactions déjà catégorisées proches (contrepartie exacte > trigrammes `pg_trgm` sur la description > `bank_code`/MCC en dernier recours, priorité aux corrections `categorySource = 'manual'`) et les injecte comme exemples dans le prompt (`buildFewShotPrompt`). Fallback silencieux vers le prompt générique si aucune similaire trouvée. Nécessite l'extension PostgreSQL `pg_trgm` (voir plus bas).
 - `@budget/auth` — Better Auth, email/mot de passe.
 - `@budget/ui` — composants Base UI. Déviation assumée par rapport au template create-t3-turbo : le `ThemeProvider` maison a été conservé (pas `next-themes`), `ThemeToggle` réécrit sans dropdown.
 - `@budget/validators` — schémas Zod partagés.
@@ -33,7 +36,8 @@ Pipeline métier inchangé : connexions bancaires configurées dans l'app (`/ban
 - `docker compose up -d` — Postgres 17 local (port hôte 5436). **Instance partagée avec l'ancien repo `budget-tracker`** (même conteneur, même volume).
 - `pnpm db:push` — push du schéma Drizzle (turbo task interactive) ; **échoue dans un environnement non-TTY**. Fallback : `pnpm -F @budget/db with-env drizzle-kit push`.
 - `pnpm run import` — import de `data/*.json` en PostgreSQL puis catégorisation (idempotent — safe à relancer). **Ne pas utiliser `pnpm import`** (sans `run`) : cette forme est interceptée par la commande interne de pnpm de conversion de lockfile et supprimerait `pnpm-lock.yaml`.
-- `pnpm categorize` — catégorisation LLM des transactions sans catégorie (idempotent, garde `IS NULL`). Fonctionne tel quel (pas de collision de nom).
+- `pnpm categorize` — catégorisation LLM des transactions sans catégorie (idempotent, garde `IS NULL`). Fonctionne tel quel (pas de collision de nom). Enrichit désormais le prompt par few-shot (transactions similaires déjà catégorisées, voir Architecture).
+- `pnpm suggest-categories` — lance l'analyse LLM (Claude Sonnet) et affiche l'arborescence de catégories proposée en CLI ; n'écrit rien en base (application depuis l'UI `/categories/suggestions`).
 - `pnpm sync` — pipeline complet : Enable Banking → import → catégorisation (équivalent au bouton Sync de l'app). Fonctionne tel quel (pas de collision de nom). **Never run `sync` on behalf of the user** — it touches live bank sessions and triggers SCA; only run when explicitly asked, and the bank authorization (auth/SCA) happens in the app, page `/banques` — there is no CLI `auth`/`banks` command anymore.
 - `pnpm test` — turbo run test (Vitest sur tous les packages).
 - `pnpm build` / `pnpm typecheck` / `pnpm lint` — turbo run sur tout le monorepo.
@@ -53,6 +57,14 @@ INSERT INTO categories (name, color) VALUES
   ('Abonnements', '#84cc16'), ('Loisirs & shopping', '#8b5cf6'),
   ('Épargne & virements internes', '#f97316'), ('Frais & impôts', '#6366f1'), ('Autres', '#94a3b8')
 ON CONFLICT (name) DO NOTHING;
+```
+
+### Extension `pg_trgm` (catégorisation few-shot)
+
+La recherche de transactions similaires (`similar-transactions.ts`) utilise `similarity()` sur la description, fourni par l'extension PostgreSQL `pg_trgm`. À activer une fois par instance (survit à `db:push`, pas géré par Drizzle) :
+
+```sql
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
 ```
 
 ## Bank data provider: Enable Banking (not GoCardless)

@@ -1,4 +1,3 @@
-import { ThemeToggle } from "@budget/ui/theme";
 import { useState } from "react";
 import {
   createFileRoute,
@@ -12,7 +11,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { LandmarkIcon, RefreshCwIcon } from "lucide-react";
+import { LandmarkIcon, RefreshCwIcon, SparklesIcon } from "lucide-react";
 import { Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
 import type {
@@ -38,6 +37,7 @@ import {
   TableHeader,
   TableRow,
 } from "@budget/ui/table";
+import { ThemeToggle } from "@budget/ui/theme";
 import { toast } from "@budget/ui/toast";
 import { PAGE_SIZE, transactionsSearchSchema } from "@budget/validators";
 
@@ -195,6 +195,14 @@ function TransactionsPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">💰 Transactions</h1>
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            aria-label="Suggestions de catégories"
+            render={<Link to="/categories/suggestions" />}
+          >
+            <SparklesIcon />
+          </Button>
           <Button
             variant="outline"
             size="icon"
