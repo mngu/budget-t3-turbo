@@ -1,0 +1,63 @@
+.hermes/plans/2026-07-22_073000-categories-intelligentes.md
+  s_7971146268cf03::t_c22e0a4103452a 1-274
+CLAUDE.md
+  s_7971146268cf03::t_e2274f93558888 14-17,39-40,62-69
+apps/tanstack-start/src/component/category-tree.tsx
+  s_7971146268cf03::t_e8c807f585a37a 1-219
+apps/tanstack-start/src/component/transaction-preview-drawer.tsx
+  s_7971146268cf03::t_a435c99f5e904c 1-73
+apps/tanstack-start/src/routeTree.gen.ts
+  s_7971146268cf03::t_50707a9c5055d2 19,56-61,73,83,95,107,117,128,192-198,213,221
+apps/tanstack-start/src/routes/_authed/categories.suggestions.tsx
+  s_7971146268cf03::t_5a566070f495be 1-250
+apps/tanstack-start/src/routes/_authed/index.tsx
+  s_7971146268cf03::t_4dd2c8775c477a 14,40,198-205
+package.json
+  s_7971146268cf03::t_d174cba3467c63 21
+packages/api/package.json
+  s_7971146268cf03::t_b8760085279ebd 20
+packages/api/scripts/categorize-core.test.ts
+  s_7971146268cf03::t_fb17979eadf4ab 3,7-8,28-38,100-136
+packages/api/scripts/categorize-core.ts
+  s_7971146268cf03::t_65f149a78617dc 5-6,20-22,42,52-82
+packages/api/scripts/categorize.ts
+  s_7971146268cf03::t_69fbafaa9870a4 14-15,19,22,82-89,94-99
+packages/api/scripts/suggest-categories.ts
+  s_7971146268cf03::t_67e0c54dc8df40 1-45
+packages/api/src/index.ts
+  s_7971146268cf03::t_0a1d8c001ba320 36-45
+packages/api/src/lib/similar-transactions.ts
+  s_7971146268cf03::t_0cf1aeb9a40c7f 1-133
+packages/api/src/lib/suggest-categories-core.test.ts
+  s_7971146268cf03::t_07c4a49e591b92 1-53
+packages/api/src/lib/suggest-categories-core.ts
+  s_7971146268cf03::t_65242bafdc71b0 1-214
+packages/api/src/lib/suggest-categories-schema.ts
+  s_7971146268cf03::t_dd8d72ca608b26 1-25
+packages/api/src/router/categories.ts
+  s_7971146268cf03::t_af22036d4cccfb 2,4,7-12,19,22-32,34-58,60-76,78-90
+packages/db/src/schema.ts
+  s_7971146268cf03::t_8fabe9044bb69e 1,76-77
+packages/ui/package.json
+  s_7971146268cf03::t_36f7aa939c43e0 12-13
+packages/ui/src/checkbox.tsx
+  s_7971146268cf03::t_8f721688098803 1-26
+packages/ui/src/dialog.tsx
+  s_7971146268cf03::t_e1f8fe66309e24 1-113
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "05153d0eb042c84c386cd8a94ccfbf9acae821de",
+  "prompts": {},
+  "sessions": {
+    "s_7971146268cf03": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7cf6a25d-eafd-43ca-9df6-ceefde3eb347",
+        "model": "unknown"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
