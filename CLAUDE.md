@@ -16,7 +16,13 @@ This is a pnpm + Turborepo monorepo (migrated from the single-package `budget-tr
 - `@budget/ui` — composants Base UI. Déviation assumée par rapport au template create-t3-turbo : le `ThemeProvider` maison a été conservé (pas `next-themes`), `ThemeToggle` réécrit sans dropdown.
 - `@budget/validators` — schémas Zod partagés.
 - `apps/tanstack-start` — app web, routes `/`, `/banques`, `/banques/ajouter`, `/callback`, `/login` sous le layout `_authed`.
-- `apps/expo` — placeholder + login (mobile).
+- `apps/expo` — app mobile (login, transactions + filtres, KPIs, banques) en gluestack-ui v5 + nativewind. **Développement en suspens** (décision du 2026-07-23) : l'objectif est une vraie app universelle web+native, ce que gluestack ne permet pas correctement aujourd'hui — ne pas y ajouter de features sans que ce soit explicitement demandé.
+
+### Notes app mobile (pour la reprise éventuelle)
+
+- Tester sur téléphone : `pnpm -F @budget/expo dev` (Metro port 8081, mode LAN) + web app sur 3000 — le serveur Vite doit écouter en LAN (`host: true` dans `vite.config.ts`, déjà en place) pour que le téléphone atteigne l'API. Sur émulateur : ouvrir `exp://10.0.2.2:8081`.
+- CORS + `trustedOrigins` better-auth sont ouverts à `localhost:*` en dev uniquement (`apps/tanstack-start/src/lib/cors.ts`, `src/auth/server.ts`) pour le mode web d'Expo.
+- `tooling/tailwind/theme.css` n'est consommé que par `apps/expo`. Ne jamais y remettre d'auto-références type tweakcn (`--shadow-sm: var(--shadow-sm)`) : inertes sur le web, elles font crasher nativewind à l'exécution (« Maximum call stack size exceeded ») — voir le commentaire dans le fichier. Après modification de ce fichier, relancer Metro avec `--clear`.
 
 Pipeline métier inchangé : connexions bancaires configurées dans l'app (`/banques` : onboarding Enable Banking, wizard d'ajout, callback OAuth sur `/callback`, sessions stockées en DB) → sync → `data/*.json` (racine du monorepo) → import (`packages/api/scripts/import.ts`) → PostgreSQL → tRPC (`@budget/api` routers) → table des transactions (`apps/tanstack-start`).
 
