@@ -1,0 +1,65 @@
+packages/auth/src/index.ts
+  s_58c915bbddc817::t_25f7b124a838db 14,26
+apps/tanstack-start/vite.config.ts
+  s_58c915bbddc817::t_ea255ff13b2e6a 14-16
+apps/tanstack-start/src/routes/__root.tsx
+  h_baa52ab231f280 15
+packages/ui/src/theme.tsx
+  s_2e9cbf45ee41c5::t_63262bf7a5094b 151,160-162
+  s_2e9cbf45ee41c5::t_d6b18b2cb73ede 4
+apps/tanstack-start/src/auth/server.ts
+  s_58c915bbddc817::t_b23741be6c3bf9 12-16
+apps/expo/src/utils/api.tsx
+  s_58c915bbddc817::t_c4c1ccd4324052 31-39,44-48
+  s_58c915bbddc817::t_b8413b932358b6 1
+apps/tanstack-start/src/styles.css
+  s_2e9cbf45ee41c5::t_9530d02b6601a3 12
+apps/expo/package.json
+  s_58c915bbddc817::t_b183b4317870f6 32
+apps/expo/src/utils/base-url.ts
+  s_58c915bbddc817::t_21717756f952da 1,9-17
+apps/tanstack-start/src/lib/cors.ts
+  s_58c915bbddc817::t_c27e99a1f8a0f6 1-45
+apps/tanstack-start/src/routes/api/auth.$.ts
+  s_58c915bbddc817::t_21960c66286659 4,9-12
+apps/tanstack-start/src/routes/_authed/index.tsx
+  h_baa52ab231f280 1,207
+apps/tanstack-start/src/routes/api/trpc.$.ts
+  s_58c915bbddc817::t_c8eb2a3d270e97 40-42
+  s_58c915bbddc817::t_14da0dc74a32b2 8
+apps/expo/src/utils/auth.ts
+  s_58c915bbddc817::t_03225ce4931e94 1,8-22,25-28,33
+tooling/tailwind/theme.css
+  s_58c915bbddc817::t_ba6d136034a63a 143-147
+pnpm-lock.yaml
+  s_58c915bbddc817::t_4fdea984a72140 152-154,202,5653-5659,11136,15378-15383,16907-16921,17247,18335,18341-18342
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "f6bcbb91791868aebb9c82dcdb352be0d041efae",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_2e9cbf45ee41c5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "dc0a7cc7-ba43-45fc-850c-fb603c179790",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    },
+    "s_58c915bbddc817": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a3a5cc91-b420-4e28-bb89-d266036c7a0e",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
