@@ -1,3 +1,4 @@
+import { ThemeToggle } from "@budget/ui/theme";
 import { useState } from "react";
 import {
   createFileRoute,
@@ -203,6 +204,7 @@ function TransactionsPage() {
             <LandmarkIcon />
           </Button>
           <SyncButton />
+          <ThemeToggle />
           <CalendarFilter />
         </div>
       </div>

@@ -9,6 +9,7 @@
 @source "../../../packages/ui/src/*.{ts,tsx}";
 
 @custom-variant dark (&:is(.dark *));
+@custom-variant auto (&:is(.auto *));
 
 @theme inline {
   --font-heading: var(--font-sans);

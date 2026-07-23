@@ -11,6 +11,9 @@ export default defineConfig({
     // (http://localhost:3000/callback) doit correspondre. Ne pas lancer les deux
     // apps (budget-tracker et celle-ci) en même temps.
     port: 3000,
+    // Écoute aussi sur l'IP LAN (pas seulement localhost) pour que l'app Expo
+    // sur un téléphone du même réseau atteigne l'API (http://<ip-du-mac>:3000).
+    host: true,
   },
   plugins: [
     tsConfigPaths({

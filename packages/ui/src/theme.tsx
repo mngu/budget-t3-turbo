@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Moon, Sun } from "lucide-react";
+import { Monitor, Moon, Sun } from "lucide-react";
 import * as z from "zod/v4";
 
 import { Button } from "./button";
@@ -148,7 +148,7 @@ export function useTheme() {
 export function ThemeToggle() {
   const { toggleMode } = useTheme();
 
-  // Icône pilotée uniquement par la variante `dark:` (classe posée sur <html>),
+  // Icône pilotée uniquement par les variantes `dark:`/`auto:` (classes posées sur <html>),
   // pour rester correcte quel que soit le CSS de l'app et sans mismatch d'hydratation.
   return (
     <Button
@@ -157,8 +157,9 @@ export function ThemeToggle() {
       onClick={toggleMode}
       aria-label="Basculer le thème"
     >
-      <Sun className="size-5 dark:hidden" />
-      <Moon className="hidden size-5 dark:block" />
+      <Sun className="size-5 dark:hidden auto:hidden" />
+      <Moon className="hidden size-5 not-auto:dark:block" />
+      <Monitor className="hidden size-5 auto:block" />
     </Button>
   );
 }

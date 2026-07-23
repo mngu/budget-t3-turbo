@@ -1,3 +1,4 @@
+import { Platform } from "react-native";
 import { QueryClient } from "@tanstack/react-query";
 import { createTRPCClient, httpBatchLink, loggerLink } from "@trpc/client";
 import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
@@ -27,13 +28,24 @@ export const trpcClient = createTRPCClient<AppRouter>({
     httpBatchLink({
       transformer: superjson,
       url: `${getBaseUrl()}/api/trpc`,
+      // Sur web, le header Cookie est interdit par le navigateur : la session
+      // passe par les cookies natifs, envoyés cross-origin via credentials
+      // "include". Sur natif, pas de cookie jar fiable : on lit le cookie
+      // stocké par le plugin expo de better-auth et on l'envoie à la main.
+      fetch:
+        Platform.OS === "web"
+          ? (url, options) =>
+              fetch(url, { ...options, credentials: "include" })
+          : undefined,
       headers() {
         const headers = new Map<string, string>();
         headers.set("x-trpc-source", "expo-react");
 
-        const cookies = authClient.getCookie();
-        if (cookies) {
-          headers.set("Cookie", cookies);
+        if (Platform.OS !== "web") {
+          const cookies = authClient.getCookie();
+          if (cookies) {
+            headers.set("Cookie", cookies);
+          }
         }
         return headers;
       },
