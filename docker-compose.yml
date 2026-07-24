@@ -8,12 +8,14 @@ services:
     environment:
       POSTGRES_USER: budget
       POSTGRES_PASSWORD: budget
-      POSTGRES_DB: budget
+      POSTGRES_DB: budget_t3
     ports:
       # 5436 côté hôte : 5432-5435 occupés par d'autres projets locaux
       - "5436:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+      # Scripts exécutés uniquement à la création initiale du volume (voir docker-initdb/).
+      - ./docker-initdb:/docker-entrypoint-initdb.d
 
 volumes:
   pgdata:

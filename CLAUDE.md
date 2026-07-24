@@ -61,7 +61,9 @@ ON CONFLICT (name) DO NOTHING;
 
 ### Extension `pg_trgm` (catégorisation few-shot)
 
-La recherche de transactions similaires (`similar-transactions.ts`) utilise `similarity()` sur la description, fourni par l'extension PostgreSQL `pg_trgm`. À activer une fois par instance (survit à `db:push`, pas géré par Drizzle) :
+La recherche de transactions similaires (`similar-transactions.ts`) utilise `similarity()` sur la description, fourni par l'extension PostgreSQL `pg_trgm`. Activée automatiquement sur un volume Docker neuf via `docker-initdb/01-pg_trgm.sql` (monté dans `/docker-entrypoint-initdb.d`, ne s'exécute qu'à la création initiale du volume — voir `docker-compose.yml`).
+
+Sur une instance déjà initialisée avant ce script (ex. le volume partagé avec `budget-tracker`), l'activer manuellement une fois (survit à `db:push`, pas géré par Drizzle) :
 
 ```sql
 CREATE EXTENSION IF NOT EXISTS pg_trgm;

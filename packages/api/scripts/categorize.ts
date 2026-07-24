@@ -12,8 +12,8 @@ import { db } from "@budget/db/client";
 import { accounts, categories, transactions } from "@budget/db/schema";
 
 import type { SimilarTxn } from "../src/lib/similar-transactions";
-import { findSimilar } from "../src/lib/similar-transactions";
 import type { TxnForLlm } from "./categorize-core";
+import { findSimilar } from "../src/lib/similar-transactions";
 import {
   buildCategorizationOutputSchema,
   buildFewShotUserMessage,
@@ -82,9 +82,7 @@ export async function main(): Promise<void> {
     for (const batch of chunkTransactions(rows, FEW_SHOT_BATCH_SIZE)) {
       const similarsByTxnId = new Map<number, SimilarTxn[]>(
         await Promise.all(
-          batch.map(
-            async (txn) => [txn.id, await findSimilar(txn)] as const,
-          ),
+          batch.map(async (txn) => [txn.id, await findSimilar(txn)] as const),
         ),
       );
       const response = await client.messages.parse({
