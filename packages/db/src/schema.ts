@@ -73,7 +73,9 @@ export const categories = pgTable("categories", {
   id: serial("id").primaryKey(),
   name: text("name").notNull().unique(),
   color: text("color"),
-  // NULL = catégorie parente ; sinon sous-catégorie (feuille, seule assignable à une transaction).
+  // NULL = catégorie parente ; sinon sous-catégorie. Les deux niveaux sont
+  // assignables à une transaction ; choisir un parent dans le filtre de liste
+  // inclut aussi ses sous-catégories (voir transactionsFilterQuery).
   parentId: integer("parent_id").references((): AnyPgColumn => categories.id),
 });
 

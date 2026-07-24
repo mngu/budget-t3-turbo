@@ -77,7 +77,7 @@ export async function analyzeAndSuggest(
 ): Promise<CategorySuggestion[]> {
   const client = new Anthropic();
   const response = await client.messages.parse({
-    model: "claude-sonnet-5",
+    model: "claude-haiku-4-5",
     max_tokens: 8192,
     system:
       "Tu es un expert en catégorisation budgétaire pour les finances personnelles.",

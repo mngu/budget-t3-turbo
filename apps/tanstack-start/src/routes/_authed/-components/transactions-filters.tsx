@@ -1,5 +1,6 @@
 import { getRouteApi } from "@tanstack/react-router";
 
+import type { CategoryTreeNode } from "@budget/api";
 import { Button } from "@budget/ui/button";
 import {
   Select,
@@ -9,6 +10,7 @@ import {
   SelectValue,
 } from "@budget/ui/select";
 
+import { CategoryTreeSelectItems } from "~/component/category-tree-select-items";
 import { SearchInput } from "~/component/search-input";
 
 export function TransactionsFilters({
@@ -16,7 +18,7 @@ export function TransactionsFilters({
   categories,
 }: {
   banks: string[];
-  categories: string[];
+  categories: CategoryTreeNode[];
 }) {
   const routeApi = getRouteApi("/_authed/");
   const search = routeApi.useSearch();
@@ -82,11 +84,7 @@ export function TransactionsFilters({
           <SelectValue placeholder="Catégorie" />
         </SelectTrigger>
         <SelectContent>
-          {categories.map((c) => (
-            <SelectItem key={c} value={c}>
-              {c}
-            </SelectItem>
-          ))}
+          <CategoryTreeSelectItems categories={categories} />
         </SelectContent>
       </Select>
 

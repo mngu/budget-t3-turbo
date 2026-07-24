@@ -16,7 +16,7 @@ import { Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
 import type {
   CategoryBreakdownItem,
-  CategoryOption,
+  CategoryTreeNode,
   TransactionRow,
 } from "@budget/api";
 import { cn } from "@budget/ui";
@@ -25,7 +25,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@budget/ui/card";
 import {
   Select,
   SelectContent,
-  SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@budget/ui/select";
@@ -41,6 +40,7 @@ import { ThemeToggle } from "@budget/ui/theme";
 import { toast } from "@budget/ui/toast";
 import { PAGE_SIZE, transactionsSearchSchema } from "@budget/validators";
 
+import { CategoryTreeSelectItems } from "~/component/category-tree-select-items";
 import { toastSyncOutcome } from "~/lib/sync-toast";
 import { useTRPCClient } from "~/lib/trpc";
 import { CalendarFilter } from "./-components/calendar-filter";
@@ -71,7 +71,7 @@ export const Route = createFileRoute("/_authed/")({
           direction: "credit",
         }),
         context.trpcClient.transactions.banks.query(),
-        context.trpcClient.categories.list.query(),
+        context.trpcClient.categories.tree.query(),
       ]);
     return {
       ...result,
@@ -216,10 +216,7 @@ function TransactionsPage() {
           <CalendarFilter />
         </div>
       </div>
-      <TransactionsFilters
-        banks={banks}
-        categories={categories.map((c) => c.name)}
-      />
+      <TransactionsFilters banks={banks} categories={categories} />
       <div className="flex gap-4">
         <KpiCard title="Total dépenses" value={euro.format(totalExpenses)} />
         <KpiCard title="Total revenues" value={euro.format(totalRevenues)} />
@@ -313,7 +310,7 @@ function CategoryCell({
 }: {
   id: number;
   category: string | null;
-  categories: CategoryOption[];
+  categories: CategoryTreeNode[];
 }) {
   const router = useRouter();
   const trpcClient = useTRPCClient();
@@ -343,11 +340,7 @@ function CategoryCell({
         <SelectValue placeholder="Catégorie" />
       </SelectTrigger>
       <SelectContent alignItemWithTrigger={false} align="start">
-        {categories.map((c) => (
-          <SelectItem key={c.id} value={c.name}>
-            {c.name}
-          </SelectItem>
-        ))}
+        <CategoryTreeSelectItems categories={categories} />
       </SelectContent>
     </Select>
   );

@@ -4,6 +4,7 @@ import { z } from "zod/v4";
 import type { SQL } from "@budget/db";
 import type { TransactionsSearch } from "@budget/validators";
 import {
+  alias,
   and,
   asc,
   count,
@@ -27,6 +28,10 @@ import { protectedProcedure } from "../trpc";
 
 // Nom de banque affiché : display_name choisi par l'utilisateur, sinon nom ASPSP.
 const bankLabel = sql<string>`coalesce(${accounts.displayName}, ${accounts.bankName})`;
+
+// Utilisé pour matcher une transaction dont la sous-catégorie appartient
+// au parent choisi dans le filtre (categories.tree, 2 niveaux).
+const parentCategories = alias(categories, "parent_categories");
 
 export interface TransactionRow {
   id: number;
@@ -60,7 +65,13 @@ const transactionsFilterQuery = (
   if (query.status) conditions.push(eq(transactions.status, query.status));
   if (query.category === "none")
     conditions.push(isNull(transactions.categoryId));
-  else if (query.category) conditions.push(eq(categories.name, query.category));
+  else if (query.category) {
+    const categoryFilter = or(
+      eq(categories.name, query.category),
+      eq(parentCategories.name, query.category),
+    );
+    if (categoryFilter) conditions.push(categoryFilter);
+  }
   if (query.dateFrom)
     conditions.push(gte(transactions.bookingDate, query.dateFrom));
   if (query.dateTo)
@@ -109,6 +120,10 @@ export const transactionsRouter = {
           .from(transactions)
           .innerJoin(accounts, eq(transactions.accountId, accounts.id))
           .leftJoin(categories, eq(transactions.categoryId, categories.id))
+          .leftJoin(
+            parentCategories,
+            eq(categories.parentId, parentCategories.id),
+          )
           .where(where)
           .orderBy(...orderBy)
           .limit(PAGE_SIZE)
@@ -118,6 +133,10 @@ export const transactionsRouter = {
           .from(transactions)
           .innerJoin(accounts, eq(transactions.accountId, accounts.id))
           .leftJoin(categories, eq(transactions.categoryId, categories.id))
+          .leftJoin(
+            parentCategories,
+            eq(categories.parentId, parentCategories.id),
+          )
           .where(where),
       ]);
 
@@ -137,6 +156,10 @@ export const transactionsRouter = {
         .from(transactions)
         .innerJoin(accounts, eq(transactions.accountId, accounts.id))
         .leftJoin(categories, eq(transactions.categoryId, categories.id))
+        .leftJoin(
+          parentCategories,
+          eq(categories.parentId, parentCategories.id),
+        )
         .where(where)
         .groupBy(categories.id, categories.name)
         .orderBy(desc(sql`sum(${transactions.amount})`));
