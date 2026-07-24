@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 // CLI : lance l'analyse LLM et affiche l'arborescence de catégories proposée.
 // N'applique rien en base — l'application se fait depuis l'UI
-// (page /categories/suggestions), qui a besoin de l'aperçu pour confirmation.
+// (page /categories), qui a besoin de l'aperçu pour confirmation.
 // Usage : pnpm suggest-categories
 import { generateSuggestionsCore } from "../src/lib/suggest-categories-core";
 
@@ -33,7 +33,7 @@ async function main(): Promise<void> {
     }
   }
   console.log(
-    "\nℹ️  Rendez-vous sur /categories/suggestions dans l'app pour valider et appliquer.",
+    "\nℹ️  Rendez-vous sur /categories dans l'app pour valider et appliquer.",
   );
 }
 

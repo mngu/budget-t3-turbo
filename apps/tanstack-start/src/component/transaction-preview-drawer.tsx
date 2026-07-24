@@ -1,6 +1,5 @@
 "use client";
 
-import type { TxnForAnalysis } from "@budget/api";
 import {
   Dialog,
   DialogContent,
@@ -14,11 +13,24 @@ const euro = new Intl.NumberFormat("fr-FR", {
   currency: "EUR",
 });
 
+// Sous-ensemble minimal commun à TxnForAnalysis (échantillon LLM) et
+// TransactionRow (données réelles de la table transactions) — le drawer ne
+// lit que ces champs, pas besoin de caster l'un ou l'autre.
+export interface PreviewableTransaction {
+  id: number;
+  description: string;
+  counterparty: string | null;
+  bankName: string;
+  amount: string | number;
+  direction: "debit" | "credit";
+}
+
 interface TransactionPreviewDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
-  transactions: TxnForAnalysis[];
+  transactions: PreviewableTransaction[];
+  description?: string;
 }
 
 export function TransactionPreviewDrawer({
@@ -26,6 +38,7 @@ export function TransactionPreviewDrawer({
   onOpenChange,
   title,
   transactions,
+  description,
 }: TransactionPreviewDrawerProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -33,8 +46,8 @@ export function TransactionPreviewDrawer({
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
-            {transactions.length} transaction
-            {transactions.length > 1 ? "s" : ""} de l'échantillon analysé.
+            {description ??
+              `${transactions.length} transaction${transactions.length > 1 ? "s" : ""} de l'échantillon analysé.`}
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-1 flex-col gap-2 overflow-y-auto">

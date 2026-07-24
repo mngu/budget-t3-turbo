@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { ArrowLeftIcon, Loader2Icon, RefreshCwIcon } from "lucide-react";
+import { ArrowLeftIcon, Loader2Icon, SparklesIcon } from "lucide-react";
 
 import type { CategorySuggestion, TxnForAnalysis } from "@budget/api";
 import { Button } from "@budget/ui/button";
@@ -13,15 +13,21 @@ import {
 } from "@budget/ui/dialog";
 import { toast } from "@budget/ui/toast";
 
+import { CategoryOverviewTree } from "~/component/category-overview-tree";
 import type { EditableParent } from "~/component/category-tree";
 import { CategoryTree, newEditableId } from "~/component/category-tree";
 import { TransactionPreviewDrawer } from "~/component/transaction-preview-drawer";
 import { useTRPCClient } from "~/lib/trpc";
 
-export const Route = createFileRoute("/_authed/categories/suggestions")({
-  loader: ({ context }) =>
-    context.trpcClient.categories.suggestions.status.query(),
-  component: CategoriesSuggestionsPage,
+export const Route = createFileRoute("/_authed/categories")({
+  loader: async ({ context }) => {
+    const [status, overview] = await Promise.all([
+      context.trpcClient.categories.suggestions.status.query(),
+      context.trpcClient.categories.overview.query(),
+    ]);
+    return { status, overview };
+  },
+  component: CategoriesPage,
 });
 
 const dateTimeFr = new Intl.DateTimeFormat("fr-FR", {
@@ -49,8 +55,8 @@ function toEditable(suggestions: CategorySuggestion[]): EditableParent[] {
   }));
 }
 
-function CategoriesSuggestionsPage() {
-  const status = Route.useLoaderData();
+function CategoriesPage() {
+  const { status, overview } = Route.useLoaderData();
   const router = useRouter();
   const trpcClient = useTRPCClient();
   const [generating, setGenerating] = useState(false);
@@ -92,37 +98,41 @@ function CategoriesSuggestionsPage() {
         >
           <ArrowLeftIcon />
         </Button>
-        <h1 className="text-2xl font-bold">🏷️ Suggestions de catégories</h1>
+        <h1 className="text-2xl font-bold">🏷️ Catégories</h1>
       </div>
 
-      {generating ? (
-        <div className="text-muted-foreground flex flex-col items-center gap-3 py-16">
+      {overview.uncategorizedCount > 0 ? (
+        <div className="rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
+          {overview.uncategorizedCount} transaction(s) sans catégorie.
+        </div>
+      ) : (
+        <div className="rounded-lg border border-emerald-500/50 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-700 dark:text-emerald-400">
+          Toutes les transactions sont catégorisées.
+        </div>
+      )}
+
+      <div className="flex items-center gap-2">
+        <Button onClick={generate} disabled={generating}>
+          <SparklesIcon />
+          Suggérer des catégories
+        </Button>
+      </div>
+
+      {generating && (
+        <div className="text-muted-foreground flex flex-col items-center gap-3 py-8">
           <Loader2Icon className="size-6 animate-spin" />
           <p>Analyse en cours... (peut prendre une minute)</p>
         </div>
-      ) : !ready ? (
-        <div className="flex flex-col items-start gap-3">
-          <p className="text-muted-foreground">
-            Aucune analyse n'a encore été lancée. L'analyse envoie un
-            échantillon de vos transactions récentes à un LLM pour proposer une
-            arborescence de catégories adaptée à vos habitudes réelles.
-          </p>
-          <Button onClick={generate}>Analyser mes transactions</Button>
-        </div>
-      ) : (
-        <SuggestionsWorkspace data={ready} onRegenerate={generate} />
       )}
+
+      {!generating && ready && <SuggestionsWorkspace data={ready} />}
+
+      <CategoryOverviewTree tree={overview.tree} />
     </main>
   );
 }
 
-function SuggestionsWorkspace({
-  data,
-  onRegenerate,
-}: {
-  data: ReadyStatus;
-  onRegenerate: () => Promise<void>;
-}) {
+function SuggestionsWorkspace({ data }: { data: ReadyStatus }) {
   const trpcClient = useTRPCClient();
   const navigate = Route.useNavigate();
   const [tree, setTree] = useState<EditableParent[]>(() =>
@@ -185,25 +195,19 @@ function SuggestionsWorkspace({
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 rounded-lg border p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-muted-foreground text-sm">
           Analyse de {data.sample.length} transactions · générée le{" "}
           {dateTimeFr.format(data.generatedAt)}
         </p>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={onRegenerate}>
-            <RefreshCwIcon />
-            Relancer l'analyse
-          </Button>
-          <Button
-            size="sm"
-            disabled={payload.length === 0}
-            onClick={() => setConfirmOpen(true)}
-          >
-            Appliquer
-          </Button>
-        </div>
+        <Button
+          size="sm"
+          disabled={payload.length === 0}
+          onClick={() => setConfirmOpen(true)}
+        >
+          Appliquer
+        </Button>
       </div>
 
       {data.newTransactionsCount > 0 && (

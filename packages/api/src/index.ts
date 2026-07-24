@@ -33,7 +33,12 @@ export type {
   CategoryBreakdownItem,
   TransactionRow,
 } from "./router/transactions";
-export type { CategoryOption, CategoryTreeNode } from "./router/categories";
+export type {
+  CategoriesOverview,
+  CategoryOption,
+  CategoryOverviewNode,
+  CategoryTreeNode,
+} from "./router/categories";
 export type {
   CategorySuggestion,
   CategorySuggestionChild,

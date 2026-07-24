@@ -198,8 +198,8 @@ function TransactionsPage() {
           <Button
             variant="outline"
             size="icon"
-            aria-label="Suggestions de catégories"
-            render={<Link to="/categories/suggestions" />}
+            aria-label="Catégories"
+            render={<Link to="/categories" />}
           >
             <SparklesIcon />
           </Button>
