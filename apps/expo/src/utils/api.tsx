@@ -34,8 +34,7 @@ export const trpcClient = createTRPCClient<AppRouter>({
       // stocké par le plugin expo de better-auth et on l'envoie à la main.
       fetch:
         Platform.OS === "web"
-          ? (url, options) =>
-              fetch(url, { ...options, credentials: "include" })
+          ? (url, options) => fetch(url, { ...options, credentials: "include" })
           : undefined,
       headers() {
         const headers = new Map<string, string>();

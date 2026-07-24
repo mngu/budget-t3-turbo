@@ -13,8 +13,8 @@ import {
 } from "@budget/ui/dialog";
 import { toast } from "@budget/ui/toast";
 
-import { CategoryOverviewTree } from "~/component/category-overview-tree";
 import type { EditableParent } from "~/component/category-tree";
+import { CategoryOverviewTree } from "~/component/category-overview-tree";
 import { CategoryTree, newEditableId } from "~/component/category-tree";
 import { TransactionPreviewDrawer } from "~/component/transaction-preview-drawer";
 import { useTRPCClient } from "~/lib/trpc";

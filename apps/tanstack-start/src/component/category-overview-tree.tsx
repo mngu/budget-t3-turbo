@@ -38,7 +38,10 @@ export function CategoryOverviewTree({ tree }: CategoryOverviewTreeProps) {
   } | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  const openPreview = async (categoryName: string, includesChildren: boolean) => {
+  const openPreview = async (
+    categoryName: string,
+    includesChildren: boolean,
+  ) => {
     const result = await trpcClient.transactions.list.query({
       page: 1,
       sort: "date",
@@ -92,8 +95,12 @@ export function CategoryOverviewTree({ tree }: CategoryOverviewTreeProps) {
           <CategoryRow
             node={parent}
             onRename={(name) => rename(parent.id, name)}
-            onPreview={() => openPreview(parent.name, parent.children.length > 0)}
-            onDelete={() => setConfirmDelete({ id: parent.id, name: parent.name })}
+            onPreview={() =>
+              openPreview(parent.name, parent.children.length > 0)
+            }
+            onDelete={() =>
+              setConfirmDelete({ id: parent.id, name: parent.name })
+            }
           />
           {parent.children.length > 0 && (
             <ul className="mt-2 flex flex-col gap-1 pl-5">
@@ -122,9 +129,8 @@ export function CategoryOverviewTree({ tree }: CategoryOverviewTreeProps) {
           <DialogHeader>
             <DialogTitle>Supprimer « {confirmDelete?.name} » ?</DialogTitle>
             <DialogDescription>
-              Cette action est irréversible. La suppression sera bloquée si
-              des sous-catégories ou des transactions y sont encore
-              rattachées.
+              Cette action est irréversible. La suppression sera bloquée si des
+              sous-catégories ou des transactions y sont encore rattachées.
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end gap-2">

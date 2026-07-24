@@ -157,9 +157,9 @@ export function ThemeToggle() {
       onClick={toggleMode}
       aria-label="Basculer le thème"
     >
-      <Sun className="size-5 dark:hidden auto:hidden" />
-      <Moon className="hidden size-5 not-auto:dark:block" />
-      <Monitor className="hidden size-5 auto:block" />
+      <Sun className="auto:hidden size-5 dark:hidden" />
+      <Moon className="not-auto:dark:block hidden size-5" />
+      <Monitor className="auto:block hidden size-5" />
     </Button>
   );
 }

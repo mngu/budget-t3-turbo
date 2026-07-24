@@ -24,8 +24,7 @@ export const authClient = createAuthClient({
   baseURL: getBaseUrl(),
   // En dev web, l'app (port Metro) et l'API (port 3000) sont cross-origin :
   // sans credentials "include", le navigateur n'envoie pas les cookies.
-  fetchOptions:
-    Platform.OS === "web" ? { credentials: "include" } : undefined,
+  fetchOptions: Platform.OS === "web" ? { credentials: "include" } : undefined,
   plugins: [
     expoClient({
       scheme: "expo",

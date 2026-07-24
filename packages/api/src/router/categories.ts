@@ -135,7 +135,9 @@ export const categoriesRouter = {
 
   // Renomme une catégorie existante (nom seul — pas de couleur dans cette passe).
   rename: protectedProcedure
-    .input(z.object({ id: z.number().int().positive(), name: z.string().min(1) }))
+    .input(
+      z.object({ id: z.number().int().positive(), name: z.string().min(1) }),
+    )
     .mutation(async ({ ctx, input }) => {
       const name = input.name.trim();
       if (name.length === 0) throw new Error("Le nom ne peut pas être vide.");

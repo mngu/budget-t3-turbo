@@ -153,7 +153,9 @@ export const transactionsRouter = {
           total: sql<string>`sum(${transactions.amount})`,
           // Couleur du parent pour une sous-catégorie, sinon la couleur propre
           // de la catégorie racine.
-          color: sql<string | null>`coalesce(${parentCategories.color}, ${categories.color})`,
+          color: sql<
+            string | null
+          >`coalesce(${parentCategories.color}, ${categories.color})`,
         })
         .from(transactions)
         .innerJoin(accounts, eq(transactions.accountId, accounts.id))
