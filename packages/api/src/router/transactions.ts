@@ -151,7 +151,9 @@ export const transactionsRouter = {
         .select({
           category: sql<string>`${categories.name}`,
           total: sql<string>`sum(${transactions.amount})`,
-          color: categories.color,
+          // Couleur du parent pour une sous-catégorie, sinon la couleur propre
+          // de la catégorie racine.
+          color: sql<string | null>`coalesce(${parentCategories.color}, ${categories.color})`,
         })
         .from(transactions)
         .innerJoin(accounts, eq(transactions.accountId, accounts.id))
@@ -161,7 +163,7 @@ export const transactionsRouter = {
           eq(categories.parentId, parentCategories.id),
         )
         .where(where)
-        .groupBy(categories.id, categories.name)
+        .groupBy(categories.id, categories.name, parentCategories.id)
         .orderBy(desc(sql`sum(${transactions.amount})`));
 
       return rows.map((r) => ({
