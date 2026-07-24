@@ -1,0 +1,46 @@
+packages/api/src/lib/suggest-categories-core.ts
+  h_baa52ab231f280 80
+apps/tanstack-start/src/routes/_authed/index.tsx
+  s_d7d368851e0641::t_71c2604f080491 219
+  s_d7d368851e0641::t_55a5447877b042 313
+  s_d7d368851e0641::t_0c306d37a1c9c2 43
+  s_d7d368851e0641::t_81db42ed6fa66e 343
+  s_d7d368851e0641::t_0e92107335b677 74
+  s_d7d368851e0641::t_d80224f4c30482 19
+docs/superpowers/plans/2026-07-24-category-selector-two-levels.md
+  s_d7d368851e0641::t_2aa08947d35d63 1-508
+apps/tanstack-start/src/component/category-tree-select-items.tsx
+  s_d7d368851e0641::t_1dabdea853e767 1-25
+apps/tanstack-start/src/routes/_authed/-components/transactions-filters.tsx
+  s_d7d368851e0641::t_3a9a98c7ea8af7 3,13,21
+  s_d7d368851e0641::t_5b2eef7e6ae5db 87
+packages/api/src/router/transactions.ts
+  s_d7d368851e0641::t_84fe710352f279 68-74
+  s_d7d368851e0641::t_66a3117abdaa7b 32-35
+  s_d7d368851e0641::t_8d2d80d8cb698a 7
+  s_d7d368851e0641::t_35f0daebd1664a 123-126,136-139
+  s_d7d368851e0641::t_f7dda2dabc5c8e 159-162
+packages/db/src/schema.ts
+  s_d7d368851e0641::t_0d408efbe8a788 76-78
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "4018788bd792b4808b3289eb64dccc35e15973f2",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_d7d368851e0641": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3923ba0a-54bd-45ec-a6d1-4b6b2824269b",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
