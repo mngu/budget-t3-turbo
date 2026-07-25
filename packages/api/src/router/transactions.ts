@@ -147,15 +147,21 @@ export const transactionsRouter = {
     .input(transactionsSearchSchema)
     .query(async ({ ctx, input }): Promise<CategoryBreakdownItem[]> => {
       const where = transactionsFilterQuery(input);
+      // Regroupe toujours au niveau de la catégorie parente : une
+      // sous-catégorie remonte dans la part de son parent (coalesce vers
+      // parentCategories), une catégorie déjà racine reste inchangée
+      // (parentCategories vide dans ce cas). Le graphique n'affiche ainsi
+      // jamais de sous-catégorie comme part à part entière.
+      const categoryLabel = sql<string>`coalesce(${parentCategories.name}, ${categories.name})`;
+      const categoryColor = sql<
+        string | null
+      >`coalesce(${parentCategories.color}, ${categories.color})`;
+      const categoryGroupId = sql`coalesce(${parentCategories.id}, ${categories.id})`;
       const rows = await ctx.db
         .select({
-          category: sql<string>`${categories.name}`,
+          category: categoryLabel,
           total: sql<string>`sum(${transactions.amount})`,
-          // Couleur du parent pour une sous-catégorie, sinon la couleur propre
-          // de la catégorie racine.
-          color: sql<
-            string | null
-          >`coalesce(${parentCategories.color}, ${categories.color})`,
+          color: categoryColor,
         })
         .from(transactions)
         .innerJoin(accounts, eq(transactions.accountId, accounts.id))
@@ -165,7 +171,7 @@ export const transactionsRouter = {
           eq(categories.parentId, parentCategories.id),
         )
         .where(where)
-        .groupBy(categories.id, categories.name, parentCategories.id)
+        .groupBy(categoryGroupId, categoryLabel, categoryColor)
         .orderBy(desc(sql`sum(${transactions.amount})`));
 
       return rows.map((r) => ({
