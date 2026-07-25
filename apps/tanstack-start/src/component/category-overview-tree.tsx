@@ -4,21 +4,20 @@ import { useState } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { Trash2Icon } from "lucide-react";
 
+
+
 import type { CategoryOption, CategoryOverviewNode } from "@budget/api";
 import { Button } from "@budget/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@budget/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@budget/ui/dialog";
 import { Input } from "@budget/ui/input";
 import { toast } from "@budget/ui/toast";
+
+
 
 import type { PreviewableTransaction } from "~/component/transaction-preview-drawer";
 import { TransactionPreviewDrawer } from "~/component/transaction-preview-drawer";
 import { useTRPCClient } from "~/lib/trpc";
+
 
 interface CategoryOverviewTreeProps {
   tree: CategoryOverviewNode[];
@@ -217,10 +216,12 @@ function CategoryRow({
   return (
     <div className="flex items-center justify-between gap-2">
       <div className="flex flex-1 items-center gap-2">
-        <span
-          className="size-2.5 shrink-0 rounded-full"
-          style={{ backgroundColor: node.color ?? "#94a3b8" }}
-        />
+        {node.color && (
+          <span
+            className="size-2.5 shrink-0 rounded-full"
+            style={{ backgroundColor: node.color }}
+          />
+        )}
         <Input
           value={value}
           onChange={(e) => setValue(e.target.value)}
