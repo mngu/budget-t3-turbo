@@ -1,0 +1,33 @@
+apps/tanstack-start/src/component/category-row-shell.tsx
+  s_c9d1110a218fe9::t_11bb63bc4659dc 3
+  s_c9d1110a218fe9::t_96cc6fd7222194 67-68
+  s_c9d1110a218fe9::t_d000176bbfbe29 75-80
+  s_c9d1110a218fe9::t_4ee038b53b108a 73
+  s_c9d1110a218fe9::t_f77e63eb04b0b2 1-2,4-66,69-72,74,81-85
+apps/tanstack-start/src/component/category-tree.tsx
+  s_c9d1110a218fe9::t_f3e32a604aadeb 8-9,126-128,135-138,142-151,153-165,167-172,174-177,179-182,187-189,193,197-202
+  s_c9d1110a218fe9::t_d000176bbfbe29 173
+packages/api/src/router/categories.ts
+  s_c9d1110a218fe9::t_56d49b8318ad20 144-173
+  s_c9d1110a218fe9::t_dff09dd016760c 6
+apps/tanstack-start/src/component/category-overview-tree.tsx
+  s_c9d1110a218fe9::t_1a83c104420f61 19-22
+  s_c9d1110a218fe9::t_13109872558f62 8-14,70-78,145-152,156-162,243,245,256-269
+  s_c9d1110a218fe9::t_c37aefa4e14b35 244
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "4669b2b4ce22f8fce69b74fee20e9c4171d10f2c",
+  "prompts": {},
+  "sessions": {
+    "s_c9d1110a218fe9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4311727b-af41-4ef3-90b1-3a96695f8169",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
