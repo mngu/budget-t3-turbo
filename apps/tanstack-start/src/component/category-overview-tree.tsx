@@ -2,22 +2,26 @@
 
 import { useState } from "react";
 import { useRouter } from "@tanstack/react-router";
-import { Trash2Icon } from "lucide-react";
-
-
 
 import type { CategoryOption, CategoryOverviewNode } from "@budget/api";
 import { Button } from "@budget/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@budget/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@budget/ui/dialog";
 import { Input } from "@budget/ui/input";
 import { toast } from "@budget/ui/toast";
 
-
-
 import type { PreviewableTransaction } from "~/component/transaction-preview-drawer";
+import {
+  AddCategoryButton,
+  CategoryRowShell,
+} from "~/component/category-row-shell";
 import { TransactionPreviewDrawer } from "~/component/transaction-preview-drawer";
 import { useTRPCClient } from "~/lib/trpc";
-
 
 interface CategoryOverviewTreeProps {
   tree: CategoryOverviewNode[];
@@ -60,6 +64,15 @@ export function CategoryOverviewTree({ tree }: CategoryOverviewTreeProps) {
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Échec du renommage.");
       return false;
+    }
+  };
+
+  const create = async (name: string, parentId: number | null) => {
+    try {
+      await trpcClient.categories.create.mutate({ name, parentId });
+      await router.invalidate();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Échec de la création.");
     }
   };
 
@@ -129,8 +142,23 @@ export function CategoryOverviewTree({ tree }: CategoryOverviewTreeProps) {
               ))}
             </ul>
           )}
+
+          <AddCategoryButton
+            label="Ajouter une sous-catégorie"
+            onClick={() => create("Nouvelle sous-catégorie", parent.id)}
+            variant="ghost"
+            size="sm"
+            className="mt-1 ml-5"
+          />
         </div>
       ))}
+
+      <AddCategoryButton
+        label="Ajouter une catégorie"
+        onClick={() => create("Nouvelle catégorie", null)}
+        variant="outline"
+        className="self-start"
+      />
 
       <Dialog
         open={confirmDelete !== null}
@@ -188,8 +216,6 @@ export function CategoryOverviewTree({ tree }: CategoryOverviewTreeProps) {
 
 // Ligne réutilisable pour un parent ou un enfant : nom éditable (commit au
 // blur/Enter), compteur de transactions cliquable (aperçu), suppression.
-// Reprend les conventions visuelles de category-tree.tsx (pastille colorée,
-// Input transparent) mais avec la vraie couleur de la catégorie.
 function CategoryRow({
   node,
   onRename,
@@ -214,14 +240,9 @@ function CategoryRow({
   };
 
   return (
-    <div className="flex items-center justify-between gap-2">
-      <div className="flex flex-1 items-center gap-2">
-        {node.color && (
-          <span
-            className="size-2.5 shrink-0 rounded-full"
-            style={{ backgroundColor: node.color }}
-          />
-        )}
+    <CategoryRowShell
+      color={node.color ?? undefined}
+      nameInput={
         <Input
           value={value}
           onChange={(e) => setValue(e.target.value)}
@@ -232,23 +253,19 @@ function CategoryRow({
           aria-label="Nom de la catégorie"
           className="focus-visible:border-input h-7 max-w-xs border-transparent bg-transparent font-medium shadow-none"
         />
-      </div>
-      <button
-        type="button"
-        className="text-muted-foreground shrink-0 text-xs hover:underline disabled:pointer-events-none disabled:opacity-50"
-        disabled={node.transactionCount === 0}
-        onClick={onPreview}
-      >
-        {node.transactionCount} txn{node.transactionCount > 1 ? "s" : ""}
-      </button>
-      <Button
-        variant="ghost"
-        size="icon-sm"
-        aria-label="Supprimer la catégorie"
-        onClick={onDelete}
-      >
-        <Trash2Icon />
-      </Button>
-    </div>
+      }
+      trailing={
+        <button
+          type="button"
+          className="text-muted-foreground shrink-0 text-xs hover:underline disabled:pointer-events-none disabled:opacity-50"
+          disabled={node.transactionCount === 0}
+          onClick={onPreview}
+        >
+          {node.transactionCount} txn{node.transactionCount > 1 ? "s" : ""}
+        </button>
+      }
+      onDelete={onDelete}
+      deleteLabel="Supprimer la catégorie"
+    />
   );
 }

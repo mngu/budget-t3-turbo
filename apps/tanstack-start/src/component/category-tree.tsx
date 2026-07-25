@@ -1,12 +1,11 @@
 "use client";
 
-import { PlusIcon, Trash2Icon } from "lucide-react";
-
 import { cn } from "@budget/ui";
-import { Button } from "@budget/ui/button";
 import { Checkbox } from "@budget/ui/checkbox";
 import { Input } from "@budget/ui/input";
 import { FALLBACK_CATEGORY_COLOR } from "@budget/validators";
+
+import { AddCategoryButton, CategoryRowShell } from "./category-row-shell";
 
 export interface EditableChild {
   id: number;
@@ -124,89 +123,83 @@ export function CategoryTree({
       )}
       {parents.map((parent) => (
         <div key={parent.id} className="rounded-lg border p-3">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex flex-1 items-center gap-2">
-              <span
-                className="size-2.5 shrink-0 rounded-full"
-                style={{ backgroundColor: parent.color }}
-              />
+          <CategoryRowShell
+            color={parent.color}
+            nameInput={
               <Input
                 value={parent.name}
                 onChange={(e) => renameParent(parent.id, e.target.value)}
                 aria-label="Nom de la catégorie"
                 className="focus-visible:border-input h-7 max-w-xs border-transparent bg-transparent font-medium shadow-none"
               />
-            </div>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              aria-label="Supprimer la catégorie"
-              onClick={() => removeParent(parent.id)}
-            >
-              <Trash2Icon />
-            </Button>
-          </div>
+            }
+            onDelete={() => removeParent(parent.id)}
+            deleteLabel="Supprimer la catégorie"
+          />
 
           <ul className="mt-2 flex flex-col gap-1 pl-5">
             {parent.children.map((child) => (
-              <li key={child.id} className="flex items-center gap-2">
-                <Checkbox
-                  checked={child.enabled}
-                  onCheckedChange={(checked) =>
-                    toggleChild(parent.id, child.id, checked)
+              <li key={child.id}>
+                <CategoryRowShell
+                  leading={
+                    <Checkbox
+                      checked={child.enabled}
+                      onCheckedChange={(checked) =>
+                        toggleChild(parent.id, child.id, checked)
+                      }
+                      aria-label={`Activer ${child.name || "la sous-catégorie"}`}
+                    />
                   }
-                  aria-label={`Activer ${child.name || "la sous-catégorie"}`}
+                  nameInput={
+                    <Input
+                      value={child.name}
+                      onChange={(e) =>
+                        renameChild(parent.id, child.id, e.target.value)
+                      }
+                      placeholder="Nom de la sous-catégorie"
+                      aria-label="Nom de la sous-catégorie"
+                      className={cn(
+                        "focus-visible:border-input h-7 max-w-xs border-transparent bg-transparent shadow-none",
+                        !child.enabled && "text-muted-foreground line-through",
+                      )}
+                    />
+                  }
+                  trailing={
+                    <button
+                      type="button"
+                      className="text-muted-foreground shrink-0 text-xs hover:underline disabled:pointer-events-none disabled:opacity-50"
+                      disabled={child.txnIds.length === 0}
+                      onClick={() =>
+                        onPreview(child.name || "Sous-catégorie", child.txnIds)
+                      }
+                    >
+                      {child.txnIds.length} txns
+                    </button>
+                  }
+                  onDelete={() => removeChild(parent.id, child.id)}
+                  deleteLabel="Supprimer la sous-catégorie"
+                  deleteSize="icon-xs"
                 />
-                <Input
-                  value={child.name}
-                  onChange={(e) =>
-                    renameChild(parent.id, child.id, e.target.value)
-                  }
-                  placeholder="Nom de la sous-catégorie"
-                  aria-label="Nom de la sous-catégorie"
-                  className={cn(
-                    "focus-visible:border-input h-7 max-w-xs border-transparent bg-transparent shadow-none",
-                    !child.enabled && "text-muted-foreground line-through",
-                  )}
-                />
-                <button
-                  type="button"
-                  className="text-muted-foreground shrink-0 text-xs hover:underline disabled:pointer-events-none disabled:opacity-50"
-                  disabled={child.txnIds.length === 0}
-                  onClick={() =>
-                    onPreview(child.name || "Sous-catégorie", child.txnIds)
-                  }
-                >
-                  {child.txnIds.length} txns
-                </button>
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  aria-label="Supprimer la sous-catégorie"
-                  onClick={() => removeChild(parent.id, child.id)}
-                >
-                  <Trash2Icon />
-                </Button>
               </li>
             ))}
           </ul>
 
-          <Button
+          <AddCategoryButton
+            label="Ajouter une sous-catégorie"
+            onClick={() => addChild(parent.id)}
             variant="ghost"
             size="sm"
             className="mt-1 ml-5"
-            onClick={() => addChild(parent.id)}
-          >
-            <PlusIcon />
-            Ajouter une sous-catégorie
-          </Button>
+          />
         </div>
       ))}
 
-      <Button variant="outline" onClick={addParent} className="self-start">
-        <PlusIcon />
-        Ajouter une catégorie
-      </Button>
+      <AddCategoryButton
+        label="Ajouter une catégorie"
+        onClick={addParent}
+        variant="outline"
+        className="self-start"
+      />
     </div>
   );
 }

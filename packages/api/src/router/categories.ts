@@ -3,6 +3,7 @@ import { z } from "zod/v4";
 
 import { count, eq, inArray, isNull } from "@budget/db";
 import { categories, transactions } from "@budget/db/schema";
+import { FALLBACK_CATEGORY_COLOR } from "@budget/validators";
 
 import { categorizeUncategorizedCore } from "../lib/categorize-uncategorized-core";
 import {
@@ -139,6 +140,36 @@ export const categoriesRouter = {
   // existantes (pas de proposition de nouvelle arborescence, voir
   // suggestions.generate pour ça) — équivalent UI de `pnpm categorize`.
   categorize: protectedProcedure.mutation(() => categorizeUncategorizedCore()),
+
+  // Crée une catégorie (parentId null) ou sous-catégorie (parentId d'un
+  // parent existant). Couleur par défaut FALLBACK_CATEGORY_COLOR pour un
+  // parent — jamais pour un enfant, qui hérite visuellement de son parent
+  // (voir transactionsRouter.byCategory).
+  create: protectedProcedure
+    .input(
+      z.object({
+        name: z.string().min(1),
+        parentId: z.number().int().positive().nullable(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const name = input.name.trim();
+      if (name.length === 0) throw new Error("Le nom ne peut pas être vide.");
+
+      const [conflict] = await ctx.db
+        .select({ id: categories.id })
+        .from(categories)
+        .where(eq(categories.name, name));
+      if (conflict) {
+        throw new Error(`Une catégorie nommée "${name}" existe déjà.`);
+      }
+
+      await ctx.db.insert(categories).values({
+        name,
+        parentId: input.parentId,
+        color: input.parentId === null ? FALLBACK_CATEGORY_COLOR : null,
+      });
+    }),
 
   // Renomme une catégorie existante (nom seul — pas de couleur dans cette passe).
   rename: protectedProcedure
