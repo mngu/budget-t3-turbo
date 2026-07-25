@@ -1,0 +1,19 @@
+apps/tanstack-start/src/component/category-suggestions.tsx
+  s_c9d1110a218fe9::t_fde0216ac90f7e 1,4-8,10,38-39,46,49-52,58-96,110,112-116,131-133,141-168,178-185,191-195,199-225,232-236
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "cdeb5d911c96631c9ade4e811289723642f92a78",
+  "prompts": {},
+  "sessions": {
+    "s_c9d1110a218fe9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4311727b-af41-4ef3-90b1-3a96695f8169",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
