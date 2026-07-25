@@ -1,7 +1,7 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod/v4";
 
-import { count, eq, isNull } from "@budget/db";
+import { count, eq, inArray, isNull } from "@budget/db";
 import { categories, transactions } from "@budget/db/schema";
 
 import {
@@ -156,36 +156,32 @@ export const categoriesRouter = {
         .where(eq(categories.id, input.id));
     }),
 
-  // Suppression bloquée si la catégorie a encore des sous-catégories ou des
-  // transactions rattachées — pas de cascade, pas de mise à NULL automatique
-  // (même logique conservatrice que le garde IS NULL de scripts/categorize.ts).
+  // Supprime une catégorie (et, pour un parent, ses sous-catégories en
+  // cascade) même si des transactions y sont rattachées : elles deviennent
+  // non-catégorisées (category_id/category_source à NULL) plutôt que de
+  // bloquer la suppression — l'avertissement en amont (UI) se base sur
+  // `overview` pour prévenir l'utilisateur avant confirmation.
   remove: protectedProcedure
     .input(z.object({ id: z.number().int().positive() }))
     .mutation(async ({ ctx, input }) => {
-      const [[childRow], [txnRow]] = await Promise.all([
-        ctx.db
-          .select({ total: count() })
-          .from(categories)
-          .where(eq(categories.parentId, input.id)),
-        ctx.db
-          .select({ total: count() })
-          .from(transactions)
-          .where(eq(transactions.categoryId, input.id)),
-      ]);
+      const children = await ctx.db
+        .select({ id: categories.id })
+        .from(categories)
+        .where(eq(categories.parentId, input.id));
+      const idsToDelete = [input.id, ...children.map((c) => c.id)];
 
-      const childCount = childRow?.total ?? 0;
-      if (childCount > 0) {
-        throw new Error(
-          `Impossible de supprimer : ${childCount} sous-catégorie(s) restante(s).`,
-        );
-      }
-      const txnCount = txnRow?.total ?? 0;
-      if (txnCount > 0) {
-        throw new Error(
-          `Impossible de supprimer : ${txnCount} transaction(s) assignée(s).`,
-        );
-      }
+      await ctx.db
+        .update(transactions)
+        .set({ categoryId: null, categorySource: null })
+        .where(inArray(transactions.categoryId, idsToDelete));
 
+      // Les enfants référencent le parent via parent_id : les supprimer
+      // avant le parent pour ne pas violer la contrainte de clé étrangère.
+      if (children.length > 0) {
+        await ctx.db
+          .delete(categories)
+          .where(eq(categories.parentId, input.id));
+      }
       await ctx.db.delete(categories).where(eq(categories.id, input.id));
     }),
 

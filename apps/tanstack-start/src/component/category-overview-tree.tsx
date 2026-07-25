@@ -35,6 +35,8 @@ export function CategoryOverviewTree({ tree }: CategoryOverviewTreeProps) {
   const [confirmDelete, setConfirmDelete] = useState<{
     id: number;
     name: string;
+    transactionCount: number;
+    childCount: number;
   } | null>(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -99,7 +101,12 @@ export function CategoryOverviewTree({ tree }: CategoryOverviewTreeProps) {
               openPreview(parent.name, parent.children.length > 0)
             }
             onDelete={() =>
-              setConfirmDelete({ id: parent.id, name: parent.name })
+              setConfirmDelete({
+                id: parent.id,
+                name: parent.name,
+                transactionCount: parent.transactionCount,
+                childCount: parent.children.length,
+              })
             }
           />
           {parent.children.length > 0 && (
@@ -111,7 +118,12 @@ export function CategoryOverviewTree({ tree }: CategoryOverviewTreeProps) {
                     onRename={(name) => rename(child.id, name)}
                     onPreview={() => openPreview(child.name, false)}
                     onDelete={() =>
-                      setConfirmDelete({ id: child.id, name: child.name })
+                      setConfirmDelete({
+                        id: child.id,
+                        name: child.name,
+                        transactionCount: child.transactionCount,
+                        childCount: 0,
+                      })
                     }
                   />
                 </li>
@@ -129,8 +141,24 @@ export function CategoryOverviewTree({ tree }: CategoryOverviewTreeProps) {
           <DialogHeader>
             <DialogTitle>Supprimer « {confirmDelete?.name} » ?</DialogTitle>
             <DialogDescription>
-              Cette action est irréversible. La suppression sera bloquée si des
-              sous-catégories ou des transactions y sont encore rattachées.
+              Cette action est irréversible.
+              {confirmDelete && confirmDelete.childCount > 0 && (
+                <>
+                  {" "}
+                  {confirmDelete.childCount} sous-catégorie(s) seront aussi
+                  supprimée(s).
+                </>
+              )}
+              {confirmDelete && confirmDelete.transactionCount > 0 && (
+                <>
+                  {" "}
+                  {confirmDelete.transactionCount} transaction(s)
+                  {confirmDelete.childCount > 0
+                    ? " (y compris dans les sous-catégories)"
+                    : ""}{" "}
+                  deviendront non-catégorisées.
+                </>
+              )}
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end gap-2">
