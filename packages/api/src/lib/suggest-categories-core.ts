@@ -221,9 +221,12 @@ async function fetchExistingWithManualCounts(
 // transactions concernées (aucune manuelle par construction du plan), puis
 // suppression cascade enfants-avant-parents (contrainte de clé étrangère
 // categories.parent_id -> categories.id). `existing` doit être le snapshot
-// pré-upsert : les catégories à supprimer sont par construction absentes de
-// la proposition, donc jamais reparentées par l'upsert, leur parentId reste
-// fiable à ce stade.
+// post-upsert : une catégorie gardée/reparentée a donc déjà quitté le
+// parent sur le point d'être supprimé (sinon la suppression violerait la
+// FK, ce parent étant encore référencé). Une catégorie à supprimer est par
+// construction absente de la proposition, donc jamais touchée par
+// l'upsert — récupérer le snapshot après l'upsert garantit qu'aucune ligne
+// vivante ne pointe plus vers elle.
 async function deleteCategoriesInPlan(
   tx: DbOrTx,
   existing: ExistingCategoryForReplace[],
@@ -289,14 +292,6 @@ export async function applySuggestionsCore(
     let categoriesDeleted = 0;
     let categoriesKept = 0;
 
-    if (mode === "replace") {
-      const existing = await fetchExistingWithManualCounts(tx);
-      const plan = computeReplacePlan(existing, proposedNames);
-      categoriesKept = plan.namesKept.length;
-      categoriesDeleted = plan.idsToDelete.length;
-      await deleteCategoriesInPlan(tx, existing, plan);
-    }
-
     for (const { parent, enfants } of suggestions) {
       const parentId = await upsertCategory(
         tx,
@@ -307,6 +302,14 @@ export async function applySuggestionsCore(
       for (const enfant of enfants) {
         await upsertCategory(tx, enfant.name, parentId, mode === "replace");
       }
+    }
+
+    if (mode === "replace") {
+      const existing = await fetchExistingWithManualCounts(tx);
+      const plan = computeReplacePlan(existing, proposedNames);
+      categoriesKept = plan.namesKept.length;
+      categoriesDeleted = plan.idsToDelete.length;
+      await deleteCategoriesInPlan(tx, existing, plan);
     }
 
     const after = await tx.select({ id: categories.id }).from(categories);
