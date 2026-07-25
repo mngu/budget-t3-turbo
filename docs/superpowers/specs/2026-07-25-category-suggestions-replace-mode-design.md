@@ -25,13 +25,13 @@ Décocher une sous-catégorie proposée a un sens différent selon le mode : en 
 
 ## Prévisualisation avant confirmation
 
-La dialog de confirmation en mode Remplacer affiche un diff concret plutôt qu'un texte générique, calculé côté client à partir de données déjà chargées sur la page :
+La dialog de confirmation en mode Remplacer affiche un diff concret plutôt qu'un texte générique :
 
 - Catégories qui seront **supprimées** (nom listé).
 - Catégories **conservées malgré tout** car elles contiennent des corrections manuelles (nom listé).
 - Nombre de catégories **créées** vs **réutilisées**.
 
-Pour ça, `categoriesRouter.overview` gagne un champ `manualTransactionCount` par catégorie (à côté du `transactionCount` déjà présent — un `count()` conditionnel de plus dans la même requête groupée, pas de nouvel endpoint). Le diff est ensuite un simple calcul client : comparer les noms de l'arborescence cochée à l'`overview` déjà en mémoire.
+Le diff vient d'une query tRPC dédiée en lecture seule, `categoriesRouter.suggestions.previewReplace`, qui appelle exactement la même fonction pure que l'application réelle (`computeReplacePlan`, voir plus bas) — le frontend n'a donc aucune logique de décision à dupliquer, il affiche tel quel ce que le serveur répond. Cette query se déclenche à l'ouverture de la dialog de confirmation (pas à chaque frappe pendant l'édition de l'arbre).
 
 Le bouton de confirmation en mode Remplacer utilise un style destructif (cohérent avec la suppression de catégorie existante, `category-overview-tree.tsx`), au lieu du style neutre actuel. Le toast final rapporte les chiffres réellement exécutés (créées / réutilisées / supprimées / conservées), pas seulement `categoriesCreated` comme aujourd'hui.
 
@@ -39,13 +39,15 @@ Le bouton de confirmation en mode Remplacer utilise un style destructif (cohére
 
 Enveloppée dans une transaction DB (`db.transaction`) pour rester atomique sur la partie catégories :
 
-1. Reset des transactions `categorySource = 'llm'` → `categoryId = null`, `categorySource = null` (comme aujourd'hui, jamais les `manual`).
-2. Calcul de la liste des catégories à supprimer : absentes de la sélection cochée **et** sans transaction manuelle rattachée — calcul remonté (bottom-up) : si un enfant est protégé par une transaction manuelle, son parent est protégé aussi (sinon la suppression du parent violerait la contrainte de clé étrangère sur l'enfant conservé).
+1. Upsert de l'arborescence cochée : création des catégories absentes, mise à jour du `parentId` pour celles qui existent déjà par nom (vraie restructuration).
+2. Calcul de la liste des catégories à supprimer, **après** l'étape 1 : absentes de la sélection cochée **et** sans transaction manuelle rattachée — calcul remonté (bottom-up) : si un enfant est protégé par une transaction manuelle, son parent est protégé aussi (sinon la suppression du parent violerait la contrainte de clé étrangère sur l'enfant conservé).
 3. Suppression cascade de cette liste (enfants avant parents, même ordre que `categoriesRouter.remove`).
-4. Upsert de l'arborescence cochée : création des catégories absentes, mise à jour du `parentId` pour celles qui existent déjà par nom.
+4. Reset des transactions `categorySource = 'llm'` → `categoryId = null`, `categorySource = null` (comme aujourd'hui, jamais les `manual`).
 5. Relance de la catégorisation (`runCategorize`) — conserve son `try/catch` actuel, non bloquant, comportement inchangé.
 
-Le mode Fusion n'est pas concerné par les étapes 2-3 (pas de suppression) ni par la mise à jour de `parentId` en étape 4 (upsert reste `onConflictDoNothing` pur, comportement actuel).
+L'étape de suppression (2-3) doit impérativement passer **après** l'upsert (1), pas avant : une catégorie conservée mais reparentée par la proposition pointe encore, en base, vers son ancien parent tant que l'upsert n'a pas tourné — supprimer cet ancien parent avant de l'avoir fait violerait la contrainte de clé étrangère `categories.parent_id -> categories.id`. (Une première version de ce design avait cet ordre inversé ; détecté et corrigé pendant l'implémentation.)
+
+Le mode Fusion n'est pas concerné par les étapes 2-3 (pas de suppression) ni par la mise à jour de `parentId` en étape 1 (upsert reste `onConflictDoNothing` pur, comportement actuel).
 
 ## Cas limites
 
@@ -67,4 +69,3 @@ Le mode Fusion n'est pas concerné par les étapes 2-3 (pas de suppression) ni p
 
 - Fusion du contenu de deux catégories convergeant vers un même nom (cf. cas limite ci-dessus) — seules les corrections manuelles sont protégées, pas migrées.
 - Renommage automatique d'une catégorie existante par le LLM (ex. suggérer que "Alimentation" devienne "Courses & Alimentation") — le matching reste par nom exact ; un renommage se ferait via le mutation `rename` existant, séparément.
-- Dry-run/preview côté serveur : le diff de la dialog de confirmation est calculé côté client à partir de l'`overview` déjà en mémoire, pas d'appel réseau dédié.
