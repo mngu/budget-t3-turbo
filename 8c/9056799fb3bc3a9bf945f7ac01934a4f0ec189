@@ -1,0 +1,45 @@
+packages/api/src/lib/suggest-categories-core.ts
+  s_c9d1110a218fe9::t_dc0114bc2e8adb 8-12
+  s_c9d1110a218fe9::t_fec36accc27b46 345,351
+  s_c9d1110a218fe9::t_1001f703028ecf 18-21,27
+  s_c9d1110a218fe9::t_c7f6e5c145bdc9 111-112
+  s_c9d1110a218fe9::t_c5624b05336d56 199-207,213,217,223-227,233-243
+  s_c9d1110a218fe9::t_a71d439cbd7281 75-78,90-92,98-110,113-115,126,134
+apps/tanstack-start/src/component/category-suggestions.tsx
+  s_c9d1110a218fe9::t_eb656567f3fafc 260
+  s_c9d1110a218fe9::t_bc7d75ba15595a 180,202-203,222-223
+  s_c9d1110a218fe9::t_e97c5def09736d 63
+packages/api/src/lib/suggest-categories-schema.ts
+  s_c9d1110a218fe9::t_e538ca210fba1c 4-5,16-21,29-44
+  s_c9d1110a218fe9::t_bc7d75ba15595a 50
+packages/validators/src/index.ts
+  s_c9d1110a218fe9::t_8e2ce9c0d69c0a 6-22,26
+  s_c9d1110a218fe9::t_14b236bc5817bb 23-25
+packages/api/src/lib/suggest-categories-core.test.ts
+  s_c9d1110a218fe9::t_bb2ade3cd25e1b 55-65,67-71,75,78-84,87-89,93
+  s_c9d1110a218fe9::t_756b6faf224504 3-4,13-14
+  s_c9d1110a218fe9::t_bc7d75ba15595a 6,66
+  s_c9d1110a218fe9::t_2208fd2b7a5ce7 72-74,76-77,85-86,90-92
+packages/api/src/lib/category-replace-plan.test.ts
+  s_c9d1110a218fe9::t_5823211e1d2379 78-90
+  s_c9d1110a218fe9::t_bc7d75ba15595a 4-7,14-19,39-42,93-99
+apps/tanstack-start/src/component/category-tree.tsx
+  s_c9d1110a218fe9::t_c4bf9dc739bf91 111,125,131
+  s_c9d1110a218fe9::t_abf22a5298a8e1 9,21-25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "8c9056799fb3bc3a9bf945f7ac01934a4f0ec189",
+  "prompts": {},
+  "sessions": {
+    "s_c9d1110a218fe9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4311727b-af41-4ef3-90b1-3a96695f8169",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
