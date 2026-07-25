@@ -55,6 +55,7 @@
     "@types/react": "catalog:react19",
     "@types/react-dom": "catalog:react19",
     "@vitejs/plugin-react": "catalog:",
+    "code-inspector-plugin": "^2.0.5",
     "eslint": "catalog:",
     "prettier": "catalog:",
     "tailwindcss": "catalog:",
