@@ -70,14 +70,23 @@ describe("buildUserMessage", () => {
 });
 
 describe("buildCategorizationOutputSchema", () => {
-  it("accepte une catégorie valide et rejette une inconnue", () => {
-    const schema = buildCategorizationOutputSchema(CATEGORY_NAMES);
+  it("valide la forme (id + categorie) sans imposer l'énumération des catégories connues", () => {
+    // Le filtrage des catégories inconnues (ex. si le LLM invente ou répète
+    // un nom de catégorie qui n'existe plus après un remplacement) est
+    // délégué à filterValidResults, pas au schéma — un z.enum() ici ferait
+    // planter le parsing structured-output de tout le lot au lieu d'ignorer
+    // juste la transaction concernée (voir filterValidResults ci-dessous).
+    const schema = buildCategorizationOutputSchema();
     expect(
       schema.safeParse({ resultats: [{ id: 1, categorie: "Alimentation" }] })
         .success,
     ).toBe(true);
     expect(
       schema.safeParse({ resultats: [{ id: 1, categorie: "Cryptomonnaie" }] })
+        .success,
+    ).toBe(true);
+    expect(
+      schema.safeParse({ resultats: [{ id: "1", categorie: "Alimentation" }] })
         .success,
     ).toBe(false);
   });

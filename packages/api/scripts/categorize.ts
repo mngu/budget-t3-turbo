@@ -50,8 +50,7 @@ export async function main(): Promise<void> {
   const categoryNames = categoryRows.map((c) => c.name);
   const categoryIdByName = new Map(categoryRows.map((c) => [c.name, c.id]));
   const systemPrompt = buildSystemPrompt(categoryNames);
-  const categorizationOutputSchema =
-    buildCategorizationOutputSchema(categoryNames);
+  const categorizationOutputSchema = buildCategorizationOutputSchema();
 
   const rows: TxnForLlm[] = await db
     .select({

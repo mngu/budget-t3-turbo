@@ -80,12 +80,19 @@ export function buildFewShotUserMessage(
     .join("\n\n---\n\n");
 }
 
-export function buildCategorizationOutputSchema(categoryNames: string[]) {
+// Ne valide que la forme (id + categorie en chaîne) : un z.enum(categoryNames)
+// ferait planter le parsing structured-output de tout le lot dès qu'une
+// réponse cite une catégorie hors liste (ex. une catégorie mentionnée dans le
+// prompt métier — « Autres », « Apport Alex » — qui n'existe plus après un
+// remplacement d'arborescence), au lieu d'ignorer juste cette transaction.
+// Le filtrage réel se fait dans filterValidResults, après un parsing qui ne
+// peut plus échouer pour cette raison.
+export function buildCategorizationOutputSchema() {
   return z.object({
     resultats: z.array(
       z.object({
         id: z.number().int(),
-        categorie: z.enum(categoryNames as [string, ...string[]]),
+        categorie: z.string(),
       }),
     ),
   });
