@@ -7,6 +7,7 @@ import { categories, transactions } from "@budget/db/schema";
 import {
   applySuggestionsCore,
   generateSuggestionsCore,
+  previewReplaceCore,
   suggestionsStatusCore,
 } from "../lib/suggest-categories-core";
 import { categorySuggestionSchema } from "../lib/suggest-categories-schema";
@@ -192,9 +193,25 @@ export const categoriesRouter = {
     // Existence/âge de la dernière analyse + nombre de transactions arrivées depuis.
     status: protectedProcedure.query(() => suggestionsStatusCore()),
 
-    // Crée les catégories/sous-catégories validées et relance la catégorisation.
-    apply: protectedProcedure
+    // Aperçu en lecture seule de ce que ferait le mode "replace" : quelles
+    // catégories existantes seraient supprimées vs conservées (corrections
+    // manuelles). Utilisé par la dialog de confirmation côté UI.
+    previewReplace: protectedProcedure
       .input(z.object({ suggestions: z.array(categorySuggestionSchema) }))
-      .mutation(({ input }) => applySuggestionsCore(input.suggestions)),
+      .query(({ input }) => previewReplaceCore(input.suggestions)),
+
+    // Crée les catégories/sous-catégories validées et relance la
+    // catégorisation. mode "merge" (défaut) additif, "replace" fait de la
+    // sélection cochée la nouvelle vérité (voir applySuggestionsCore).
+    apply: protectedProcedure
+      .input(
+        z.object({
+          suggestions: z.array(categorySuggestionSchema),
+          mode: z.enum(["merge", "replace"]).default("merge"),
+        }),
+      )
+      .mutation(({ input }) =>
+        applySuggestionsCore(input.suggestions, input.mode),
+      ),
   },
 } satisfies TRPCRouterRecord;

@@ -43,6 +43,7 @@ export type {
   CategorySuggestion,
   CategorySuggestionChild,
 } from "./lib/suggest-categories-schema";
+export type { ReplacePlan } from "./lib/category-replace-plan";
 export type {
   SuggestionsRun,
   SuggestionsStatus,
