@@ -98,8 +98,10 @@ export const transactions = pgTable(
     bankCode: text("bank_code"),
     mcc: text("mcc"),
     categoryId: integer("category_id").references(() => categories.id),
-    // 'manual' (future UI de correction) ne doit jamais être écrasé par un re-run LLM.
-    categorySource: text("category_source", { enum: ["llm", "manual"] }),
+    // 'manual' : corrigé par l'utilisateur — jamais écrasé.
+    // 'auto'   : court-circuit déterministe (≥2 similaires même contrepartie).
+    // 'llm'    : catégorisé par le LLM (few-shot ou générique).
+    categorySource: text("category_source", { enum: ["llm", "manual", "auto"] }),
     raw: jsonb("raw").notNull(),
     importedAt: timestamp("imported_at", { withTimezone: true })
       .notNull()

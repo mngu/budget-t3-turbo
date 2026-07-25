@@ -21,6 +21,7 @@ import {
   chunkTransactions,
   FEW_SHOT_BATCH_SIZE,
   filterValidResults,
+  resolveShortcut,
 } from "./categorize-core";
 
 // tsx ne charge pas .env tout seul (même logique que src/db/client.ts).
@@ -97,6 +98,37 @@ export async function main(): Promise<CategorizeResult> {
           batch.map(async (txn) => [txn.id, await findSimilar(txn)] as const),
         ),
       );
+
+      // Court-circuit déterministe : applique directement la catégorie
+      // si ≥2 similaires partagent la même contrepartie et catégorie.
+      for (const txn of batch) {
+        const similars = similarsByTxnId.get(txn.id) ?? [];
+        const shortcut = resolveShortcut(similars);
+        if (shortcut !== null) {
+          const categoryId = categoryIdByName.get(shortcut);
+          if (categoryId !== undefined) {
+            await db
+              .update(transactions)
+              .set({ categoryId, categorySource: "auto" as const })
+              .where(
+                and(eq(transactions.id, txn.id), isNull(transactions.categoryId)),
+              );
+            categorized++;
+          }
+        }
+      }
+
+      // On ne soumet au LLM que les transactions sans match fort.
+      const llmBatch = batch.filter((txn) => {
+        const similars = similarsByTxnId.get(txn.id) ?? [];
+        return resolveShortcut(similars) === null;
+      });
+
+      if (llmBatch.length === 0) {
+        console.log(`   ${categorized}/${rows.length} (déterministe)…`);
+        continue;
+      }
+
       const response = await client.messages.parse({
         model: "claude-haiku-4-5",
         max_tokens: 8192,
@@ -104,7 +136,7 @@ export async function main(): Promise<CategorizeResult> {
         messages: [
           {
             role: "user",
-            content: buildFewShotUserMessage(batch, similarsByTxnId),
+            content: buildFewShotUserMessage(llmBatch, similarsByTxnId),
           },
         ],
         output_config: { format: zodOutputFormat(categorizationOutputSchema) },
@@ -117,7 +149,7 @@ export async function main(): Promise<CategorizeResult> {
         continue;
       }
 
-      const batchIds = new Set(batch.map((t) => t.id));
+      const batchIds = new Set(llmBatch.map((t) => t.id));
       const valid = filterValidResults(
         response.parsed_output.resultats,
         batchIds,

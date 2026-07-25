@@ -98,6 +98,30 @@ export function buildCategorizationOutputSchema() {
   });
 }
 
+// Court-circuit déterministe : si au moins 2 transactions similaires partagent
+// la même contrepartie ET la même catégorie, on peut appliquer directement
+// sans appeler le LLM. Retourne le nom de la catégorie ou null.
+export function resolveShortcut(
+  similars: SimilarTxn[],
+): string | null {
+  const byCounterparty = new Map<string, Map<string, number>>();
+  for (const s of similars) {
+    if (!s.counterparty) continue;
+    let catCounts = byCounterparty.get(s.counterparty);
+    if (!catCounts) {
+      catCounts = new Map();
+      byCounterparty.set(s.counterparty, catCounts);
+    }
+    catCounts.set(s.categoryName, (catCounts.get(s.categoryName) ?? 0) + 1);
+  }
+  for (const [, catCounts] of byCounterparty) {
+    for (const [catName, count] of catCounts) {
+      if (count >= 2) return catName;
+    }
+  }
+  return null;
+}
+
 // Défense en profondeur derrière les structured outputs : ids hors lot ou
 // catégories hors liste connue sont ignorés plutôt que de corrompre la base.
 export function filterValidResults(
