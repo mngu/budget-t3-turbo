@@ -1,0 +1,22 @@
+docs/superpowers/plans/2026-07-25-category-suggestions-replace-mode.md
+  s_c9d1110a218fe9::t_0a2966062b32c9 326-334
+  s_c9d1110a218fe9::t_5d8a90d060b5c8 943
+  s_c9d1110a218fe9::t_0524884eacda51 461-476
+  s_c9d1110a218fe9::t_7782b7d3974552 477-478
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "4f4dd079e5e92429434a070cbd643c4d6f79adcc",
+  "prompts": {},
+  "sessions": {
+    "s_c9d1110a218fe9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4311727b-af41-4ef3-90b1-3a96695f8169",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
