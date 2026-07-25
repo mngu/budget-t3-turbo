@@ -1,0 +1,30 @@
+apps/tanstack-start/src/component/category-overview-tree.tsx
+  s_d7d368851e0641::t_5ba32cd5f2a50c 104-109
+  s_d7d368851e0641::t_57c367c7b2a589 144-161
+  s_d7d368851e0641::t_df1a04da257990 121-126
+  s_d7d368851e0641::t_09c4229e6bbe2d 38-39
+packages/api/src/router/categories.ts
+  s_d7d368851e0641::t_4f03adf1f3759b 4
+  s_d7d368851e0641::t_88fa40ee667270 159-163,167-171,173-183
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "fca0fdd5d070f6d3578f498c1e0a35691c9a432b",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_d7d368851e0641": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3923ba0a-54bd-45ec-a6d1-4b6b2824269b",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
