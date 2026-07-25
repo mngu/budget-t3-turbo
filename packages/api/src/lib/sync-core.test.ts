@@ -24,7 +24,7 @@ describe("performSync", () => {
   it("appelle sync, import puis categorize dans l'ordre en cas de succès", async () => {
     syncMock.mockResolvedValue({ expired: [], rateLimited: [] });
     runImportMock.mockResolvedValue(false);
-    runCategorizeMock.mockResolvedValue(undefined);
+    runCategorizeMock.mockResolvedValue({ categorized: 0, remaining: 0 });
 
     await performSync();
 
@@ -36,7 +36,7 @@ describe("performSync", () => {
   it("transmet les PSU headers à syncBanks (accès « PSU présent »)", async () => {
     syncMock.mockResolvedValue({ expired: [], rateLimited: [] });
     runImportMock.mockResolvedValue(false);
-    runCategorizeMock.mockResolvedValue(undefined);
+    runCategorizeMock.mockResolvedValue({ categorized: 0, remaining: 0 });
 
     const psuHeaders = {
       "Psu-Ip-Address": "203.0.113.7",
@@ -53,7 +53,7 @@ describe("performSync", () => {
       rateLimited: ["Société Générale"],
     });
     runImportMock.mockResolvedValue(false);
-    runCategorizeMock.mockResolvedValue(undefined);
+    runCategorizeMock.mockResolvedValue({ categorized: 0, remaining: 0 });
 
     await expect(performSync()).resolves.toEqual({
       expired: ["Revolut"],
@@ -78,7 +78,7 @@ describe("performSync", () => {
     );
 
     runImportMock.mockResolvedValue(false);
-    runCategorizeMock.mockResolvedValue(undefined);
+    runCategorizeMock.mockResolvedValue({ categorized: 0, remaining: 0 });
     resolveSync({ expired: [], rateLimited: [] });
     await first;
   });
@@ -89,7 +89,7 @@ describe("performSync", () => {
 
     syncMock.mockResolvedValue({ expired: [], rateLimited: [] });
     runImportMock.mockResolvedValue(false);
-    runCategorizeMock.mockResolvedValue(undefined);
+    runCategorizeMock.mockResolvedValue({ categorized: 0, remaining: 0 });
     await expect(performSync()).resolves.toEqual({
       expired: [],
       rateLimited: [],

@@ -4,6 +4,7 @@ import { z } from "zod/v4";
 import { count, eq, inArray, isNull } from "@budget/db";
 import { categories, transactions } from "@budget/db/schema";
 
+import { categorizeUncategorizedCore } from "../lib/categorize-uncategorized-core";
 import {
   applySuggestionsCore,
   generateSuggestionsCore,
@@ -133,6 +134,11 @@ export const categoriesRouter = {
       return { tree, uncategorizedCount: uncategorized?.total ?? 0 };
     },
   ),
+
+  // Catégorise les transactions sans catégorie avec les catégories déjà
+  // existantes (pas de proposition de nouvelle arborescence, voir
+  // suggestions.generate pour ça) — équivalent UI de `pnpm categorize`.
+  categorize: protectedProcedure.mutation(() => categorizeUncategorizedCore()),
 
   // Renomme une catégorie existante (nom seul — pas de couleur dans cette passe).
   rename: protectedProcedure

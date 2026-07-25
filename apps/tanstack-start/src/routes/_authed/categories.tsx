@@ -26,6 +26,7 @@ function CategoriesPage() {
   const router = useRouter();
   const trpcClient = useTRPCClient();
   const [generating, setGenerating] = useState(false);
+  const [categorizing, setCategorizing] = useState(false);
 
   const generate = async () => {
     setGenerating(true);
@@ -38,6 +39,25 @@ function CategoriesPage() {
       );
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const categorize = async () => {
+    setCategorizing(true);
+    try {
+      const result = await trpcClient.categories.categorize.mutate();
+      await router.invalidate();
+      toast.success(
+        result.remaining > 0
+          ? `${result.categorized} transaction(s) catégorisée(s), ${result.remaining} restante(s).`
+          : `${result.categorized} transaction(s) catégorisée(s) — tout est catégorisé.`,
+      );
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Échec de la catégorisation.",
+      );
+    } finally {
+      setCategorizing(false);
     }
   };
 
@@ -68,8 +88,19 @@ function CategoriesPage() {
       </div>
 
       {overview.uncategorizedCount > 0 ? (
-        <div className="rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
-          {overview.uncategorizedCount} transaction(s) sans catégorie.
+        <div className="flex items-center justify-between gap-2 rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
+          <span>
+            {overview.uncategorizedCount} transaction(s) sans catégorie.
+          </span>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={categorize}
+            disabled={categorizing}
+          >
+            {categorizing && <Loader2Icon className="animate-spin" />}
+            Catégoriser
+          </Button>
         </div>
       ) : (
         <div className="rounded-lg border border-emerald-500/50 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-700 dark:text-emerald-400">

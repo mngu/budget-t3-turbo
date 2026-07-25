@@ -32,12 +32,25 @@ if (!process.env.ANTHROPIC_API_KEY) {
   }
 }
 
-export async function main(): Promise<void> {
+export interface CategorizeResult {
+  categorized: number;
+  remaining: number;
+}
+
+async function remainingUncategorizedCount(): Promise<number> {
+  const [row] = await db
+    .select({ remaining: count() })
+    .from(transactions)
+    .where(isNull(transactions.categoryId));
+  return row?.remaining ?? 0;
+}
+
+export async function main(): Promise<CategorizeResult> {
   if (!process.env.ANTHROPIC_API_KEY) {
     console.warn(
       "⚠️  ANTHROPIC_API_KEY absente (.env) — catégorisation sautée.",
     );
-    return;
+    return { categorized: 0, remaining: await remainingUncategorizedCount() };
   }
 
   const categoryRows = await db
@@ -45,7 +58,7 @@ export async function main(): Promise<void> {
     .from(categories);
   if (categoryRows.length === 0) {
     console.warn("⚠️  Table categories vide — catégorisation sautée.");
-    return;
+    return { categorized: 0, remaining: await remainingUncategorizedCount() };
   }
   const categoryNames = categoryRows.map((c) => c.name);
   const categoryIdByName = new Map(categoryRows.map((c) => [c.name, c.id]));
@@ -70,7 +83,7 @@ export async function main(): Promise<void> {
 
   if (rows.length === 0) {
     console.log("✅ Rien à catégoriser.");
-    return;
+    return { categorized: 0, remaining: 0 };
   }
   console.log(`🏷️  ${rows.length} transactions à catégoriser…`);
 
@@ -133,13 +146,9 @@ export async function main(): Promise<void> {
     }
   }
 
-  const [row] = await db
-    .select({ remaining: count() })
-    .from(transactions)
-    .where(isNull(transactions.categoryId));
-  console.log(
-    `✅ ${categorized} catégorisées, ${row?.remaining ?? 0} restantes.`,
-  );
+  const remaining = await remainingUncategorizedCount();
+  console.log(`✅ ${categorized} catégorisées, ${remaining} restantes.`);
+  return { categorized, remaining };
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
