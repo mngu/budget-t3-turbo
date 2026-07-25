@@ -323,10 +323,15 @@ async function fetchExistingWithManualCounts(
 // Exécute la suppression décidée par computeReplacePlan : reset des
 // transactions concernées (aucune manuelle par construction du plan), puis
 // suppression cascade enfants-avant-parents (contrainte de clé étrangère
-// categories.parent_id -> categories.id). `existing` doit être le snapshot
-// pré-upsert : les catégories à supprimer sont par construction absentes de
-// la proposition, donc jamais reparentées par l'upsert, leur parentId reste
-// fiable à ce stade.
+// categories.parent_id -> categories.id). `existing` doit être un snapshot
+// pris APRÈS la boucle d'upsert (voir applySuggestionsCore) : une catégorie
+// à supprimer est par construction absente de la proposition, donc jamais
+// reparentée par l'upsert — mais une catégorie CONSERVÉE peut, elle, avoir
+// été reparentée loin d'un parent sur le point d'être supprimé. Si on
+// supprimait avant l'upsert, ce parent aurait encore des enfants pointant
+// vers lui en base au moment du DELETE -> violation de la contrainte de clé
+// étrangère. Snapshotter après l'upsert garantit qu'aucune catégorie
+// conservée ne référence plus une catégorie sur le point d'être supprimée.
 async function deleteCategoriesInPlan(
   tx: DbOrTx,
   existing: ExistingCategoryForReplace[],
@@ -441,17 +446,6 @@ export async function applySuggestionsCore(
     const before = await tx.select({ id: categories.id }).from(categories);
     const beforeIds = new Set(before.map((c) => c.id));
 
-    let categoriesDeleted = 0;
-    let categoriesKept = 0;
-
-    if (mode === "replace") {
-      const existing = await fetchExistingWithManualCounts(tx);
-      const plan = computeReplacePlan(existing, proposedNames);
-      categoriesKept = plan.namesKept.length;
-      categoriesDeleted = plan.idsToDelete.length;
-      await deleteCategoriesInPlan(tx, existing, plan);
-    }
-
     for (const { parent, enfants } of suggestions) {
       const parentId = await upsertCategory(
         tx,
@@ -462,6 +456,24 @@ export async function applySuggestionsCore(
       for (const enfant of enfants) {
         await upsertCategory(tx, enfant.name, parentId, mode === "replace");
       }
+    }
+
+    let categoriesDeleted = 0;
+    let categoriesKept = 0;
+
+    // Snapshot et suppression APRÈS la boucle d'upsert ci-dessus : toute
+    // catégorie conservée/reparentée par la proposition a déjà migré vers
+    // son nouveau parent, donc plus aucune catégorie vivante ne référence
+    // encore une catégorie sur le point d'être supprimée (contrainte de clé
+    // étrangère categories.parent_id -> categories.id) — voir le
+    // commentaire de deleteCategoriesInPlan pour le détail du scénario que
+    // ça évite.
+    if (mode === "replace") {
+      const existing = await fetchExistingWithManualCounts(tx);
+      const plan = computeReplacePlan(existing, proposedNames);
+      categoriesKept = plan.namesKept.length;
+      categoriesDeleted = plan.idsToDelete.length;
+      await deleteCategoriesInPlan(tx, existing, plan);
     }
 
     const after = await tx.select({ id: categories.id }).from(categories);
@@ -928,3 +940,4 @@ git commit -m "feat(tanstack-start): add replace mode toggle with server-compute
 - **Spec coverage :** mode fusion/remplacement (Task 2-3), reparentage des catégories existantes matchées (Task 2, `reparentIfExists`), protection bottom-up des transactions manuelles (Task 1, `computeReplacePlan`), aperçu du diff avant confirmation (Task 3-4, `previewReplace` — désormais calculé une seule fois côté serveur, jamais dupliqué côté client), style destructif + toast détaillé (Task 4), transaction DB atomique (Task 2, `db.transaction`), tests `computeReplacePlan`/`flattenProposedNames` (Task 1) — tous les points du spec du 2026-07-25 sont couverts. Le cas limite "deux catégories convergent vers un même nom" et le hors-scope "renommage automatique par le LLM" restent volontairement non gérés, comme documenté dans le spec.
 - **Simplifications appliquées suite à revue** (par rapport à une première esquisse de ce plan) : (1) suppression de la duplication client/serveur de l'algorithme de décision — le frontend appelle désormais une query `previewReplace` au lieu de recalculer localement, ce qui a aussi rendu inutile l'extension de `categories.overview` et le passage d'une prop `overviewTree` à travers la route (une tâche entière en moins) ; (2) `applySuggestionsCore` découpé en petites fonctions nommées (`fetchExistingWithManualCounts`, `deleteCategoriesInPlan`) au lieu d'un seul bloc de ~80 lignes, réutilisées telles quelles par `previewReplaceCore`.
 - **Type consistency :** `ApplyMode`, `ApplySuggestionsResult`, `ExistingCategoryForReplace`, `ReplacePlan`, `computeReplacePlan`, `flattenProposedNames` utilisés à l'identique entre Task 1/2/3/4 — un seul jeu de types, une seule implémentation, pas de nom parallèle à surveiller côté frontend.
+- **Correction post-implémentation (Task 2) :** la première version de ce plan plaçait le calcul du plan + la suppression AVANT la boucle d'upsert. L'implémenteur de la Task 2 a détecté que cet ordre peut violer la contrainte de clé étrangère `categories.parent_id -> categories.id` : une catégorie conservée mais reparentée par la proposition pointe encore, en base, vers son ancien parent au moment où celui-ci est supprimé (l'upsert qui la reparente n'a pas encore tourné). Corrigé en déplaçant le bloc `if (mode === "replace")` (snapshot + `computeReplacePlan` + `deleteCategoriesInPlan`) après la boucle d'upsert — voir le code ci-dessus (Task 2, Step 2-3), déjà à jour.
