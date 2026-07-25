@@ -1,0 +1,28 @@
+apps/tanstack-start/vite.config.ts
+  h_baa52ab231f280 4,27-29
+apps/tanstack-start/package.json
+  s_c9d1110a218fe9::t_972e2098d0b833 58
+pnpm-lock.yaml
+  s_c9d1110a218fe9::t_ab5d66fc8a5119 388-390,1365-1393,4291-4293,4571-4574,4680-4682,6734-6736,7313-7315,7343-7345,7726-7729,10460-10530,11304,12341,13722,13931-13932,14087,14295-14299,14448-14464,15369,15463,15521,15668,16779-16783,17430,17677-17679,17707-17711,18181-18187
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "a588ea394b481d877936e55402d54db830cabf90",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_c9d1110a218fe9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4311727b-af41-4ef3-90b1-3a96695f8169",
+        "model": "unknown"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
