@@ -6,8 +6,10 @@ import { Button } from "@budget/ui/button";
 import { toast } from "@budget/ui/toast";
 
 import type { ReadyStatus } from "~/component/category-suggestions";
+import type { PreviewableTransaction } from "~/component/transaction-preview-drawer";
 import { CategoryOverviewTree } from "~/component/category-overview-tree";
 import { SuggestionsWorkspace } from "~/component/category-suggestions";
+import { TransactionPreviewDrawer } from "~/component/transaction-preview-drawer";
 import { useTRPCClient } from "~/lib/trpc";
 
 export const Route = createFileRoute("/_authed/categories")({
@@ -27,6 +29,9 @@ function CategoriesPage() {
   const trpcClient = useTRPCClient();
   const [generating, setGenerating] = useState(false);
   const [categorizing, setCategorizing] = useState(false);
+  const [uncategorizedPreview, setUncategorizedPreview] = useState<
+    PreviewableTransaction[] | null
+  >(null);
 
   const generate = async () => {
     setGenerating(true);
@@ -61,6 +66,16 @@ function CategoriesPage() {
     }
   };
 
+  const openUncategorizedPreview = async () => {
+    const result = await trpcClient.transactions.list.query({
+      page: 1,
+      sort: "date",
+      order: "desc",
+      category: "none",
+    });
+    setUncategorizedPreview(result.rows);
+  };
+
   const ready: ReadyStatus | null =
     status.exists && status.suggestions && status.sample && status.generatedAt
       ? {
@@ -89,9 +104,13 @@ function CategoriesPage() {
 
       {overview.uncategorizedCount > 0 ? (
         <div className="flex items-center justify-between gap-2 rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
-          <span>
+          <button
+            type="button"
+            className="text-left hover:underline"
+            onClick={openUncategorizedPreview}
+          >
             {overview.uncategorizedCount} transaction(s) sans catégorie.
-          </span>
+          </button>
           <Button
             size="sm"
             variant="outline"
@@ -125,6 +144,18 @@ function CategoriesPage() {
       {!generating && ready && <SuggestionsWorkspace data={ready} />}
 
       <CategoryOverviewTree tree={overview.tree} />
+
+      <TransactionPreviewDrawer
+        open={uncategorizedPreview !== null}
+        onOpenChange={(open) => !open && setUncategorizedPreview(null)}
+        title="Transactions sans catégorie"
+        transactions={uncategorizedPreview ?? []}
+        description={
+          uncategorizedPreview
+            ? `${overview.uncategorizedCount} transaction(s) sans catégorie${overview.uncategorizedCount > uncategorizedPreview.length ? ` (${uncategorizedPreview.length} plus récentes)` : ""}.`
+            : undefined
+        }
+      />
     </main>
   );
 }
