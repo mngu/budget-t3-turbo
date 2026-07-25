@@ -6,6 +6,7 @@ import { cn } from "@budget/ui";
 import { Button } from "@budget/ui/button";
 import { Checkbox } from "@budget/ui/checkbox";
 import { Input } from "@budget/ui/input";
+import { FALLBACK_CATEGORY_COLOR } from "@budget/validators";
 
 export interface EditableChild {
   id: number;
@@ -17,6 +18,11 @@ export interface EditableChild {
 export interface EditableParent {
   id: number;
   name: string;
+  // Couleur proposée par le LLM (voir suggest-categories-core.ts), toujours
+  // un membre de CATEGORY_COLOR_HEXES pour une suggestion générée — lecture
+  // seule ici, pas de sélecteur pour la changer dans cette itération.
+  // FALLBACK_CATEGORY_COLOR pour une catégorie ajoutée manuellement.
+  color: string;
   children: EditableChild[];
 }
 
@@ -26,17 +32,6 @@ let nextEditableId = 0;
 export function newEditableId(): number {
   return nextEditableId++;
 }
-
-const PARENT_COLORS = [
-  "#6366f1",
-  "#16a34a",
-  "#f59e0b",
-  "#ec4899",
-  "#3b82f6",
-  "#10b981",
-  "#8b5cf6",
-  "#f97316",
-];
 
 interface CategoryTreeProps {
   parents: EditableParent[];
@@ -113,6 +108,7 @@ export function CategoryTree({
       {
         id: newEditableId(),
         name: "Nouvelle catégorie",
+        color: FALLBACK_CATEGORY_COLOR,
         children: [
           { id: newEditableId(), name: "", txnIds: [], enabled: true },
         ],
@@ -126,16 +122,13 @@ export function CategoryTree({
           Aucune catégorie proposée — ajoutez-en une manuellement ci-dessous.
         </p>
       )}
-      {parents.map((parent, parentIndex) => (
+      {parents.map((parent) => (
         <div key={parent.id} className="rounded-lg border p-3">
           <div className="flex items-center justify-between gap-2">
             <div className="flex flex-1 items-center gap-2">
               <span
                 className="size-2.5 shrink-0 rounded-full"
-                style={{
-                  backgroundColor:
-                    PARENT_COLORS[parentIndex % PARENT_COLORS.length],
-                }}
+                style={{ backgroundColor: parent.color }}
               />
               <Input
                 value={parent.name}

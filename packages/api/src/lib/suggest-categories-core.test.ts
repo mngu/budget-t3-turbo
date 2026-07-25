@@ -1,15 +1,17 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { CATEGORY_COLOR_HEXES } from "@budget/validators";
+
 import type { TxnForAnalysis } from "./suggest-categories-core";
+import type { RawCategorySuggestion } from "./suggest-categories-schema";
 
 // Mocks explicites : importer le vrai module chargerait src/db/client.ts
 // (POSTGRES_URL requise) et le SDK Anthropic — voir sync-core.test.ts.
 vi.mock("@budget/db/client", () => ({ db: {} }));
 vi.mock("../../scripts/categorize", () => ({ main: vi.fn() }));
 
-const { buildAnalysisPrompt, sampleWindowStart } = await import(
-  "./suggest-categories-core"
-);
+const { buildAnalysisPrompt, sampleWindowStart, sanitizeSuggestionColors } =
+  await import("./suggest-categories-core");
 
 const txn = (id: number): TxnForAnalysis => ({
   id,
@@ -49,5 +51,44 @@ describe("buildAnalysisPrompt", () => {
       "arborescence de catégories budgétaires à 2 niveaux",
     );
     expect(prompt).toContain('"txnIds"');
+  });
+
+  it("liste la palette de couleurs fermée pour parentColor", () => {
+    const prompt = buildAnalysisPrompt([txn(1)]);
+    expect(prompt).toContain('"parentColor"');
+    for (const hex of CATEGORY_COLOR_HEXES) {
+      expect(prompt).toContain(hex);
+    }
+  });
+});
+
+describe("sanitizeSuggestionColors", () => {
+  const rawSuggestion = (parentColor: string): RawCategorySuggestion => ({
+    parent: "Alimentation",
+    parentColor,
+    enfants: [{ name: "Courses", txnIds: [1] }],
+  });
+
+  const firstHex = CATEGORY_COLOR_HEXES[0] ?? "";
+  const secondHex = CATEGORY_COLOR_HEXES[1] ?? "";
+
+  it("garde une couleur déjà valide inchangée", () => {
+    const results = sanitizeSuggestionColors([rawSuggestion(firstHex)]);
+    expect(results[0]?.parentColor).toBe(firstHex);
+  });
+
+  it("remplace une couleur hors palette par un repli déterministe (cycle par index)", () => {
+    const results = sanitizeSuggestionColors([
+      rawSuggestion("#000000"),
+      rawSuggestion("#ffffff"),
+    ]);
+    expect(results[0]?.parentColor).toBe(firstHex);
+    expect(results[1]?.parentColor).toBe(secondHex);
+  });
+
+  it("préserve le reste de la suggestion (nom, enfants)", () => {
+    const results = sanitizeSuggestionColors([rawSuggestion("#000000")]);
+    expect(results[0]?.parent).toBe("Alimentation");
+    expect(results[0]?.enfants).toEqual([{ name: "Courses", txnIds: [1] }]);
   });
 });

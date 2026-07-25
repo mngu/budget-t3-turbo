@@ -60,6 +60,7 @@ export function SuggestionsWorkspace({ data }: { data: ReadyStatus }) {
   const payload: CategorySuggestion[] = tree
     .map((p) => ({
       parent: p.name.trim(),
+      parentColor: p.color,
       enfants: p.children
         .filter((c) => c.enabled && c.name.trim().length > 0)
         .map((c) => ({ name: c.name.trim(), txnIds: c.txnIds })),
@@ -176,7 +177,7 @@ export function SuggestionsWorkspace({ data }: { data: ReadyStatus }) {
       )}
 
       {mode === "replace" && (
-        <div className="rounded-lg border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+        <div className="border-destructive/40 bg-destructive/5 text-destructive rounded-lg border px-3 py-2 text-sm">
           Mode remplacement : les catégories existantes absentes de cette
           sélection seront supprimées, sauf celles contenant des corrections
           manuelles.
@@ -198,8 +199,8 @@ export function SuggestionsWorkspace({ data }: { data: ReadyStatus }) {
               {payload.reduce((n, p) => n + p.enfants.length, 0)}{" "}
               sous-catégorie(s) seront{" "}
               {mode === "replace" ? "créées ou réutilisées" : "créées"}. Les
-              transactions catégorisées automatiquement seront reclassées
-              dans cette nouvelle arborescence.
+              transactions catégorisées automatiquement seront reclassées dans
+              cette nouvelle arborescence.
               {mode === "replace" && previewLoading && (
                 <> Calcul de l'impact en cours…</>
               )}
@@ -218,7 +219,8 @@ export function SuggestionsWorkspace({ data }: { data: ReadyStatus }) {
                       {" "}
                       {replacePreview.namesKept.length} catégorie(s) seront
                       conservées malgré tout car elles contiennent des
-                      corrections manuelles : {replacePreview.namesKept.join(", ")}.
+                      corrections manuelles :{" "}
+                      {replacePreview.namesKept.join(", ")}.
                     </>
                   )}
                 </>
@@ -255,6 +257,7 @@ function toEditable(suggestions: CategorySuggestion[]): EditableParent[] {
   return suggestions.map((s) => ({
     id: newEditableId(),
     name: s.parent,
+    color: s.parentColor,
     children: s.enfants.map((e) => ({
       id: newEditableId(),
       name: e.name,

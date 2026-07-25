@@ -5,18 +5,26 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { count, desc, eq, gte, inArray, sql } from "@budget/db";
 import { db } from "@budget/db/client";
 import { accounts, categories, transactions } from "@budget/db/schema";
+import {
+  CATEGORY_COLOR_HEXES,
+  CATEGORY_COLOR_PALETTE,
+  FALLBACK_CATEGORY_COLOR,
+} from "@budget/validators";
 
 import type {
   ExistingCategoryForReplace,
   ReplacePlan,
 } from "./category-replace-plan";
-import type { CategorySuggestion } from "./suggest-categories-schema";
+import type {
+  CategorySuggestion,
+  RawCategorySuggestion,
+} from "./suggest-categories-schema";
 import { main as runCategorize } from "../../scripts/categorize";
 import {
   computeReplacePlan,
   flattenProposedNames,
 } from "./category-replace-plan";
-import { categorySuggestionsSchema } from "./suggest-categories-schema";
+import { rawCategorySuggestionsSchema } from "./suggest-categories-schema";
 
 export interface TxnForAnalysis {
   id: number;
@@ -64,6 +72,10 @@ export async function sampleTransactions(
     .limit(limit);
 }
 
+const CATEGORY_COLOR_PROMPT_LIST = CATEGORY_COLOR_PALETTE.map(
+  (c) => `- ${c.name} (${c.hex})`,
+).join("\n");
+
 export function buildAnalysisPrompt(txns: TxnForAnalysis[]): string {
   return `Tu analyses les habitudes de dépense d'un ménage français à partir de ${txns.length} transactions bancaires réelles (comptes Société Générale, Caisse d'Épargne Île-de-France, Revolut).
 
@@ -75,9 +87,30 @@ Règles :
 - Regroupe par usage réel (ex. distinguer « Courses » de « Livraison » si les deux apparaissent nettement).
 - Ignore les transactions trop rares ou ambiguës pour former une sous-catégorie dédiée ; elles resteront dans une catégorie générique.
 - Pour chaque sous-catégorie, liste dans "txnIds" les identifiants ("id") de toutes les transactions de l'échantillon qui en relèvent. Une transaction n'appartient qu'à une seule sous-catégorie.
+- Pour chaque catégorie parente (jamais les sous-catégories), choisis dans "parentColor" le code hexadécimal de la couleur qui lui correspond le mieux, parmi cette liste exclusivement :
+${CATEGORY_COLOR_PROMPT_LIST}
+  Essaie d'utiliser une couleur différente pour chaque catégorie parente de cette proposition.
 
 Transactions (JSON) :
 ${JSON.stringify(txns)}`;
+}
+
+// Ramène la couleur brute renvoyée par le LLM à un membre valide de
+// CATEGORY_COLOR_HEXES — jamais une contrainte au niveau du schéma structured
+// output (voir rawCategorySuggestionSchema), pour ne jamais faire planter le
+// parsing de toute l'analyse à cause d'une seule couleur invalide. Repli
+// déterministe (cycle sur la palette par index) plutôt qu'aléatoire, pour un
+// résultat stable et testable.
+export function sanitizeSuggestionColors(
+  raw: RawCategorySuggestion[],
+): CategorySuggestion[] {
+  return raw.map((suggestion, index) => ({
+    ...suggestion,
+    parentColor: CATEGORY_COLOR_HEXES.includes(suggestion.parentColor)
+      ? suggestion.parentColor
+      : (CATEGORY_COLOR_HEXES[index % CATEGORY_COLOR_HEXES.length] ??
+        FALLBACK_CATEGORY_COLOR),
+  }));
 }
 
 export async function analyzeAndSuggest(
@@ -90,7 +123,7 @@ export async function analyzeAndSuggest(
     system:
       "Tu es un expert en catégorisation budgétaire pour les finances personnelles.",
     messages: [{ role: "user", content: buildAnalysisPrompt(txns) }],
-    output_config: { format: zodOutputFormat(categorySuggestionsSchema) },
+    output_config: { format: zodOutputFormat(rawCategorySuggestionsSchema) },
   });
 
   if (!response.parsed_output) {
@@ -98,7 +131,7 @@ export async function analyzeAndSuggest(
       `Analyse sans sortie exploitable (stop_reason: ${response.stop_reason}).`,
     );
   }
-  return response.parsed_output.categories;
+  return sanitizeSuggestionColors(response.parsed_output.categories);
 }
 
 export interface SuggestionsRun {
@@ -163,34 +196,51 @@ export async function suggestionsStatusCore(): Promise<SuggestionsStatus> {
 type DbOrTx = typeof db | Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 // `reparentIfExists` : en mode "replace", une catégorie déjà existante et
-// présente dans la proposition doit adopter le `parentId` de la nouvelle
-// arborescence (vraie restructuration) ; en mode "merge", on ne touche
-// jamais à une catégorie déjà existante (comportement additif inchangé).
+// présente dans la proposition doit adopter le `parentId` (et la `color`,
+// pour un parent) de la nouvelle arborescence (vraie restructuration) ; en
+// mode "merge", on ne touche jamais à une catégorie déjà existante
+// (comportement additif inchangé).
+// `color` : `undefined` signifie "ne jamais toucher cet attribut" (toujours
+// le cas pour une sous-catégorie, qui n'a pas de couleur propre — voir
+// transactionsRouter, elle hérite visuellement de son parent) ; une valeur
+// fournie (toujours le cas pour un parent) est posée à la création et, en
+// mode "replace", mise à jour si elle diffère.
 async function upsertCategory(
   tx: DbOrTx,
   name: string,
   parentId: number | null,
   reparentIfExists: boolean,
+  color?: string | null,
 ): Promise<number> {
   const [inserted] = await tx
     .insert(categories)
-    .values({ name, parentId })
+    .values({ name, parentId, ...(color !== undefined ? { color } : {}) })
     .onConflictDoNothing({ target: categories.name })
     .returning({ id: categories.id });
   if (inserted) return inserted.id;
 
   const [existing] = await tx
-    .select({ id: categories.id, parentId: categories.parentId })
+    .select({
+      id: categories.id,
+      parentId: categories.parentId,
+      color: categories.color,
+    })
     .from(categories)
     .where(eq(categories.name, name));
   if (!existing) {
     throw new Error(`Impossible de créer la catégorie « ${name} ».`);
   }
-  if (reparentIfExists && existing.parentId !== parentId) {
-    await tx
-      .update(categories)
-      .set({ parentId })
-      .where(eq(categories.id, existing.id));
+  if (reparentIfExists) {
+    const patch: Partial<{ parentId: number | null; color: string | null }> =
+      {};
+    if (existing.parentId !== parentId) patch.parentId = parentId;
+    if (color !== undefined && existing.color !== color) patch.color = color;
+    if (Object.keys(patch).length > 0) {
+      await tx
+        .update(categories)
+        .set(patch)
+        .where(eq(categories.id, existing.id));
+    }
   }
   return existing.id;
 }
@@ -292,12 +342,13 @@ export async function applySuggestionsCore(
     let categoriesDeleted = 0;
     let categoriesKept = 0;
 
-    for (const { parent, enfants } of suggestions) {
+    for (const { parent, parentColor, enfants } of suggestions) {
       const parentId = await upsertCategory(
         tx,
         parent,
         null,
         mode === "replace",
+        parentColor,
       );
       for (const enfant of enfants) {
         await upsertCategory(tx, enfant.name, parentId, mode === "replace");

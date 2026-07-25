@@ -3,6 +3,27 @@ import { z } from "zod/v4";
 export const PAGE_SIZE = 25;
 export const FALLBACK_CATEGORY_COLOR = "#94a3b8";
 
+// Palette fermée pour les catégories parentes — source unique de vérité,
+// partagée entre le prompt LLM de suggestion de catégories (packages/api)
+// et son affichage (apps/tanstack-start), pour ne jamais dupliquer une
+// liste de couleurs codée en dur à plusieurs endroits.
+export const CATEGORY_COLOR_PALETTE = [
+  { name: "Indigo", hex: "#6366f1" },
+  { name: "Vert", hex: "#16a34a" },
+  { name: "Ambre", hex: "#f59e0b" },
+  { name: "Rose", hex: "#ec4899" },
+  { name: "Bleu", hex: "#3b82f6" },
+  { name: "Émeraude", hex: "#10b981" },
+  { name: "Violet", hex: "#8b5cf6" },
+  { name: "Orange", hex: "#f97316" },
+  { name: "Citron vert", hex: "#84cc16" },
+  { name: "Ardoise", hex: FALLBACK_CATEGORY_COLOR },
+] as const;
+
+export const CATEGORY_COLOR_HEXES: string[] = CATEGORY_COLOR_PALETTE.map(
+  (c) => c.hex,
+);
+
 // Schéma des query params de la table de transactions — partagé entre
 // validateSearch (web) et l'input tRPC (api).
 export const transactionsSearchSchema = z.object({

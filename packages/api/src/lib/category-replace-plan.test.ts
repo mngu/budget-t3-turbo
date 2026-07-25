@@ -1,14 +1,22 @@
 import { describe, expect, it } from "vitest";
 
 import type { ExistingCategoryForReplace } from "./category-replace-plan";
-import { computeReplacePlan, flattenProposedNames } from "./category-replace-plan";
+import {
+  computeReplacePlan,
+  flattenProposedNames,
+} from "./category-replace-plan";
 
 const cat = (
   id: number,
   name: string,
   parentId: number | null,
   manualTransactionCount = 0,
-): ExistingCategoryForReplace => ({ id, name, parentId, manualTransactionCount });
+): ExistingCategoryForReplace => ({
+  id,
+  name,
+  parentId,
+  manualTransactionCount,
+});
 
 describe("computeReplacePlan", () => {
   it("supprime une catégorie absente de la proposition sans transaction manuelle", () => {
@@ -28,7 +36,10 @@ describe("computeReplacePlan", () => {
   });
 
   it("conserve un parent absent si un de ses enfants est protégé (bottom-up)", () => {
-    const existing = [cat(1, "Alimentation", null), cat(2, "Boulangerie", 1, 1)];
+    const existing = [
+      cat(1, "Alimentation", null),
+      cat(2, "Boulangerie", 1, 1),
+    ];
     const plan = computeReplacePlan(existing, new Set(["Nouvelle"]));
     expect(plan.idsToDelete).toEqual([]);
     expect(plan.namesKept).toEqual(["Alimentation", "Boulangerie"]);
@@ -64,11 +75,28 @@ describe("computeReplacePlan", () => {
 describe("flattenProposedNames", () => {
   it("aplatit parents et enfants en un seul Set de noms", () => {
     const names = flattenProposedNames([
-      { parent: "Alimentation", enfants: [{ name: "Courses", txnIds: [] }, { name: "Restaurants", txnIds: [] }] },
-      { parent: "Transport", enfants: [{ name: "Essence", txnIds: [] }] },
+      {
+        parent: "Alimentation",
+        parentColor: "#f59e0b",
+        enfants: [
+          { name: "Courses", txnIds: [] },
+          { name: "Restaurants", txnIds: [] },
+        ],
+      },
+      {
+        parent: "Transport",
+        parentColor: "#3b82f6",
+        enfants: [{ name: "Essence", txnIds: [] }],
+      },
     ]);
     expect(names).toEqual(
-      new Set(["Alimentation", "Courses", "Restaurants", "Transport", "Essence"]),
+      new Set([
+        "Alimentation",
+        "Courses",
+        "Restaurants",
+        "Transport",
+        "Essence",
+      ]),
     );
   });
 });
