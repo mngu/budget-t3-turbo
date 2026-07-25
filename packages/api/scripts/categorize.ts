@@ -18,8 +18,6 @@ import {
   buildCategorizationOutputSchema,
   buildFewShotUserMessage,
   buildSystemPrompt,
-  chunkTransactions,
-  FEW_SHOT_BATCH_SIZE,
   filterValidResults,
   resolveShortcut,
 } from "./categorize-core";
@@ -88,93 +86,90 @@ export async function main(): Promise<CategorizeResult> {
   }
   console.log(`🏷️  ${rows.length} transactions à catégoriser…`);
 
-  const client = new Anthropic();
+  // Étape 1 : recherche des similaires pour toutes les transactions (parallèle).
+  const similarsByTxnId = new Map<number, SimilarTxn[]>(
+    await Promise.all(
+      rows.map(async (txn) => [txn.id, await findSimilar(txn)] as const),
+    ),
+  );
+
   let categorized = 0;
 
-  try {
-    for (const batch of chunkTransactions(rows, FEW_SHOT_BATCH_SIZE)) {
-      const similarsByTxnId = new Map<number, SimilarTxn[]>(
-        await Promise.all(
-          batch.map(async (txn) => [txn.id, await findSimilar(txn)] as const),
-        ),
-      );
-
-      // Court-circuit déterministe : applique directement la catégorie
-      // si ≥2 similaires partagent la même contrepartie et catégorie.
-      for (const txn of batch) {
-        const similars = similarsByTxnId.get(txn.id) ?? [];
-        const shortcut = resolveShortcut(similars);
-        if (shortcut !== null) {
-          const categoryId = categoryIdByName.get(shortcut);
-          if (categoryId !== undefined) {
-            await db
-              .update(transactions)
-              .set({ categoryId, categorySource: "auto" as const })
-              .where(
-                and(eq(transactions.id, txn.id), isNull(transactions.categoryId)),
-              );
-            categorized++;
-          }
-        }
+  // Étape 2 : court-circuit déterministe (match fort).
+  const llmRows: TxnForLlm[] = [];
+  for (const txn of rows) {
+    const similars = similarsByTxnId.get(txn.id) ?? [];
+    const shortcut = resolveShortcut(similars);
+    if (shortcut !== null) {
+      const categoryId = categoryIdByName.get(shortcut);
+      if (categoryId !== undefined) {
+        await db
+          .update(transactions)
+          .set({ categoryId, categorySource: "auto" as const })
+          .where(
+            and(eq(transactions.id, txn.id), isNull(transactions.categoryId)),
+          );
+        categorized++;
       }
+    } else {
+      llmRows.push(txn);
+    }
+  }
+  if (categorized > 0) {
+    console.log(`   ${categorized} court-circuitées (déterministe)`);
+  }
 
-      // On ne soumet au LLM que les transactions sans match fort.
-      const llmBatch = batch.filter((txn) => {
-        const similars = similarsByTxnId.get(txn.id) ?? [];
-        return resolveShortcut(similars) === null;
-      });
+  // Étape 3 : un seul appel LLM pour toutes les transactions sans match fort.
+  if (llmRows.length > 0) {
+    console.log(`   🤖 ${llmRows.length} soumises au LLM…`);
+    const client = new Anthropic();
 
-      if (llmBatch.length === 0) {
-        console.log(`   ${categorized}/${rows.length} (déterministe)…`);
-        continue;
-      }
-
+    try {
       const response = await client.messages.parse({
         model: "claude-haiku-4-5",
-        max_tokens: 8192,
+        max_tokens: 16384,
         system: systemPrompt,
         messages: [
           {
             role: "user",
-            content: buildFewShotUserMessage(llmBatch, similarsByTxnId),
+            content: buildFewShotUserMessage(llmRows, similarsByTxnId),
           },
         ],
         output_config: { format: zodOutputFormat(categorizationOutputSchema) },
       });
 
-      if (!response.parsed_output) {
-        console.warn(
-          `   ⚠️  lot sans sortie exploitable (stop_reason: ${response.stop_reason}) — ignoré`,
+      if (response.parsed_output) {
+        const llmIds = new Set(llmRows.map((t) => t.id));
+        const valid = filterValidResults(
+          response.parsed_output.resultats,
+          llmIds,
+          categoryNames,
         );
-        continue;
-      }
 
-      const batchIds = new Set(llmBatch.map((t) => t.id));
-      const valid = filterValidResults(
-        response.parsed_output.resultats,
-        batchIds,
-        categoryNames,
-      );
-
-      for (const { id, categorie } of valid) {
-        const categoryId = categoryIdByName.get(categorie);
-        if (categoryId === undefined) continue;
-        // Le garde IS NULL protège les futures corrections manuelles.
-        await db
-          .update(transactions)
-          .set({ categoryId, categorySource: "llm" })
-          .where(and(eq(transactions.id, id), isNull(transactions.categoryId)));
+        for (const { id, categorie } of valid) {
+          const categoryId = categoryIdByName.get(categorie);
+          if (categoryId === undefined) continue;
+          await db
+            .update(transactions)
+            .set({ categoryId, categorySource: "llm" })
+            .where(
+              and(eq(transactions.id, id), isNull(transactions.categoryId)),
+            );
+        }
+        categorized += valid.length;
+      } else {
+        console.warn(
+          `   ⚠️  sortie LLM non exploitable (stop_reason: ${response.stop_reason})`,
+        );
       }
-      categorized += valid.length;
-      console.log(`   ${categorized}/${rows.length}…`);
-    }
-  } catch (err) {
-    if (err instanceof Anthropic.APIError) {
-      console.warn(
-        `⚠️  Erreur API Claude (${err.message}) — catégorisation interrompue, relancez npm run categorize.`,
-      );
-    } else {
-      throw err; // erreur DB ou bug → exit 1
+    } catch (err) {
+      if (err instanceof Anthropic.APIError) {
+        console.warn(
+          `⚠️  Erreur API Claude (${err.message}) — catégorisation interrompue, relancez npm run categorize.`,
+        );
+      } else {
+        throw err;
+      }
     }
   }
 
