@@ -1,0 +1,100 @@
+packages/api/src/banking/fetch-transactions.ts
+  s_b0e7f1054f806d::t_a07e491d72a0e9 10
+  s_b0e7f1054f806d::t_06871d26cae5a4 11
+packages/api/src/pipeline.ts
+  s_b0e7f1054f806d::t_fe5a05c29c90c3 5,8,10-11
+  s_b0e7f1054f806d::t_f1a69f83719157 2,4,6
+  s_b0e7f1054f806d::t_3ccb009c41b14b 1,3,16,22
+packages/api/src/categorization/run.ts
+  s_b0e7f1054f806d::t_f1a69f83719157 12,14
+  s_b0e7f1054f806d::t_f68462877e8b11 35
+  s_b0e7f1054f806d::t_2cfd2bae306a54 2-3,11,13,19-20
+  s_b0e7f1054f806d::t_229cec79fb4074 171
+  s_b0e7f1054f806d::t_96271c12bfaf50 184-192
+packages/api/src/categorization/results.ts
+  s_b0e7f1054f806d::t_4eea6c173e0d83 1-85
+packages/api/src/categories/suggestions/analyze.test.ts
+  s_b0e7f1054f806d::t_16b570fc1bf103 5-6,9
+  s_b0e7f1054f806d::t_62794e3a38224a 13
+packages/api/src/transactions/import.ts
+  s_b0e7f1054f806d::t_e2b62b7354a59b 10,15-17
+packages/api/src/lib/single-flight.ts
+  s_b0e7f1054f806d::t_f67a44e1302df0 1-4,6-12,14,16
+packages/api/tsconfig.json
+  s_b0e7f1054f806d::t_463cc3a5112d6e 3
+packages/api/src/banking/domain.test.ts
+  s_b0e7f1054f806d::t_a07e491d72a0e9 10
+packages/api/src/pipeline.test.ts
+  s_b0e7f1054f806d::t_7b815d6005c283 3,5,11-13,16-17
+  s_b0e7f1054f806d::t_f1a69f83719157 4,6
+packages/api/src/router/connections.ts
+  s_b0e7f1054f806d::t_2986839b8f12c2 5-12,18,28,32,34,38,52,56
+packages/api/src/router/settings.ts
+  s_b0e7f1054f806d::t_2986839b8f12c2 4,8,18
+packages/api/src/categories/suggestions/apply.ts
+  s_b0e7f1054f806d::t_f1a69f83719157 7
+  s_b0e7f1054f806d::t_9848c26f23edda 1-3,5,8-10,66-67,124,148,203
+packages/api/src/banking/connections.ts
+  s_b0e7f1054f806d::t_d79372faf9bc19 23,47,94,196,243
+  s_b0e7f1054f806d::t_f1a69f83719157 265,274
+  s_b0e7f1054f806d::t_a07e491d72a0e9 8-9,15
+packages/api/src/categorization/results.test.ts
+  s_b0e7f1054f806d::t_f1a69f83719157 56-58
+  s_b0e7f1054f806d::t_209eea8aa7ecc0 1-55,59-94
+packages/api/src/categorization/prompt.test.ts
+  s_b0e7f1054f806d::t_f1a69f83719157 4
+  s_b0e7f1054f806d::t_f656f75799ec7a 3,9,47
+packages/api/src/categories/suggestions/replace-plan.ts
+  s_b0e7f1054f806d::t_a07e491d72a0e9 8
+  s_b0e7f1054f806d::t_d79372faf9bc19 5
+packages/api/src/categories/suggestions/schema.ts
+  s_b0e7f1054f806d::t_a07e491d72a0e9 1,20
+  s_b0e7f1054f806d::t_92f1ed4edcaf15 33
+packages/api/package.json
+  s_b0e7f1054f806d::t_2986839b8f12c2 7,19
+packages/api/src/index.ts
+  s_b0e7f1054f806d::t_2986839b8f12c2 28-31,45-46,50-51
+packages/api/src/categories/suggestions/analyze.ts
+  s_b0e7f1054f806d::t_f1a69f83719157 15
+  s_b0e7f1054f806d::t_e3f15baec4030f 1-14,16-128
+packages/api/src/banking/settings.ts
+  s_b0e7f1054f806d::t_a07e491d72a0e9 6-8
+  s_b0e7f1054f806d::t_d79372faf9bc19 80
+  s_b0e7f1054f806d::t_f1a69f83719157 94
+packages/api/eslint.config.ts
+  s_b0e7f1054f806d::t_2986839b8f12c2 11-14
+packages/api/src/categories/suggestions/state.ts
+  s_b0e7f1054f806d::t_f1a69f83719157 9
+  s_b0e7f1054f806d::t_fc9eb592787789 1-8,10-67
+packages/api/src/router/categories.ts
+  s_b0e7f1054f806d::t_2986839b8f12c2 12-20,147,262,265,272,276,284
+packages/api/src/categories/suggestions/replace-plan.test.ts
+  s_b0e7f1054f806d::t_a07e491d72a0e9 3
+  s_b0e7f1054f806d::t_f1a69f83719157 4
+packages/api/src/categorization/prompt.ts
+  s_b0e7f1054f806d::t_7b5f8103b9a2c9 1,3,21,61-62
+packages/api/src/categorization/similar.ts
+  s_b0e7f1054f806d::t_a07e491d72a0e9 8
+packages/api/src/banking/client.ts
+  s_b0e7f1054f806d::t_a07e491d72a0e9 5
+pnpm-lock.yaml
+  s_b0e7f1054f806d::t_a09be4bc35b85a 11263,11298,12335,12349,14081,15457,15515,15662,17067,17072,17365,17404,17451
+packages/api/src/router/sync.ts
+  s_b0e7f1054f806d::t_2986839b8f12c2 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "f5a96302090d1ec46ab04ef162e27d7fa8ecb678",
+  "prompts": {},
+  "sessions": {
+    "s_b0e7f1054f806d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "59449e5a-c130-4906-b3a4-762a27276041",
+        "model": "claude-opus-5"
+      },
+      "human_author": null
+    }
+  }
+}
