@@ -1,17 +1,9 @@
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
-import {
-  boolean,
-  date,
-  index,
-  integer,
-  jsonb,
-  numeric,
-  pgTable,
-  serial,
-  text,
-  timestamp,
-  uniqueIndex,
-} from "drizzle-orm/pg-core";
+import { boolean, date, index, integer, jsonb, numeric, pgTable, serial, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+
+
+
+
 
 // Configuration Enable Banking (ligne unique, id=1) — alimentée par l'onboarding.
 export const appSettings = pgTable("app_settings", {
@@ -125,5 +117,6 @@ export type NewCategory = typeof categories.$inferInsert;
 export type AppSettingsRow = typeof appSettings.$inferSelect;
 export type BankConnection = typeof bankConnections.$inferSelect;
 export type AuthRequest = typeof authRequests.$inferSelect;
+export type Transaction = typeof transactions.$inferSelect;
 
 export * from "./auth-schema";

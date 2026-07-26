@@ -1,5 +1,6 @@
 // Recherche de transactions déjà catégorisées similaires à une transaction donnée,
 // pour enrichir le prompt de catégorisation par des exemples concrets (few-shot).
+import type { Transaction } from "@budget/db/schema";
 import { and, desc, eq, isNotNull, ne, or, sql } from "@budget/db";
 import { db } from "@budget/db/client";
 import { categories, transactions } from "@budget/db/schema";
@@ -11,9 +12,9 @@ export interface SimilarTxn {
   description: string;
   counterparty: string | null;
   amount: string;
-  direction: "debit" | "credit";
+  direction: Transaction["direction"];
   categoryName: string;
-  categorySource: "llm" | "manual" | null;
+  categorySource: Transaction["categorySource"];
 }
 
 export const SIMILAR_LIMIT = 5;
