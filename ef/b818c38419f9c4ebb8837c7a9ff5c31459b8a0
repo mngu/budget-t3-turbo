@@ -1,0 +1,39 @@
+packages/api/scripts/categorize-core.test.ts
+  s_b0e7f1054f806d::t_7f35f59313030c 73-95,100,102,117-124,127-129,132-134,136,140-144
+  s_b0e7f1054f806d::t_e3b8a75cad051c 9,12
+packages/api/scripts/categorize.ts
+  s_b0e7f1054f806d::t_72ee3e007ae988 160-174
+  s_b0e7f1054f806d::t_9602cf79cff7be 21
+  s_b0e7f1054f806d::t_764e6034bae155 143
+CLAUDE.md
+  s_b0e7f1054f806d::t_1f956485bb08ad 64-65
+  s_b0e7f1054f806d::t_1925003b90b28a 17-19
+  s_b0e7f1054f806d::t_7f912cef47eca7 41
+packages/api/scripts/categorize-core.ts
+  s_b0e7f1054f806d::t_56dfd8be60b5f5 91-97,103
+  s_b0e7f1054f806d::t_5ee2e0074265c8 32-35,44,48,53
+  s_b0e7f1054f806d::t_c4dfc72554b9a9 133-150,153-170
+  s_b0e7f1054f806d::t_d24caac6ca7350 49-51
+  s_b0e7f1054f806d::t_a924b459f2db5f 36-39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "efb818c38419f9c4ebb8837c7a9ff5c31459b8a0",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_b0e7f1054f806d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "59449e5a-c130-4906-b3a4-762a27276041",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
