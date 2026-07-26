@@ -1,6 +1,6 @@
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
 
-import type { CategoryTreeNode } from "@budget/api";
 import { Button } from "@budget/ui/button";
 import {
   Select,
@@ -10,17 +10,19 @@ import {
   SelectValue,
 } from "@budget/ui/select";
 
-import { CategoryTreeSelectItems } from "~/component/category-tree-select-items";
+import { CategoryTreeSelect } from "~/component/category-tree-select/category-tree-select";
 import { SearchInput } from "~/component/search-input";
+import { useTRPC } from "~/lib/trpc";
 
-export function TransactionsFilters({
-  banks,
-  categories,
-}: {
-  banks: string[];
-  categories: CategoryTreeNode[];
-}) {
-  const routeApi = getRouteApi("/_authed/");
+const routeApi = getRouteApi("/_authed/");
+
+export function TransactionsFilters() {
+  const trpc = useTRPC();
+  // Même contrat que CategoryTreeSelect : la liste vient du cache, que le
+  // loader de la route réalimente à chaque passage.
+  const { data: banks } = useSuspenseQuery(
+    trpc.transactions.banks.queryOptions(),
+  );
   const search = routeApi.useSearch();
   const navigate = routeApi.useNavigate();
 
@@ -76,17 +78,11 @@ export function TransactionsFilters({
         </SelectContent>
       </Select>
 
-      <Select
+      <CategoryTreeSelect
+        className="w-56"
         value={search.category ?? null}
         onValueChange={(v) => setFilter({ category: v ?? undefined })}
-      >
-        <SelectTrigger className="w-56">
-          <SelectValue placeholder="Catégorie" />
-        </SelectTrigger>
-        <SelectContent>
-          <CategoryTreeSelectItems categories={categories} />
-        </SelectContent>
-      </Select>
+      />
 
       <Button
         variant="ghost"

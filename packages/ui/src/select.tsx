@@ -6,6 +6,11 @@ import { cn } from "@budget/ui";
 
 const Select = SelectPrimitive.Root;
 
+// `Select` est un composant générique : `ComponentProps<typeof Select>` en
+// perd le paramètre et retombe sur `{}` pour la valeur. Les wrappers qui ne
+// gèrent qu'une sélection simple de chaînes s'appuient sur ce type.
+type SelectProps<Value = string> = SelectPrimitive.Root.Props<Value, false>;
+
 function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
   return (
     <SelectPrimitive.Group
@@ -186,6 +191,7 @@ function SelectScrollDownButton({
   );
 }
 
+export type { SelectProps };
 export {
   Select,
   SelectContent,

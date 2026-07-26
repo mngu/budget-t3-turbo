@@ -8,10 +8,7 @@ import {
   DialogTitle,
 } from "@budget/ui/dialog";
 
-const euro = new Intl.NumberFormat("fr-FR", {
-  style: "currency",
-  currency: "EUR",
-});
+import { euro } from "~/lib/format";
 
 // Sous-ensemble minimal commun à TxnForAnalysis (échantillon LLM) et
 // TransactionRow (données réelles de la table transactions) — le drawer ne

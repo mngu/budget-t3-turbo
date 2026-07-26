@@ -9,7 +9,7 @@ import { Button } from "@budget/ui/button";
 import { Calendar } from "@budget/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@budget/ui/popover";
 
-const dateFr = new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium" });
+import { dateFr } from "~/lib/format";
 
 export function RangePicker({
   value,
