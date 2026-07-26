@@ -1,0 +1,33 @@
+packages/api/src/categories/suggestions/analyze.ts
+  s_a11e1e41a03fff::t_27eb2ed78a8172 100
+apps/tanstack-start/src/lib/category-color.ts
+  s_a11e1e41a03fff::t_5241db1c426e71 1-11
+apps/tanstack-start/src/routes/_authed/index.tsx
+  s_a11e1e41a03fff::t_9d0b41cbb27332 508,511-512
+  s_a11e1e41a03fff::t_27eb2ed78a8172 44
+CLAUDE.md
+  s_a11e1e41a03fff::t_7674259ecd0bcf 71-74
+apps/tanstack-start/src/component/category-row-shell.tsx
+  s_a11e1e41a03fff::t_040e3a1d906db5 12-13
+  s_a11e1e41a03fff::t_d637e4fab926cb 50,61
+  s_a11e1e41a03fff::t_3d948d7b00bcaa 87,98,103-104,108,112,117,119
+packages/validators/src/index.ts
+  s_a11e1e41a03fff::t_c00d879bdd01c8 6-13,18-45,49,52-65
+  s_a11e1e41a03fff::t_a0854a784e11a1 66
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "4949c0758ea573f88db5fd2bb60fda975ebb80eb",
+  "prompts": {},
+  "sessions": {
+    "s_a11e1e41a03fff": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5ba0df2e-4bca-4bc9-8cba-241c3ea7212b",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
