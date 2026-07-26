@@ -3,7 +3,10 @@ import { z } from "zod/v4";
 
 import { count, eq, inArray, isNull } from "@budget/db";
 import { categories, transactions } from "@budget/db/schema";
-import { FALLBACK_CATEGORY_COLOR } from "@budget/validators";
+import {
+  CATEGORY_COLOR_HEXES,
+  FALLBACK_CATEGORY_COLOR,
+} from "@budget/validators";
 
 import { categorizeUncategorizedCore } from "../lib/categorize-uncategorized-core";
 import {
@@ -191,6 +194,35 @@ export const categoriesRouter = {
       await ctx.db
         .update(categories)
         .set({ name })
+        .where(eq(categories.id, input.id));
+    }),
+
+  // Change la couleur d'une catégorie PARENTE uniquement (parmi la palette
+  // fermée) — une sous-catégorie n'a jamais de couleur propre, elle hérite
+  // toujours visuellement de son parent (voir transactionsRouter.byCategory,
+  // qui ne regarde même pas la couleur d'une sous-catégorie).
+  updateColor: protectedProcedure
+    .input(
+      z.object({
+        id: z.number().int().positive(),
+        color: z.enum(CATEGORY_COLOR_HEXES as [string, ...string[]]),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const [category] = await ctx.db
+        .select({ parentId: categories.parentId })
+        .from(categories)
+        .where(eq(categories.id, input.id));
+      if (!category) throw new Error("Catégorie introuvable.");
+      if (category.parentId !== null) {
+        throw new Error(
+          "Seules les catégories parentes ont une couleur propre.",
+        );
+      }
+
+      await ctx.db
+        .update(categories)
+        .set({ color: input.color })
         .where(eq(categories.id, input.id));
     }),
 

@@ -1,9 +1,13 @@
 "use client";
 
 import type { ComponentProps, ReactNode } from "react";
+import { useState } from "react";
 import { PlusIcon, Trash2Icon } from "lucide-react";
 
+import { cn } from "@budget/ui";
 import { Button } from "@budget/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@budget/ui/popover";
+import { CATEGORY_COLOR_PALETTE } from "@budget/validators";
 
 // Coquille visuelle partagée par category-tree.tsx (brouillon de suggestions,
 // rien n'est persisté avant "Appliquer") et category-overview-tree.tsx
@@ -15,6 +19,10 @@ interface CategoryRowShellProps {
   // Absente pour une sous-catégorie du brouillon : elle n'affiche jamais de
   // pastille (héritage visuel du parent, voir transactionsRouter.byCategory).
   color?: string;
+  // Fournir onColorChange rend la pastille cliquable (sélecteur de couleur
+  // parmi CATEGORY_COLOR_PALETTE) au lieu d'un simple indicateur statique —
+  // utilisé uniquement pour les catégories parentes de l'overview.
+  onColorChange?: (hex: string) => void;
   // Ex. la Checkbox "activer" du brouillon — absente en mode overview.
   leading?: ReactNode;
   // L'Input du nom, possédé par l'appelant (onChange en brouillon,
@@ -29,6 +37,7 @@ interface CategoryRowShellProps {
 
 export function CategoryRowShell({
   color,
+  onColorChange,
   leading,
   nameInput,
   trailing,
@@ -40,12 +49,15 @@ export function CategoryRowShell({
     <div className="flex items-center gap-2">
       {leading}
       <div className="flex flex-1 items-center gap-2">
-        {color && (
-          <span
-            className="size-2.5 shrink-0 rounded-full"
-            style={{ backgroundColor: color }}
-          />
-        )}
+        {color &&
+          (onColorChange ? (
+            <CategoryColorPicker color={color} onSelect={onColorChange} />
+          ) : (
+            <span
+              className="size-2.5 shrink-0 rounded-full"
+              style={{ backgroundColor: color }}
+            />
+          ))}
         {nameInput}
       </div>
       {trailing}
@@ -58,6 +70,52 @@ export function CategoryRowShell({
         <Trash2Icon />
       </Button>
     </div>
+  );
+}
+
+function CategoryColorPicker({
+  color,
+  onSelect,
+}: {
+  color: string;
+  onSelect: (hex: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger
+        render={(props) => (
+          <button
+            {...props}
+            type="button"
+            aria-label="Changer la couleur"
+            className="ring-offset-background hover:ring-ring size-2.5 shrink-0 rounded-full ring-offset-2 hover:ring-2"
+            style={{ backgroundColor: color }}
+          />
+        )}
+      />
+      <PopoverContent className="w-auto p-2">
+        <div className="grid grid-cols-5 gap-1.5">
+          {CATEGORY_COLOR_PALETTE.map((c) => (
+            <button
+              key={c.hex}
+              type="button"
+              aria-label={c.name}
+              onClick={() => {
+                onSelect(c.hex);
+                setOpen(false);
+              }}
+              className={cn(
+                "ring-offset-popover size-6 rounded-full",
+                c.hex === color && "ring-ring ring-2 ring-offset-2",
+              )}
+              style={{ backgroundColor: c.hex }}
+            />
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }
 

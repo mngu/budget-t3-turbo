@@ -14,6 +14,7 @@ import {
 } from "@budget/ui/dialog";
 import { Input } from "@budget/ui/input";
 import { toast } from "@budget/ui/toast";
+import { FALLBACK_CATEGORY_COLOR } from "@budget/validators";
 
 import type { PreviewableTransaction } from "~/component/transaction-preview-drawer";
 import {
@@ -76,6 +77,17 @@ export function CategoryOverviewTree({ tree }: CategoryOverviewTreeProps) {
     }
   };
 
+  const updateColor = async (id: number, color: string) => {
+    try {
+      await trpcClient.categories.updateColor.mutate({ id, color });
+      await router.invalidate();
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Échec du changement de couleur.",
+      );
+    }
+  };
+
   const confirmRemove = async () => {
     if (!confirmDelete) return;
     setDeleting(true);
@@ -109,6 +121,7 @@ export function CategoryOverviewTree({ tree }: CategoryOverviewTreeProps) {
           <CategoryRow
             node={parent}
             onRename={(name) => rename(parent.id, name)}
+            onColorChange={(color) => updateColor(parent.id, color)}
             onPreview={() =>
               openPreview(parent.name, parent.children.length > 0)
             }
@@ -219,11 +232,13 @@ export function CategoryOverviewTree({ tree }: CategoryOverviewTreeProps) {
 function CategoryRow({
   node,
   onRename,
+  onColorChange,
   onPreview,
   onDelete,
 }: {
   node: CategoryOption & { transactionCount: number };
   onRename: (name: string) => Promise<boolean>;
+  onColorChange?: (color: string) => void;
   onPreview: () => void;
   onDelete: () => void;
 }) {
@@ -241,7 +256,10 @@ function CategoryRow({
 
   return (
     <CategoryRowShell
-      color={node.color ?? undefined}
+      color={
+        node.color ?? (onColorChange ? FALLBACK_CATEGORY_COLOR : undefined)
+      }
+      onColorChange={onColorChange}
       nameInput={
         <Input
           value={value}
