@@ -32,13 +32,13 @@ export type { ConsentBadge } from "./banking/domain";
 export type {
   CategoryBreakdownItem,
   TransactionRow,
-} from "./router/transactions";
+} from "./transactions/queries";
 export type {
   CategoriesOverview,
   CategoryOption,
   CategoryOverviewNode,
   CategoryTreeNode,
-} from "./router/categories";
+} from "./categories/queries";
 export type {
   CategorySuggestion,
   CategorySuggestionChild,

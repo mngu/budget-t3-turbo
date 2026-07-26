@@ -54,6 +54,9 @@ export function normalizeTransaction(
     status: raw.status === "BOOK" ? "booked" : "pending",
     bookingDate,
     valueDate: raw.value_date,
+    // `||` volontaire, pas `??` : `joined` est une chaîne (vide quand
+    // remittance_information est absent) et doit retomber sur la contrepartie.
+    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
     description: joined || counterparty || "(sans libellé)",
     counterparty,
     bankCode: raw.bank_transaction_code?.code ?? null,
