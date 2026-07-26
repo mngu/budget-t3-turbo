@@ -29,20 +29,28 @@ export function chunkTransactions<T>(items: T[], size = BATCH_SIZE): T[][] {
   return chunks;
 }
 
+// Le prompt ne s'appuie QUE sur les catégories réellement présentes en base :
+// aucun nom de catégorie codé en dur ici (une règle citant une catégorie
+// absente de la liste faisait répondre le LLM hors liste, et la transaction
+// n'était jamais catégorisée). Combler les trous de l'arborescence est le rôle
+// du process de suggestion (suggest-categories-core.ts) — attention, son
+// échantillon est celui des transactions récentes, catégorisées ou non
+// (sampleTransactions ne filtre que sur bookingDate) : les transactions
+// laissées sans catégorie y figurent sans être priorisées.
 export function buildSystemPrompt(categoryNames: string[]): string {
   return `Tu catégorises des transactions bancaires personnelles pour le budget d'un ménage français.
 Les comptes appartiennent à Alex Martin et Camille Durand (banques : Société Générale, Caisse d'Épargne Île-de-France, Revolut).
 
-Pour chaque transaction, choisis exactement une catégorie parmi :
+Pour chaque transaction, choisis une catégorie parmi cette liste, et uniquement parmi celle-ci :
 ${categoryNames.map((c) => `- ${c}`).join("\n")}
 
 Règles :
-- Un virement entre ses propres comptes (libellé mentionnant son propre nom, ex. « VIR SEPA M ALEX MARTIN ») → « Apport Alex ».
-- Salaire et autres revenus entrants → « Revenus ».
-- Quand des transactions similaires déjà catégorisées sont fournies, classe par analogie avec elles en priorité.
-- En cas de doute, réponds « Autres » — n'invente jamais.
+- N'invente jamais de catégorie : toute réponse hors de cette liste est ignorée.
+- Les transactions similaires fournies sont des indices, pas une autorité. Ne classe par analogie que si la transaction est réellement de même nature (même contrepartie, même type d'opération) : des libellés qui se ressemblent ne suffisent pas.
+- Une catégorie « à peu près » n'est pas une bonne réponse. Si la transaction relève d'un type de dépense ou de revenu absent de la liste, réponds null.
+- La liste est incomplète par construction : répondre null est un résultat normal et utile. Ces transactions sont reprises par l'analyse qui propose de nouvelles catégories.
 
-Réponds pour chaque transaction avec son id et sa catégorie.`;
+Réponds pour chaque transaction avec son id et sa catégorie (ou null).`;
 }
 
 export function buildUserMessage(batch: TxnForLlm[]): string {
@@ -80,19 +88,19 @@ export function buildFewShotUserMessage(
     .join("\n\n---\n\n");
 }
 
-// Ne valide que la forme (id + categorie en chaîne) : un z.enum(categoryNames)
-// ferait planter le parsing structured-output de tout le lot dès qu'une
-// réponse cite une catégorie hors liste (ex. une catégorie mentionnée dans le
-// prompt métier — « Autres », « Apport Alex » — qui n'existe plus après un
-// remplacement d'arborescence), au lieu d'ignorer juste cette transaction.
-// Le filtrage réel se fait dans filterValidResults, après un parsing qui ne
-// peut plus échouer pour cette raison.
+// Ne valide que la forme (id + categorie) : un z.enum(categoryNames) ferait
+// planter le parsing structured-output de tout le lot dès qu'une réponse cite
+// une catégorie hors liste, au lieu d'ignorer juste cette transaction.
+// Le tri réel se fait dans partitionResults, après un parsing qui ne peut plus
+// échouer pour cette raison. `categorie: null` est la réponse légitime quand
+// aucune catégorie existante ne convient — sans cette échappatoire, le LLM est
+// contraint d'inventer un nom, qui serait rejeté silencieusement.
 export function buildCategorizationOutputSchema() {
   return z.object({
     resultats: z.array(
       z.object({
         id: z.number().int(),
-        categorie: z.string(),
+        categorie: z.string().nullable(),
       }),
     ),
   });
@@ -122,14 +130,42 @@ export function resolveShortcut(
   return null;
 }
 
-// Défense en profondeur derrière les structured outputs : ids hors lot ou
-// catégories hors liste connue sont ignorés plutôt que de corrompre la base.
-export function filterValidResults(
-  resultats: { id: number; categorie: string }[],
+export interface ResultsPartition {
+  // Catégorisations applicables telles quelles.
+  valid: { id: number; categorie: string }[];
+  // Refus assumés (`categorie: null`) : aucune catégorie existante ne convient.
+  // Attendu, pas une anomalie — ces transactions restent sans catégorie et
+  // alimentent le process de suggestion.
+  declined: number[];
+  // Réponses aberrantes : id hors lot ou catégorie inconnue en base. Signal de
+  // bug (prompt désaligné, hallucination) — à remonter, pas à avaler en silence.
+  rejected: { id: number; categorie: string | null }[];
+}
+
+// Défense en profondeur derrière les structured outputs : rien qui ne soit pas
+// une catégorie connue du lot courant n'atteint la base. Les deux raisons de ne
+// pas catégoriser sont séparées — les confondre est précisément ce qui rendait
+// le désalignement prompt/base invisible.
+export function partitionResults(
+  resultats: { id: number; categorie: string | null }[],
   batchIds: Set<number>,
   categoryNames: string[],
-): { id: number; categorie: string }[] {
-  return resultats.filter(
-    (r) => batchIds.has(r.id) && categoryNames.includes(r.categorie),
-  );
+): ResultsPartition {
+  const partition: ResultsPartition = {
+    valid: [],
+    declined: [],
+    rejected: [],
+  };
+  for (const r of resultats) {
+    if (!batchIds.has(r.id)) {
+      partition.rejected.push(r);
+    } else if (r.categorie === null) {
+      partition.declined.push(r.id);
+    } else if (categoryNames.includes(r.categorie)) {
+      partition.valid.push({ id: r.id, categorie: r.categorie });
+    } else {
+      partition.rejected.push(r);
+    }
+  }
+  return partition;
 }

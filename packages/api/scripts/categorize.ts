@@ -18,7 +18,7 @@ import {
   buildCategorizationOutputSchema,
   buildFewShotUserMessage,
   buildSystemPrompt,
-  filterValidResults,
+  partitionResults,
   resolveShortcut,
 } from "./categorize-core";
 
@@ -140,7 +140,7 @@ export async function main(): Promise<CategorizeResult> {
 
       if (response.parsed_output) {
         const llmIds = new Set(llmRows.map((t) => t.id));
-        const valid = filterValidResults(
+        const { valid, declined, rejected } = partitionResults(
           response.parsed_output.resultats,
           llmIds,
           categoryNames,
@@ -157,6 +157,21 @@ export async function main(): Promise<CategorizeResult> {
             );
         }
         categorized += valid.length;
+
+        if (declined.length > 0) {
+          console.log(
+            `   ${declined.length} laissées sans catégorie (aucune catégorie existante ne convient) — lancez l'analyse de suggestions depuis /categories.`,
+          );
+        }
+        // Ne jamais avaler ce cas en silence : une catégorie inconnue renvoyée
+        // par le LLM signale un prompt désaligné avec l'arborescence en base.
+        if (rejected.length > 0) {
+          console.warn(
+            `   ⚠️  ${rejected.length} réponses ignorées (id hors lot ou catégorie inconnue) : ${rejected
+              .map((r) => `${r.id}→${r.categorie ?? "null"}`)
+              .join(", ")}`,
+          );
+        }
       } else {
         console.warn(
           `   ⚠️  sortie LLM non exploitable (stop_reason: ${response.stop_reason})`,
