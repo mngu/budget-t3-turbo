@@ -42,10 +42,23 @@ export interface TransactionRow {
   category: string | null;
 }
 
+export interface CategoryBreakdownDetail {
+  category: string;
+  total: number;
+  color: string;
+}
+
 export interface CategoryBreakdownItem {
   category: string;
   total: number;
   color: string;
+  // Détail par sous-catégorie, trié comme le parent (total décroissant).
+  // Vide si la catégorie n'a pas d'enfant : le tooltip retombe alors sur
+  // l'affichage une ligne.
+  //
+  // Surtout pas nommé `children` : recharts étale le datum dans les props des
+  // secteurs SVG, où React interpréterait le champ comme des enfants à rendre.
+  breakdown: CategoryBreakdownDetail[];
 }
 
 function transactionsFilterQuery(
@@ -130,39 +143,111 @@ export async function listTransactions(
   return { rows: rows as TransactionRow[], total: countRow?.total ?? 0 };
 }
 
+// Part du graphique portant un montant rattaché directement à la catégorie
+// parente plutôt qu'à l'une de ses sous-catégories.
+const UNALLOCATED_LABEL = "Non ventilé";
+
 // Regroupe toujours au niveau de la catégorie parente : une sous-catégorie
-// remonte dans la part de son parent (coalesce vers parentCategories), une
-// catégorie déjà racine reste inchangée (parentCategories vide dans ce cas).
-// Le graphique n'affiche ainsi jamais de sous-catégorie comme part à part
-// entière.
+// remonte dans la part de son parent, une catégorie déjà racine reste
+// inchangée (parentCategories vide dans ce cas). Le graphique n'affiche ainsi
+// jamais de sous-catégorie comme part à part entière — le détail par
+// sous-catégorie est renvoyé dans `breakdown` pour le tooltip.
+//
+// L'agrégat SQL descend jusqu'à la catégorie feuille ; le repli sur le parent
+// se fait en TypeScript. Conséquence : l'`order by` SQL porterait sur les
+// feuilles, donc l'ordre des parts (et de la légende) est refait ici sur le
+// total replié.
 export async function transactionsByCategory(
   input: TransactionsSearch,
 ): Promise<CategoryBreakdownItem[]> {
   const where = transactionsFilterQuery(input);
-  const categoryLabel = sql<string>`coalesce(${parentCategories.name}, ${categories.name})`;
-  const categoryColor = sql<
-    string | null
-  >`coalesce(${parentCategories.color}, ${categories.color})`;
-  const categoryGroupId = sql`coalesce(${parentCategories.id}, ${categories.id})`;
   const rows = await db
     .select({
-      category: categoryLabel,
+      parentId: parentCategories.id,
+      parentName: parentCategories.name,
+      parentColor: parentCategories.color,
+      categoryId: categories.id,
+      categoryName: categories.name,
+      categoryColor: categories.color,
       total: sql<string>`sum(${transactions.amount})`,
-      color: categoryColor,
     })
     .from(transactions)
     .innerJoin(accounts, eq(transactions.accountId, accounts.id))
     .leftJoin(categories, eq(transactions.categoryId, categories.id))
     .leftJoin(parentCategories, eq(categories.parentId, parentCategories.id))
     .where(where)
-    .groupBy(categoryGroupId, categoryLabel, categoryColor)
-    .orderBy(desc(sql`sum(${transactions.amount})`));
+    .groupBy(
+      parentCategories.id,
+      parentCategories.name,
+      parentCategories.color,
+      categories.id,
+      categories.name,
+      categories.color,
+    );
 
-  return rows.map((r) => ({
-    category: r.category,
-    total: Number(r.total),
-    color: r.color ?? FALLBACK_CATEGORY_COLOR,
-  }));
+  // `unallocated` = montant porté par la catégorie parente elle-même. Il ne
+  // devient une ligne « Non ventilé » que si la catégorie a par ailleurs des
+  // sous-catégories ; sinon c'est simplement une catégorie racine sans enfant.
+  interface Group {
+    category: string;
+    color: string;
+    unallocated: number;
+    breakdown: CategoryBreakdownDetail[];
+  }
+  const groups = new Map<string, Group>();
+
+  for (const row of rows) {
+    const isChild = row.parentId !== null;
+    // Le leftJoin laisse passer les transactions sans catégorie (tout est null) :
+    // elles restent une part unique, sans détail, comme avant.
+    const groupId = row.parentId ?? row.categoryId;
+    const key = groupId === null ? "none" : String(groupId);
+    const total = Number(row.total);
+
+    let group = groups.get(key);
+    if (!group) {
+      // Une part croisée d'abord par ses enfants tient libellé et couleur du
+      // parent joint, sinon de la ligne elle-même. Seule la part « sans
+      // catégorie » n'a aucun des deux et retombe sur le libellé vide.
+      group = {
+        category: (isChild ? row.parentName : row.categoryName) ?? "",
+        color:
+          (isChild ? row.parentColor : row.categoryColor) ??
+          FALLBACK_CATEGORY_COLOR,
+        unallocated: 0,
+        breakdown: [],
+      };
+      groups.set(key, group);
+    }
+
+    if (isChild) {
+      group.breakdown.push({
+        category: row.categoryName ?? "",
+        total,
+        color: row.categoryColor ?? FALLBACK_CATEGORY_COLOR,
+      });
+    } else {
+      group.unallocated += total;
+    }
+  }
+
+  return [...groups.values()]
+    .map((group) => {
+      const breakdown = [...group.breakdown].sort((a, b) => b.total - a.total);
+      const total =
+        group.unallocated + breakdown.reduce((acc, c) => acc + c.total, 0);
+      // Le montant porté par la catégorie parente elle-même ne devient une
+      // ligne qu'en présence de vraies sous-catégories, et reste en dernier.
+      if (breakdown.length > 0 && group.unallocated !== 0) {
+        breakdown.push({
+          category: UNALLOCATED_LABEL,
+          total: group.unallocated,
+          color: group.color,
+        });
+      }
+      return { category: group.category, color: group.color, total, breakdown };
+    })
+    .sort((a, b) => b.total - a.total);
 }
 
 export async function listBankLabels(): Promise<string[]> {

@@ -425,23 +425,89 @@ interface PieChartCardProps {
   data: CategoryBreakdownItem[];
 }
 
+const tooltipStyle = {
+  backgroundColor: "var(--popover)",
+  border: "1px solid var(--border)",
+  borderRadius: "var(--radius-md)",
+  color: "var(--popover-foreground)",
+  fontSize: 12,
+};
+
+const percentFr = new Intl.NumberFormat("fr-FR", {
+  style: "percent",
+  maximumFractionDigits: 0,
+});
+
+// Un montant non nul ne doit jamais s'afficher « 0 % » : ça se lit comme un bug.
+function sharePercent(part: number, whole: number) {
+  if (whole === 0 || part === 0) return percentFr.format(0);
+  const share = part / whole;
+  return share < 0.01 ? "< 1 %" : percentFr.format(share);
+}
+
+// Le tooltip est clampé dans la zone du graphique (Card en overflow-hidden) :
+// au-delà de cette limite les lignes en trop sont repliées en une seule.
+const MAX_TOOLTIP_ROWS = 10;
+
+// Tooltip custom : `content` court-circuite `formatter`/`contentStyle` de
+// recharts, le style et le format euro sont donc portés ici.
+function CategoryTooltip({
+  active,
+  payload,
+}: {
+  active?: boolean;
+  payload?: { payload: CategoryBreakdownItem }[];
+}) {
+  const item = payload?.[0]?.payload;
+  if (!active || !item) return null;
+
+  const shown = item.breakdown.slice(0, MAX_TOOLTIP_ROWS);
+  const hidden = item.breakdown.slice(MAX_TOOLTIP_ROWS);
+  const rows =
+    hidden.length === 0
+      ? shown
+      : [
+          ...shown,
+          {
+            category: `${hidden.length} autres`,
+            total: hidden.reduce((acc, d) => acc + d.total, 0),
+            color: item.color,
+          },
+        ];
+
+  return (
+    <div style={tooltipStyle} className="px-3 py-2">
+      <div className="flex items-baseline justify-between gap-6 font-medium">
+        <span>{item.category}</span>
+        <span className="tabular-nums">{euro.format(item.total)}</span>
+      </div>
+      {rows.length > 0 && (
+        <ul className="border-border mt-2 space-y-1 border-t pt-2">
+          {rows.map((detail) => (
+            <li
+              key={detail.category}
+              className="flex items-baseline justify-between gap-6"
+            >
+              <span className="text-muted-foreground">{detail.category}</span>
+              <span className="tabular-nums">
+                {euro.format(detail.total)}
+                <span className="text-muted-foreground ml-2">
+                  {sharePercent(detail.total, item.total)}
+                </span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 function PieChartCard({ title, data }: PieChartCardProps) {
   const coloredData = data.map((entry) => ({
     ...entry,
     fill: entry.color,
   }));
-
-  const tooltipStyle = {
-    backgroundColor: "var(--popover)",
-    border: "1px solid var(--border)",
-    borderRadius: "var(--radius-md)",
-    color: "var(--popover-foreground)",
-    fontSize: 12,
-  };
-
-  function euroTooltip(value: unknown) {
-    return euro.format(Number(value));
-  }
 
   return (
     <Card className="flex-1">
@@ -462,7 +528,7 @@ function PieChartCard({ title, data }: PieChartCardProps) {
                 outerRadius={100}
                 paddingAngle={2}
               />
-              <Tooltip formatter={euroTooltip} contentStyle={tooltipStyle} />
+              <Tooltip content={<CategoryTooltip />} />
               <Legend />
             </PieChart>
           </ResponsiveContainer>

@@ -30,6 +30,7 @@ export type { SetupStatus } from "./banking/settings";
 export type { SyncOutcome } from "./banking/fetch-transactions";
 export type { ConsentBadge } from "./banking/domain";
 export type {
+  CategoryBreakdownDetail,
   CategoryBreakdownItem,
   TransactionRow,
 } from "./transactions/queries";
