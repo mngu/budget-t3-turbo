@@ -17,7 +17,7 @@ import {
   partitionResults,
   resolveShortcut,
 } from "./results";
-import { findSimilar } from "./similar";
+import { findSimilar, loadDiscriminativeBankCodes } from "./similar";
 
 export interface CategorizeResult {
   categorized: number;
@@ -75,9 +75,14 @@ async function runCategorization(): Promise<CategorizeResult> {
   console.log(`🏷️  ${rows.length} transactions à catégoriser…`);
 
   // Étape 1 : recherche des similaires pour toutes les transactions (parallèle).
+  // La pureté des bank_code est calculée une seule fois pour tout le run.
+  const discriminativeBankCodes = await loadDiscriminativeBankCodes();
   const similarsByTxnId = new Map<number, SimilarTxn[]>(
     await Promise.all(
-      rows.map(async (txn) => [txn.id, await findSimilar(txn)] as const),
+      rows.map(
+        async (txn) =>
+          [txn.id, await findSimilar(txn, discriminativeBankCodes)] as const,
+      ),
     ),
   );
 

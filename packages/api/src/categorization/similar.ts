@@ -1,7 +1,7 @@
 // Recherche de transactions déjà catégorisées similaires à une transaction donnée,
 // pour enrichir le prompt de catégorisation par des exemples concrets (few-shot).
 import type { Transaction } from "@budget/db/schema";
-import { and, desc, eq, isNotNull, ne, or, sql } from "@budget/db";
+import { and, desc, eq, isNotNull, ne, sql } from "@budget/db";
 import { db } from "@budget/db/client";
 import { categories, transactions } from "@budget/db/schema";
 
@@ -20,6 +20,76 @@ export interface SimilarTxn {
 export const SIMILAR_LIMIT = 5;
 // Seuil pg_trgm en dessous duquel deux descriptions ne sont pas jugées similaires.
 const TRIGRAM_THRESHOLD = 0.3;
+
+// `bank_code` est un code de type d'opération propre à chaque banque, pas une
+// nature de dépense : sa valeur d'indice varie énormément d'un code à l'autre.
+// Mesuré sur les données réelles, `TOPUP` ou `06` désignent une seule catégorie
+// parente, tandis que `CARD_PAYMENT` (171 transactions) en couvre 11 et `C2`
+// (« virement reçu » chez SG) mélange remboursements, loyer et virements
+// internes — c'est ce dernier qui poussait des virements entrants vers
+// « Transferts personnels ». On ne s'en sert donc que pour les codes dont la
+// pureté est vérifiée dans les données, jamais sur une liste codée en dur (les
+// codes sont spécifiques à chaque banque et pourriraient au premier ajout).
+//
+// Calibration : « au moins 10 observations dont au plus une aberrante ». Une
+// première tentative à 5 observations / 80 % laissait passer `C2` — 4 virements
+// dans « Remboursements & Transferts » et 1 loyer, soit exactement 0,80 — qui
+// continuait donc à montrer un exemple « Loyer » à un virement entrant. Sur un
+// échantillon de 5, une proportion de 80 % ne veut rien dire ; il faut à la
+// fois assez d'observations et une quasi-unanimité.
+export const BANK_CODE_MIN_SAMPLES = 10;
+export const BANK_CODE_MIN_DOMINANCE = 0.9;
+
+export interface BankCodeParentCount {
+  bankCode: string;
+  parentId: number;
+  count: number;
+}
+
+// Garde les codes dont la catégorie parente dominante représente au moins
+// `minDominance` des transactions déjà catégorisées, sur au moins
+// `minSamples` observations. Pur : testable sans base.
+export function selectDiscriminativeBankCodes(
+  rows: BankCodeParentCount[],
+  minSamples = BANK_CODE_MIN_SAMPLES,
+  minDominance = BANK_CODE_MIN_DOMINANCE,
+): Set<string> {
+  const totals = new Map<string, { total: number; top: number }>();
+  for (const { bankCode, count } of rows) {
+    const entry = totals.get(bankCode) ?? { total: 0, top: 0 };
+    entry.total += count;
+    entry.top = Math.max(entry.top, count);
+    totals.set(bankCode, entry);
+  }
+
+  const kept = new Set<string>();
+  for (const [bankCode, { total, top }] of totals) {
+    if (total >= minSamples && top / total >= minDominance) kept.add(bankCode);
+  }
+  return kept;
+}
+
+// Une seule requête par run de catégorisation (et non par transaction) :
+// la pureté ne dépend pas de la transaction qu'on cherche à classer.
+export async function loadDiscriminativeBankCodes(): Promise<Set<string>> {
+  const rows = await db
+    .select({
+      bankCode: transactions.bankCode,
+      parentId: sql<number>`coalesce(${categories.parentId}, ${categories.id})`,
+      count: sql<number>`count(*)`.mapWith(Number),
+    })
+    .from(transactions)
+    .innerJoin(categories, eq(transactions.categoryId, categories.id))
+    .where(isNotNull(transactions.bankCode))
+    .groupBy(
+      transactions.bankCode,
+      sql`coalesce(${categories.parentId}, ${categories.id})`,
+    );
+
+  return selectDiscriminativeBankCodes(
+    rows.filter((r): r is BankCodeParentCount => r.bankCode !== null),
+  );
+}
 
 const similarColumns = {
   id: transactions.id,
@@ -76,11 +146,13 @@ async function byDescriptionTrigram(
     .limit(limit);
 }
 
-async function byBankCodeOrMcc(
-  txn: TxnForLlm,
-  limit: number,
-): Promise<SimilarTxn[]> {
-  if (!txn.bankCode && !txn.mcc) return [];
+// Le MCC (merchant category code) est une nature de commerce, donc un indice
+// sémantique fort — aucun filtre de pureté nécessaire. Attention : Enable
+// Banking ne le renseigne pour aucune des trois banques du projet (la clé est
+// présente dans `raw` mais toujours nulle), ce tier ne remonte donc jamais rien
+// aujourd'hui. Conservé pour l'ajout éventuel d'un établissement qui l'expose.
+async function byMcc(txn: TxnForLlm, limit: number): Promise<SimilarTxn[]> {
+  if (!txn.mcc) return [];
   return db
     .select(similarColumns)
     .from(transactions)
@@ -89,19 +161,41 @@ async function byBankCodeOrMcc(
       and(
         isNotNull(transactions.categoryId),
         ne(transactions.id, txn.id),
-        or(
-          txn.bankCode ? eq(transactions.bankCode, txn.bankCode) : undefined,
-          txn.mcc ? eq(transactions.mcc, txn.mcc) : undefined,
-        ),
+        eq(transactions.mcc, txn.mcc),
       ),
     )
     .orderBy(manualFirst, desc(transactions.bookingDate))
     .limit(limit);
 }
 
-// Fusionne les candidats des différents niveaux de similarité (contrepartie exacte
-// > trigrammes sur la description > bank_code/MCC en dernier recours), dédoublonne
-// par id (le niveau le plus prioritaire gagne) et plafonne à `limit`.
+// Dernier recours, et uniquement pour les codes dont la pureté a été vérifiée
+// (voir selectDiscriminativeBankCodes) : sur un code fourre-tout, ce tier
+// fabrique des exemples qui contredisent la transaction à classer.
+async function byBankCode(
+  txn: TxnForLlm,
+  limit: number,
+  discriminativeBankCodes: Set<string>,
+): Promise<SimilarTxn[]> {
+  if (!txn.bankCode || !discriminativeBankCodes.has(txn.bankCode)) return [];
+  return db
+    .select(similarColumns)
+    .from(transactions)
+    .innerJoin(categories, eq(transactions.categoryId, categories.id))
+    .where(
+      and(
+        isNotNull(transactions.categoryId),
+        ne(transactions.id, txn.id),
+        eq(transactions.bankCode, txn.bankCode),
+      ),
+    )
+    .orderBy(manualFirst, desc(transactions.bookingDate))
+    .limit(limit);
+}
+
+// Fusionne les candidats des différents niveaux de similarité (contrepartie
+// exacte > trigrammes sur la description > MCC > bank_code discriminant en
+// dernier recours), dédoublonne par id (le niveau le plus prioritaire gagne)
+// et plafonne à `limit`.
 export function mergeSimilarCandidates(
   tiers: SimilarTxn[][],
   limit = SIMILAR_LIMIT,
@@ -120,15 +214,20 @@ export function mergeSimilarCandidates(
 }
 
 // Transactions déjà catégorisées les plus proches de `txn` (hors elle-même),
-// triées par pertinence décroissante.
+// triées par pertinence décroissante. `discriminativeBankCodes` vient de
+// loadDiscriminativeBankCodes(), calculé une fois par run : le passer
+// explicitement évite une requête de pureté par transaction, et un appelant qui
+// l'omettrait n'obtiendrait jamais d'exemples issus d'un code fourre-tout.
 export async function findSimilar(
   txn: TxnForLlm,
+  discriminativeBankCodes = new Set<string>(),
   limit = SIMILAR_LIMIT,
 ): Promise<SimilarTxn[]> {
-  const [exact, trigram, fallback] = await Promise.all([
+  const [exact, trigram, mcc, bankCode] = await Promise.all([
     byCounterparty(txn, limit),
     byDescriptionTrigram(txn, limit),
-    byBankCodeOrMcc(txn, limit),
+    byMcc(txn, limit),
+    byBankCode(txn, limit, discriminativeBankCodes),
   ]);
-  return mergeSimilarCandidates([exact, trigram, fallback], limit);
+  return mergeSimilarCandidates([exact, trigram, mcc, bankCode], limit);
 }

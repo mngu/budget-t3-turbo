@@ -3,7 +3,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 
-import { desc, eq, gte } from "@budget/db";
+import { and, desc, eq, gte, isNotNull, isNull } from "@budget/db";
 import { db } from "@budget/db/client";
 import { accounts, transactions } from "@budget/db/schema";
 import {
@@ -38,31 +38,62 @@ export function sampleWindowStart(
   return d.toISOString().slice(0, 10);
 }
 
-// Échantillon représentatif : transactions des 6 derniers mois (tous comptes),
-// triées par date décroissante, plafonné à SAMPLE_LIMIT.
-// Attention : le filtre ne porte que sur la date — les transactions déjà
-// catégorisées comme celles laissées sans catégorie y figurent, sans priorité
-// pour ces dernières (voir le commentaire de buildSystemPrompt côté
-// categorization/prompt.ts, qui compte sur ce process pour combler les trous).
+// Part maximale de l'échantillon réservée aux transactions sans catégorie.
+// Ce plafond n'est pas cosmétique : le LLM propose une arborescence complète
+// qui, en mode "replace", devient la vérité (voir apply.ts). S'il ne voyait que
+// les orphelines, il proposerait un arbre ne couvrant qu'elles et "replace"
+// supprimerait tout le reste — computeReplacePlan ne protège que les
+// corrections manuelles. Le contexte déjà catégorisé doit rester majoritaire.
+export const UNCATEGORIZED_SAMPLE_SHARE = 0.3;
+
+const analysisColumns = {
+  id: transactions.id,
+  description: transactions.description,
+  counterparty: transactions.counterparty,
+  amount: transactions.amount,
+  direction: transactions.direction,
+  bankName: accounts.bankName,
+  mcc: transactions.mcc,
+};
+
+// Échantillon stratifié, plafonné à SAMPLE_LIMIT :
+//   1. les transactions sans catégorie — sans fenêtre de date, une orpheline
+//      ancienne reste un trou de l'arborescence — dans la limite de
+//      UNCATEGORIZED_SAMPLE_SHARE ;
+//   2. complété par les transactions récentes déjà catégorisées, qui donnent
+//      au LLM le contexte des habitudes réelles.
+// Sans l'étape 1, les orphelines (aujourd'hui ~2 % des lignes) seraient diluées
+// puis évincées dès que le volume dépasse la limite : la boucle « la
+// catégorisation classe avec l'existant, les suggestions créent ce qui manque »
+// ne se refermerait jamais.
 export async function sampleTransactions(
   limit = SAMPLE_LIMIT,
 ): Promise<TxnForAnalysis[]> {
   const since = sampleWindowStart(new Date());
-  return db
-    .select({
-      id: transactions.id,
-      description: transactions.description,
-      counterparty: transactions.counterparty,
-      amount: transactions.amount,
-      direction: transactions.direction,
-      bankName: accounts.bankName,
-      mcc: transactions.mcc,
-    })
+
+  const uncategorized = await db
+    .select(analysisColumns)
     .from(transactions)
     .innerJoin(accounts, eq(transactions.accountId, accounts.id))
-    .where(gte(transactions.bookingDate, since))
+    .where(isNull(transactions.categoryId))
     .orderBy(desc(transactions.bookingDate))
-    .limit(limit);
+    .limit(Math.floor(limit * UNCATEGORIZED_SAMPLE_SHARE));
+
+  const categorized = await db
+    .select(analysisColumns)
+    .from(transactions)
+    .innerJoin(accounts, eq(transactions.accountId, accounts.id))
+    .where(
+      and(
+        isNotNull(transactions.categoryId),
+        gte(transactions.bookingDate, since),
+      ),
+    )
+    .orderBy(desc(transactions.bookingDate))
+    .limit(limit - uncategorized.length);
+
+  // Les deux requêtes sont disjointes (IS NULL / IS NOT NULL) : pas de doublon.
+  return [...uncategorized, ...categorized];
 }
 
 const CATEGORY_COLOR_PROMPT_LIST = CATEGORY_COLOR_PALETTE.map(
