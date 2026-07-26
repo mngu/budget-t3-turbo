@@ -141,7 +141,7 @@ export const categoriesRouter = {
 
   // Catégorise les transactions sans catégorie avec les catégories déjà
   // existantes (pas de proposition de nouvelle arborescence, voir
-  // suggestions.generate pour ça) — équivalent UI de `pnpm categorize`.
+  // suggestions.generate pour ça).
   categorize: protectedProcedure.mutation(() => categorizeUncategorizedCore()),
 
   // Crée une catégorie (parentId null) ou sous-catégorie (parentId d'un

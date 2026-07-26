@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { main as runCategorize } from "../../scripts/categorize";
 import { main as runImport } from "../../scripts/import";
 import { syncBanks } from "./eb-sync";
-import { performSync } from "./sync-core";
+import { performImport, performSync } from "./sync-core";
 
 // Mocks explicites (avec factory) plutôt que l'automock de vi.mock(path) seul :
 // l'automock importerait le vrai module pour en inspecter la forme, ce qui
@@ -113,5 +113,56 @@ describe("performSync", () => {
       expired: [],
       rateLimited: [],
     });
+  });
+});
+
+describe("performImport", () => {
+  it("importe et catégorise sans jamais appeler la banque", async () => {
+    runImportMock.mockResolvedValue(false);
+    runCategorizeMock.mockResolvedValue({ categorized: 3, remaining: 1 });
+
+    await expect(performImport()).resolves.toEqual({
+      categorized: 3,
+      remaining: 1,
+    });
+    // L'intérêt de cet endpoint est précisément de ne pas toucher aux sessions
+    // bancaires (pas de SCA, pas de consommation du quota PSD2).
+    expect(syncMock).not.toHaveBeenCalled();
+  });
+
+  it("lève une erreur explicite si l'import échoue, sans appeler categorize", async () => {
+    runImportMock.mockResolvedValue(true);
+
+    await expect(performImport()).rejects.toThrow("Échec de l'import");
+    expect(runCategorizeMock).not.toHaveBeenCalled();
+  });
+
+  it("renvoie null si la catégorisation échoue (l'import, lui, a réussi)", async () => {
+    runImportMock.mockResolvedValue(false);
+    runCategorizeMock.mockRejectedValue(new Error("boom catégorisation"));
+
+    await expect(performImport()).resolves.toBeNull();
+  });
+
+  it("partage le verrou avec performSync", async () => {
+    let resolveSync!: (value: {
+      expired: string[];
+      rateLimited: string[];
+    }) => void;
+    syncMock.mockReturnValue(
+      new Promise((resolve) => {
+        resolveSync = resolve;
+      }),
+    );
+
+    const running = performSync();
+    await expect(performImport()).rejects.toThrow(
+      "Une synchronisation est déjà en cours.",
+    );
+
+    runImportMock.mockResolvedValue(false);
+    runCategorizeMock.mockResolvedValue({ categorized: 0, remaining: 0 });
+    resolveSync({ expired: [], rateLimited: [] });
+    await running;
   });
 });

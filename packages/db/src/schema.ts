@@ -1,10 +1,6 @@
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import { boolean, date, index, integer, jsonb, numeric, pgTable, serial, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
 
-
-
-
-
 // Configuration Enable Banking (ligne unique, id=1) — alimentée par l'onboarding.
 export const appSettings = pgTable("app_settings", {
   id: integer("id").primaryKey().default(1),
