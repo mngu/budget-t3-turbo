@@ -1,0 +1,35 @@
+packages/api/eslint.config.ts
+  s_b0e7f1054f806d::t_0d6a24965437ab 12-16
+packages/api/src/router/transactions.ts
+  s_b0e7f1054f806d::t_1332f8440ca528 4,6-11,17,21,23,27
+packages/api/src/transactions/normalize.ts
+  s_b0e7f1054f806d::t_acf8589b8d5b03 57-59
+packages/api/src/banking/fetch-transactions.ts
+  s_b0e7f1054f806d::t_a69f848d105dd3 11
+packages/api/src/categories/mutations.ts
+  s_b0e7f1054f806d::t_caedd623f49764 1-93
+packages/api/src/transactions/queries.ts
+  s_b0e7f1054f806d::t_faeb61d3ad53a5 1-192
+packages/api/src/categories/queries.ts
+  s_b0e7f1054f806d::t_ea4c6ca97831f8 1-118
+packages/api/src/index.ts
+  s_b0e7f1054f806d::t_4e2607a384e947 35,41
+packages/api/src/router/categories.ts
+  s_b0e7f1054f806d::t_96e59797cb220f 4,6-16,29,35-36,38,40,49,51,54-55,57-58,62,66,69-70
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "a762371602b933d0a1a633c6c4fbe4a0b79dd6fc",
+  "prompts": {},
+  "sessions": {
+    "s_b0e7f1054f806d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "59449e5a-c130-4906-b3a4-762a27276041",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
