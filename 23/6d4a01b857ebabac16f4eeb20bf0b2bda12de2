@@ -1,0 +1,16 @@
+packages/api/src/lib/similar-transactions.ts
+  h_baa52ab231f280 3,15,17
+packages/db/src/schema.ts
+  h_baa52ab231f280 2,4-6,120
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "236d4a01b857ebabac16f4eeb20bf0b2bda12de2",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
