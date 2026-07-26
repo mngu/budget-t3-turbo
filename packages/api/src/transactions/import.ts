@@ -1,21 +1,20 @@
-#!/usr/bin/env tsx
 // Import idempotent des JSON Enable Banking (data/) vers PostgreSQL.
-// Usage : npm run import
 import { readdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 
 import { sql } from "@budget/db";
 import { db } from "@budget/db/client";
 import { accounts, transactions } from "@budget/db/schema";
 
 import type { EbTransaction } from "./normalize";
-import { DATA_DIR } from "../src/lib/data-dir";
+import { DATA_DIR } from "../lib/data-dir";
 import { normalizeTransaction } from "./normalize";
 
 const DATA = DATA_DIR;
 
-export async function main(): Promise<boolean> {
+// Retourne true si au moins un fichier n'a pas pu être traité (l'import des
+// autres se poursuit) — l'appelant décide quoi en faire.
+export async function importTransactions(): Promise<boolean> {
   // 1. Comptes connus (créés par le wizard de connexion, ou import historique)
   const dbAccounts = await db
     .select({ id: accounts.id, uid: accounts.uid })
@@ -98,13 +97,4 @@ export async function main(): Promise<boolean> {
   }
 
   return hadError;
-}
-
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  main()
-    .then((hadError) => process.exit(hadError ? 1 : 0))
-    .catch((err) => {
-      console.error(`❌ ${err.message}`);
-      process.exit(1);
-    });
 }

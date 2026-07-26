@@ -3,9 +3,9 @@
 import { db } from "@budget/db/client";
 import { appSettings } from "@budget/db/schema";
 
-import type { EbSettings } from "./eb-client";
-import { ebApi, loadSettings } from "./eb-client";
-import { makeJwt } from "./eb-domain";
+import type { EbSettings } from "./client";
+import { ebApi, loadSettings } from "./client";
+import { makeJwt } from "./domain";
 
 export interface SetupStatus {
   configured: boolean;
@@ -77,7 +77,7 @@ async function upsertSettings(settings: EbSettings): Promise<void> {
     });
 }
 
-export async function getSetupStatusCore(): Promise<SetupStatus> {
+export async function getSetupStatus(): Promise<SetupStatus> {
   if (statusCache && Date.now() - statusCache.at < STATUS_TTL_MS)
     return statusCache.status;
 
@@ -91,9 +91,7 @@ export async function getSetupStatusCore(): Promise<SetupStatus> {
   return status;
 }
 
-export async function saveSettingsCore(
-  input: EbSettings,
-): Promise<SetupStatus> {
+export async function saveSettings(input: EbSettings): Promise<SetupStatus> {
   try {
     makeJwt(input.applicationId, input.privateKeyPem);
   } catch {

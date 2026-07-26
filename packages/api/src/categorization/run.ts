@@ -1,9 +1,6 @@
-#!/usr/bin/env tsx
 // Catégorisation LLM des transactions non catégorisées (category_id IS NULL).
-// Best-effort : sans clé API ou en cas d'erreur API, warning + exit 0
-// (l'import ne doit jamais échouer à cause de la catégorisation).
-// Usage : npm run categorize
-import { fileURLToPath } from "node:url";
+// Best-effort : sans clé API ou en cas d'erreur API, avertissement et retour
+// normal — l'import ne doit jamais échouer à cause de la catégorisation.
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 
@@ -11,25 +8,16 @@ import { and, count, eq, isNull } from "@budget/db";
 import { db } from "@budget/db/client";
 import { accounts, categories, transactions } from "@budget/db/schema";
 
-import type { SimilarTxn } from "../src/lib/similar-transactions";
-import type { TxnForLlm } from "./categorize-core";
-import { findSimilar } from "../src/lib/similar-transactions";
+import type { TxnForLlm } from "./prompt";
+import type { SimilarTxn } from "./similar";
+import { withSingleFlight } from "../lib/single-flight";
+import { buildFewShotUserMessage, buildSystemPrompt } from "./prompt";
 import {
   buildCategorizationOutputSchema,
-  buildFewShotUserMessage,
-  buildSystemPrompt,
   partitionResults,
   resolveShortcut,
-} from "./categorize-core";
-
-// tsx ne charge pas .env tout seul (même logique que src/db/client.ts).
-if (!process.env.ANTHROPIC_API_KEY) {
-  try {
-    process.loadEnvFile(".env");
-  } catch {
-    // .env absent : la variable doit venir de l'environnement
-  }
-}
+} from "./results";
+import { findSimilar } from "./similar";
 
 export interface CategorizeResult {
   categorized: number;
@@ -44,7 +32,7 @@ async function remainingUncategorizedCount(): Promise<number> {
   return row?.remaining ?? 0;
 }
 
-export async function main(): Promise<CategorizeResult> {
+async function runCategorization(): Promise<CategorizeResult> {
   if (!process.env.ANTHROPIC_API_KEY) {
     console.warn(
       "⚠️  ANTHROPIC_API_KEY absente (.env) — catégorisation sautée.",
@@ -180,7 +168,7 @@ export async function main(): Promise<CategorizeResult> {
     } catch (err) {
       if (err instanceof Anthropic.APIError) {
         console.warn(
-          `⚠️  Erreur API Claude (${err.message}) — catégorisation interrompue, relancez npm run categorize.`,
+          `⚠️  Erreur API Claude (${err.message}) — catégorisation interrompue, relancez-la depuis /categories.`,
         );
       } else {
         throw err;
@@ -193,11 +181,13 @@ export async function main(): Promise<CategorizeResult> {
   return { categorized, remaining };
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  main()
-    .then(() => process.exit(0))
-    .catch((err) => {
-      console.error(`❌ ${err.message}`);
-      process.exit(1);
-    });
+// Idempotent (garde `IS NULL` partout) : relancer est toujours sûr. Sérialisé
+// pour ne pas soumettre deux fois les mêmes transactions au LLM — la
+// catégorisation lancée par le pipeline de sync passe par le même verrou.
+export async function categorizeUncategorized(): Promise<CategorizeResult> {
+  return withSingleFlight(
+    "categorize",
+    "Une catégorisation est déjà en cours.",
+    runCategorization,
+  );
 }

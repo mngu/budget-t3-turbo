@@ -2,20 +2,20 @@ import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod/v4";
 
 import {
-  completeAuthCore,
-  getConnectionAccountsCore,
-  listConnectionsCore,
-  revokeConnectionCore,
-  searchAspspsCore,
-  startAuthCore,
-  updateAccountsCore,
-} from "../lib/connections-core";
+  completeAuth,
+  getConnectionAccounts,
+  listConnections,
+  revokeConnection,
+  searchAspsps,
+  startAuth,
+  updateAccounts,
+} from "../banking/connections";
 import { protectedProcedure } from "../trpc";
 
 export const connectionsRouter = {
   searchAspsps: protectedProcedure
     .input(z.object({ q: z.string().optional() }))
-    .query(({ input }) => searchAspspsCore(input.q)),
+    .query(({ input }) => searchAspsps(input.q)),
 
   start: protectedProcedure
     .input(
@@ -25,17 +25,17 @@ export const connectionsRouter = {
         connectionId: z.number().int().positive().optional(),
       }),
     )
-    .mutation(({ input }) => startAuthCore(input)),
+    .mutation(({ input }) => startAuth(input)),
 
   complete: protectedProcedure
     .input(z.object({ code: z.string().min(1), state: z.string().min(1) }))
-    .mutation(({ input }) => completeAuthCore(input.code, input.state)),
+    .mutation(({ input }) => completeAuth(input.code, input.state)),
 
-  list: protectedProcedure.query(() => listConnectionsCore()),
+  list: protectedProcedure.query(() => listConnections()),
 
   accounts: protectedProcedure
     .input(z.object({ connectionId: z.number().int().positive() }))
-    .query(({ input }) => getConnectionAccountsCore(input.connectionId)),
+    .query(({ input }) => getConnectionAccounts(input.connectionId)),
 
   updateAccounts: protectedProcedure
     .input(
@@ -49,9 +49,9 @@ export const connectionsRouter = {
         ),
       }),
     )
-    .mutation(({ input }) => updateAccountsCore(input.accounts)),
+    .mutation(({ input }) => updateAccounts(input.accounts)),
 
   revoke: protectedProcedure
     .input(z.object({ connectionId: z.number().int().positive() }))
-    .mutation(({ input }) => revokeConnectionCore(input.connectionId)),
+    .mutation(({ input }) => revokeConnection(input.connectionId)),
 } satisfies TRPCRouterRecord;

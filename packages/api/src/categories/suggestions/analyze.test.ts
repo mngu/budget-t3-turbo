@@ -2,16 +2,15 @@ import { describe, expect, it, vi } from "vitest";
 
 import { CATEGORY_COLOR_HEXES } from "@budget/validators";
 
-import type { TxnForAnalysis } from "./suggest-categories-core";
-import type { RawCategorySuggestion } from "./suggest-categories-schema";
+import type { TxnForAnalysis } from "./analyze";
+import type { RawCategorySuggestion } from "./schema";
 
 // Mocks explicites : importer le vrai module chargerait src/db/client.ts
-// (POSTGRES_URL requise) et le SDK Anthropic — voir sync-core.test.ts.
+// (POSTGRES_URL requise) et le SDK Anthropic — voir pipeline.test.ts.
 vi.mock("@budget/db/client", () => ({ db: {} }));
-vi.mock("../../scripts/categorize", () => ({ main: vi.fn() }));
 
 const { buildAnalysisPrompt, sampleWindowStart, sanitizeSuggestionColors } =
-  await import("./suggest-categories-core");
+  await import("./analyze");
 
 const txn = (id: number): TxnForAnalysis => ({
   id,

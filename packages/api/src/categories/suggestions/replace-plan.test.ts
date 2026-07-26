@@ -1,10 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import type { ExistingCategoryForReplace } from "./category-replace-plan";
-import {
-  computeReplacePlan,
-  flattenProposedNames,
-} from "./category-replace-plan";
+import type { ExistingCategoryForReplace } from "./replace-plan";
+import { computeReplacePlan, flattenProposedNames } from "./replace-plan";
 
 const cat = (
   id: number,

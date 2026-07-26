@@ -4,7 +4,7 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/src/index.d.ts",
+      "types": "./dist/index.d.ts",
       "default": "./src/index.ts"
     }
   },
@@ -16,8 +16,7 @@
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "lint": "eslint --flag unstable_native_nodejs_ts_config",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit --emitDeclarationOnly false",
-    "with-env": "dotenv -e ../../.env --"
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.111.0",
@@ -32,10 +31,8 @@
     "@budget/eslint-config": "workspace:*",
     "@budget/prettier-config": "workspace:*",
     "@budget/tsconfig": "workspace:*",
-    "dotenv-cli": "^10.0.0",
     "eslint": "catalog:",
     "prettier": "catalog:",
-    "tsx": "^4.23.0",
     "typescript": "catalog:",
     "vitest": "^4.1.10"
   },

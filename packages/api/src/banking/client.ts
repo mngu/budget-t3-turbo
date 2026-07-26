@@ -2,7 +2,7 @@
 import { db } from "@budget/db/client";
 import { appSettings } from "@budget/db/schema";
 
-import { makeJwt } from "./eb-domain";
+import { makeJwt } from "./domain";
 
 const API = "https://api.enablebanking.com";
 

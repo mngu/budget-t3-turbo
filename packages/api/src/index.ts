@@ -25,10 +25,10 @@ export type {
   AccountSummary,
   AspspOption,
   ConnectionSummary,
-} from "./lib/connections-core";
-export type { SetupStatus } from "./lib/settings-core";
-export type { SyncOutcome } from "./lib/eb-sync";
-export type { ConsentBadge } from "./lib/eb-domain";
+} from "./banking/connections";
+export type { SetupStatus } from "./banking/settings";
+export type { SyncOutcome } from "./banking/fetch-transactions";
+export type { ConsentBadge } from "./banking/domain";
 export type {
   CategoryBreakdownItem,
   TransactionRow,
@@ -42,10 +42,10 @@ export type {
 export type {
   CategorySuggestion,
   CategorySuggestionChild,
-} from "./lib/suggest-categories-schema";
-export type { ReplacePlan } from "./lib/category-replace-plan";
+} from "./categories/suggestions/schema";
+export type { ReplacePlan } from "./categories/suggestions/replace-plan";
 export type {
   SuggestionsRun,
   SuggestionsStatus,
-  TxnForAnalysis,
-} from "./lib/suggest-categories-core";
+} from "./categories/suggestions/state";
+export type { TxnForAnalysis } from "./categories/suggestions/analyze";

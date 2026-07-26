@@ -5,7 +5,7 @@ import { and, desc, eq, isNotNull, ne, or, sql } from "@budget/db";
 import { db } from "@budget/db/client";
 import { categories, transactions } from "@budget/db/schema";
 
-import type { TxnForLlm } from "../../scripts/categorize-core";
+import type { TxnForLlm } from "./prompt";
 
 export interface SimilarTxn {
   id: number;

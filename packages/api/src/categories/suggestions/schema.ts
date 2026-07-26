@@ -1,4 +1,4 @@
-// Schéma de la sortie structurée du LLM d'analyse (voir suggest-categories-core.ts).
+// Schéma de la sortie structurée du LLM d'analyse (voir suggestions/analyze.ts).
 import { z } from "zod/v4";
 
 import { CATEGORY_COLOR_HEXES } from "@budget/validators";
@@ -17,7 +17,7 @@ export const categorySuggestionSchema = z.object({
   // sous-catégories, qui héritent visuellement de leur parent — voir
   // transactionsRouter). Toujours un membre de CATEGORY_COLOR_HEXES à ce
   // stade : la sortie brute du LLM est nettoyée par sanitizeSuggestionColors
-  // avant de prendre cette forme (voir suggest-categories-core.ts).
+  // avant de prendre cette forme (voir suggestions/analyze.ts).
   parentColor: z.enum(CATEGORY_COLOR_HEXES as [string, ...string[]]),
   enfants: z.array(categorySuggestionChildSchema).min(1),
 });
@@ -30,7 +30,7 @@ export const categorySuggestionsSchema = z.object({
 // (zodOutputFormat) : `parentColor` n'est pas contraint à l'énumération ici,
 // pour ne jamais faire planter le parsing structured-output de toute
 // l'analyse si le LLM sort une couleur hors liste — même piège que celui
-// corrigé dans categorize-core.ts (voir buildCategorizationOutputSchema).
+// corrigé dans categorization/results.ts (voir buildCategorizationOutputSchema).
 // sanitizeSuggestionColors ramène chaque couleur à un membre valide de la
 // palette juste après, avant que la donnée ne prenne la forme stricte
 // ci-dessus.

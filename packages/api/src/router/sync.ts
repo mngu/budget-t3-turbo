@@ -1,6 +1,6 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 
-import { performImport, performSync } from "../lib/sync-core";
+import { performImport, performSync } from "../pipeline";
 import { protectedProcedure } from "../trpc";
 
 export const syncRouter = {

@@ -5,14 +5,14 @@ import { and, eq, inArray, lt, sql } from "@budget/db";
 import { db } from "@budget/db/client";
 import { accounts, authRequests, bankConnections } from "@budget/db/schema";
 
-import type { ConsentBadge } from "./eb-domain";
-import { appJwt, ebApi, getAllAspsps, requireSettings } from "./eb-client";
+import type { ConsentBadge } from "./domain";
+import { appJwt, ebApi, getAllAspsps, requireSettings } from "./client";
 import {
   clampValidUntil,
   consentBadge,
   parseSessionAccounts,
   reconcileAccounts,
-} from "./eb-domain";
+} from "./domain";
 
 export interface AspspOption {
   name: string;
@@ -20,7 +20,7 @@ export interface AspspOption {
   logo: string | null;
 }
 
-export async function searchAspspsCore(
+export async function searchAspsps(
   q: string | undefined,
 ): Promise<AspspOption[]> {
   const settings = await requireSettings();
@@ -44,7 +44,7 @@ export interface StartAuthInput {
   connectionId?: number;
 }
 
-export async function startAuthCore(
+export async function startAuth(
   input: StartAuthInput,
 ): Promise<{ url: string }> {
   const settings = await requireSettings();
@@ -91,7 +91,7 @@ export interface CompleteAuthResult {
   renewed: boolean;
 }
 
-export async function completeAuthCore(
+export async function completeAuth(
   code: string,
   state: string,
 ): Promise<CompleteAuthResult> {
@@ -193,7 +193,7 @@ export interface ConnectionSummary {
   accounts: AccountSummary[];
 }
 
-export async function listConnectionsCore(): Promise<ConnectionSummary[]> {
+export async function listConnections(): Promise<ConnectionSummary[]> {
   // Bascule paresseuse : les connexions actives dont la validité est passée
   // deviennent expired (pas de tâche planifiée nécessaire).
   await db
@@ -240,7 +240,7 @@ export async function listConnectionsCore(): Promise<ConnectionSummary[]> {
   }));
 }
 
-export async function getConnectionAccountsCore(
+export async function getConnectionAccounts(
   connectionId: number,
 ): Promise<AccountSummary[]> {
   const rows = await db
@@ -262,9 +262,7 @@ export interface AccountUpdate {
   enabled: boolean;
 }
 
-export async function updateAccountsCore(
-  updates: AccountUpdate[],
-): Promise<void> {
+export async function updateAccounts(updates: AccountUpdate[]): Promise<void> {
   for (const u of updates) {
     await db
       .update(accounts)
@@ -273,9 +271,7 @@ export async function updateAccountsCore(
   }
 }
 
-export async function revokeConnectionCore(
-  connectionId: number,
-): Promise<void> {
+export async function revokeConnection(connectionId: number): Promise<void> {
   const [conn] = await db
     .select()
     .from(bankConnections)

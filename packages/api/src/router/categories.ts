@@ -8,14 +8,16 @@ import {
   FALLBACK_CATEGORY_COLOR,
 } from "@budget/validators";
 
-import { categorizeUncategorizedCore } from "../lib/categorize-uncategorized-core";
 import {
-  applySuggestionsCore,
-  generateSuggestionsCore,
-  previewReplaceCore,
-  suggestionsStatusCore,
-} from "../lib/suggest-categories-core";
-import { categorySuggestionSchema } from "../lib/suggest-categories-schema";
+  applySuggestions,
+  previewReplace,
+} from "../categories/suggestions/apply";
+import { categorySuggestionSchema } from "../categories/suggestions/schema";
+import {
+  generateSuggestions,
+  getSuggestionsStatus,
+} from "../categories/suggestions/state";
+import { categorizeUncategorized } from "../categorization/run";
 import { protectedProcedure } from "../trpc";
 
 export interface CategoryOption {
@@ -142,7 +144,7 @@ export const categoriesRouter = {
   // Catégorise les transactions sans catégorie avec les catégories déjà
   // existantes (pas de proposition de nouvelle arborescence, voir
   // suggestions.generate pour ça).
-  categorize: protectedProcedure.mutation(() => categorizeUncategorizedCore()),
+  categorize: protectedProcedure.mutation(() => categorizeUncategorized()),
 
   // Crée une catégorie (parentId null) ou sous-catégorie (parentId d'un
   // parent existant). Couleur par défaut FALLBACK_CATEGORY_COLOR pour un
@@ -257,21 +259,21 @@ export const categoriesRouter = {
 
   suggestions: {
     // Lance l'analyse LLM sur un échantillon de transactions récentes.
-    generate: protectedProcedure.mutation(() => generateSuggestionsCore()),
+    generate: protectedProcedure.mutation(() => generateSuggestions()),
 
     // Existence/âge de la dernière analyse + nombre de transactions arrivées depuis.
-    status: protectedProcedure.query(() => suggestionsStatusCore()),
+    status: protectedProcedure.query(() => getSuggestionsStatus()),
 
     // Aperçu en lecture seule de ce que ferait le mode "replace" : quelles
     // catégories existantes seraient supprimées vs conservées (corrections
     // manuelles). Utilisé par la dialog de confirmation côté UI.
     previewReplace: protectedProcedure
       .input(z.object({ suggestions: z.array(categorySuggestionSchema) }))
-      .query(({ input }) => previewReplaceCore(input.suggestions)),
+      .query(({ input }) => previewReplace(input.suggestions)),
 
     // Crée les catégories/sous-catégories validées et relance la
     // catégorisation. mode "merge" (défaut) additif, "replace" fait de la
-    // sélection cochée la nouvelle vérité (voir applySuggestionsCore).
+    // sélection cochée la nouvelle vérité (voir applySuggestions).
     apply: protectedProcedure
       .input(
         z.object({
@@ -279,8 +281,6 @@ export const categoriesRouter = {
           mode: z.enum(["merge", "replace"]).default("merge"),
         }),
       )
-      .mutation(({ input }) =>
-        applySuggestionsCore(input.suggestions, input.mode),
-      ),
+      .mutation(({ input }) => applySuggestions(input.suggestions, input.mode)),
   },
 } satisfies TRPCRouterRecord;

@@ -7,7 +7,7 @@ import {
   makeJwt,
   parseSessionAccounts,
   reconcileAccounts,
-} from "./eb-domain";
+} from "./domain";
 
 const NOW = new Date("2026-07-19T12:00:00Z");
 const DAY = 24 * 3600 * 1000;

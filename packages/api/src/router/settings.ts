@@ -1,11 +1,11 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod/v4";
 
-import { getSetupStatusCore, saveSettingsCore } from "../lib/settings-core";
+import { getSetupStatus, saveSettings } from "../banking/settings";
 import { protectedProcedure } from "../trpc";
 
 export const settingsRouter = {
-  status: protectedProcedure.query(() => getSetupStatusCore()),
+  status: protectedProcedure.query(() => getSetupStatus()),
 
   save: protectedProcedure
     .input(
@@ -15,5 +15,5 @@ export const settingsRouter = {
         redirectUrl: z.url("URL de redirection invalide"),
       }),
     )
-    .mutation(({ input }) => saveSettingsCore(input)),
+    .mutation(({ input }) => saveSettings(input)),
 } satisfies TRPCRouterRecord;

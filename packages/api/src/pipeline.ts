@@ -1,35 +1,25 @@
-import type { CategorizeResult } from "../../scripts/categorize";
-import type { SyncOutcome } from "./eb-sync";
-import { main as runCategorize } from "../../scripts/categorize";
-import { main as runImport } from "../../scripts/import";
-import { syncBanks } from "./eb-sync";
+import type { SyncOutcome } from "./banking/fetch-transactions";
+import type { CategorizeResult } from "./categorization/run";
+import { syncBanks } from "./banking/fetch-transactions";
+import { categorizeUncategorized } from "./categorization/run";
+import { withSingleFlight } from "./lib/single-flight";
+import { importTransactions } from "./transactions/import";
 
-// Un seul verrou pour tout ce qui écrit dans `transactions` : un import ne doit
+// Un seul verrou pour tout ce qui alimente `transactions` : un import ne doit
 // pas s'intercaler dans une synchronisation en cours (et réciproquement).
-let syncInProgress = false;
-
-async function withSyncLock<T>(run: () => Promise<T>): Promise<T> {
-  if (syncInProgress) {
-    throw new Error("Une synchronisation est déjà en cours.");
-  }
-  syncInProgress = true;
-  try {
-    return await run();
-  } finally {
-    syncInProgress = false;
-  }
-}
+const withSyncLock = <T>(run: () => Promise<T>) =>
+  withSingleFlight("sync", "Une synchronisation est déjà en cours.", run);
 
 // Import des data/*.json présents, puis catégorisation. La catégorisation est
 // best-effort : son échec ne doit jamais invalider un import réussi.
 async function importAndCategorize(): Promise<CategorizeResult | null> {
-  const hadImportError = await runImport();
+  const hadImportError = await importTransactions();
   if (hadImportError) {
     throw new Error("Échec de l'import (voir les logs serveur).");
   }
 
   try {
-    return await runCategorize();
+    return await categorizeUncategorized();
   } catch (err) {
     console.error("⚠️  Catégorisation échouée après l'import :", err);
     return null;

@@ -8,8 +8,10 @@ export default defineConfig(
   },
   baseConfig,
   {
-    // Code porté iso-fonctionnel depuis budget-tracker (ebApi non typé) — ne pas durcir sans refactor dédié.
-    files: ["src/lib/**/*.ts", "scripts/**/*.ts"],
+    // Code porté iso-fonctionnel depuis budget-tracker (ebApi non typé) — ne pas
+    // durcir sans refactor dédié. Cible les modules qui manipulent directement
+    // les réponses brutes d'Enable Banking, pas tout `src/`.
+    files: ["src/banking/**/*.ts", "src/transactions/*.ts"],
     rules: {
       "@typescript-eslint/no-unsafe-assignment": "off",
       "@typescript-eslint/no-unsafe-member-access": "off",

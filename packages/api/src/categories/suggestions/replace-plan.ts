@@ -2,10 +2,10 @@
 // quand le mode "Remplacer" des suggestions de catégories est appliqué.
 // Seule implémentation de cette décision dans tout le projet : appelée à la
 // fois par la query d'aperçu (previewReplace) et par la mutation réelle
-// (applySuggestionsCore) — voir suggest-categories-core.ts. Le frontend ne
+// (applySuggestions) — voir suggestions/analyze.ts. Le frontend ne
 // réimplémente jamais cet algorithme, il affiche le résultat de
 // previewReplace tel quel.
-import type { CategorySuggestion } from "./suggest-categories-schema";
+import type { CategorySuggestion } from "./schema";
 
 export interface ExistingCategoryForReplace {
   id: number;

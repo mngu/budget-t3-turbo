@@ -1,20 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { main as runCategorize } from "../../scripts/categorize";
-import { main as runImport } from "../../scripts/import";
-import { syncBanks } from "./eb-sync";
-import { performImport, performSync } from "./sync-core";
+import { syncBanks } from "./banking/fetch-transactions";
+import { categorizeUncategorized } from "./categorization/run";
+import { performImport, performSync } from "./pipeline";
+import { importTransactions } from "./transactions/import";
 
 // Mocks explicites (avec factory) plutôt que l'automock de vi.mock(path) seul :
 // l'automock importerait le vrai module pour en inspecter la forme, ce qui
 // chargerait src/db/client.ts et exigerait DATABASE_URL.
-vi.mock("./eb-sync", () => ({ syncBanks: vi.fn() }));
-vi.mock("../../scripts/import", () => ({ main: vi.fn() }));
-vi.mock("../../scripts/categorize", () => ({ main: vi.fn() }));
+vi.mock("./banking/fetch-transactions", () => ({ syncBanks: vi.fn() }));
+vi.mock("./transactions/import", () => ({ importTransactions: vi.fn() }));
+vi.mock("./categorization/run", () => ({ categorizeUncategorized: vi.fn() }));
 
 const syncMock = vi.mocked(syncBanks);
-const runImportMock = vi.mocked(runImport);
-const runCategorizeMock = vi.mocked(runCategorize);
+const runImportMock = vi.mocked(importTransactions);
+const runCategorizeMock = vi.mocked(categorizeUncategorized);
 
 beforeEach(() => {
   vi.clearAllMocks();

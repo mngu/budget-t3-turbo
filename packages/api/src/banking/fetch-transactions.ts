@@ -7,8 +7,8 @@ import { and, eq } from "@budget/db";
 import { db } from "@budget/db/client";
 import { accounts, bankConnections } from "@budget/db/schema";
 
-import { DATA_DIR } from "./data-dir";
-import { appJwt, ebApi, EbApiError, requireSettings } from "./eb-client";
+import { appJwt, ebApi, EbApiError, requireSettings } from "./client";
+import { DATA_DIR } from "../lib/data-dir";
 
 const SYNC_DAYS = 90;
 
