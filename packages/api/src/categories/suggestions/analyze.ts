@@ -97,7 +97,7 @@ export async function sampleTransactions(
 }
 
 const CATEGORY_COLOR_PROMPT_LIST = CATEGORY_COLOR_PALETTE.map(
-  (c) => `- ${c.name} (${c.hex})`,
+  (c) => `- ${c.name} (${c.light})`,
 ).join("\n");
 
 export function buildAnalysisPrompt(txns: TxnForAnalysis[]): string {

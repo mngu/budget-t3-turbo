@@ -68,10 +68,10 @@ Sur un clone neuf, la table `categories` est vide tant qu'elle n'a pas été see
 
 ```sql
 INSERT INTO categories (name, color) VALUES
-  ('Revenus', '#16a34a'), ('Logement', '#6366f1'), ('Alimentation', '#f59e0b'),
-  ('Restaurants & bars', '#10b981'), ('Transport', '#3b82f6'), ('Santé', '#ec4899'),
-  ('Abonnements', '#84cc16'), ('Loisirs & shopping', '#8b5cf6'),
-  ('Épargne & virements internes', '#f97316'), ('Frais & impôts', '#6366f1'), ('Autres', '#94a3b8')
+  ('Revenus', '#00c65a'), ('Logement', '#1447e6'), ('Alimentation', '#b55200'),
+  ('Restaurants & bars', '#007857'), ('Transport', '#0084c8'), ('Santé', '#fb64b6'),
+  ('Abonnements', '#83cc00'), ('Loisirs & shopping', '#8d56ff'),
+  ('Épargne & virements internes', '#fb2c36'), ('Frais & impôts', '#9810fa'), ('Autres', '#94a3b8')
 ON CONFLICT (name) DO NOTHING;
 ```
 

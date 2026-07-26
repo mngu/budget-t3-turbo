@@ -41,6 +41,7 @@ import { toast } from "@budget/ui/toast";
 import { PAGE_SIZE, transactionsSearchSchema } from "@budget/validators";
 
 import { CategoryTreeSelectItems } from "~/component/category-tree-select-items";
+import { useCategoryColor } from "~/lib/category-color";
 import { toastSyncOutcome } from "~/lib/sync-toast";
 import { useTRPCClient } from "~/lib/trpc";
 import { CalendarFilter } from "./-components/calendar-filter";
@@ -504,9 +505,11 @@ function CategoryTooltip({
 }
 
 function PieChartCard({ title, data }: PieChartCardProps) {
+  const resolve = useCategoryColor();
   const coloredData = data.map((entry) => ({
     ...entry,
-    fill: entry.color,
+    color: resolve(entry.color),
+    fill: resolve(entry.color),
   }));
 
   return (

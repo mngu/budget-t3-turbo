@@ -9,6 +9,8 @@ import { Button } from "@budget/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@budget/ui/popover";
 import { CATEGORY_COLOR_PALETTE } from "@budget/validators";
 
+import { useCategoryColor } from "~/lib/category-color";
+
 // Coquille visuelle partagée par category-tree.tsx (brouillon de suggestions,
 // rien n'est persisté avant "Appliquer") et category-overview-tree.tsx
 // (catégories réelles, chaque action est une mutation immédiate) — seule la
@@ -45,6 +47,7 @@ export function CategoryRowShell({
   deleteLabel,
   deleteSize = "icon-sm",
 }: CategoryRowShellProps) {
+  const resolve = useCategoryColor();
   return (
     <div className="flex items-center gap-2">
       {leading}
@@ -55,7 +58,7 @@ export function CategoryRowShell({
           ) : (
             <span
               className="size-2.5 shrink-0 rounded-full"
-              style={{ backgroundColor: color }}
+              style={{ backgroundColor: resolve(color) }}
             />
           ))}
         {nameInput}
@@ -81,6 +84,7 @@ function CategoryColorPicker({
   onSelect: (hex: string) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const resolve = useCategoryColor();
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -91,26 +95,28 @@ function CategoryColorPicker({
             type="button"
             aria-label="Changer la couleur"
             className="ring-offset-background hover:ring-ring size-2.5 shrink-0 rounded-full ring-offset-2 hover:ring-2"
-            style={{ backgroundColor: color }}
+            style={{ backgroundColor: resolve(color) }}
           />
         )}
       />
       <PopoverContent className="w-auto p-2">
+        {/* La pastille affiche le pas du mode courant, mais la sélection et la
+            comparaison portent toujours sur la valeur light canonique. */}
         <div className="grid grid-cols-5 gap-1.5">
           {CATEGORY_COLOR_PALETTE.map((c) => (
             <button
-              key={c.hex}
+              key={c.light}
               type="button"
               aria-label={c.name}
               onClick={() => {
-                onSelect(c.hex);
+                onSelect(c.light);
                 setOpen(false);
               }}
               className={cn(
                 "ring-offset-popover size-6 rounded-full",
-                c.hex === color && "ring-ring ring-2 ring-offset-2",
+                c.light === color && "ring-ring ring-2 ring-offset-2",
               )}
-              style={{ backgroundColor: c.hex }}
+              style={{ backgroundColor: resolve(c.light) }}
             />
           ))}
         </div>
