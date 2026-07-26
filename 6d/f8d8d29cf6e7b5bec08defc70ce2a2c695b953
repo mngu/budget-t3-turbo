@@ -1,0 +1,23 @@
+CLAUDE.md
+  s_b0e7f1054f806d::t_99a75ccc3f0b5b 54-60
+  s_b0e7f1054f806d::t_7ca8297b20f80f 14-24
+  s_b0e7f1054f806d::t_a90ed6df732e84 26-29
+  s_b0e7f1054f806d::t_1e2bc0c45bfb4c 43,67
+  s_b0e7f1054f806d::t_9093a3adecc858 30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "6df8d8d29cf6e7b5bec08defc70ce2a2c695b953",
+  "prompts": {},
+  "sessions": {
+    "s_b0e7f1054f806d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "59449e5a-c130-4906-b3a4-762a27276041",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
