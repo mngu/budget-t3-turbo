@@ -1,0 +1,28 @@
+packages/api/src/router/categories.ts
+  s_b0e7f1054f806d::t_ee80fdcec493a8 144
+packages/api/src/router/sync.ts
+  s_b0e7f1054f806d::t_61143e175d1889 3,7-10
+packages/api/src/lib/sync-core.test.ts
+  s_b0e7f1054f806d::t_c65dff0145ef39 6
+  s_b0e7f1054f806d::t_aeee85352ecbb4 118-168
+packages/api/src/lib/sync-core.ts
+  s_b0e7f1054f806d::t_250ef71237346b 1,7-8,11,17-21,23-29,31-37,39-44,46-53
+apps/tanstack-start/src/routes/_authed/index.tsx
+  s_b0e7f1054f806d::t_c988cbf9f3b767 89
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "2ca6e6254b27796ffe06669d13754fc33740f663",
+  "prompts": {},
+  "sessions": {
+    "s_b0e7f1054f806d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "59449e5a-c130-4906-b3a4-762a27276041",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
