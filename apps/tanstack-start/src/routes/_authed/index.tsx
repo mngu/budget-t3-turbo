@@ -5,7 +5,7 @@ import { transactionsSearchSchema } from "@budget/shared";
 
 import { monthBounds } from "~/lib/date";
 import { euro } from "~/lib/format";
-import { CategoryPieChart } from "./-components/category-pie-chart";
+import { CategoryBreakdownChart } from "./-components/category-breakdown-chart";
 import { KpiCard } from "./-components/kpi-card";
 import { TransactionsFilters } from "./-components/transactions-filters";
 import { TransactionsHeader } from "./-components/transactions-header";
@@ -40,7 +40,7 @@ const defaultToCurrentMonth = <
   next: (search: TSearch) => TSearch;
 }) => {
   const result = next(search);
-  return result.dateFrom ?? result.dateTo
+  return (result.dateFrom ?? result.dateTo)
     ? result
     : { ...result, ...monthBounds(new Date()) };
 };
@@ -61,9 +61,9 @@ export const Route = createFileRoute("/_authed/")({
   loader: async ({ deps, context }) => {
     const [result, expensesByCategory, revenuesByCategory] = await Promise.all([
       context.trpcClient.transactions.list.query(deps),
-      // `category` est volontairement retiré : les camemberts gardent la
-      // répartition complète et se contentent de surligner la part
-      // sélectionnée, sinon cliquer une part la réduirait à 100 % du
+      // `category` est volontairement retiré : les graphiques gardent la
+      // répartition complète et se contentent de surligner le segment
+      // sélectionné, sinon cliquer un segment le réduirait à 100 % du
       // graphique et il n'y aurait plus de quoi naviguer.
       context.trpcClient.transactions.byCategory.query({
         ...deps,
@@ -124,13 +124,16 @@ function TransactionsPage() {
           value={euro.format(sumTotals(revenuesByCategory))}
         />
       </div>
-      <div className="flex gap-4">
-        <CategoryPieChart
+      {/* items-start : sans hauteur fixe, les deux cartes n'ont plus le même
+          nombre de lignes — les étirer laisserait un grand vide sous la plus
+          courte. */}
+      <div className="flex items-start gap-4">
+        <CategoryBreakdownChart
           title="Répartition des dépenses par catégorie"
           data={expensesByCategory}
           direction="debit"
         />
-        <CategoryPieChart
+        <CategoryBreakdownChart
           title="Répartition des revenues par catégorie"
           data={revenuesByCategory}
           direction="credit"

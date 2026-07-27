@@ -19,7 +19,8 @@
     "./separator": "./src/separator.tsx",
     "./table": "./src/table.tsx",
     "./theme": "./src/theme.tsx",
-    "./toast": "./src/toast.tsx"
+    "./toast": "./src/toast.tsx",
+    "./tooltip": "./src/tooltip.tsx"
   },
   "license": "MIT",
   "scripts": {

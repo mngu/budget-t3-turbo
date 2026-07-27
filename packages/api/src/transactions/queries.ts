@@ -46,6 +46,10 @@ export interface CategoryBreakdownDetail {
   category: string;
   total: number;
   color: string;
+  // Vrai pour la seule ligne « Non ventilé », qui n'est pas une catégorie mais
+  // le reliquat porté par le parent lui-même. Le client s'en sert pour ne pas
+  // poser `category=Non ventilé` en filtre — aucune ligne ne matcherait.
+  unallocated: boolean;
 }
 
 export interface CategoryBreakdownItem {
@@ -53,11 +57,8 @@ export interface CategoryBreakdownItem {
   total: number;
   color: string;
   // Détail par sous-catégorie, trié comme le parent (total décroissant).
-  // Vide si la catégorie n'a pas d'enfant : le tooltip retombe alors sur
-  // l'affichage une ligne.
-  //
-  // Surtout pas nommé `children` : recharts étale le datum dans les props des
-  // secteurs SVG, où React interpréterait le champ comme des enfants à rendre.
+  // Vide si la catégorie n'a pas d'enfant : le graphique retombe alors sur une
+  // barre d'un seul tenant.
   breakdown: CategoryBreakdownDetail[];
 }
 
@@ -148,15 +149,14 @@ export async function listTransactions(
 const UNALLOCATED_LABEL = "Non ventilé";
 
 // Regroupe toujours au niveau de la catégorie parente : une sous-catégorie
-// remonte dans la part de son parent, une catégorie déjà racine reste
-// inchangée (parentCategories vide dans ce cas). Le graphique n'affiche ainsi
-// jamais de sous-catégorie comme part à part entière — le détail par
-// sous-catégorie est renvoyé dans `breakdown` pour le tooltip.
+// remonte dans le total de son parent, une catégorie déjà racine reste
+// inchangée (parentCategories vide dans ce cas). Une barre du graphique vaut
+// donc toujours une catégorie parente, et `breakdown` porte ses segments.
 //
 // L'agrégat SQL descend jusqu'à la catégorie feuille ; le repli sur le parent
 // se fait en TypeScript. Conséquence : l'`order by` SQL porterait sur les
-// feuilles, donc l'ordre des parts (et de la légende) est refait ici sur le
-// total replié.
+// feuilles, donc l'ordre des barres comme celui des segments est refait ici
+// sur le total replié.
 export async function transactionsByCategory(
   input: TransactionsSearch,
 ): Promise<CategoryBreakdownItem[]> {
@@ -225,6 +225,7 @@ export async function transactionsByCategory(
         category: row.categoryName ?? "",
         total,
         color: row.categoryColor ?? FALLBACK_CATEGORY_COLOR,
+        unallocated: false,
       });
     } else {
       group.unallocated += total;
@@ -233,18 +234,23 @@ export async function transactionsByCategory(
 
   return [...groups.values()]
     .map((group) => {
-      const breakdown = [...group.breakdown].sort((a, b) => b.total - a.total);
+      const breakdown = [...group.breakdown];
       const total =
         group.unallocated + breakdown.reduce((acc, c) => acc + c.total, 0);
-      // Le montant porté par la catégorie parente elle-même ne devient une
-      // ligne qu'en présence de vraies sous-catégories, et reste en dernier.
+      // Le montant porté par la catégorie parente elle-même ne devient un
+      // segment qu'en présence de vraies sous-catégories.
       if (breakdown.length > 0 && group.unallocated !== 0) {
         breakdown.push({
           category: UNALLOCATED_LABEL,
           total: group.unallocated,
           color: group.color,
+          unallocated: true,
         });
       }
+      // Tri du plus gros au plus petit, « Non ventilé » compris : le graphique
+      // dérive la nuance de chaque segment de son rang, un reliquat épinglé en
+      // dernier donnerait la teinte la plus pâle au plus gros des segments.
+      breakdown.sort((a, b) => b.total - a.total);
       return { category: group.category, color: group.color, total, breakdown };
     })
     .sort((a, b) => b.total - a.total);
