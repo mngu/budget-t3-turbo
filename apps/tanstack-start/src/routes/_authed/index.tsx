@@ -1,6 +1,6 @@
 import { createFileRoute, stripSearchParams } from "@tanstack/react-router";
 
-import { transactionsSearchSchema } from "@budget/validators";
+import { transactionsSearchSchema } from "@budget/shared";
 
 import { euro } from "~/lib/format";
 import { CategoryPieChart } from "./-components/category-pie-chart";

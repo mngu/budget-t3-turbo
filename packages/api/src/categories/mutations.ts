@@ -3,7 +3,7 @@
 import { eq, inArray } from "@budget/db";
 import { db } from "@budget/db/client";
 import { categories, transactions } from "@budget/db/schema";
-import { FALLBACK_CATEGORY_COLOR } from "@budget/validators";
+import { FALLBACK_CATEGORY_COLOR } from "@budget/shared";
 
 // `categories.name` est unique en base ; on vérifie en amont pour renvoyer un
 // message utilisable côté UI plutôt qu'une violation de contrainte brute.

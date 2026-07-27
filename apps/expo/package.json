@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@better-auth/expo": "catalog:",
-    "@budget/validators": "workspace:*",
+    "@budget/shared": "workspace:*",
     "@expo/html-elements": "^0.12.5",
     "@gluestack-ui/core": "^5.0.15",
     "@gluestack-ui/utils": "^5.0.6",

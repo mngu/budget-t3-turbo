@@ -22,7 +22,7 @@
     "@anthropic-ai/sdk": "^0.111.0",
     "@budget/auth": "workspace:*",
     "@budget/db": "workspace:*",
-    "@budget/validators": "workspace:*",
+    "@budget/shared": "workspace:*",
     "@trpc/server": "catalog:",
     "superjson": "2.2.3",
     "zod": "catalog:"

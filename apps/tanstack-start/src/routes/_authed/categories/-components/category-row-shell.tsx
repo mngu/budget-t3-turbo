@@ -7,7 +7,7 @@ import { PlusIcon, Trash2Icon } from "lucide-react";
 import { cn } from "@budget/ui";
 import { Button } from "@budget/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@budget/ui/popover";
-import { CATEGORY_COLOR_PALETTE } from "@budget/validators";
+import { CATEGORY_COLOR_PALETTE } from "@budget/shared";
 
 import { useCategoryColor } from "~/component/category/lib/category-color";
 

@@ -2,7 +2,7 @@ import { Fragment } from "react";
 
 import type { CategoryTreeNode } from "@budget/api";
 import { SelectItem, SelectValue } from "@budget/ui/select";
-import { FALLBACK_CATEGORY_COLOR } from "@budget/validators";
+import { FALLBACK_CATEGORY_COLOR } from "@budget/shared";
 
 import { useCategoryColor } from "~/component/category/lib/category-color";
 

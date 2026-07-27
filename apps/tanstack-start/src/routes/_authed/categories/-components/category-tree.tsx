@@ -3,7 +3,7 @@
 import { cn } from "@budget/ui";
 import { Checkbox } from "@budget/ui/checkbox";
 import { Input } from "@budget/ui/input";
-import { FALLBACK_CATEGORY_COLOR } from "@budget/validators";
+import { FALLBACK_CATEGORY_COLOR } from "@budget/shared";
 
 import { AddCategoryButton, CategoryRowShell } from "./category-row-shell";
 

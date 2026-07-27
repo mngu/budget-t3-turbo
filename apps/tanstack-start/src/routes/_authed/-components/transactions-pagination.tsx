@@ -1,7 +1,7 @@
 import { getRouteApi } from "@tanstack/react-router";
 
 import { Button } from "@budget/ui/button";
-import { PAGE_SIZE } from "@budget/validators";
+import { PAGE_SIZE } from "@budget/shared";
 
 const routeApi = getRouteApi("/_authed/");
 

@@ -1,6 +1,6 @@
 // Lectures et corrections manuelles sur la table des transactions.
 import type { SQL } from "@budget/db";
-import type { TransactionsSearch } from "@budget/validators";
+import type { TransactionsSearch } from "@budget/shared";
 import {
   alias,
   and,
@@ -17,7 +17,7 @@ import {
 } from "@budget/db";
 import { db } from "@budget/db/client";
 import { accounts, categories, transactions } from "@budget/db/schema";
-import { FALLBACK_CATEGORY_COLOR, PAGE_SIZE } from "@budget/validators";
+import { FALLBACK_CATEGORY_COLOR, PAGE_SIZE } from "@budget/shared";
 
 // Nom de banque affiché : display_name choisi par l'utilisateur, sinon nom ASPSP.
 const bankLabel = sql<string>`coalesce(${accounts.displayName}, ${accounts.bankName})`;

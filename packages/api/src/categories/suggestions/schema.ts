@@ -1,7 +1,7 @@
 // Schéma de la sortie structurée du LLM d'analyse (voir suggestions/analyze.ts).
 import { z } from "zod/v4";
 
-import { CATEGORY_COLOR_HEXES } from "@budget/validators";
+import { CATEGORY_COLOR_HEXES } from "@budget/shared";
 
 export const categorySuggestionChildSchema = z.object({
   name: z.string().min(1),

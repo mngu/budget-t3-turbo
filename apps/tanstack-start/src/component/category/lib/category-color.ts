@@ -1,5 +1,5 @@
 import { useTheme } from "@budget/ui/theme";
-import { resolveCategoryColor } from "@budget/validators";
+import { resolveCategoryColor } from "@budget/shared";
 
 // La base ne stocke qu'un hex par catégorie (la valeur light canonique de
 // CATEGORY_COLOR_PALETTE) : c'est ici, au rendu, qu'on le remplace par le pas

@@ -10,7 +10,7 @@ import {
   CATEGORY_COLOR_HEXES,
   CATEGORY_COLOR_PALETTE,
   FALLBACK_CATEGORY_COLOR,
-} from "@budget/validators";
+} from "@budget/shared";
 
 import type { CategorySuggestion, RawCategorySuggestion } from "./schema";
 import { rawCategorySuggestionsSchema } from "./schema";

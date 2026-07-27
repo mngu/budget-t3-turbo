@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import type { CategoryOption } from "@budget/api";
-import type { TransactionsSearch } from "@budget/validators";
+import type { TransactionsSearch } from "@budget/shared";
 
 import {
   Actionsheet,

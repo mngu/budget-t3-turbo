@@ -1,7 +1,7 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod/v4";
 
-import { CATEGORY_COLOR_HEXES } from "@budget/validators";
+import { CATEGORY_COLOR_HEXES } from "@budget/shared";
 
 import {
   createCategory,

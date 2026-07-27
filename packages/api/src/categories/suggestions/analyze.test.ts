@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { CATEGORY_COLOR_HEXES } from "@budget/validators";
+import { CATEGORY_COLOR_HEXES } from "@budget/shared";
 
 import type { TxnForAnalysis } from "./analyze";
 import type { RawCategorySuggestion } from "./schema";

@@ -319,7 +319,7 @@ Line 4-24, update the `@budget/db` import to include `alias`:
 
 ```ts
 import type { SQL } from "@budget/db";
-import type { TransactionsSearch } from "@budget/validators";
+import type { TransactionsSearch } from "@budget/shared";
 import {
   alias,
   and,

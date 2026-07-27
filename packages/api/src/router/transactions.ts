@@ -1,7 +1,7 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod/v4";
 
-import { transactionsSearchSchema } from "@budget/validators";
+import { transactionsSearchSchema } from "@budget/shared";
 
 import {
   listBankLabels,

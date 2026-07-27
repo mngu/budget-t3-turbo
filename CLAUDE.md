@@ -30,7 +30,7 @@ This is a pnpm + Turborepo monorepo (migrated from the single-package `budget-tr
 
 - `@budget/auth` — Better Auth, email/mot de passe.
 - `@budget/ui` — composants Base UI. Déviation assumée par rapport au template create-t3-turbo : le `ThemeProvider` maison a été conservé (pas `next-themes`), `ThemeToggle` réécrit sans dropdown.
-- `@budget/validators` — schémas Zod partagés.
+- `@budget/shared` — code partagé api↔apps sans dépendance lourde (`src/schemas.ts` : schéma Zod + `PAGE_SIZE` ; `src/colors.ts` : palette de catégories). Sa seule dépendance runtime est `zod`, et **c'est la raison d'être du package** : `transactionsSearchSchema` est consommé comme valeur au runtime dans le navigateur (`validateSearch` d'une route TanStack) autant que par l'input tRPC. Le mettre dans `@budget/api` ferait entrer `@budget/db`/`pg`, le SDK Anthropic et better-auth dans le bundle client — tous les autres imports app → `@budget/api` sont des `import type`, effacés à la compilation. Ne jamais y ajouter de dépendance lourde.
 - `apps/tanstack-start` — app web, routes `/`, `/banques`, `/banques/ajouter`, `/callback`, `/login` sous le layout `_authed`.
 - `apps/expo` — app mobile (login, transactions + filtres, KPIs, banques) en gluestack-ui v5 + nativewind. **Développement en suspens** (décision du 2026-07-23) : l'objectif est une vraie app universelle web+native, ce que gluestack ne permet pas correctement aujourd'hui — ne pas y ajouter de features sans que ce soit explicitement demandé.
 

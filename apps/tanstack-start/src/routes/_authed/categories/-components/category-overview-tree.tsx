@@ -14,7 +14,7 @@ import {
 } from "@budget/ui/dialog";
 import { Input } from "@budget/ui/input";
 import { toast } from "@budget/ui/toast";
-import { FALLBACK_CATEGORY_COLOR } from "@budget/validators";
+import { FALLBACK_CATEGORY_COLOR } from "@budget/shared";
 
 import type { PreviewableTransaction } from "./transaction-preview-drawer";
 import { useTRPCClient } from "~/lib/trpc";
