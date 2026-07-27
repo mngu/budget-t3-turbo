@@ -80,7 +80,7 @@ export function CategoryTreeSelect({
         // rapport à l'élément sélectionné : ce dernier exigerait que la liste
         // soit déjà montée à l'ouverture, ce qui est précisément ce qu'on
         // évite ici. L'ancrage ne dépend plus que du trigger.
-        <SelectContent alignItemWithTrigger={false} align="start">
+        <SelectContent>
           <CategoryTreeSelectItems categories={categories} />
         </SelectContent>
       )}

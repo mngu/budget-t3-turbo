@@ -25,12 +25,18 @@ export const Route = createFileRoute("/_authed/")({
   loader: async ({ deps, context }) => {
     const [result, expensesByCategory, revenuesByCategory] = await Promise.all([
       context.trpcClient.transactions.list.query(deps),
+      // `category` est volontairement retiré : les camemberts gardent la
+      // répartition complète et se contentent de surligner la part
+      // sélectionnée, sinon cliquer une part la réduirait à 100 % du
+      // graphique et il n'y aurait plus de quoi naviguer.
       context.trpcClient.transactions.byCategory.query({
         ...deps,
+        category: undefined,
         direction: "debit",
       }),
       context.trpcClient.transactions.byCategory.query({
         ...deps,
+        category: undefined,
         direction: "credit",
       }),
       // Ni les banques ni l'arborescence ne sont retournées : leurs Select
@@ -86,10 +92,12 @@ function TransactionsPage() {
         <CategoryPieChart
           title="Répartition des dépenses par catégorie"
           data={expensesByCategory}
+          direction="debit"
         />
         <CategoryPieChart
           title="Répartition des revenues par catégorie"
           data={revenuesByCategory}
+          direction="credit"
         />
       </div>
       <TransactionsTable rows={rows} total={total} />
