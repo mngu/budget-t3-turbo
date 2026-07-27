@@ -1,0 +1,73 @@
+packages/api/src/transactions/queries.ts
+  s_0a9192f5218622::t_092f15f6da2bea 3,20
+packages/api/src/categories/mutations.ts
+  s_0a9192f5218622::t_092f15f6da2bea 6
+apps/tanstack-start/src/routes/_authed/categories/-components/category-overview-tree.tsx
+  s_0a9192f5218622::t_092f15f6da2bea 17
+packages/shared/src/colors.ts
+  s_0a9192f5218622::t_15492d052636d4 1-62
+packages/api/src/categories/suggestions/schema.ts
+  s_0a9192f5218622::t_092f15f6da2bea 4
+apps/tanstack-start/src/routes/_authed/-components/transactions-pagination.tsx
+  s_0a9192f5218622::t_092f15f6da2bea 4
+apps/tanstack-start/src/component/category/category-tree-select/category-tree-select-items.tsx
+  s_0a9192f5218622::t_092f15f6da2bea 5
+CLAUDE.md
+  s_0a9192f5218622::t_1742012da6b538 33
+packages/shared/src/schemas.ts
+  s_0a9192f5218622::t_8d171fd98332e8 30-31
+  s_0a9192f5218622::t_d74fc8c47026ad 1-29
+apps/expo/package.json
+  s_0a9192f5218622::t_092f15f6da2bea 18
+packages/api/src/categories/suggestions/analyze.test.ts
+  s_0a9192f5218622::t_092f15f6da2bea 3
+docs/superpowers/plans/2026-07-24-category-selector-two-levels.md
+  s_0a9192f5218622::t_711a688a38dd0a 322
+packages/api/src/router/categories.ts
+  s_0a9192f5218622::t_092f15f6da2bea 4
+packages/shared/src/index.ts
+  s_0a9192f5218622::t_366b17be04343a 1-2
+apps/tanstack-start/src/routes/_authed/index.tsx
+  s_0a9192f5218622::t_092f15f6da2bea 3
+apps/tanstack-start/src/component/category/lib/category-color.ts
+  s_0a9192f5218622::t_092f15f6da2bea 2
+packages/api/package.json
+  s_0a9192f5218622::t_092f15f6da2bea 25
+packages/shared/package.json
+  s_0a9192f5218622::t_9387eb32de532b 2
+packages/api/src/categories/suggestions/analyze.ts
+  s_0a9192f5218622::t_092f15f6da2bea 13
+packages/api/src/router/transactions.ts
+  s_0a9192f5218622::t_092f15f6da2bea 4
+apps/tanstack-start/src/routes/_authed/categories/-components/category-row-shell.tsx
+  s_0a9192f5218622::t_092f15f6da2bea 10
+apps/tanstack-start/src/routes/_authed/categories/-components/category-tree.tsx
+  s_0a9192f5218622::t_092f15f6da2bea 6
+apps/expo/src/components/transaction-filters-sheet.tsx
+  s_0a9192f5218622::t_092f15f6da2bea 4
+apps/tanstack-start/package.json
+  s_0a9192f5218622::t_092f15f6da2bea 19
+pnpm-lock.yaml
+  s_0a9192f5218622::t_7b206e5537649a 110,112,276-278,421,423,533-557,11256,11263,12349,17052,17057-17060,17067,17072,17244-17263,17377,17385,17471
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "394a25e5cdd10f132d072e9ce9b48b21725812ac",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_0a9192f5218622": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e361934a-f1df-4449-925f-a7248cfe4c7f",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
