@@ -53,21 +53,54 @@ describe("buildCategorizationOutputSchema", () => {
 
 describe("resolveShortcut", () => {
   it("court-circuite quand 2 similaires partagent contrepartie et catégorie", () => {
-    expect(resolveShortcut([similarTxn(), similarTxn({ id: 2 })])).toBe(
-      "Alimentation",
-    );
+    expect(
+      resolveShortcut([similarTxn(), similarTxn({ id: 2 })], "Carrefour"),
+    ).toBe("Alimentation");
   });
 
   it("ne court-circuite pas sur une seule occurrence", () => {
-    expect(resolveShortcut([similarTxn()])).toBeNull();
+    expect(resolveShortcut([similarTxn()], "Carrefour")).toBeNull();
   });
 
   it("ignore les similaires sans contrepartie", () => {
     expect(
-      resolveShortcut([
-        similarTxn({ counterparty: null }),
-        similarTxn({ id: 2, counterparty: null }),
-      ]),
+      resolveShortcut(
+        [
+          similarTxn({ counterparty: null }),
+          similarTxn({ id: 2, counterparty: null }),
+        ],
+        "Carrefour",
+      ),
+    ).toBeNull();
+  });
+
+  // La liste fusionnée mélange tous les tiers de findSimilar : deux candidats
+  // remontés par trigramme peuvent partager une contrepartie entre eux sans
+  // avoir le moindre rapport avec la transaction à classer.
+  it("ignore les similaires dont la contrepartie n'est pas celle de la transaction", () => {
+    expect(
+      resolveShortcut(
+        [
+          similarTxn({ counterparty: "Monoprix" }),
+          similarTxn({ id: 2, counterparty: "Monoprix" }),
+        ],
+        "Carrefour",
+      ),
+    ).toBeNull();
+  });
+
+  it("ne court-circuite jamais une transaction sans contrepartie", () => {
+    expect(
+      resolveShortcut([similarTxn(), similarTxn({ id: 2 })], null),
+    ).toBeNull();
+  });
+
+  it("exige que les similaires s'accordent sur la catégorie", () => {
+    expect(
+      resolveShortcut(
+        [similarTxn(), similarTxn({ id: 2, categoryName: "Transport" })],
+        "Carrefour",
+      ),
     ).toBeNull();
   });
 });

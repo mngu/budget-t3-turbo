@@ -11,13 +11,17 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthedRouteImport } from './routes/_authed'
-import { Route as AuthedIndexRouteImport } from './routes/_authed/index'
 import { Route as AuthedCallbackRouteImport } from './routes/_authed/callback'
+import { Route as AuthedRevueRouteImport } from './routes/_authed/_revue'
 import { Route as AuthedCategoriesIndexRouteImport } from './routes/_authed/categories/index'
 import { Route as AuthedBanquesIndexRouteImport } from './routes/_authed/banques/index'
+import { Route as AuthedRevueIndexRouteImport } from './routes/_authed/_revue/index'
 import { Route as ApiTrpcSplatRouteImport } from './routes/api/trpc.$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as AuthedBanquesAjouterRouteImport } from './routes/_authed/banques/ajouter'
+import { Route as AuthedRevueVentilerRouteImport } from './routes/_authed/_revue/ventiler'
+import { Route as AuthedRevueTransactionsRouteImport } from './routes/_authed/_revue/transactions'
+import { Route as AuthedRevueCategorieNameRouteImport } from './routes/_authed/_revue/categorie.$name'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -28,14 +32,13 @@ const AuthedRoute = AuthedRouteImport.update({
   id: '/_authed',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthedIndexRoute = AuthedIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AuthedRoute,
-} as any)
 const AuthedCallbackRoute = AuthedCallbackRouteImport.update({
   id: '/callback',
   path: '/callback',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedRevueRoute = AuthedRevueRouteImport.update({
+  id: '/_revue',
   getParentRoute: () => AuthedRoute,
 } as any)
 const AuthedCategoriesIndexRoute = AuthedCategoriesIndexRouteImport.update({
@@ -47,6 +50,11 @@ const AuthedBanquesIndexRoute = AuthedBanquesIndexRouteImport.update({
   id: '/banques/',
   path: '/banques/',
   getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedRevueIndexRoute = AuthedRevueIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthedRevueRoute,
 } as any)
 const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
   id: '/api/trpc/$',
@@ -63,71 +71,107 @@ const AuthedBanquesAjouterRoute = AuthedBanquesAjouterRouteImport.update({
   path: '/banques/ajouter',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedRevueVentilerRoute = AuthedRevueVentilerRouteImport.update({
+  id: '/ventiler',
+  path: '/ventiler',
+  getParentRoute: () => AuthedRevueRoute,
+} as any)
+const AuthedRevueTransactionsRoute = AuthedRevueTransactionsRouteImport.update({
+  id: '/transactions',
+  path: '/transactions',
+  getParentRoute: () => AuthedRevueRoute,
+} as any)
+const AuthedRevueCategorieNameRoute =
+  AuthedRevueCategorieNameRouteImport.update({
+    id: '/categorie/$name',
+    path: '/categorie/$name',
+    getParentRoute: () => AuthedRevueRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/callback': typeof AuthedCallbackRoute
-  '/': typeof AuthedIndexRoute
+  '/transactions': typeof AuthedRevueTransactionsRoute
+  '/ventiler': typeof AuthedRevueVentilerRoute
   '/banques/ajouter': typeof AuthedBanquesAjouterRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
+  '/': typeof AuthedRevueIndexRoute
   '/banques': typeof AuthedBanquesIndexRoute
   '/categories': typeof AuthedCategoriesIndexRoute
+  '/categorie/$name': typeof AuthedRevueCategorieNameRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/callback': typeof AuthedCallbackRoute
-  '/': typeof AuthedIndexRoute
+  '/transactions': typeof AuthedRevueTransactionsRoute
+  '/ventiler': typeof AuthedRevueVentilerRoute
   '/banques/ajouter': typeof AuthedBanquesAjouterRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
+  '/': typeof AuthedRevueIndexRoute
   '/banques': typeof AuthedBanquesIndexRoute
   '/categories': typeof AuthedCategoriesIndexRoute
+  '/categorie/$name': typeof AuthedRevueCategorieNameRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authed': typeof AuthedRouteWithChildren
   '/login': typeof LoginRoute
+  '/_authed/_revue': typeof AuthedRevueRouteWithChildren
   '/_authed/callback': typeof AuthedCallbackRoute
-  '/_authed/': typeof AuthedIndexRoute
+  '/_authed/_revue/transactions': typeof AuthedRevueTransactionsRoute
+  '/_authed/_revue/ventiler': typeof AuthedRevueVentilerRoute
   '/_authed/banques/ajouter': typeof AuthedBanquesAjouterRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
+  '/_authed/_revue/': typeof AuthedRevueIndexRoute
   '/_authed/banques/': typeof AuthedBanquesIndexRoute
   '/_authed/categories/': typeof AuthedCategoriesIndexRoute
+  '/_authed/_revue/categorie/$name': typeof AuthedRevueCategorieNameRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/login'
     | '/callback'
-    | '/'
+    | '/transactions'
+    | '/ventiler'
     | '/banques/ajouter'
     | '/api/auth/$'
     | '/api/trpc/$'
+    | '/'
     | '/banques'
     | '/categories'
+    | '/categorie/$name'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
     | '/callback'
-    | '/'
+    | '/transactions'
+    | '/ventiler'
     | '/banques/ajouter'
     | '/api/auth/$'
     | '/api/trpc/$'
+    | '/'
     | '/banques'
     | '/categories'
+    | '/categorie/$name'
   id:
     | '__root__'
     | '/_authed'
     | '/login'
+    | '/_authed/_revue'
     | '/_authed/callback'
-    | '/_authed/'
+    | '/_authed/_revue/transactions'
+    | '/_authed/_revue/ventiler'
     | '/_authed/banques/ajouter'
     | '/api/auth/$'
     | '/api/trpc/$'
+    | '/_authed/_revue/'
     | '/_authed/banques/'
     | '/_authed/categories/'
+    | '/_authed/_revue/categorie/$name'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -153,18 +197,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authed/': {
-      id: '/_authed/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof AuthedIndexRouteImport
-      parentRoute: typeof AuthedRoute
-    }
     '/_authed/callback': {
       id: '/_authed/callback'
       path: '/callback'
       fullPath: '/callback'
       preLoaderRoute: typeof AuthedCallbackRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/_revue': {
+      id: '/_authed/_revue'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthedRevueRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/_authed/categories/': {
@@ -180,6 +224,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/banques'
       preLoaderRoute: typeof AuthedBanquesIndexRouteImport
       parentRoute: typeof AuthedRoute
+    }
+    '/_authed/_revue/': {
+      id: '/_authed/_revue/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof AuthedRevueIndexRouteImport
+      parentRoute: typeof AuthedRevueRoute
     }
     '/api/trpc/$': {
       id: '/api/trpc/$'
@@ -202,20 +253,59 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedBanquesAjouterRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/_revue/ventiler': {
+      id: '/_authed/_revue/ventiler'
+      path: '/ventiler'
+      fullPath: '/ventiler'
+      preLoaderRoute: typeof AuthedRevueVentilerRouteImport
+      parentRoute: typeof AuthedRevueRoute
+    }
+    '/_authed/_revue/transactions': {
+      id: '/_authed/_revue/transactions'
+      path: '/transactions'
+      fullPath: '/transactions'
+      preLoaderRoute: typeof AuthedRevueTransactionsRouteImport
+      parentRoute: typeof AuthedRevueRoute
+    }
+    '/_authed/_revue/categorie/$name': {
+      id: '/_authed/_revue/categorie/$name'
+      path: '/categorie/$name'
+      fullPath: '/categorie/$name'
+      preLoaderRoute: typeof AuthedRevueCategorieNameRouteImport
+      parentRoute: typeof AuthedRevueRoute
+    }
   }
 }
 
+interface AuthedRevueRouteChildren {
+  AuthedRevueTransactionsRoute: typeof AuthedRevueTransactionsRoute
+  AuthedRevueVentilerRoute: typeof AuthedRevueVentilerRoute
+  AuthedRevueIndexRoute: typeof AuthedRevueIndexRoute
+  AuthedRevueCategorieNameRoute: typeof AuthedRevueCategorieNameRoute
+}
+
+const AuthedRevueRouteChildren: AuthedRevueRouteChildren = {
+  AuthedRevueTransactionsRoute: AuthedRevueTransactionsRoute,
+  AuthedRevueVentilerRoute: AuthedRevueVentilerRoute,
+  AuthedRevueIndexRoute: AuthedRevueIndexRoute,
+  AuthedRevueCategorieNameRoute: AuthedRevueCategorieNameRoute,
+}
+
+const AuthedRevueRouteWithChildren = AuthedRevueRoute._addFileChildren(
+  AuthedRevueRouteChildren,
+)
+
 interface AuthedRouteChildren {
+  AuthedRevueRoute: typeof AuthedRevueRouteWithChildren
   AuthedCallbackRoute: typeof AuthedCallbackRoute
-  AuthedIndexRoute: typeof AuthedIndexRoute
   AuthedBanquesAjouterRoute: typeof AuthedBanquesAjouterRoute
   AuthedBanquesIndexRoute: typeof AuthedBanquesIndexRoute
   AuthedCategoriesIndexRoute: typeof AuthedCategoriesIndexRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
+  AuthedRevueRoute: AuthedRevueRouteWithChildren,
   AuthedCallbackRoute: AuthedCallbackRoute,
-  AuthedIndexRoute: AuthedIndexRoute,
   AuthedBanquesAjouterRoute: AuthedBanquesAjouterRoute,
   AuthedBanquesIndexRoute: AuthedBanquesIndexRoute,
   AuthedCategoriesIndexRoute: AuthedCategoriesIndexRoute,

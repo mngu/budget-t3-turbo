@@ -19,7 +19,18 @@ export interface SimilarTxn {
 
 export const SIMILAR_LIMIT = 5;
 // Seuil pg_trgm en dessous duquel deux descriptions ne sont pas jugées similaires.
-const TRIGRAM_THRESHOLD = 0.3;
+//
+// Calibration : sur les données réelles, deux transactions au hasard partagent
+// la même catégorie parente dans 14,9 % des cas. Les paires admises par un seuil
+// à 0,30 font à peine mieux (19,1 % entre 0,30 et 0,40), parce que le format de
+// libellé des banques est dominé par du boilerplate — « CB Spotify P435865 FACT
+// 090626 » et « CB PAUL            FACT 280526 » atteignent 0,38 sur les seuls
+// `CB `, ` FACT `, le padding et les chiffres de date. L'accord ne dépasse le
+// hasard de façon nette qu'à partir de 0,5 (49,8 %), puis franchement au-delà de
+// 0,6 (67 %+). Le tri décroissant + `limit` enterrait déjà ces paires bruitées
+// la plupart du temps ; le seuil protège le cas où une transaction a trop peu de
+// candidats pour que la queue reste invisible.
+const TRIGRAM_THRESHOLD = 0.5;
 
 // `bank_code` est un code de type d'opération propre à chaque banque, pas une
 // nature de dépense : sa valeur d'indice varie énormément d'un code à l'autre.
@@ -102,6 +113,10 @@ const similarColumns = {
 };
 
 // Priorité aux corrections manuelles au sein d'un même niveau de similarité.
+// Les tiers contrepartie/MCC/bank_code n'ont pas de score : leurs candidats sont
+// tous également similaires, la priorité manuelle y est donc le premier critère.
+// Le tier trigramme, lui, est ordonné par bande de similarité d'abord (voir
+// byDescriptionTrigram) — « au sein d'un même niveau » y a un sens littéral.
 const manualFirst = desc(
   sql`case when ${transactions.categorySource} = 'manual' then 1 else 0 end`,
 );
@@ -126,6 +141,13 @@ async function byCounterparty(
     .limit(limit);
 }
 
+// La similarité est le critère principal, la priorité manuelle ne départage
+// qu'à l'intérieur d'une bande (arrondi à 0,1). Mettre `manualFirst` en premier
+// laissait une correction manuelle à 0,51 passer devant un quasi-doublon à
+// 0,95 : mesuré sur les données réelles, le meilleur exemple injecté dans le
+// prompt tombait à 69,5 % de bonne catégorie parente contre 91,4 % en triant
+// par similarité. L'intention d'origine — préférer un exemple validé par un
+// humain — est conservée, mais entre candidats comparablement similaires.
 async function byDescriptionTrigram(
   txn: TxnForLlm,
   limit: number,
@@ -142,7 +164,11 @@ async function byDescriptionTrigram(
         sql`${similarity} > ${TRIGRAM_THRESHOLD}`,
       ),
     )
-    .orderBy(manualFirst, desc(similarity))
+    .orderBy(
+      desc(sql`round(${similarity}::numeric, 1)`),
+      manualFirst,
+      desc(similarity),
+    )
     .limit(limit);
 }
 

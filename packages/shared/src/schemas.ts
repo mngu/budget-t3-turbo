@@ -24,8 +24,19 @@ export const transactionsSearchSchema = z.object({
     .optional()
     .catch(undefined),
   q: z.string().optional().catch(undefined),
+  // Ne garde que les transactions rattachées à une catégorie parente qui a des
+  // sous-catégories — le « non ventilé » de la revue du mois. Ce n'est pas le
+  // même prédicat que `category: "none"` (aucune catégorie du tout).
+  nvOnly: z.boolean().optional().catch(undefined),
   sort: z.enum(["date", "amount"]).catch("date"),
   order: z.enum(["asc", "desc"]).catch("desc"),
+  // Tri de la liste des catégories de la revue du mois. Distinct de `sort`,
+  // qui ne concerne que la table des transactions.
+  //
+  // Optionnel et non `.catch("montant")` : une clé requise obligerait tous les
+  // `navigate({ to: "/" })` de l'app (pages Banques et Catégories) à la
+  // renseigner. Le défaut est appliqué à la lecture, dans la liste elle-même.
+  catSort: z.enum(["montant", "ecart", "nv"]).optional().catch(undefined),
 });
 
 export type TransactionsSearch = z.infer<typeof transactionsSearchSchema>;

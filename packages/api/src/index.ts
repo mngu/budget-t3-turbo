@@ -32,6 +32,9 @@ export type { ConsentBadge } from "./banking/domain";
 export type {
   CategoryBreakdownDetail,
   CategoryBreakdownItem,
+  MonthlyCategoryTotal,
+  ReviewItem,
+  ReviewReason,
   TransactionRow,
 } from "./transactions/queries";
 export type {

@@ -23,23 +23,29 @@ export function buildCategorizationOutputSchema() {
 }
 
 // Court-circuit déterministe : si au moins 2 transactions similaires partagent
-// la même contrepartie ET la même catégorie, on peut appliquer directement
-// sans appeler le LLM. Retourne le nom de la catégorie ou null.
-export function resolveShortcut(similars: SimilarTxn[]): string | null {
-  const byCounterparty = new Map<string, Map<string, number>>();
+// la contrepartie de la transaction à classer ET la même catégorie, on peut
+// appliquer directement sans appeler le LLM. Retourne le nom de la catégorie
+// ou null.
+//
+// `counterparty` est celle de la transaction à classer, et la comparer est
+// indispensable : la liste reçue est le résultat fusionné de tous les tiers de
+// findSimilar, pas seulement du tier contrepartie exacte. Sans cette garde, il
+// suffisait de deux candidats trigramme partageant une contrepartie *entre eux*
+// pour catégoriser d'autorité une transaction qui, elle, n'a aucune
+// contrepartie — cas majoritaire (57 % des transactions en base), et donc
+// court-circuit de la seule étape capable de rattraper un match faible.
+export function resolveShortcut(
+  similars: SimilarTxn[],
+  counterparty: string | null,
+): string | null {
+  if (!counterparty) return null;
+  const catCounts = new Map<string, number>();
   for (const s of similars) {
-    if (!s.counterparty) continue;
-    let catCounts = byCounterparty.get(s.counterparty);
-    if (!catCounts) {
-      catCounts = new Map();
-      byCounterparty.set(s.counterparty, catCounts);
-    }
+    if (s.counterparty !== counterparty) continue;
     catCounts.set(s.categoryName, (catCounts.get(s.categoryName) ?? 0) + 1);
   }
-  for (const [, catCounts] of byCounterparty) {
-    for (const [catName, count] of catCounts) {
-      if (count >= 2) return catName;
-    }
+  for (const [catName, count] of catCounts) {
+    if (count >= 2) return catName;
   }
   return null;
 }

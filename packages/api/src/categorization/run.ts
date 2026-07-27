@@ -92,7 +92,7 @@ async function runCategorization(): Promise<CategorizeResult> {
   const llmRows: TxnForLlm[] = [];
   for (const txn of rows) {
     const similars = similarsByTxnId.get(txn.id) ?? [];
-    const shortcut = resolveShortcut(similars);
+    const shortcut = resolveShortcut(similars, txn.counterparty);
     if (shortcut !== null) {
       const categoryId = categoryIdByName.get(shortcut);
       if (categoryId !== undefined) {

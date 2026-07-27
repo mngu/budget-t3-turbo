@@ -9,6 +9,13 @@ export const euro = new Intl.NumberFormat("fr-FR", {
 
 export const dateFr = new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium" });
 
+// Sans l'année : les écrans de la revue sont déjà bornés à un mois, la répéter
+// sur chaque ligne fait passer la colonne de date sur deux lignes.
+export const dayMonthFr = new Intl.DateTimeFormat("fr-FR", {
+  day: "2-digit",
+  month: "short",
+});
+
 const percentFr = new Intl.NumberFormat("fr-FR", {
   style: "percent",
   maximumFractionDigits: 0,
