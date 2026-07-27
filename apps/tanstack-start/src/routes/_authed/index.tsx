@@ -1,7 +1,9 @@
 import { createFileRoute, stripSearchParams } from "@tanstack/react-router";
 
+import type { TransactionsSearch } from "@budget/shared";
 import { transactionsSearchSchema } from "@budget/shared";
 
+import { monthBounds } from "~/lib/date";
 import { euro } from "~/lib/format";
 import { CategoryPieChart } from "./-components/category-pie-chart";
 import { KpiCard } from "./-components/kpi-card";
@@ -9,6 +11,39 @@ import { TransactionsFilters } from "./-components/transactions-filters";
 import { TransactionsHeader } from "./-components/transactions-header";
 import { TransactionsPagination } from "./-components/transactions-pagination";
 import { TransactionsTable } from "./-components/transactions-table";
+
+// Sans période dans l'URL, la page se cale sur le mois en cours plutôt que sur
+// l'historique complet. Le défaut est *injecté* dans l'URL (et non appliqué au
+// seul loader) pour que le RangePicker et les flèches de mois affichent la
+// période réellement interrogée.
+//
+// `new Date()` est volontairement évalué à chaque navigation : au niveau du
+// module, le mois resterait figé sur celui du démarrage du serveur.
+//
+// Le défaut est appliqué au *retour* de `next`, comme le fait
+// `stripSearchParams`, et non sur la search entrante : le maillon terminal de
+// la chaîne remplace la search par celle passée à `navigate()`, donc tout ce
+// qu'on modifie avant `next` est jeté dès qu'une navigation fournit un objet
+// littéral — c'est exactement le cas du bouton « Réinitialiser ».
+//
+// Générique, et pas typé sur TransactionsSearch : `stripSearchParams` dégrade
+// le schéma vu par les middlewares suivants (`page: unknown` — même cause que
+// la suppression d'erreur commentée plus bas), et un type concret ne s'y
+// unifierait plus. Ce middleware n'a de toute façon besoin que des deux bornes.
+const defaultToCurrentMonth = <
+  TSearch extends Pick<TransactionsSearch, "dateFrom" | "dateTo">,
+>({
+  search,
+  next,
+}: {
+  search: TSearch;
+  next: (search: TSearch) => TSearch;
+}) => {
+  const result = next(search);
+  return result.dateFrom ?? result.dateTo
+    ? result
+    : { ...result, ...monthBounds(new Date()) };
+};
 
 export const Route = createFileRoute("/_authed/")({
   validateSearch: transactionsSearchSchema,
@@ -19,6 +54,7 @@ export const Route = createFileRoute("/_authed/")({
       // Runtime behavior is unaffected (all three are still stripped when equal to defaults).
       // Revisit if the router is upgraded to align with the source app's 1.170.x.
       stripSearchParams({ page: 1, sort: "date", order: "desc" }),
+      defaultToCurrentMonth,
     ],
   },
   loaderDeps: ({ search }) => search,
