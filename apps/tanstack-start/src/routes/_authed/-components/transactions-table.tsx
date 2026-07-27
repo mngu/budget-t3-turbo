@@ -18,7 +18,7 @@ import {
 } from "@budget/ui/table";
 import { toast } from "@budget/ui/toast";
 
-import { CategoryTreeSelect } from "~/component/category/category-tree-select/category-tree-select";
+import { CategoryTreeSelect } from "~/component/category-tree-select/category-tree-select";
 import { dateFr, euro } from "~/lib/format";
 import { useTRPCClient } from "~/lib/trpc";
 

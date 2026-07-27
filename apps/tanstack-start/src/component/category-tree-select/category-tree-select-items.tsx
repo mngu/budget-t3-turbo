@@ -4,7 +4,7 @@ import type { CategoryTreeNode } from "@budget/api";
 import { SelectItem, SelectValue } from "@budget/ui/select";
 import { FALLBACK_CATEGORY_COLOR } from "@budget/shared";
 
-import { useCategoryColor } from "~/component/category/lib/category-color";
+import { useCategoryColor } from "~/lib/category-color";
 
 export function CategoryTreeSelectItems({
   categories,
