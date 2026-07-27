@@ -1,0 +1,174 @@
+apps/tanstack-start/src/styles.css
+  s_b97973717cf61b::t_a98f74b75b37f3 5
+  s_b97973717cf61b::t_74234df964a803 178-189
+  s_b97973717cf61b::t_04d61dee65afc1 77-84,86-87,89,91-103,109-120
+  s_b97973717cf61b::t_2fd226101d0580 133-147,149-150,156-167
+  s_b97973717cf61b::t_f7d17c78db0e9f 18-36
+apps/tanstack-start/src/routes/_authed/_revue/-components/ventiler-row.tsx
+  s_b97973717cf61b::t_8b7be7fc350286 1-6,9-34,36-76
+  s_b97973717cf61b::t_828e269fa9fe4a 7
+  s_b97973717cf61b::t_1df354419e98df 35
+  s_b97973717cf61b::t_5361bd1c55204c 8
+apps/tanstack-start/src/routes/_authed/_revue/categorie.$name.tsx
+  s_b97973717cf61b::t_0901ee04e834b9 1-29,31-68,70-79,81-95,97-102,104-135,137-149,154-183,185-228
+  s_b97973717cf61b::t_91a51fc1fe0897 69
+  s_b97973717cf61b::t_baca6c81e56fd0 80,96,103,136
+  s_b97973717cf61b::t_828e269fa9fe4a 30,150-153,184
+apps/tanstack-start/src/routes/_authed/_revue/index.tsx
+  s_b97973717cf61b::t_bce5b00122d3e6 1-23,25-125,127-133
+  s_b97973717cf61b::t_f57e2c8f714e3d 126
+  s_b97973717cf61b::t_828e269fa9fe4a 24
+apps/tanstack-start/src/routes/_authed/_revue/-components/category-transactions.tsx
+  s_b97973717cf61b::t_45ad7fb42a4998 1-9,11-57,59-98
+  s_b97973717cf61b::t_62773b77b160e8 10,58
+apps/tanstack-start/src/lib/history.ts
+  s_b97973717cf61b::t_ef31269c819dab 1-7,16-26,36-41,43-52,54-56,58-60,79-83,85-95,97,105,108,111-138,141-142,144-145,149-150,152-153,157,159-160
+  s_b97973717cf61b::t_828e269fa9fe4a 109-110
+  s_b97973717cf61b::t_4499099659c216 8-15,27-35,42,53,57,61-78,84,96,98-104,106-107,139-140,143,146-148,151,154-156,158
+apps/tanstack-start/src/routes/_authed/_revue/-components/filter-bar.tsx
+  s_b97973717cf61b::t_828e269fa9fe4a 10,13,141-143
+  s_b97973717cf61b::t_3bc70ec983bec3 1-9,11-12,14-140,144-252
+apps/tanstack-start/src/routes/_authed/_revue/-components/category-path-picker.tsx
+  s_b97973717cf61b::t_96a74c3cb92e94 1-7,9-34,36-45,52-135,140-168
+  s_b97973717cf61b::t_828e269fa9fe4a 35,46-51
+  s_b97973717cf61b::t_fd7451014e70e8 136-139
+  s_b97973717cf61b::t_e39d21314d74b2 8
+apps/tanstack-start/src/routes/_authed/_revue/-components/category-spend-list.tsx
+  s_b97973717cf61b::t_921428a1c47371 40-42,44-45
+  s_b97973717cf61b::t_7370c5f9c7c2d6 66
+  s_b97973717cf61b::t_5c7035fc860f0c 94
+  s_b97973717cf61b::t_baca6c81e56fd0 99,113,140,152,160
+  s_b97973717cf61b::t_828e269fa9fe4a 47-48
+  s_b97973717cf61b::t_c43e0954bf3f89 161
+  s_b97973717cf61b::t_2d959dbdf73872 1-39,43,46,49-65,67-93,95-98,100-112,114-139,141-151,153-159,162-192
+apps/tanstack-start/src/routes/_authed/_revue/ventiler.tsx
+  s_b97973717cf61b::t_a386dafb6f1610 6-7,9-34,36-97,99-104,106-159,161,165-168,170-185,188-219,221-268
+  s_b97973717cf61b::t_baca6c81e56fd0 98,105,169,220
+  s_b97973717cf61b::t_3a65f62f5ee55b 8
+  s_b97973717cf61b::t_828e269fa9fe4a 1-5,35,186-187
+  s_b97973717cf61b::t_fcb8ca40b7eb36 160,162-164
+brief-A-restyle.md
+  s_8a3933318f8587::t_983d544aaffbf8 1-89
+apps/tanstack-start/src/lib/transactions-search.ts
+  s_b97973717cf61b::t_52e108f740bafa 1-63
+apps/tanstack-start/src/lib/use-set-category.ts
+  s_b97973717cf61b::t_d63c0f5d73ac09 1-42
+packages/api/src/categorization/results.ts
+  s_3d6e9deeb6144e::t_593f6fc85954fd 26-42,44,47-48
+packages/api/src/categorization/results.test.ts
+  s_3d6e9deeb6144e::t_503770b7b465b1 56-58,62,67-103
+apps/tanstack-start/src/lib/format.ts
+  s_b97973717cf61b::t_fe5c1ddef75f4b 12-18
+CLAUDE.md
+  s_b97973717cf61b::t_94a47b7c6014c5 37-41
+  s_3d6e9deeb6144e::t_66779998f59df7 27-29
+  s_3d6e9deeb6144e::t_285f71d505db77 89
+  s_3d6e9deeb6144e::t_81a90820039134 30
+apps/tanstack-start/src/lib/use-revue-search.ts
+  s_b97973717cf61b::t_a7a55db2322a2e 19
+  s_b97973717cf61b::t_b1911bc25dbf07 24-27,34
+  s_b97973717cf61b::t_6974039a230dbe 1-18,20-23,28-33,35-39
+apps/tanstack-start/src/lib/category-color.ts
+  s_b97973717cf61b::t_634bf88079efc3 12-39
+  s_b97973717cf61b::t_828e269fa9fe4a 2
+apps/tanstack-start/src/routes/_authed/_revue/-components/summary-tiles.tsx
+  s_b97973717cf61b::t_ba826508459a0d 3-6,8,10-110,112-129,131-145,147-175
+  s_b97973717cf61b::t_3bbad24ed5396a 1-2,7,9
+  s_b97973717cf61b::t_7dc6c094b893a3 111
+  s_b97973717cf61b::t_baca6c81e56fd0 146
+  s_b97973717cf61b::t_828e269fa9fe4a 130
+packages/api/src/index.ts
+  s_b97973717cf61b::t_e709f3a1eb8e89 35
+  s_b97973717cf61b::t_b4738fe232bc73 36-37
+packages/api/src/categorization/run.ts
+  s_3d6e9deeb6144e::t_91c29635d66089 95
+apps/tanstack-start/src/routes/_authed/_revue/-components/transactions-table.tsx
+  s_b97973717cf61b::t_e55814a12b0d12 1-9,11-101,103-138,142-191
+  s_b97973717cf61b::t_62773b77b160e8 10,102
+  s_b97973717cf61b::t_828e269fa9fe4a 139-141
+brief-B-table-rase.md
+  s_8a3933318f8587::t_983d544aaffbf8 1-101
+apps/tanstack-start/src/routes/_authed/_revue/-components/app-header.tsx
+  s_b97973717cf61b::t_b22d0576a97625 108-128
+  s_b97973717cf61b::t_baca6c81e56fd0 51
+  s_b97973717cf61b::t_e8561654e7114b 22
+  s_b97973717cf61b::t_156a7bc2995861 1-6,9-11,13-15,17-21,23-30,33-50,52-82,84-107,129-161
+  s_b97973717cf61b::t_c2f34297023e74 31-32
+  s_b97973717cf61b::t_d0ce698437258f 83
+  s_b97973717cf61b::t_06d16fd880b3f8 7-8,12,16
+packages/api/src/transactions/queries.ts
+  s_b97973717cf61b::t_ddb66af812efbe 471
+  s_b97973717cf61b::t_90053c439a2eb6 505
+  s_b97973717cf61b::t_8975c497a5763d 517-535
+  s_b97973717cf61b::t_1bdf05af780a33 78-89
+  s_b97973717cf61b::t_ad74396b354724 287-290,292-347,350-426
+  s_b97973717cf61b::t_a8395974bf2258 491
+  s_b97973717cf61b::t_b4a1e945f23b5f 115-117,120
+  s_b97973717cf61b::t_c93a4f6ad66a00 42,44-47
+  s_b97973717cf61b::t_6a9a56a9236cf8 452-459
+  s_b97973717cf61b::t_04e153bcaf2296 160-161
+  s_b97973717cf61b::t_828e269fa9fe4a 291,348-349
+  s_b97973717cf61b::t_b9fd0477db256c 434-437
+  s_b97973717cf61b::t_150c8aea1bde44 146-152
+  s_b97973717cf61b::t_9a8c37dc1d2da2 427-433,438-451,460-470,472-490,492-504,506-508
+apps/tanstack-start/src/routes/_authed/_revue/transactions.tsx
+  s_b97973717cf61b::t_828e269fa9fe4a 5,15
+  s_b97973717cf61b::t_202b7b32dbd05d 23-38
+  s_b97973717cf61b::t_4cc9698c258749 1-4,6-14,16-22,39-95
+apps/tanstack-start/src/routes/_authed/_revue/-components/period-stepper.tsx
+  s_b97973717cf61b::t_828e269fa9fe4a 19,46-48
+  s_b97973717cf61b::t_1736488a4d42c8 1-18,20-45,49-103
+packages/shared/src/schemas.ts
+  s_b97973717cf61b::t_477aab36327f16 27-30,33-34
+  s_b97973717cf61b::t_48949125ca67ce 35-39
+packages/api/src/router/transactions.ts
+  s_b97973717cf61b::t_05d655a74a199b 19-26
+  s_b97973717cf61b::t_ecc6e5427ca0c1 11
+  s_b97973717cf61b::t_33721e1b3ee05f 7,10
+  s_b97973717cf61b::t_d2dcd8f6716649 34-41
+  s_b97973717cf61b::t_c40ce735605376 42-45
+packages/api/src/categorization/similar.ts
+  s_3d6e9deeb6144e::t_b484da9ac45766 22-33
+  s_3d6e9deeb6144e::t_10d92100a5f49c 144-150,167-171
+  s_3d6e9deeb6144e::t_7a48600c661034 116-119
+apps/tanstack-start/src/routes/_authed/_revue.tsx
+  s_b97973717cf61b::t_eb4d9ac0eaaa0c 1-30
+apps/tanstack-start/src/routes/_authed/_revue/-components/review-rail.tsx
+  s_b97973717cf61b::t_828e269fa9fe4a 95,129-131
+  s_b97973717cf61b::t_62773b77b160e8 10,90
+  s_b97973717cf61b::t_cc61edeecc2a34 1-9,11-89,91-94,96-128,132-147
+apps/tanstack-start/src/routeTree.gen.ts
+  s_b97973717cf61b::t_2e5c3ae42f1dcc 15,18,22-24,40-43,54-58,74-89,94-95,99,102,107-108,112,115,121,123-124,128,131,138-139,143,146,151-152,156,159,164,166-167,171,174,207-213,228-234,256-276,280-297,299,307
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "e32cfcd8fed51540d8ed577935db2509ed5b1c8a",
+  "prompts": {},
+  "sessions": {
+    "s_3d6e9deeb6144e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ecde31a7-4c41-48c2-9b76-b447e88afe79",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    },
+    "s_8a3933318f8587": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4655172e-fd06-47cf-b5dc-5bdf68fdd214",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    },
+    "s_b97973717cf61b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "dfb98076-9b4b-4396-a510-248c1a8123ca",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
