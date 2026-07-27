@@ -1,0 +1,22 @@
+apps/tanstack-start/src/routes/_authed/-components/transactions-table.tsx
+  h_baa52ab231f280 21
+apps/tanstack-start/src/routes/_authed/-components/category-pie-chart.tsx
+  h_baa52ab231f280 6
+apps/tanstack-start/src/component/category-tree-select/category-tree-select-items.tsx
+  h_baa52ab231f280 1-84
+apps/tanstack-start/src/routes/_authed/-components/transactions-filters.tsx
+  h_baa52ab231f280 13
+apps/tanstack-start/src/routes/_authed/categories/-components/category-row-shell.tsx
+  h_baa52ab231f280 12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "e79c5fce00f366301b410fdccc722693c08a5e43",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
