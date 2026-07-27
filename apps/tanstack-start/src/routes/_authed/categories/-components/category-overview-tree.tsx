@@ -16,13 +16,10 @@ import { Input } from "@budget/ui/input";
 import { toast } from "@budget/ui/toast";
 import { FALLBACK_CATEGORY_COLOR } from "@budget/validators";
 
-import type { PreviewableTransaction } from "~/component/transaction-preview-drawer";
-import {
-  AddCategoryButton,
-  CategoryRowShell,
-} from "~/component/category-row-shell";
-import { TransactionPreviewDrawer } from "~/component/transaction-preview-drawer";
+import type { PreviewableTransaction } from "./transaction-preview-drawer";
 import { useTRPCClient } from "~/lib/trpc";
+import { AddCategoryButton, CategoryRowShell } from "./category-row-shell";
+import { TransactionPreviewDrawer } from "./transaction-preview-drawer";
 
 interface CategoryOverviewTreeProps {
   tree: CategoryOverviewNode[];

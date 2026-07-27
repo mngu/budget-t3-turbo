@@ -3,7 +3,7 @@ import { Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import type { CategoryBreakdownItem } from "@budget/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@budget/ui/card";
 
-import { useCategoryColor } from "~/lib/category-color";
+import { useCategoryColor } from "~/component/category/lib/category-color";
 import { euro, sharePercent } from "~/lib/format";
 
 const tooltipStyle = {

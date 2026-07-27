@@ -9,7 +9,7 @@ import { Button } from "@budget/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@budget/ui/popover";
 import { CATEGORY_COLOR_PALETTE } from "@budget/validators";
 
-import { useCategoryColor } from "~/lib/category-color";
+import { useCategoryColor } from "~/component/category/lib/category-color";
 
 // Coquille visuelle partagée par category-tree.tsx (brouillon de suggestions,
 // rien n'est persisté avant "Appliquer") et category-overview-tree.tsx

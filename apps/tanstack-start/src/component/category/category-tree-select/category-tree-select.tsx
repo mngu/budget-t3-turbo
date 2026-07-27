@@ -8,7 +8,7 @@ import { useTRPC } from "~/lib/trpc";
 import {
   CategorySelectValue,
   CategoryTreeSelectItems,
-} from "../category-tree-select-items";
+} from "./category-tree-select-items";
 
 // La largeur diffère selon l'appelant (w-56 pour le filtre, w-48 pour la
 // cellule du tableau) : elle reste à l'appelant, pas codée en dur ici.

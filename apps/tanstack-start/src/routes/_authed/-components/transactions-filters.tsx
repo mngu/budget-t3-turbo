@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@budget/ui/select";
 
-import { CategoryTreeSelect } from "~/component/category-tree-select/category-tree-select";
+import { CategoryTreeSelect } from "~/component/category/category-tree-select/category-tree-select";
 import { SearchInput } from "~/component/search-input";
 import { useTRPC } from "~/lib/trpc";
 

@@ -5,14 +5,14 @@ import { ArrowLeftIcon, Loader2Icon, SparklesIcon } from "lucide-react";
 import { Button } from "@budget/ui/button";
 import { toast } from "@budget/ui/toast";
 
-import type { ReadyStatus } from "~/component/category-suggestions";
-import type { PreviewableTransaction } from "~/component/transaction-preview-drawer";
-import { CategoryOverviewTree } from "~/component/category-overview-tree";
-import { SuggestionsWorkspace } from "~/component/category-suggestions";
-import { TransactionPreviewDrawer } from "~/component/transaction-preview-drawer";
+import type { ReadyStatus } from "./-components/category-suggestions";
+import type { PreviewableTransaction } from "./-components/transaction-preview-drawer";
 import { useTRPCClient } from "~/lib/trpc";
+import { CategoryOverviewTree } from "~/routes/_authed/categories/-components/category-overview-tree";
+import { SuggestionsWorkspace } from "./-components/category-suggestions";
+import { TransactionPreviewDrawer } from "./-components/transaction-preview-drawer";
 
-export const Route = createFileRoute("/_authed/categories")({
+export const Route = createFileRoute("/_authed/categories/")({
   loader: async ({ context }) => {
     const [status, overview] = await Promise.all([
       context.trpcClient.categories.suggestions.status.query(),

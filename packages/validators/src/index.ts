@@ -89,5 +89,3 @@ export const transactionsSearchSchema = z.object({
   sort: z.enum(["date", "amount"]).catch("date"),
   order: z.enum(["asc", "desc"]).catch("desc"),
 });
-
-export type TransactionsSearch = z.infer<typeof transactionsSearchSchema>;
