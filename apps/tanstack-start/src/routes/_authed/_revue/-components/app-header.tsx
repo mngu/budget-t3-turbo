@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Link, useRouter } from "@tanstack/react-router";
 import {
   LandmarkIcon,
@@ -12,18 +13,21 @@ import {
   SunIcon,
 } from "lucide-react";
 
+import { REVIEW_QUEUE_LIMIT } from "@budget/shared";
 import { cn } from "@budget/ui";
 import { useTheme } from "@budget/ui/theme";
 import { toast } from "@budget/ui/toast";
 
 import { SearchInput } from "~/component/search-input";
 import { toastSyncOutcome } from "~/lib/sync-toast";
-import { useTRPCClient } from "~/lib/trpc";
+import { reviewScope } from "~/lib/transactions-search";
+import { useTRPC, useTRPCClient } from "~/lib/trpc";
 import { useRevueSearch } from "~/lib/use-revue-search";
 import { PeriodStepper } from "./period-stepper";
 
 const TABS = [
   { to: "/", label: "Revue du mois" },
+  { to: "/ventiler", label: "À revoir" },
   { to: "/transactions", label: "Toutes les transactions" },
 ] as const;
 
@@ -50,11 +54,12 @@ export function AppHeader() {
             // c'est le même périmètre vu de deux façons.
             search={search}
             activeOptions={{ exact: true }}
-            className="rounded-[7px] px-3 py-1 text-xs data-[status=active]:bg-[var(--card)] data-[status=active]:font-semibold"
+            className="flex items-center gap-1.5 rounded-[7px] px-3 py-1 text-xs data-[status=active]:bg-[var(--card)] data-[status=active]:font-semibold"
             activeProps={{ className: "text-foreground" }}
             inactiveProps={{ className: "text-muted-foreground" }}
           >
             {tab.label}
+            {tab.to === "/ventiler" && <ReviewBadge />}
           </Link>
         ))}
       </nav>
@@ -83,6 +88,25 @@ export function AppHeader() {
         <ThemeButton />
       </div>
     </header>
+  );
+}
+
+// Compteur de l'onglet « À revoir ». Sans suspense et sans loader dédié : les
+// quatre écrans amorcent `transactions.review` dans le cache react-query, le
+// badge s'y sert. La file est plafonnée côté serveur, d'où le « + » : afficher
+// « 40 » pour 400 transactions ferait passer un plafond pour un décompte.
+function ReviewBadge() {
+  const trpc = useTRPC();
+  const { search } = useRevueSearch();
+  const { data } = useQuery(
+    trpc.transactions.review.queryOptions(reviewScope(search)),
+  );
+  if (!data?.length) return null;
+  return (
+    <span className="text-bad bg-bad-soft rounded-full px-1.5 text-[11px] font-semibold">
+      {data.length}
+      {data.length >= REVIEW_QUEUE_LIMIT && "+"}
+    </span>
   );
 }
 

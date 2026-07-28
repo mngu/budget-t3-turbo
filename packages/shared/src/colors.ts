@@ -4,7 +4,12 @@ export interface CategoryColor {
   name: string;
   /** Valeur canonique — c'est elle qui est stockée dans `categories.color`. */
   light: string;
-  /** Même teinte, re-steppée pour la surface sombre (`--card` = #171717). */
+  /**
+   * Même teinte, re-steppée pour la surface sombre. Les pas ont été mesurés
+   * contre un `--card` sombre plus foncé que l'actuel (la maquette l'a remonté
+   * à oklch(0.262 0.012 265) le 2026-07-28) : les écarts de la palette entre
+   * eux n'en dépendent pas, mais un re-calage tiendrait compte de ce fond.
+   */
   dark: string;
 }
 

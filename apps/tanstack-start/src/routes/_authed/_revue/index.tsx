@@ -11,11 +11,12 @@ import {
 } from "~/lib/history";
 import {
   defaultToCurrentMonth,
+  reviewScope,
   SEARCH_DEFAULTS,
   wholePeriod,
 } from "~/lib/transactions-search";
+import { CategoryIncomeList } from "./-components/category-income-list";
 import { CategorySpendList } from "./-components/category-spend-list";
-import { ReviewRail } from "./-components/review-rail";
 import { SummaryTiles } from "./-components/summary-tiles";
 
 export const Route = createFileRoute("/_authed/_revue/")({
@@ -40,11 +41,17 @@ export const Route = createFileRoute("/_authed/_revue/")({
         direction: "credit",
       }),
       context.trpcClient.transactions.history.query(period),
-      context.trpcClient.transactions.review.query(deps),
-      // L'arborescence et les compteurs par banque ne sont pas retournés :
-      // leurs consommateurs (sélecteur de catégorie, pastilles de la barre de
-      // filtres) les lisent dans le cache react-query, que le loader réalimente
-      // à chaque passage — `router.invalidate()` suffit donc à les rafraîchir.
+      // L'arborescence, les compteurs par banque et la file de relecture ne
+      // sont pas retournés tels quels : leurs consommateurs (sélecteur de
+      // catégorie, pastilles de la barre de filtres, badge de l'onglet
+      // « À revoir ») les lisent dans le cache react-query, que le loader
+      // réalimente à chaque passage — `router.invalidate()` suffit donc à les
+      // rafraîchir. La file est en plus *lue* ici pour la note de bas des
+      // entrées ; c'est bien la même entrée de cache que celle du badge.
+      context.queryClient.fetchQuery({
+        ...context.trpc.transactions.review.queryOptions(reviewScope(deps)),
+        staleTime: 0,
+      }),
       context.queryClient.fetchQuery({
         ...context.trpc.categories.tree.queryOptions(),
         staleTime: 0,
@@ -93,8 +100,11 @@ function RevueDuMois() {
   const monthly = totalsByMonth(history);
 
   return (
-    <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(280px,376px)]">
-      <div className="min-w-0 overflow-y-auto px-6 pt-5 pb-7">
+    // Pleine largeur : la file de relecture qui occupait la colonne de droite
+    // a son propre onglet (« À revoir », /ventiler). La revue redevient une
+    // lecture — sorties, puis entrées — et la correction se fait à côté.
+    <div className="min-h-0 flex-1 overflow-y-auto">
+      <div className="max-w-[1500px] px-6 pt-5 pb-10">
         <SummaryTiles
           expenses={expensesTotal}
           revenues={revenuesTotal}
@@ -125,9 +135,15 @@ function RevueDuMois() {
           total={expensesTotal}
           averages={categoryAverages(history, monthly, anchor)}
         />
-      </div>
 
-      <ReviewRail items={review} />
+        <CategoryIncomeList
+          items={revenues}
+          total={revenuesTotal}
+          oddDirectionCount={
+            review.filter((item) => item.reason === "sens-inhabituel").length
+          }
+        />
+      </div>
     </div>
   );
 }

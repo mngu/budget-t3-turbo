@@ -56,7 +56,7 @@ export function CategorySpendList({
     <>
       <div className="mt-6 mb-2.5 flex flex-wrap items-baseline gap-2.5">
         <h2 className="text-[15px] font-semibold tracking-[-0.02em]">
-          Où est parti l'argent
+          Sorties · où est parti l'argent
         </h2>
         <span className="text-subtle text-[11.5px]">
           {items.length} catégories · cliquer pour ouvrir le détail

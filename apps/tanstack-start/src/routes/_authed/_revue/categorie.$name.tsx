@@ -16,6 +16,7 @@ import {
 import { euro, sharePercent } from "~/lib/format";
 import {
   defaultToCurrentMonth,
+  reviewScope,
   SEARCH_DEFAULTS,
   wholePeriod,
 } from "~/lib/transactions-search";
@@ -31,10 +32,18 @@ export const Route = createFileRoute("/_authed/_revue/categorie/$name")({
   },
   loaderDeps: ({ search }) => search,
   loader: async ({ deps, params, context }) => {
-    const [expenses, list] = await Promise.all([
+    const period = wholePeriod(deps);
+    const [expenses, revenues, list, review] = await Promise.all([
       context.trpcClient.transactions.byCategory.query({
-        ...wholePeriod(deps),
+        ...period,
         direction: "debit",
+      }),
+      // Les catégories d'entrée sont atteignables depuis la liste « Entrées »
+      // de la revue : sans cette seconde répartition, le zoom d'un salaire ne
+      // trouverait rien et afficherait l'état vide.
+      context.trpcClient.transactions.byCategory.query({
+        ...period,
+        direction: "credit",
       }),
       // Le filtre SQL par catégorie est parent-inclusif : passer le nom du
       // parent remonte aussi les transactions de ses sous-catégories.
@@ -45,6 +54,10 @@ export const Route = createFileRoute("/_authed/_revue/categorie/$name")({
         limit: ZOOM_LIMIT,
       }),
       context.queryClient.fetchQuery({
+        ...context.trpc.transactions.review.queryOptions(reviewScope(deps)),
+        staleTime: 0,
+      }),
+      context.queryClient.fetchQuery({
         ...context.trpc.categories.tree.queryOptions(),
         staleTime: 0,
       }),
@@ -53,18 +66,29 @@ export const Route = createFileRoute("/_authed/_revue/categorie/$name")({
         staleTime: 0,
       }),
     ]);
+    // Une catégorie peut porter les deux sens ; c'est celui qui pèse le plus
+    // qui décide de quoi la part affichée est un pourcentage.
+    const asExpense = expenses.find((e) => e.category === params.name) ?? null;
+    const asRevenue = revenues.find((e) => e.category === params.name) ?? null;
+    const isIncome =
+      asRevenue !== null &&
+      (asExpense === null || asRevenue.total > asExpense.total);
+    const side = isIncome ? revenues : expenses;
     return {
-      item: expenses.find((e) => e.category === params.name) ?? null,
-      periodTotal: expenses.reduce((acc, e) => acc + e.total, 0),
+      item: (isIncome ? asRevenue : asExpense) ?? null,
+      isIncome,
+      periodTotal: side.reduce((acc, e) => acc + e.total, 0),
       rows: list.rows,
       total: list.total,
+      flagged: review.map((r) => r.id),
     };
   },
   component: ZoomCategorie,
 });
 
 function ZoomCategorie() {
-  const { item, periodTotal, rows, total } = Route.useLoaderData();
+  const { item, isIncome, periodTotal, rows, total, flagged } =
+    Route.useLoaderData();
   const { name } = Route.useParams();
   const search = Route.useSearch();
   const resolveColor = useCategoryColor();
@@ -73,7 +97,7 @@ function ZoomCategorie() {
     return (
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3">
         <p className="text-muted-foreground text-[12.5px]">
-          Aucune dépense dans « {name} » sur cette période.
+          Aucun mouvement dans « {name} » sur cette période.
         </p>
         <Link
           to="/"
@@ -124,13 +148,17 @@ function ZoomCategorie() {
               {euro.format(item.total)}
             </div>
             <div className="text-muted-foreground text-xs">
-              {sharePercent(item.total, periodTotal)} des dépenses du mois ·{" "}
+              {sharePercent(item.total, periodTotal)}{" "}
+              {isIncome ? "des entrées du mois" : "des sorties du mois"} ·{" "}
               {total} transactions
             </div>
           </div>
         </div>
 
-        {unallocated > 0 && (
+        {/* La ventilation ne traite que les sorties (son loader force
+            `direction: "debit"`) : proposer la carte sur une catégorie
+            d'entrée mènerait à un écran vide. */}
+        {!isIncome && unallocated > 0 && (
           <Link
             to="/ventiler"
             search={{ ...search, category: item.category, page: 1 }}
@@ -221,7 +249,12 @@ function ZoomCategorie() {
             catégorie modifiable sur place
           </div>
         </div>
-        <CategoryTransactions rows={rows} shown={rows.length} total={total} />
+        <CategoryTransactions
+          rows={rows}
+          shown={rows.length}
+          total={total}
+          flagged={new Set(flagged)}
+        />
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import { PAGE_SIZE, transactionsSearchSchema } from "@budget/shared";
 import { euro } from "~/lib/format";
 import {
   defaultToCurrentMonth,
+  reviewScope,
   SEARCH_DEFAULTS,
 } from "~/lib/transactions-search";
 import { TransactionsTable } from "./-components/transactions-table";
@@ -36,7 +37,13 @@ export const Route = createFileRoute("/_authed/_revue/transactions")({
             ...deps,
             direction: "credit",
           }),
-      context.trpcClient.transactions.review.query(deps),
+      // Une seule entrée de cache pour la file de relecture, partagée avec le
+      // badge de l'onglet « À revoir » : `reviewScope` neutralise la pagination,
+      // sinon chaque « Suivant » recalculerait le badge (voir son commentaire).
+      context.queryClient.fetchQuery({
+        ...context.trpc.transactions.review.queryOptions(reviewScope(deps)),
+        staleTime: 0,
+      }),
       context.queryClient.fetchQuery({
         ...context.trpc.categories.tree.queryOptions(),
         staleTime: 0,
@@ -65,11 +72,11 @@ function ToutesLesTransactions() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="bg-secondary border-border flex flex-none items-center gap-2.5 border-b px-5 py-2">
+      <div className="bg-secondary border-border flex flex-none items-center gap-3 border-b px-8 py-3">
         <span className="text-muted-foreground text-[11.5px]">
           {total} transactions · page {search.page} sur {pageCount}
         </span>
-        <span className="ml-auto flex items-baseline gap-3.5">
+        <span className="ml-auto flex items-baseline gap-4.5">
           <span className="text-muted-foreground text-[11.5px]">
             Débits{" "}
             <b className="num text-foreground text-[12.5px]">

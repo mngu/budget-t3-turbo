@@ -5,7 +5,7 @@ import {
 } from "@tanstack/react-router";
 
 import type { CategoryBreakdownItem, TransactionRow } from "@budget/api";
-import { transactionsSearchSchema } from "@budget/shared";
+import { REVIEW_QUEUE_LIMIT, transactionsSearchSchema } from "@budget/shared";
 
 import {
   hatchedBackground,
@@ -15,10 +15,12 @@ import {
 import { euro, sharePercent } from "~/lib/format";
 import {
   defaultToCurrentMonth,
+  reviewScope,
   SEARCH_DEFAULTS,
   wholePeriod,
 } from "~/lib/transactions-search";
 import { useCategoryPaths } from "./-components/category-path-picker";
+import { ReviewCards } from "./-components/review-cards";
 import { VentilerRow } from "./-components/ventiler-row";
 
 // Assez de lignes pour couvrir plusieurs catégories d'un coup — l'écran ne
@@ -36,7 +38,7 @@ export const Route = createFileRoute("/_authed/_revue/ventiler")({
   },
   loaderDeps: ({ search }) => search,
   loader: async ({ deps, context }) => {
-    const [nv, expenses] = await Promise.all([
+    const [nv, expenses, review] = await Promise.all([
       context.trpcClient.transactions.list.query({
         ...deps,
         page: 1,
@@ -50,6 +52,12 @@ export const Route = createFileRoute("/_authed/_revue/ventiler")({
         ...wholePeriod(deps),
         direction: "debit",
       }),
+      // Même entrée de cache que le badge de l'onglet « À revoir » (voir
+      // `reviewScope`), d'où le passage par le queryClient.
+      context.queryClient.fetchQuery({
+        ...context.trpc.transactions.review.queryOptions(reviewScope(deps)),
+        staleTime: 0,
+      }),
       context.queryClient.fetchQuery({
         ...context.trpc.categories.tree.queryOptions(),
         staleTime: 0,
@@ -59,7 +67,7 @@ export const Route = createFileRoute("/_authed/_revue/ventiler")({
         staleTime: 0,
       }),
     ]);
-    return { rows: nv.rows, total: nv.total, expenses };
+    return { rows: nv.rows, total: nv.total, expenses, review };
   },
   component: Ventiler,
 });
@@ -68,7 +76,7 @@ const unallocatedOf = (item: CategoryBreakdownItem) =>
   item.breakdown.find((b) => b.unallocated)?.total ?? 0;
 
 function Ventiler() {
-  const { rows, total, expenses } = Route.useLoaderData();
+  const { rows, total, expenses, review } = Route.useLoaderData();
   const search = Route.useSearch();
   const resolveColor = useCategoryColor();
   const paths = useCategoryPaths();
@@ -99,7 +107,7 @@ function Ventiler() {
             Revue du mois
           </Link>
           <span className="text-subtle">›</span>
-          <span className="text-foreground font-medium">Ventiler</span>
+          <span className="text-foreground font-medium">À revoir</span>
           <Link
             to="/"
             search={search}
@@ -204,6 +212,14 @@ function Ventiler() {
             </p>
           )}
         </div>
+
+        {/* Le motif `non-ventile` est retiré : ces transactions sont déjà
+            au-dessus, groupées par catégorie. Sans ce partage, la même ligne
+            apparaîtrait deux fois sur un seul écran. */}
+        <ReviewCards
+          items={review.filter((item) => item.reason !== "non-ventile")}
+          truncated={review.length >= REVIEW_QUEUE_LIMIT}
+        />
       </div>
 
       <aside className="border-border bg-sunken overflow-y-auto border-l px-4 py-4.5">

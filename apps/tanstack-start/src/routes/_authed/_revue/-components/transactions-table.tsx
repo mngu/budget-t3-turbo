@@ -14,8 +14,12 @@ import { CategoryPathPicker } from "./category-path-picker";
 
 // Une seule définition de gabarit pour l'en-tête et les lignes : deux grilles
 // déclarées séparément finissent toujours par diverger d'un pixel.
+//
+// Gouttière et marges reprises de la maquette au facteur ~0,77 appliqué partout
+// dans le portage (24 px → 18, 40 px → 32) ; les tailles de texte et de
+// contrôles, elles, sont au ratio 1:1 comme sur les autres écrans.
 const GRID =
-  "grid grid-cols-[74px_minmax(120px,1.4fr)_minmax(88px,1fr)_minmax(80px,1fr)_minmax(140px,1.4fr)_96px] items-center gap-2.5 px-5";
+  "grid grid-cols-[74px_minmax(120px,1.4fr)_minmax(88px,1fr)_minmax(80px,1fr)_minmax(140px,1.4fr)_96px] items-center gap-4.5 px-8";
 
 export function TransactionsTable({
   rows,
@@ -60,7 +64,7 @@ export function TransactionsTable({
           </p>
         )}
 
-        <div className="text-subtle flex items-center justify-center gap-2.5 p-3 text-[11.5px]">
+        <div className="text-subtle flex items-center justify-center gap-3 p-4 text-[11.5px]">
           <button
             type="button"
             disabled={page <= 1}
@@ -94,7 +98,7 @@ function Row({ row, flagged }: { row: TransactionRow; flagged: boolean }) {
     <div
       className={cn(
         GRID,
-        "border-border hover:bg-accent h-[30px] border-b",
+        "border-border hover:bg-accent h-9 border-b",
         flagged && "bg-bad-soft",
       )}
     >
@@ -102,23 +106,23 @@ function Row({ row, flagged }: { row: TransactionRow; flagged: boolean }) {
         {dayMonthFr.format(new Date(row.bookingDate))}
       </span>
       <span className="flex min-w-0 items-center gap-1.5">
-        <span className="num truncate text-[11.5px]">{row.description}</span>
+        <span className="num truncate text-[12.5px]">{row.description}</span>
         {flagged && (
           <span
             className="bg-bad size-1.5 flex-none rounded-full"
-            title="À revoir — voir le rail de la revue du mois"
+            title="À revoir — voir l'onglet du même nom"
           />
         )}
       </span>
-      <span className="text-muted-foreground truncate text-[11px]">
+      <span className="text-muted-foreground truncate text-[12px]">
         {row.bankName}
       </span>
-      <span className="text-subtle truncate text-[11px]">
+      <span className="text-subtle truncate text-[12px]">
         {debtor ?? row.counterparty ?? "—"}
       </span>
       <CategoryCell row={row} />
       <span
-        className={cn("num text-right text-[11.5px]", signed > 0 && "text-ok")}
+        className={cn("num text-right text-[12.5px]", signed > 0 && "text-ok")}
       >
         {euro.format(signed)}
       </span>
@@ -145,7 +149,7 @@ function CategoryCell({ row }: { row: TransactionRow }) {
         type="button"
         disabled={pending}
         onClick={() => setPicking(true)}
-        className="hover:border-primary hover:bg-background min-w-0 flex-1 truncate rounded-[5px] border border-transparent px-1 py-0.5 text-left text-[11.5px]"
+        className="hover:border-primary hover:bg-background h-7 min-w-0 flex-1 truncate rounded-[7px] border border-transparent px-1 text-left text-[11.5px]"
       >
         {row.categoryPath ?? "Sans catégorie"}
       </button>

@@ -129,42 +129,52 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
+/* Thème sombre de la maquette (`[data-theme="sombre"]`), traduit dans les mêmes
+   rôles que le bloc clair ci-dessus et avec les mêmes valeurs qu'elle. Deux
+   choses à ne pas « corriger » de tête : ses fonds sont nettement plus clairs
+   qu'un dark shadcn (0,232 pour le fond, 0,262 pour la carte, contre 0,148 /
+   0,196 auparavant), et ses accents sont *moins* saturés qu'en clair — c'est
+   ce qui tient l'écart entre `--card` et `--background` sans virer au noir. */
 .dark {
-  --background: oklch(0.148 0.012 265);
-  --foreground: oklch(0.962 0.004 265);
-  --card: oklch(0.196 0.013 265);
-  --card-foreground: oklch(0.962 0.004 265);
-  --popover: oklch(0.196 0.013 265);
-  --popover-foreground: oklch(0.962 0.004 265);
-  --primary: oklch(0.762 0.14 266);
-  --primary-foreground: oklch(0.148 0.012 265);
-  --secondary: oklch(0.172 0.012 265);
-  --secondary-foreground: oklch(0.962 0.004 265);
-  --muted: oklch(0.172 0.012 265);
-  --muted-foreground: oklch(0.718 0.012 265);
-  --accent: oklch(0.242 0.015 265);
-  --accent-foreground: oklch(0.962 0.004 265);
-  --destructive: oklch(0.742 0.16 25);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 19%);
-  --ring: oklch(0.762 0.14 266);
+  --background: oklch(0.232 0.011 265);
+  --foreground: oklch(0.905 0.005 265);
+  --card: oklch(0.262 0.012 265);
+  --card-foreground: oklch(0.905 0.005 265);
+  --popover: oklch(0.262 0.012 265);
+  --popover-foreground: oklch(0.905 0.005 265);
+  --primary: oklch(0.735 0.11 266);
+  --primary-foreground: oklch(0.232 0.011 265);
+  --secondary: oklch(0.245 0.011 265);
+  --secondary-foreground: oklch(0.905 0.005 265);
+  --muted: oklch(0.245 0.011 265);
+  --muted-foreground: oklch(0.712 0.011 265);
+  --accent: oklch(0.298 0.013 265);
+  --accent-foreground: oklch(0.905 0.005 265);
+  --destructive: oklch(0.718 0.125 25);
+  --border: oklch(1 0 0 / 7.5%);
+  /* Seul rôle qui ne suit pas `--border` comme en clair : la maquette n'a que
+     deux champs, et c'est celui de sa modale qui porte `--border2`. Les
+     composants shadcn peignent en plus leur fond avec `bg-input/30` — à 7,5 %,
+     un champ de /login ou /banques n'aurait plus ni bord ni fond visibles. */
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.735 0.11 266);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --sunken: oklch(0.118 0.012 265);
-  --surface-2: oklch(0.172 0.012 265);
-  --subtle: oklch(0.618 0.012 265);
-  --border-strong: oklch(1 0 0 / 19%);
-  --track: oklch(1 0 0 / 9%);
-  --accent-soft: oklch(0.288 0.09 266);
-  --ok: oklch(0.782 0.14 152);
-  --ok-soft: oklch(0.278 0.07 152);
-  --warn: oklch(0.822 0.14 72);
-  --warn-soft: oklch(0.3 0.07 70);
-  --bad: oklch(0.742 0.16 25);
-  --bad-soft: oklch(0.298 0.08 25);
+  --sunken: oklch(0.208 0.011 265);
+  --surface-2: oklch(0.245 0.011 265);
+  --subtle: oklch(0.625 0.011 265);
+  --border-strong: oklch(1 0 0 / 15%);
+  --track: oklch(1 0 0 / 8%);
+  --accent-soft: oklch(0.335 0.07 266);
+  --ok: oklch(0.752 0.11 152);
+  --ok-soft: oklch(0.328 0.055 152);
+  --warn: oklch(0.79 0.11 72);
+  --warn-soft: oklch(0.345 0.055 70);
+  --bad: oklch(0.718 0.125 25);
+  --bad-soft: oklch(0.342 0.062 25);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);

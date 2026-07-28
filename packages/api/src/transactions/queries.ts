@@ -17,7 +17,11 @@ import {
 } from "@budget/db";
 import { db } from "@budget/db/client";
 import { accounts, categories, transactions } from "@budget/db/schema";
-import { FALLBACK_CATEGORY_COLOR, PAGE_SIZE } from "@budget/shared";
+import {
+  FALLBACK_CATEGORY_COLOR,
+  PAGE_SIZE,
+  REVIEW_QUEUE_LIMIT,
+} from "@budget/shared";
 
 // Nom de banque affiché : display_name choisi par l'utilisateur, sinon nom ASPSP.
 const bankLabel = sql<string>`coalesce(${accounts.displayName}, ${accounts.bankName})`;
@@ -319,7 +323,7 @@ const DIRECTION_MIN_SAMPLE = 8;
 // vaut confirmation et sort définitivement de la file.
 export async function reviewQueue(
   input: TransactionsSearch,
-  limit = 40,
+  limit: number = REVIEW_QUEUE_LIMIT,
 ): Promise<ReviewItem[]> {
   const parentName = sql<
     string | null
@@ -365,6 +369,15 @@ export async function reviewQueue(
     ...oddPairs,
   );
 
+  // Le non ventilé passe en dernier sous le plafond. Il domine le prédicat en
+  // volume (toute transaction rattachée à un parent qui a des enfants) et, s'il
+  // est trié au seul montant, il monopolise les `limit` lignes : les « sans
+  // catégorie » et les sens inhabituels — les deux seuls motifs qui n'ont pas
+  // d'autre écran — tombent alors sous la coupe et ne remontent nulle part.
+  // Le non ventilé, lui, n'y perd rien : la page de ventilation le regroupe
+  // depuis `listTransactions({ nvOnly: true })`, une requête distincte.
+  const priority = sql`case when ${or(isNull(transactions.categoryId), ...oddPairs)} then 0 else 1 end`;
+
   const rows = await db
     .select({
       id: transactions.id,
@@ -396,7 +409,7 @@ export async function reviewQueue(
         ),
       ),
     )
-    .orderBy(desc(transactions.amount))
+    .orderBy(priority, desc(transactions.amount))
     .limit(limit);
 
   return rows.map((row) => {

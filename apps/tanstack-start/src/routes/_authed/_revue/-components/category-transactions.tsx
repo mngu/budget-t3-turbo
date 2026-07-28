@@ -20,15 +20,18 @@ export function CategoryTransactions({
   rows,
   shown,
   total,
+  flagged,
 }: {
   rows: TransactionRow[];
   shown: number;
   total: number;
+  /** Ids présents dans la file de relecture — marqués « douteux ». */
+  flagged: Set<number>;
 }) {
   return (
     <div className="border-border bg-card overflow-hidden rounded-[10px] border">
       {rows.map((row) => (
-        <Row key={row.id} row={row} />
+        <Row key={row.id} row={row} flagged={flagged.has(row.id)} />
       ))}
       {rows.length === 0 && (
         <p className="text-muted-foreground py-8 text-center text-[11.5px]">
@@ -46,7 +49,7 @@ export function CategoryTransactions({
   );
 }
 
-function Row({ row }: { row: TransactionRow }) {
+function Row({ row, flagged }: { row: TransactionRow; flagged: boolean }) {
   const [picking, setPicking] = useState(false);
   const { setCategory, pending } = useSetCategory();
   const resolveColor = useCategoryColor();
@@ -57,7 +60,17 @@ function Row({ row }: { row: TransactionRow }) {
       <div className="text-muted-foreground num text-[11.5px]">
         {dayMonthFr.format(new Date(row.bookingDate))}
       </div>
-      <div className="num min-w-0 truncate text-xs">{row.description}</div>
+      <div className="flex min-w-0 items-center gap-2">
+        <span className="num min-w-0 truncate text-xs">{row.description}</span>
+        {/* Sans pourcentage : la maquette affiche un score de confiance, la
+            base n'en a aucun (voir `review-cards.tsx`). Le pastillage se
+            contente de dire que la ligne est dans la file « À revoir ». */}
+        {flagged && (
+          <span className="text-bad bg-bad-soft flex-none rounded-[4px] px-1.5 py-px text-[10.5px]">
+            douteux
+          </span>
+        )}
+      </div>
       <div className="text-muted-foreground truncate text-[11.5px]">
         {row.bankName}
       </div>

@@ -114,13 +114,13 @@ export function SummaryTiles({
   return (
     <div className="grid grid-cols-[repeat(auto-fit,minmax(210px,1fr))] gap-3">
       <div className={tileClass}>
-        <div className="text-muted-foreground text-[11.5px]">Dépenses</div>
+        <div className="text-muted-foreground text-[11.5px]">Sorties</div>
         <div className={amountClass}>{euro.format(expenses)}</div>
         <ComparisonRow comparison={expensesComparison} worseWhenUp />
       </div>
 
       <div className={tileClass}>
-        <div className="text-muted-foreground text-[11.5px]">Revenus</div>
+        <div className="text-muted-foreground text-[11.5px]">Entrées</div>
         <div className={amountClass}>{euro.format(revenues)}</div>
         <ComparisonRow comparison={revenuesComparison} worseWhenUp={false} />
       </div>
@@ -166,7 +166,7 @@ export function SummaryTiles({
           />
         </div>
         <div className="text-muted-foreground text-[11px]">
-          {unallocatedShare} des dépenses · {unallocatedCategories} catégories
+          {unallocatedShare} des sorties · {unallocatedCategories} catégories
           concernées
         </div>
       </Link>

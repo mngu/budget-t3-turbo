@@ -61,3 +61,19 @@ export const wholePeriod = <T extends TransactionsSearch>(search: T) => ({
   category: undefined,
   nvOnly: undefined,
 });
+
+// Clé de la file de relecture. Les filtres de contenu comptent (le compteur de
+// l'onglet « À revoir » parle bien du périmètre affiché), mais pagination et tri
+// sont neutralisés : `reviewQueue` les ignore côté serveur, et les laisser dans
+// la clé donnerait une entrée de cache par page de la table — le compteur de
+// l'en-tête se remettrait à charger à chaque « Suivant ». Les quatre écrans
+// doivent appeler `transactions.review` par cette seule fonction, sans quoi ils
+// alimentent des entrées de cache concurrentes et le compteur change de valeur
+// d'un onglet à l'autre.
+export const reviewScope = <T extends TransactionsSearch>(search: T) => ({
+  ...search,
+  page: 1,
+  sort: "date" as const,
+  order: "desc" as const,
+  catSort: undefined,
+});

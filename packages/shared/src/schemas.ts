@@ -2,6 +2,11 @@ import { z } from "zod/v4";
 
 export const PAGE_SIZE = 25;
 
+// Plafond de la file de relecture (`reviewQueue`). Partagé parce que l'onglet
+// « À revoir » compte les éléments reçus : sans connaître le plafond, il
+// afficherait « 40 » aussi bien pour 40 transactions que pour 400.
+export const REVIEW_QUEUE_LIMIT = 40;
+
 // Schéma des query params de la table de transactions — partagé entre
 // validateSearch (web) et l'input tRPC (api).
 export const transactionsSearchSchema = z.object({
