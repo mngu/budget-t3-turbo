@@ -21,6 +21,7 @@ import {
   wholePeriod,
 } from "~/lib/transactions-search";
 import { CategoryTransactions } from "./-components/category-transactions";
+import { ActiveFilters } from "./-components/refine-bar";
 
 // Le zoom ne pagine pas : une catégorie tient sur un écran qui scrolle.
 const ZOOM_LIMIT = 120;
@@ -63,6 +64,10 @@ export const Route = createFileRoute("/_authed/_revue/categorie/$name")({
       }),
       context.queryClient.fetchQuery({
         ...context.trpc.transactions.bankCounts.queryOptions(deps),
+        staleTime: 0,
+      }),
+      context.queryClient.fetchQuery({
+        ...context.trpc.transactions.banks.queryOptions(),
         staleTime: 0,
       }),
     ]);
@@ -131,6 +136,11 @@ function ZoomCategorie() {
         </Link>
       </div>
 
+      {/* Le zoom n'a pas de barre de filtres — il en est un lui-même. Les
+          filtres hérités des autres onglets restent pourtant appliqués à sa
+          liste de transactions : ils sont rappelés ici, et retirables. */}
+      <ActiveFilters className="flex-none px-7 pt-2.5" exclude={["category"]} />
+
       <div className="grid flex-none grid-cols-[minmax(0,1fr)_minmax(230px,300px)] items-end gap-6 px-7 pt-3.5 pb-5">
         <div className="flex flex-wrap items-end gap-4.5">
           <div
@@ -155,17 +165,17 @@ function ZoomCategorie() {
           </div>
         </div>
 
-        {/* La ventilation ne traite que les sorties (son loader force
+        {/* L'écran « À revoir » ne traite que les sorties (son loader force
             `direction: "debit"`) : proposer la carte sur une catégorie
             d'entrée mènerait à un écran vide. */}
         {!isIncome && unallocated > 0 && (
           <Link
-            to="/ventiler"
+            to="/classer"
             search={{ ...search, category: item.category, page: 1 }}
             className="border-border bg-card hover:border-warn hover:bg-warn-soft rounded-[10px] border px-3.5 py-3 text-left"
           >
             <div className="text-muted-foreground flex justify-between text-[11.5px]">
-              <span>Non ventilé</span>
+              <span>À classer</span>
               <span className="num text-foreground font-medium">
                 {euro.format(unallocated)}
               </span>
@@ -184,7 +194,7 @@ function ZoomCategorie() {
             </div>
             <div className="text-warn text-[11.5px] font-medium">
               {sharePercent(unallocated, item.total)} sans sous-catégorie ·
-              ventiler ›
+              classer ›
             </div>
           </Link>
         )}
@@ -215,7 +225,7 @@ function ZoomCategorie() {
                   </span>
                   {sub.unallocated && (
                     <span className="text-warn border-warn flex-none rounded-[4px] border border-dashed px-1 text-[10.5px]">
-                      à ventiler
+                      à classer
                     </span>
                   )}
                 </div>

@@ -9,7 +9,7 @@ import { useTRPCClient } from "./trpc";
 
 /**
  * Écriture de la catégorie d'une transaction, partagée par les quatre écrans de
- * la revue (rail « À revoir », ventilation, zoom catégorie, table).
+ * la revue (rail « À revoir », zoom catégorie, table).
  *
  * `updateCategory` passe `category_source` à `'manual'` : valider une catégorie
  * déjà proposée n'est donc pas un no-op — c'est ce qui la met à l'abri de la

@@ -5,7 +5,7 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { TransactionsSearch } from "@budget/shared";
 
 /**
- * Search partagée par les quatre écrans de la revue (revue du mois, ventilation,
+ * Search partagée par les quatre écrans de la revue (revue du mois, « À revoir »,
  * zoom catégorie, table complète).
  *
  * `strict: false` parce que l'en-tête et la barre de filtres vivent dans le

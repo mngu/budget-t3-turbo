@@ -135,26 +135,3 @@ export function negativeStreak(
   }
   return streak;
 }
-
-// Moyenne mensuelle des dépenses par catégorie parente sur les mêmes mois de
-// référence que les tuiles — base du tri « Écart vs moy. » de la revue.
-export function categoryAverages(
-  history: MonthlyCategoryTotal[],
-  totals: MonthTotals[],
-  anchorIso: string,
-): Map<string, number> {
-  const months = new Set(referenceMonths(totals, anchorIso));
-  if (months.size === 0) return new Map();
-
-  const sums = new Map<string, number>();
-  for (const row of history) {
-    if (!months.has(row.month) || row.category === null) continue;
-    sums.set(row.category, (sums.get(row.category) ?? 0) + row.debit);
-  }
-  // Divisé par le nombre de mois *retenus*, pas par la taille de la fenêtre :
-  // sur un historique plus court que 3 mois, la moyenne serait sinon divisée
-  // par des mois qui n'existent pas.
-  return new Map(
-    [...sums].map(([category, sum]) => [category, sum / months.size]),
-  );
-}

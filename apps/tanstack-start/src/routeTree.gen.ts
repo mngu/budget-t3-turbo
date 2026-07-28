@@ -19,8 +19,8 @@ import { Route as AuthedRevueIndexRouteImport } from './routes/_authed/_revue/in
 import { Route as ApiTrpcSplatRouteImport } from './routes/api/trpc.$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as AuthedBanquesAjouterRouteImport } from './routes/_authed/banques/ajouter'
-import { Route as AuthedRevueVentilerRouteImport } from './routes/_authed/_revue/ventiler'
 import { Route as AuthedRevueTransactionsRouteImport } from './routes/_authed/_revue/transactions'
+import { Route as AuthedRevueClasserRouteImport } from './routes/_authed/_revue/classer'
 import { Route as AuthedRevueCategorieNameRouteImport } from './routes/_authed/_revue/categorie.$name'
 
 const LoginRoute = LoginRouteImport.update({
@@ -71,14 +71,14 @@ const AuthedBanquesAjouterRoute = AuthedBanquesAjouterRouteImport.update({
   path: '/banques/ajouter',
   getParentRoute: () => AuthedRoute,
 } as any)
-const AuthedRevueVentilerRoute = AuthedRevueVentilerRouteImport.update({
-  id: '/ventiler',
-  path: '/ventiler',
-  getParentRoute: () => AuthedRevueRoute,
-} as any)
 const AuthedRevueTransactionsRoute = AuthedRevueTransactionsRouteImport.update({
   id: '/transactions',
   path: '/transactions',
+  getParentRoute: () => AuthedRevueRoute,
+} as any)
+const AuthedRevueClasserRoute = AuthedRevueClasserRouteImport.update({
+  id: '/classer',
+  path: '/classer',
   getParentRoute: () => AuthedRevueRoute,
 } as any)
 const AuthedRevueCategorieNameRoute =
@@ -91,8 +91,8 @@ const AuthedRevueCategorieNameRoute =
 export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/callback': typeof AuthedCallbackRoute
+  '/classer': typeof AuthedRevueClasserRoute
   '/transactions': typeof AuthedRevueTransactionsRoute
-  '/ventiler': typeof AuthedRevueVentilerRoute
   '/banques/ajouter': typeof AuthedBanquesAjouterRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
@@ -104,8 +104,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/callback': typeof AuthedCallbackRoute
+  '/classer': typeof AuthedRevueClasserRoute
   '/transactions': typeof AuthedRevueTransactionsRoute
-  '/ventiler': typeof AuthedRevueVentilerRoute
   '/banques/ajouter': typeof AuthedBanquesAjouterRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
@@ -120,8 +120,8 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_authed/_revue': typeof AuthedRevueRouteWithChildren
   '/_authed/callback': typeof AuthedCallbackRoute
+  '/_authed/_revue/classer': typeof AuthedRevueClasserRoute
   '/_authed/_revue/transactions': typeof AuthedRevueTransactionsRoute
-  '/_authed/_revue/ventiler': typeof AuthedRevueVentilerRoute
   '/_authed/banques/ajouter': typeof AuthedBanquesAjouterRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
@@ -135,8 +135,8 @@ export interface FileRouteTypes {
   fullPaths:
     | '/login'
     | '/callback'
+    | '/classer'
     | '/transactions'
-    | '/ventiler'
     | '/banques/ajouter'
     | '/api/auth/$'
     | '/api/trpc/$'
@@ -148,8 +148,8 @@ export interface FileRouteTypes {
   to:
     | '/login'
     | '/callback'
+    | '/classer'
     | '/transactions'
-    | '/ventiler'
     | '/banques/ajouter'
     | '/api/auth/$'
     | '/api/trpc/$'
@@ -163,8 +163,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/_authed/_revue'
     | '/_authed/callback'
+    | '/_authed/_revue/classer'
     | '/_authed/_revue/transactions'
-    | '/_authed/_revue/ventiler'
     | '/_authed/banques/ajouter'
     | '/api/auth/$'
     | '/api/trpc/$'
@@ -253,18 +253,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedBanquesAjouterRouteImport
       parentRoute: typeof AuthedRoute
     }
-    '/_authed/_revue/ventiler': {
-      id: '/_authed/_revue/ventiler'
-      path: '/ventiler'
-      fullPath: '/ventiler'
-      preLoaderRoute: typeof AuthedRevueVentilerRouteImport
-      parentRoute: typeof AuthedRevueRoute
-    }
     '/_authed/_revue/transactions': {
       id: '/_authed/_revue/transactions'
       path: '/transactions'
       fullPath: '/transactions'
       preLoaderRoute: typeof AuthedRevueTransactionsRouteImport
+      parentRoute: typeof AuthedRevueRoute
+    }
+    '/_authed/_revue/classer': {
+      id: '/_authed/_revue/classer'
+      path: '/classer'
+      fullPath: '/classer'
+      preLoaderRoute: typeof AuthedRevueClasserRouteImport
       parentRoute: typeof AuthedRevueRoute
     }
     '/_authed/_revue/categorie/$name': {
@@ -278,15 +278,15 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthedRevueRouteChildren {
+  AuthedRevueClasserRoute: typeof AuthedRevueClasserRoute
   AuthedRevueTransactionsRoute: typeof AuthedRevueTransactionsRoute
-  AuthedRevueVentilerRoute: typeof AuthedRevueVentilerRoute
   AuthedRevueIndexRoute: typeof AuthedRevueIndexRoute
   AuthedRevueCategorieNameRoute: typeof AuthedRevueCategorieNameRoute
 }
 
 const AuthedRevueRouteChildren: AuthedRevueRouteChildren = {
+  AuthedRevueClasserRoute: AuthedRevueClasserRoute,
   AuthedRevueTransactionsRoute: AuthedRevueTransactionsRoute,
-  AuthedRevueVentilerRoute: AuthedRevueVentilerRoute,
   AuthedRevueIndexRoute: AuthedRevueIndexRoute,
   AuthedRevueCategorieNameRoute: AuthedRevueCategorieNameRoute,
 }

@@ -10,6 +10,7 @@ import {
   eq,
   gte,
   ilike,
+  inArray,
   isNull,
   lte,
   or,
@@ -55,9 +56,9 @@ export interface CategoryBreakdownDetail {
   category: string;
   total: number;
   color: string;
-  // Vrai pour la seule ligne « Non ventilé », qui n'est pas une catégorie mais
+  // Vrai pour la seule ligne « À classer », qui n'est pas une catégorie mais
   // le reliquat porté par le parent lui-même. Le client s'en sert pour ne pas
-  // poser `category=Non ventilé` en filtre — aucune ligne ne matcherait.
+  // poser `category=À classer` en filtre — aucune ligne ne matcherait.
   unallocated: boolean;
 }
 
@@ -75,20 +76,26 @@ function transactionsFilterQuery(
   query: TransactionsSearch,
 ): SQL<unknown> | undefined {
   const conditions: SQL[] = [];
-  if (query.bank) conditions.push(eq(bankLabel, query.bank));
+  // `bank` accepte une banque ou une liste (voir @budget/shared). Une liste vide
+  // vaut « pas de filtre », comme `undefined` : c'est la lecture que fait déjà
+  // `selectedBanks` côté client, et le panneau de comptes refuse de décocher le
+  // dernier — les deux doivent dire la même chose d'une URL bricolée à la main.
+  if (Array.isArray(query.bank)) {
+    if (query.bank.length > 0) conditions.push(inArray(bankLabel, query.bank));
+  } else if (query.bank) conditions.push(eq(bankLabel, query.bank));
   if (query.direction)
     conditions.push(eq(transactions.direction, query.direction));
   if (query.status) conditions.push(eq(transactions.status, query.status));
-  // « Non ventilé » : la transaction porte une catégorie *parente* qui a par
+  // « À classer » : la transaction porte une catégorie *parente* qui a par
   // ailleurs des sous-catégories. C'est un prédicat de ligne, sans rapport avec
   // le drapeau `unallocated` de transactionsByCategory qui, lui, est un
   // agrégat. Ne pas confondre non plus avec `category: "none"` (aucune
   // catégorie du tout) : ici la transaction est classée, mais trop grossièrement.
-  if (query.nvOnly)
+  if (query.aClasser)
     conditions.push(
       sql`${categories.parentId} is null and exists (
-        select 1 from ${categories} as nv_children
-        where nv_children.parent_id = ${categories.id}
+        select 1 from ${categories} as a_classer_children
+        where a_classer_children.parent_id = ${categories.id}
       )`,
     );
   if (query.category === "none")
@@ -116,7 +123,7 @@ function transactionsFilterQuery(
   return conditions.length > 0 ? and(...conditions) : undefined;
 }
 
-// `limit` déroge à PAGE_SIZE pour les écrans qui ne paginent pas (ventilation,
+// `limit` déroge à PAGE_SIZE pour les écrans qui ne paginent pas (« À revoir »,
 // zoom catégorie) : ils affichent une tranche plus large d'un coup plutôt que de
 // faire naviguer l'utilisateur. La pagination reste le cas par défaut.
 export async function listTransactions(
@@ -178,7 +185,7 @@ export async function listTransactions(
 
 // Part du graphique portant un montant rattaché directement à la catégorie
 // parente plutôt qu'à l'une de ses sous-catégories.
-const UNALLOCATED_LABEL = "Non ventilé";
+const A_CLASSER_LABEL = "À classer";
 
 // Regroupe toujours au niveau de la catégorie parente : une sous-catégorie
 // remonte dans le total de son parent, une catégorie déjà racine reste
@@ -218,7 +225,7 @@ export async function transactionsByCategory(
     );
 
   // `unallocated` = montant porté par la catégorie parente elle-même. Il ne
-  // devient une ligne « Non ventilé » que si la catégorie a par ailleurs des
+  // devient une ligne « À classer » que si la catégorie a par ailleurs des
   // sous-catégories ; sinon c'est simplement une catégorie racine sans enfant.
   interface Group {
     category: string;
@@ -273,13 +280,13 @@ export async function transactionsByCategory(
       // segment qu'en présence de vraies sous-catégories.
       if (breakdown.length > 0 && group.unallocated !== 0) {
         breakdown.push({
-          category: UNALLOCATED_LABEL,
+          category: A_CLASSER_LABEL,
           total: group.unallocated,
           color: group.color,
           unallocated: true,
         });
       }
-      // Tri du plus gros au plus petit, « Non ventilé » compris : le graphique
+      // Tri du plus gros au plus petit, « À classer » compris : le graphique
       // dérive la nuance de chaque segment de son rang, un reliquat épinglé en
       // dernier donnerait la teinte la plus pâle au plus gros des segments.
       breakdown.sort((a, b) => b.total - a.total);
@@ -292,7 +299,7 @@ export async function transactionsByCategory(
 // La base ne stocke aucun score de confiance : la file est construite sur des
 // signaux réellement présents (catégorie absente, catégorie trop grossière,
 // sens contraire à celui de la catégorie), jamais sur une probabilité inventée.
-export type ReviewReason = "sans-categorie" | "non-ventile" | "sens-inhabituel";
+export type ReviewReason = "sans-categorie" | "a-classer" | "sens-inhabituel";
 
 export interface ReviewItem {
   id: number;
@@ -363,19 +370,19 @@ export async function reviewQueue(
   const suspect = or(
     isNull(transactions.categoryId),
     sql`${categories.parentId} is null and exists (
-      select 1 from ${categories} as nv_children
-      where nv_children.parent_id = ${categories.id}
+      select 1 from ${categories} as a_classer_children
+      where a_classer_children.parent_id = ${categories.id}
     )`,
     ...oddPairs,
   );
 
-  // Le non ventilé passe en dernier sous le plafond. Il domine le prédicat en
+  // Le « à classer » passe en dernier sous le plafond. Il domine le prédicat en
   // volume (toute transaction rattachée à un parent qui a des enfants) et, s'il
   // est trié au seul montant, il monopolise les `limit` lignes : les « sans
   // catégorie » et les sens inhabituels — les deux seuls motifs qui n'ont pas
   // d'autre écran — tombent alors sous la coupe et ne remontent nulle part.
-  // Le non ventilé, lui, n'y perd rien : la page de ventilation le regroupe
-  // depuis `listTransactions({ nvOnly: true })`, une requête distincte.
+  // Le « à classer », lui, n'y perd rien : la page « À revoir » le regroupe
+  // depuis `listTransactions({ aClasser: true })`, une requête distincte.
   const priority = sql`case when ${or(isNull(transactions.categoryId), ...oddPairs)} then 0 else 1 end`;
 
   const rows = await db
@@ -420,7 +427,7 @@ export async function reviewQueue(
         : parentLabel !== null &&
             oddDirection.get(parentLabel) === row.direction
           ? "sens-inhabituel"
-          : "non-ventile";
+          : "a-classer";
     return {
       id: row.id,
       bookingDate: row.bookingDate,

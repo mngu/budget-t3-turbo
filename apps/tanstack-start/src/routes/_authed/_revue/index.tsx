@@ -2,13 +2,7 @@ import { createFileRoute, stripSearchParams } from "@tanstack/react-router";
 
 import { transactionsSearchSchema } from "@budget/shared";
 
-import { sharePercent } from "~/lib/format";
-import {
-  categoryAverages,
-  compareToAverage,
-  negativeStreak,
-  totalsByMonth,
-} from "~/lib/history";
+import { compareToAverage, negativeStreak, totalsByMonth } from "~/lib/history";
 import {
   defaultToCurrentMonth,
   reviewScope,
@@ -17,6 +11,7 @@ import {
 } from "~/lib/transactions-search";
 import { CategoryIncomeList } from "./-components/category-income-list";
 import { CategorySpendList } from "./-components/category-spend-list";
+import { ActiveFilters } from "./-components/refine-bar";
 import { SummaryTiles } from "./-components/summary-tiles";
 
 export const Route = createFileRoute("/_authed/_revue/")({
@@ -26,7 +21,7 @@ export const Route = createFileRoute("/_authed/_revue/")({
   },
   loaderDeps: ({ search }) => search,
   loader: async ({ deps, context }) => {
-    // `category` et `nvOnly` sont retirés des agrégats : la revue garde la
+    // `category` et `aClasser` sont retirés des agrégats : la revue garde la
     // répartition complète et se contente de surligner la sélection, sinon
     // filtrer une catégorie la porterait à 100 % du total et il n'y aurait
     // plus de quoi naviguer.
@@ -60,6 +55,10 @@ export const Route = createFileRoute("/_authed/_revue/")({
         ...context.trpc.transactions.bankCounts.queryOptions(deps),
         staleTime: 0,
       }),
+      context.queryClient.fetchQuery({
+        ...context.trpc.transactions.banks.queryOptions(),
+        staleTime: 0,
+      }),
     ]);
     return { expenses, revenues, history, review };
   },
@@ -85,14 +84,6 @@ function RevueDuMois() {
 
   const expensesTotal = sum(expenses);
   const revenuesTotal = sum(revenues);
-  const unallocated = expenses.reduce(
-    (acc, item) =>
-      acc + (item.breakdown.find((b) => b.unallocated)?.total ?? 0),
-    0,
-  );
-  const unallocatedCategories = expenses.filter((item) =>
-    item.breakdown.some((b) => b.unallocated),
-  ).length;
 
   // Ancre de comparaison : la fin de la période affichée. `history` est bâti
   // sur la même ancre côté serveur, les deux ne peuvent pas diverger.
@@ -101,10 +92,17 @@ function RevueDuMois() {
 
   return (
     // Pleine largeur : la file de relecture qui occupait la colonne de droite
-    // a son propre onglet (« À revoir », /ventiler). La revue redevient une
+    // a son propre onglet (« À revoir », /classer). La revue redevient une
     // lecture — sorties, puis entrées — et la correction se fait à côté.
     <div className="min-h-0 flex-1 overflow-y-auto">
       <div className="max-w-[1500px] px-6 pt-5 pb-10">
+        {/* La revue n'a pas de barre de filtres — ils se posent depuis
+            l'en-tête et depuis les deux autres onglets, et se conservent d'un
+            écran à l'autre. Sans ce rappel, une sélection posée sur
+            « Toutes les transactions » resterait active ici sans rien qui le
+            dise ni aucun moyen de la retirer. */}
+        <ActiveFilters className="mb-3" />
+
         <SummaryTiles
           expenses={expensesTotal}
           revenues={revenuesTotal}
@@ -125,16 +123,9 @@ function RevueDuMois() {
             anchor,
             revenuesTotal - expensesTotal,
           )}
-          unallocated={unallocated}
-          unallocatedShare={sharePercent(unallocated, expensesTotal)}
-          unallocatedCategories={unallocatedCategories}
         />
 
-        <CategorySpendList
-          items={expenses}
-          total={expensesTotal}
-          averages={categoryAverages(history, monthly, anchor)}
-        />
+        <CategorySpendList items={expenses} total={expensesTotal} />
 
         <CategoryIncomeList
           items={revenues}

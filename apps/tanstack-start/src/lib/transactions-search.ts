@@ -41,11 +41,41 @@ export const SEARCH_DEFAULTS = {
   page: 1,
   sort: "date",
   order: "desc",
-  catSort: "montant",
 } as const;
 
+// Banques explicitement retenues, sous forme de liste. Vide = aucun filtre,
+// c'est-à-dire *toutes* les banques — le panneau de comptes ne matérialise
+// jamais la sélection complète dans l'URL (voir `bank` dans @budget/shared).
+export const selectedBanks = (search: Pick<TransactionsSearch, "bank">) =>
+  search.bank === undefined
+    ? []
+    : Array.isArray(search.bank)
+      ? search.bank
+      : [search.bank];
+
+// Bascule d'un compte dans la sélection. `undefined` dès que tous les comptes
+// connus sont cochés : sans ce repli, décocher puis recocher laisserait une
+// liste figée dans l'URL, qui ignorerait toute banque connectée par la suite.
+export function toggleBank(
+  search: Pick<TransactionsSearch, "bank">,
+  bank: string,
+  known: string[],
+): string[] | undefined {
+  const current = selectedBanks(search);
+  const base = current.length > 0 ? current : known;
+  const next = base.includes(bank)
+    ? base.filter((b) => b !== bank)
+    : [...base, bank];
+  // Décocher le dernier compte ne laisse rien à afficher : la bascule est
+  // ignorée plutôt que de vider l'écran sans explication.
+  if (next.length === 0) return base;
+  return next.length === known.length && known.every((b) => next.includes(b))
+    ? undefined
+    : next;
+}
+
 // Périmètre « toutes les transactions du mois » : les listes qui ne paginent pas
-// (revue, ventilation, zoom catégorie) doivent neutraliser la pagination du
+// (revue, « À revoir », zoom catégorie) doivent neutraliser la pagination du
 // schéma partagé plutôt que d'hériter de la page courante de la table.
 export const withoutPaging = <T extends { page: number }>(search: T) => ({
   ...search,
@@ -59,7 +89,7 @@ export const wholePeriod = <T extends TransactionsSearch>(search: T) => ({
   ...search,
   page: 1,
   category: undefined,
-  nvOnly: undefined,
+  aClasser: undefined,
 });
 
 // Clé de la file de relecture. Les filtres de contenu comptent (le compteur de
@@ -75,5 +105,4 @@ export const reviewScope = <T extends TransactionsSearch>(search: T) => ({
   page: 1,
   sort: "date" as const,
   order: "desc" as const,
-  catSort: undefined,
 });

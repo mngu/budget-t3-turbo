@@ -23,7 +23,7 @@ export interface CategoryPath {
 }
 
 // Rattacher une transaction à la catégorie parente, c'est précisément ce que la
-// revue appelle « non ventilé » : le choix reste offert (toutes les catégories
+// revue appelle « à classer » : le choix reste offert (toutes les catégories
 // n'ont pas de sous-catégories) mais il est nommé pour ce qu'il est.
 const PARENT_SUB_LABEL = "Sans sous-catégorie";
 

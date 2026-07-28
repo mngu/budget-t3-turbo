@@ -14,11 +14,11 @@ import { CategoryPathPicker } from "./category-path-picker";
 const MAX_SUGGESTIONS = 5;
 
 /**
- * Une transaction non ventilée : les sous-catégories de sa catégorie parente
+ * Une transaction à classere : les sous-catégories de sa catégorie parente
  * sont offertes en un clic. C'est tout l'intérêt de l'écran — le chemin normal
  * (ouvrir un sélecteur, chercher, valider) coûte trop cher répété cent fois.
  */
-export function VentilerRow({
+export function ClasserRow({
   row,
   suggestions,
 }: {
@@ -30,15 +30,18 @@ export function VentilerRow({
   const signed = (row.direction === "debit" ? -1 : 1) * Number(row.amount);
 
   return (
-    <div className="border-border hover:bg-secondary grid grid-cols-[70px_minmax(110px,220px)_92px_minmax(140px,1fr)] items-center gap-3 border-b px-3.5 py-2.5">
+    // Les pastilles occupent leur propre rangée, sous la transaction : à côté
+    // du montant elles n'en tenaient que deux ou trois avant de déborder, et
+    // c'est précisément le contenu qu'on vient cliquer.
+    <div className="border-border hover:bg-secondary grid grid-cols-[70px_minmax(0,1fr)_96px] items-center gap-x-3.5 gap-y-1.5 border-b px-3.5 py-2.5">
       <span className="text-muted-foreground num text-[11.5px]">
         {dayMonthFr.format(new Date(row.bookingDate))}
       </span>
-      <span className="num truncate text-xs">{row.description}</span>
+      <span className="num truncate text-[12.5px]">{row.description}</span>
       <span className="num text-right text-[12.5px]">
         {euro.format(signed)}
       </span>
-      <span className="flex flex-wrap items-center gap-1.5">
+      <span className="col-start-1 -col-end-1 flex flex-wrap items-center gap-1.5">
         {suggestions.slice(0, MAX_SUGGESTIONS).map((sub) => (
           <button
             key={sub.name}

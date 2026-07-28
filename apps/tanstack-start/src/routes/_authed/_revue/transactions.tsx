@@ -8,6 +8,7 @@ import {
   reviewScope,
   SEARCH_DEFAULTS,
 } from "~/lib/transactions-search";
+import { describeFilters, RefineBar } from "./-components/refine-bar";
 import { TransactionsTable } from "./-components/transactions-table";
 
 export const Route = createFileRoute("/_authed/_revue/transactions")({
@@ -52,6 +53,10 @@ export const Route = createFileRoute("/_authed/_revue/transactions")({
         ...context.trpc.transactions.bankCounts.queryOptions(deps),
         staleTime: 0,
       }),
+      context.queryClient.fetchQuery({
+        ...context.trpc.transactions.banks.queryOptions(),
+        staleTime: 0,
+      }),
     ]);
     const sum = (items: { total: number }[]) =>
       items.reduce((acc, item) => acc + item.total, 0);
@@ -69,13 +74,29 @@ function ToutesLesTransactions() {
   const { rows, total, debits, credits, flagged } = Route.useLoaderData();
   const search = Route.useSearch();
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const filters = describeFilters(search);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
+      {/* Seul écran à porter tous les filtres : c'est le seul dont la liste est
+          la sélection elle-même, et non une répartition qu'un filtre de
+          catégorie porterait à 100 % du total. */}
+      <RefineBar
+        label="Affiner cette liste"
+        sens
+        aClasser
+        className="border-border flex-none border-b px-8 py-3"
+      />
+
       <div className="bg-secondary border-border flex flex-none items-center gap-3 border-b px-8 py-3">
         <span className="text-muted-foreground text-[11.5px]">
           {total} transactions · page {search.page} sur {pageCount}
         </span>
+        {filters.length > 0 && (
+          <span className="text-subtle text-[11.5px]">
+            · {filters.join(" · ")}
+          </span>
+        )}
         <span className="ml-auto flex items-baseline gap-4.5">
           <span className="text-muted-foreground text-[11.5px]">
             Débits{" "}

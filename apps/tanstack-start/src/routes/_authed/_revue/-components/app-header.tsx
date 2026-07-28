@@ -1,33 +1,29 @@
 "use client";
 
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import {
   LandmarkIcon,
   MonitorIcon,
   MoonIcon,
-  RefreshCwIcon,
   SearchIcon,
   SparklesIcon,
   SunIcon,
 } from "lucide-react";
 
 import { REVIEW_QUEUE_LIMIT } from "@budget/shared";
-import { cn } from "@budget/ui";
 import { useTheme } from "@budget/ui/theme";
-import { toast } from "@budget/ui/toast";
 
 import { SearchInput } from "~/component/search-input";
-import { toastSyncOutcome } from "~/lib/sync-toast";
 import { reviewScope } from "~/lib/transactions-search";
-import { useTRPC, useTRPCClient } from "~/lib/trpc";
+import { useTRPC } from "~/lib/trpc";
 import { useRevueSearch } from "~/lib/use-revue-search";
+import { BankPicker } from "./bank-picker";
 import { PeriodStepper } from "./period-stepper";
 
 const TABS = [
   { to: "/", label: "Revue du mois" },
-  { to: "/ventiler", label: "À revoir" },
+  { to: "/classer", label: "À revoir" },
   { to: "/transactions", label: "Toutes les transactions" },
 ] as const;
 
@@ -59,7 +55,7 @@ export function AppHeader() {
             inactiveProps={{ className: "text-muted-foreground" }}
           >
             {tab.label}
-            {tab.to === "/ventiler" && <ReviewBadge />}
+            {tab.to === "/classer" && <ReviewBadge />}
           </Link>
         ))}
       </nav>
@@ -78,13 +74,15 @@ export function AppHeader() {
       </div>
 
       <div className="flex items-center gap-1.5">
+        <BankPicker />
+        {/* Absents de la maquette, qui n'a que ces quatre écrans : ce sont les
+            seuls accès de l'app aux pages Banques et Catégories. */}
         <IconLink to="/categories" label="Catégories">
           <SparklesIcon className="size-3.5" />
         </IconLink>
         <IconLink to="/banques" label="Banques">
           <LandmarkIcon className="size-3.5" />
         </IconLink>
-        <SyncButton />
         <ThemeButton />
       </div>
     </header>
@@ -146,40 +144,6 @@ function ThemeButton() {
       <SunIcon className="auto:hidden size-3.5 dark:hidden" />
       <MoonIcon className="not-auto:dark:block hidden size-3.5" />
       <MonitorIcon className="auto:block hidden size-3.5" />
-    </button>
-  );
-}
-
-// sync.run touche aux sessions bancaires réelles et déclenche une SCA : ce
-// bouton est le seul déclencheur, jamais un effet de bord d'autre chose.
-function SyncButton() {
-  const router = useRouter();
-  const trpcClient = useTRPCClient();
-  const [syncing, setSyncing] = useState(false);
-
-  return (
-    <button
-      type="button"
-      aria-label="Synchroniser"
-      title="Synchroniser"
-      disabled={syncing}
-      className={iconButton}
-      onClick={async () => {
-        setSyncing(true);
-        try {
-          const outcome = await trpcClient.sync.run.mutate();
-          await router.invalidate();
-          toastSyncOutcome(outcome);
-        } catch (err) {
-          toast.error(
-            err instanceof Error ? err.message : "Échec de la synchronisation.",
-          );
-        } finally {
-          setSyncing(false);
-        }
-      }}
-    >
-      <RefreshCwIcon className={cn("size-3.5", syncing && "animate-spin")} />
     </button>
   );
 }

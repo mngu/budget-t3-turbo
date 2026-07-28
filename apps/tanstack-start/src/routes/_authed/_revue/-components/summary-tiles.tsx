@@ -1,12 +1,9 @@
 "use client";
 
-import { Link } from "@tanstack/react-router";
-
 import { cn } from "@budget/ui";
 
 import type { Comparison } from "~/lib/history";
 import { euro } from "~/lib/format";
-import { useRevueSearch } from "~/lib/use-revue-search";
 
 const signedPercent = new Intl.NumberFormat("fr-FR", {
   maximumFractionDigits: 1,
@@ -29,7 +26,7 @@ function Sparkline({ points, tone }: { points: number[]; tone: string }) {
 
   return (
     <svg
-      width="60"
+      width="66"
       height="18"
       viewBox="0 0 60 18"
       aria-hidden
@@ -47,10 +44,13 @@ function Sparkline({ points, tone }: { points: number[]; tone: string }) {
   );
 }
 
-const tileClass =
-  "border-border bg-card rounded-xl border px-4 py-3.5 text-left";
+// Les trois chiffres du mois tiennent dans une seule carte séparée par des
+// filets, et non en tuiles détachées : ils se lisent comme une équation
+// (sorties, entrées, ce qu'il reste), pas comme trois indicateurs distincts.
+const cellClass =
+  "border-border flex flex-col justify-center gap-1 px-4.5 py-3 not-last:border-r";
 const amountClass =
-  "num my-1 text-[clamp(18px,1.7vw,24px)] font-medium tracking-[-0.03em] whitespace-nowrap";
+  "num text-[clamp(18px,1.5vw,24px)] font-medium tracking-[-0.03em] whitespace-nowrap";
 
 function ComparisonRow({
   comparison,
@@ -62,14 +62,14 @@ function ComparisonRow({
 }) {
   if (comparison.deltaPct === null)
     return (
-      <div className="text-subtle text-[11px]">
+      <div className="text-subtle min-h-[18px] text-[11px]">
         Pas d'historique de comparaison
       </div>
     );
 
   const bad = worseWhenUp ? comparison.deltaPct > 0 : comparison.deltaPct < 0;
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex min-h-[18px] flex-wrap items-center gap-2">
       <span
         className={cn(
           "rounded-[5px] px-1.5 py-px text-[11.5px] font-semibold",
@@ -81,10 +81,6 @@ function ComparisonRow({
         {signedPercent.format(comparison.deltaPct)} %
       </span>
       <span className="text-subtle text-[11px]">vs moy. 3 mois</span>
-      <Sparkline
-        points={comparison.points}
-        tone={bad ? "var(--warn)" : "var(--muted-foreground)"}
-      />
     </div>
   );
 }
@@ -95,42 +91,57 @@ export function SummaryTiles({
   expensesComparison,
   revenuesComparison,
   negativeMonths,
-  unallocated,
-  unallocatedShare,
-  unallocatedCategories,
 }: {
   expenses: number;
   revenues: number;
   expensesComparison: Comparison;
   revenuesComparison: Comparison;
   negativeMonths: number;
-  unallocated: number;
-  unallocatedShare: string;
-  unallocatedCategories: number;
 }) {
-  const { search } = useRevueSearch();
   const balance = revenues - expenses;
 
   return (
-    <div className="grid grid-cols-[repeat(auto-fit,minmax(210px,1fr))] gap-3">
-      <div className={tileClass}>
+    <div className="border-border bg-card grid grid-cols-[repeat(3,minmax(0,1fr))] overflow-hidden rounded-xl border">
+      <div className={cellClass}>
         <div className="text-muted-foreground text-[11.5px]">Sorties</div>
-        <div className={amountClass}>{euro.format(expenses)}</div>
+        <div className="flex items-baseline gap-3">
+          <span className={amountClass}>{euro.format(expenses)}</span>
+          <Sparkline
+            points={expensesComparison.points}
+            tone={
+              (expensesComparison.deltaPct ?? 0) > 0
+                ? "var(--warn)"
+                : "var(--muted-foreground)"
+            }
+          />
+        </div>
         <ComparisonRow comparison={expensesComparison} worseWhenUp />
       </div>
 
-      <div className={tileClass}>
+      <div className={cellClass}>
         <div className="text-muted-foreground text-[11.5px]">Entrées</div>
-        <div className={amountClass}>{euro.format(revenues)}</div>
+        <div className="flex items-baseline gap-3">
+          <span className={cn(amountClass, "text-ok")}>
+            {euro.format(revenues)}
+          </span>
+          <Sparkline
+            points={revenuesComparison.points}
+            tone={
+              (revenuesComparison.deltaPct ?? 0) < 0
+                ? "var(--warn)"
+                : "var(--muted-foreground)"
+            }
+          />
+        </div>
         <ComparisonRow comparison={revenuesComparison} worseWhenUp={false} />
       </div>
 
-      <div className={tileClass}>
+      <div className={cellClass}>
         <div className="text-muted-foreground text-[11.5px]">Solde du mois</div>
         <div className={cn(amountClass, balance < 0 ? "text-bad" : "text-ok")}>
           {euro.format(balance)}
         </div>
-        <div className="text-subtle text-[11px]">
+        <div className="text-subtle min-h-[18px] text-[11px]">
           {negativeMonths > 1
             ? `${negativeMonths}ᵉ mois négatif d'affilée`
             : negativeMonths === 1
@@ -138,38 +149,6 @@ export function SummaryTiles({
               : "Mois à l'équilibre"}
         </div>
       </div>
-
-      {/* La tuile « non ventilé » est la seule action de la rangée : c'est le
-          point d'entrée vers l'écran de ventilation. */}
-      <Link
-        to="/ventiler"
-        search={search}
-        className={cn(tileClass, "border-warn hover:bg-warn-soft block")}
-      >
-        <div className="flex items-center gap-2">
-          <span className="text-warn text-[11.5px] font-semibold">
-            Non ventilé
-          </span>
-          <span className="text-warn border-warn ml-auto rounded-full border px-2 text-[11px] font-semibold">
-            Ventiler ›
-          </span>
-        </div>
-        <div className={amountClass}>{euro.format(unallocated)}</div>
-        <div className="bg-track mb-1.5 h-1.5 overflow-hidden rounded-full">
-          <div
-            className="h-full"
-            style={{
-              width: unallocatedShare,
-              background:
-                "repeating-linear-gradient(115deg,var(--warn) 0 4px,transparent 4px 8px),var(--warn-soft)",
-            }}
-          />
-        </div>
-        <div className="text-muted-foreground text-[11px]">
-          {unallocatedShare} des sorties · {unallocatedCategories} catégories
-          concernées
-        </div>
-      </Link>
     </div>
   );
 }

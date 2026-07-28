@@ -11,7 +11,16 @@ export const REVIEW_QUEUE_LIMIT = 40;
 // validateSearch (web) et l'input tRPC (api).
 export const transactionsSearchSchema = z.object({
   page: z.coerce.number().int().min(1).catch(1),
-  bank: z.string().optional().catch(undefined),
+  // Une banque, ou plusieurs : le panneau de comptes de l'en-tête coche et
+  // décoche chaque compte indépendamment. La forme scalaire est conservée — les
+  // liens et l'app mobile n'en posent jamais qu'une — et `undefined` veut dire
+  // « tous les comptes », jamais la liste complète : la matérialiser ferait
+  // apparaître les trois banques dans chaque URL et changerait à chaque
+  // connexion ajoutée.
+  bank: z
+    .union([z.string(), z.array(z.string())])
+    .optional()
+    .catch(undefined),
   direction: z.enum(["debit", "credit"]).optional().catch(undefined),
   status: z.enum(["booked", "pending"]).optional().catch(undefined),
   category: z
@@ -30,18 +39,16 @@ export const transactionsSearchSchema = z.object({
     .catch(undefined),
   q: z.string().optional().catch(undefined),
   // Ne garde que les transactions rattachées à une catégorie parente qui a des
-  // sous-catégories — le « non ventilé » de la revue du mois. Ce n'est pas le
+  // sous-catégories — le « à classer » de la revue du mois. Ce n'est pas le
   // même prédicat que `category: "none"` (aucune catégorie du tout).
-  nvOnly: z.boolean().optional().catch(undefined),
+  //
+  // Nommé d'après le libellé affiché, et non `unallocatedOnly` : le drapeau
+  // `unallocated` de `transactions.byCategory` est un *agrégat* et désigne
+  // autre chose — deux noms voisins pour deux notions distinctes se
+  // confondraient à la première relecture.
+  aClasser: z.boolean().optional().catch(undefined),
   sort: z.enum(["date", "amount"]).catch("date"),
   order: z.enum(["asc", "desc"]).catch("desc"),
-  // Tri de la liste des catégories de la revue du mois. Distinct de `sort`,
-  // qui ne concerne que la table des transactions.
-  //
-  // Optionnel et non `.catch("montant")` : une clé requise obligerait tous les
-  // `navigate({ to: "/" })` de l'app (pages Banques et Catégories) à la
-  // renseigner. Le défaut est appliqué à la lecture, dans la liste elle-même.
-  catSort: z.enum(["montant", "ecart", "nv"]).optional().catch(undefined),
 });
 
 export type TransactionsSearch = z.infer<typeof transactionsSearchSchema>;

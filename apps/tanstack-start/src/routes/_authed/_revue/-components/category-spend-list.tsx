@@ -3,21 +3,15 @@
 import { Link } from "@tanstack/react-router";
 
 import type { CategoryBreakdownItem } from "@budget/api";
-import { cn } from "@budget/ui";
 
-import {
-  hatchedBackground,
-  softCategoryColor,
-  useCategoryColor,
-} from "~/lib/category-color";
+import { useCategoryColor } from "~/lib/category-color";
 import { euro, sharePercent } from "~/lib/format";
 import { useRevueSearch } from "~/lib/use-revue-search";
-
-const SORTS = [
-  { value: "montant", label: "Montant" },
-  { value: "ecart", label: "Écart vs moy." },
-  { value: "nv", label: "Non ventilé" },
-] as const;
+import {
+  CategoryBar,
+  CategoryBreakdownCard,
+  categorySegments,
+} from "./category-segments";
 
 // Montant rattaché à la catégorie parente elle-même — le segment que
 // `transactionsByCategory` marque `unallocated`.
@@ -27,29 +21,15 @@ const unallocatedOf = (item: CategoryBreakdownItem) =>
 export function CategorySpendList({
   items,
   total,
-  averages,
 }: {
   items: CategoryBreakdownItem[];
   total: number;
-  /** Moyenne mensuelle des 3 mois précédents, par catégorie parente. */
-  averages: Map<string, number>;
 }) {
-  const { search, setSearch } = useRevueSearch();
+  const { search } = useRevueSearch();
   const resolveColor = useCategoryColor();
 
-  // `catSort` est optionnel dans l'URL (voir schemas.ts) : le défaut vit ici.
-  const catSort = search.catSort ?? "montant";
-
-  const sorted = [...items].sort((a, b) => {
-    if (catSort === "nv") return unallocatedOf(b) - unallocatedOf(a);
-    if (catSort === "ecart")
-      return (
-        b.total -
-        (averages.get(b.category) ?? b.total) -
-        (a.total - (averages.get(a.category) ?? a.total))
-      );
-    return b.total - a.total;
-  });
+  // Toujours du plus gros au plus petit : c'est la question que pose l'écran.
+  const sorted = [...items].sort((a, b) => b.total - a.total);
   const max = Math.max(...items.map((i) => i.total), 1);
 
   return (
@@ -61,38 +41,24 @@ export function CategorySpendList({
         <span className="text-subtle text-[11.5px]">
           {items.length} catégories · cliquer pour ouvrir le détail
         </span>
-        <div className="ml-auto flex flex-wrap gap-1.5">
-          {SORTS.map((sort) => {
-            const active = catSort === sort.value;
-            return (
-              <button
-                key={sort.value}
-                type="button"
-                onClick={() => setSearch({ catSort: sort.value })}
-                className={cn(
-                  "hover:bg-accent rounded-[7px] border px-2.5 py-[3px] text-[11.5px]",
-                  active
-                    ? "border-border-strong bg-card text-foreground font-medium"
-                    : "text-muted-foreground border-transparent",
-                )}
-              >
-                {sort.label}
-              </button>
-            );
-          })}
-        </div>
       </div>
 
-      <div className="border-border bg-card overflow-hidden rounded-xl border">
+      {/* Sans `overflow-hidden` : le détail au survol déborde de la carte, et
+          c'est tout l'intérêt. Les lignes arrondissent donc elles-mêmes le haut
+          de la carte, sans quoi leur fond de survol en carrerait les coins. */}
+      <div className="border-border bg-card rounded-xl border">
         {sorted.map((item) => {
           const color = resolveColor(item.color);
+          const segments = categorySegments(item, color);
           const unallocated = unallocatedOf(item);
           const label = item.category || "Sans catégorie";
           return (
             <div
               key={label}
-              className="border-border hover:bg-secondary grid h-[41px] grid-cols-[minmax(150px,178px)_minmax(90px,1fr)_108px_56px] items-center gap-2.5 border-b px-4"
+              className="border-border hover:bg-secondary group relative grid h-[41px] grid-cols-[minmax(150px,178px)_minmax(90px,1fr)_108px_56px] items-center gap-2.5 border-b px-4 first:rounded-t-xl"
             >
+              <CategoryBreakdownCard item={item} segments={segments} />
+
               <Link
                 to="/categorie/$name"
                 params={{ name: label }}
@@ -111,34 +77,16 @@ export function CategorySpendList({
                   to="/categorie/$name"
                   params={{ name: label }}
                   search={search}
-                  className="bg-track flex h-3.5 min-w-0 flex-1 overflow-hidden rounded-[4px]"
+                  className="bg-track flex h-3.5 min-w-0 flex-1 gap-px overflow-hidden rounded-[4px]"
                   aria-label={`Détail de ${label}`}
                 >
-                  {/* La portion hachurée est ce qui reste à ventiler ; elle est
-                      en tête de barre pour être comparable d'une ligne à l'autre. */}
-                  <span
-                    className="h-full"
-                    style={{
-                      width: `${(unallocated / max) * 100}%`,
-                      background: hatchedBackground(
-                        color,
-                        softCategoryColor(color),
-                      ),
-                    }}
-                  />
-                  <span
-                    className="h-full"
-                    style={{
-                      width: `${((item.total - unallocated) / max) * 100}%`,
-                      background: color,
-                    }}
-                  />
+                  <CategoryBar segments={segments} max={max} />
                 </Link>
                 {unallocated > 0 && (
                   <Link
-                    to="/ventiler"
+                    to="/classer"
                     search={{ ...search, category: label, page: 1 }}
-                    title={`Ventiler — ${sharePercent(unallocated, item.total)} sans sous-catégorie`}
+                    title={`Classer — ${sharePercent(unallocated, item.total)} sans sous-catégorie`}
                     className="text-warn border-warn hover:bg-warn-soft flex-none rounded-[5px] border border-dashed px-1.5 text-[10px] font-semibold whitespace-nowrap"
                   >
                     {sharePercent(unallocated, item.total)}
@@ -176,13 +124,13 @@ export function CategorySpendList({
                   "repeating-linear-gradient(115deg,var(--subtle) 0 3px,transparent 3px 7px)",
               }}
             />
-            hachuré = non ventilé
+            hachuré = à classer
           </span>
           <span className="flex items-center gap-1.5">
             <span className="text-warn border-warn rounded-[5px] border border-dashed px-1.5 text-[10px]">
               %
             </span>
-            cliquer pour ventiler
+            cliquer pour classer
           </span>
           <span className="num ml-auto">total {euro.format(total)}</span>
         </div>
