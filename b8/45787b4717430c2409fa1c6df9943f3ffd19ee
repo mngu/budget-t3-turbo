@@ -1,0 +1,89 @@
+CLAUDE.md
+  s_c1b54d9162ac36::t_d460f222d99649 44
+  s_c1b54d9162ac36::t_0fe8f5ef7773fa 40-42
+packages/api/src/transactions/queries.ts
+  s_c1b54d9162ac36::t_3362832f9b83c7 326
+  s_c1b54d9162ac36::t_c5eabb7b7727ce 372-380
+  s_c1b54d9162ac36::t_30286913bb3273 20-24
+  s_c1b54d9162ac36::t_93aa519120094d 412
+apps/tanstack-start/src/routes/_authed/_revue/transactions.tsx
+  s_c1b54d9162ac36::t_96c55310ef41d9 79
+  s_c1b54d9162ac36::t_b3edd9abc069af 75
+  s_c1b54d9162ac36::t_6d206915387e87 40-46
+  s_c1b54d9162ac36::t_e4dd3c9e0797fa 8
+apps/tanstack-start/src/routes/_authed/_revue/index.tsx
+  s_c1b54d9162ac36::t_abb2ee3a2c4664 107
+  s_c1b54d9162ac36::t_f2e4d7c8e4c51d 139-146
+  s_c1b54d9162ac36::t_2153454ad4ae15 14,18
+  s_c1b54d9162ac36::t_674aae9aa7a23b 44-54
+  s_c1b54d9162ac36::t_b4d54443850d62 103-106
+apps/tanstack-start/src/routes/_authed/_revue/-components/category-spend-list.tsx
+  s_c1b54d9162ac36::t_2cd4090e09c774 59
+apps/tanstack-start/src/routes/_authed/_revue/ventiler.tsx
+  s_c1b54d9162ac36::t_0e642b3ea28bc0 79
+  s_c1b54d9162ac36::t_a35afadace46d9 18,23
+  s_c1b54d9162ac36::t_aac69d0bdee346 221
+  s_c1b54d9162ac36::t_d4f779c3f69cd9 55-60,70
+  s_c1b54d9162ac36::t_832ae531ab5fca 8
+  s_c1b54d9162ac36::t_858961c05f198f 215-220,222
+  s_c1b54d9162ac36::t_e22b99f269986f 41
+  s_c1b54d9162ac36::t_012ae4c828af02 110
+apps/tanstack-start/src/routes/_authed/_revue/-components/transactions-table.tsx
+  s_c1b54d9162ac36::t_39394e4aced906 113
+  s_c1b54d9162ac36::t_d49963c5d0eee3 109
+  s_c1b54d9162ac36::t_2a727401032ce4 117,120,125
+  s_c1b54d9162ac36::t_6f2c9443502e00 17-20,22
+  s_c1b54d9162ac36::t_1133946c803bc8 67
+  s_c1b54d9162ac36::t_84b016129d309c 101
+  s_c1b54d9162ac36::t_feb42b675a3989 152
+apps/tanstack-start/src/routes/_authed/_revue/-components/category-transactions.tsx
+  s_c1b54d9162ac36::t_202c4c1e28514d 52
+  s_c1b54d9162ac36::t_a95fa4dda49aa0 63-73
+  s_c1b54d9162ac36::t_e084a8ac5c6521 23,28-29,34
+apps/tanstack-start/src/styles.css
+  s_c1b54d9162ac36::t_4c0515f73b5278 155-159
+  s_c1b54d9162ac36::t_afd98e1ae0be97 132-137,139-154,160,166-177
+packages/shared/src/schemas.ts
+  s_c1b54d9162ac36::t_99d556a939f413 5-9
+apps/tanstack-start/src/routes/_authed/_revue/-components/review-cards.tsx
+  s_c1b54d9162ac36::t_da63be4ef87835 1-39,52-58,64-157
+  s_c1b54d9162ac36::t_e6052aa148b699 40-51,59-63
+apps/tanstack-start/src/lib/transactions-search.ts
+  s_c1b54d9162ac36::t_ac4ccf901a50cf 64-79
+apps/tanstack-start/src/routes/_authed/_revue/-components/app-header.tsx
+  s_c1b54d9162ac36::t_63aa7f0ce44a55 4
+  s_c1b54d9162ac36::t_f3bc08175f7bc5 23-24,30
+  s_c1b54d9162ac36::t_baec691f473bdb 94-112
+  s_c1b54d9162ac36::t_5e959986901bf0 16
+  s_c1b54d9162ac36::t_c79d6e9ad9ec67 57,62
+apps/tanstack-start/src/routes/_authed/_revue/-components/category-income-list.tsx
+  s_c1b54d9162ac36::t_328abc50486418 1-101
+apps/tanstack-start/src/routes/_authed/_revue/-components/summary-tiles.tsx
+  s_c1b54d9162ac36::t_2cd4090e09c774 117,123,169
+apps/tanstack-start/src/routes/_authed/_revue/categorie.$name.tsx
+  s_c1b54d9162ac36::t_0a2f5a7c707f49 100
+  s_c1b54d9162ac36::t_1dda1542d47f70 35-36,38,41-47,56-59,69-76,78-80,83
+  s_c1b54d9162ac36::t_f6b8e5305f4e4a 19
+  s_c1b54d9162ac36::t_172d40897f4264 90-91
+  s_c1b54d9162ac36::t_e1aecd55394163 158-161
+  s_c1b54d9162ac36::t_eeb18e5dc1c86d 151-152
+  s_c1b54d9162ac36::t_9b2c9f8c909f17 252-257
+packages/shared/src/colors.ts
+  s_c1b54d9162ac36::t_d463c3135d5e66 7-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "b845787b4717430c2409fa1c6df9943f3ffd19ee",
+  "prompts": {},
+  "sessions": {
+    "s_c1b54d9162ac36": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "da3be1c4-bf03-4bd6-8772-48ce1c6990ea",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
