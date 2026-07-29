@@ -67,6 +67,26 @@ export async function updateCategoryColor(
   await db.update(categories).set({ color }).where(eq(categories.id, id));
 }
 
+// Même règle que updateCategoryColor : l'icône fait partie de l'identité d'une
+// catégorie PARENTE, une sous-catégorie n'en a jamais. `null` remet la
+// catégorie dans l'état « sans icône » (pastille creuse, la couleur travaille
+// seule). Le jeu fermé est validé par le routeur.
+export async function updateCategoryIcon(
+  id: number,
+  icon: string | null,
+): Promise<void> {
+  const [category] = await db
+    .select({ parentId: categories.parentId })
+    .from(categories)
+    .where(eq(categories.id, id));
+  if (!category) throw new Error("Catégorie introuvable.");
+  if (category.parentId !== null) {
+    throw new Error("Seules les catégories parentes ont une icône propre.");
+  }
+
+  await db.update(categories).set({ icon }).where(eq(categories.id, id));
+}
+
 // Supprime une catégorie (et, pour un parent, ses sous-catégories en cascade)
 // même si des transactions y sont rattachées : elles deviennent
 // non-catégorisées (category_id/category_source à NULL) plutôt que de bloquer

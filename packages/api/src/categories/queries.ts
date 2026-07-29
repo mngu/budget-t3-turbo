@@ -7,6 +7,9 @@ export interface CategoryOption {
   id: number;
   name: string;
   color: string | null;
+  // Nom Lucide (voir CATEGORY_ICON_NAMES) — toujours null pour une
+  // sous-catégorie, comme `color`.
+  icon: string | null;
   parentId: number | null;
 }
 
@@ -16,7 +19,15 @@ export interface CategoryTreeNode extends CategoryOption {
 
 export interface CategoryOverviewNode extends CategoryOption {
   transactionCount: number;
-  children: (CategoryOption & { transactionCount: number })[];
+  // Transactions portées par la catégorie elle-même, hors sous-catégories.
+  // `transactionCount` est le total cumulé pour un parent : les deux chiffres
+  // ne disent pas la même chose et la page /categories affiche le direct
+  // (« le compteur d'une parente ne compte que ses transactions directes »).
+  directTransactionCount: number;
+  children: (CategoryOption & {
+    transactionCount: number;
+    directTransactionCount: number;
+  })[];
 }
 
 export interface CategoriesOverview {
@@ -28,6 +39,7 @@ const categoryColumns = {
   id: categories.id,
   name: categories.name,
   color: categories.color,
+  icon: categories.icon,
   parentId: categories.parentId,
 };
 
@@ -80,19 +92,22 @@ export async function listCategoryTree(): Promise<CategoryTreeNode[]> {
   return buildCategoryTree(rows);
 }
 
-// Arborescence + nombre de transactions par catégorie (page /categories) :
-// total cumulé (elle-même + sous-catégories) pour un parent, compte direct
-// pour une sous-catégorie. Part de `categories` (pas `transactions`, contrairement
-// à `transactions.byCategory`) pour ne perdre aucune catégorie à 0 transaction.
+// Arborescence + nombre de transactions par catégorie (page /categories).
+// Deux compteurs par nœud, à ne pas confondre : `transactionCount` est le
+// total cumulé (elle-même + sous-catégories) pour un parent, `directTransactionCount`
+// ne compte jamais que les transactions portées par la catégorie elle-même.
+// Ils coïncident sur une sous-catégorie, qui n'a pas d'enfant.
+// Part de `categories` (pas `transactions`, contrairement à
+// `transactions.byCategory`) pour ne perdre aucune catégorie à 0 transaction.
 export async function categoriesOverview(): Promise<CategoriesOverview> {
   const [rows, [uncategorized]] = await Promise.all([
     db
       .select({
-        id: categories.id,
-        name: categories.name,
-        color: categories.color,
-        parentId: categories.parentId,
+        ...categoryColumns,
         transactionCount: count(transactions.id),
+        // Même valeur que `transactionCount` à ce stade (le compte direct) ;
+        // seul `transactionCount` devient cumulé au niveau du parent, plus bas.
+        directTransactionCount: count(transactions.id),
       })
       .from(categories)
       .leftJoin(transactions, eq(transactions.categoryId, categories.id))
@@ -106,9 +121,9 @@ export async function categoriesOverview(): Promise<CategoriesOverview> {
 
   const tree = buildCategoryTree(rows).map((parent) => ({
     ...parent,
-    // Total cumulé pour l'affichage du parent ; le compte direct (calculé
-    // ci-dessus, avant ce map) reste ce que `removeCategory` utilise pour
-    // avertir avant suppression.
+    // Seul `transactionCount` devient cumulé — `directTransactionCount` reste
+    // le compte direct issu de la requête, ce que `removeCategory` utilise
+    // pour avertir avant suppression et ce que la page /categories affiche.
     transactionCount:
       parent.transactionCount +
       parent.children.reduce((sum, c) => sum + c.transactionCount, 0),

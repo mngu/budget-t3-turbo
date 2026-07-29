@@ -3,15 +3,16 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 
-import { and, desc, eq, gte, isNotNull, isNull } from "@budget/db";
+import { alias, and, desc, eq, gte, isNotNull, isNull } from "@budget/db";
 import { db } from "@budget/db/client";
-import { accounts, transactions } from "@budget/db/schema";
+import { accounts, categories, transactions } from "@budget/db/schema";
 import {
   CATEGORY_COLOR_HEXES,
   CATEGORY_COLOR_PALETTE,
   FALLBACK_CATEGORY_COLOR,
 } from "@budget/shared";
 
+import type { CategoryTreeNode } from "../queries";
 import type { CategorySuggestion, RawCategorySuggestion } from "./schema";
 import { rawCategorySuggestionsSchema } from "./schema";
 
@@ -23,6 +24,15 @@ export interface TxnForAnalysis {
   direction: "debit" | "credit";
   bankName: string;
   mcc: string | null;
+  // Catégorie actuelle de la transaction, `null` si elle n'est pas encore
+  // classée. C'est le signal qui permet au LLM de distinguer « déjà couvert »
+  // de « réellement manquant », et surtout de voir les noms existants écrits
+  // au caractère près, transaction après transaction — la liste de
+  // l'arborescence seule ne suffisait pas à ancrer la réutilisation verbatim.
+  category: string | null;
+  // Parente de `category` — `null` quand la transaction est rattachée
+  // directement à une parente (« à classer ») ou n'a pas de catégorie.
+  parentCategory: string | null;
 }
 
 export const SAMPLE_LIMIT = 500;
@@ -46,6 +56,11 @@ export function sampleWindowStart(
 // corrections manuelles. Le contexte déjà catégorisé doit rester majoritaire.
 export const UNCATEGORIZED_SAMPLE_SHARE = 0.3;
 
+// Deux alias sur `categories` : la catégorie portée par la transaction, et sa
+// parente (l'arborescence n'a que 2 niveaux, un seul niveau de remontée suffit).
+const txnCategory = alias(categories, "txn_category");
+const txnParentCategory = alias(categories, "txn_parent_category");
+
 const analysisColumns = {
   id: transactions.id,
   description: transactions.description,
@@ -54,7 +69,21 @@ const analysisColumns = {
   direction: transactions.direction,
   bankName: accounts.bankName,
   mcc: transactions.mcc,
+  category: txnCategory.name,
+  parentCategory: txnParentCategory.name,
 };
+
+// Jointures communes aux deux moitiés de l'échantillon : la moitié « sans
+// catégorie » ne ramène que des `null` sur les deux dernières colonnes, mais
+// garder une seule forme de ligne évite de reconstruire les colonnes à la main.
+function analysisQuery() {
+  return db
+    .select(analysisColumns)
+    .from(transactions)
+    .innerJoin(accounts, eq(transactions.accountId, accounts.id))
+    .leftJoin(txnCategory, eq(transactions.categoryId, txnCategory.id))
+    .leftJoin(txnParentCategory, eq(txnCategory.parentId, txnParentCategory.id));
+}
 
 // Échantillon stratifié, plafonné à SAMPLE_LIMIT :
 //   1. les transactions sans catégorie — sans fenêtre de date, une orpheline
@@ -71,18 +100,12 @@ export async function sampleTransactions(
 ): Promise<TxnForAnalysis[]> {
   const since = sampleWindowStart(new Date());
 
-  const uncategorized = await db
-    .select(analysisColumns)
-    .from(transactions)
-    .innerJoin(accounts, eq(transactions.accountId, accounts.id))
+  const uncategorized = await analysisQuery()
     .where(isNull(transactions.categoryId))
     .orderBy(desc(transactions.bookingDate))
     .limit(Math.floor(limit * UNCATEGORIZED_SAMPLE_SHARE));
 
-  const categorized = await db
-    .select(analysisColumns)
-    .from(transactions)
-    .innerJoin(accounts, eq(transactions.accountId, accounts.id))
+  const categorized = await analysisQuery()
     .where(
       and(
         isNotNull(transactions.categoryId),
@@ -100,12 +123,53 @@ const CATEGORY_COLOR_PROMPT_LIST = CATEGORY_COLOR_PALETTE.map(
   (c) => `- ${c.name} (${c.light})`,
 ).join("\n");
 
-export function buildAnalysisPrompt(txns: TxnForAnalysis[]): string {
+// Rendu de l'arborescence réelle pour le prompt : une ligne par parente, avec
+// sa couleur actuelle et ses sous-catégories. C'est la référence des noms que
+// le LLM doit réutiliser au caractère près.
+function formatExistingTree(tree: CategoryTreeNode[]): string {
+  return tree
+    .map((parent) => {
+      const children =
+        parent.children.length > 0
+          ? parent.children.map((c) => `« ${c.name} »`).join(", ")
+          : "aucune sous-catégorie pour l'instant";
+      const color = parent.color ? ` [${parent.color}]` : "";
+      return `- « ${parent.name} »${color} : ${children}`;
+    })
+    .join("\n");
+}
+
+// L'arborescence réelle est passée au LLM pour deux raisons distinctes : lui
+// faire réutiliser les noms existants au lieu d'en inventer des variantes
+// (« Transports » à côté d'un « Transport » existant, qui devient une seconde
+// parente en base — `categories.name` est unique mais sensible à la casse et
+// aux accents, donc rien ne l'empêche), et lui faire garder la couleur déjà
+// choisie pour une parente existante.
+//
+// La réponse attendue reste l'arborescence **complète**, jamais un delta :
+// `applySuggestions` en mode "replace" traite la proposition comme la nouvelle
+// vérité et supprime tout ce qui en est absent (voir apply.ts). Une proposition
+// réduite aux nouveautés y deviendrait un bouton de suppression de masse.
+export function buildAnalysisPrompt(
+  txns: TxnForAnalysis[],
+  tree: CategoryTreeNode[],
+): string {
+  const existingSection =
+    tree.length === 0
+      ? `Aucune catégorie n'existe encore : l'arborescence est à créer entièrement.`
+      : `Arborescence actuelle, à reprendre comme base (${tree.length} catégorie(s) parente(s)) :
+${formatExistingTree(tree)}`;
+
   return `Tu analyses les habitudes de dépense d'un ménage français à partir de ${txns.length} transactions bancaires réelles (comptes Société Générale, Caisse d'Épargne Île-de-France, Revolut).
 
 Propose une arborescence de catégories budgétaires à 2 niveaux (catégories parentes et sous-catégories) qui reflète fidèlement ces transactions — pas une liste générique.
 
+${existingSection}
+
 Règles :
+- **Réutilise les noms existants au caractère près.** Quand une catégorie de l'arborescence actuelle couvre déjà un concept, reprends son nom exactement tel quel : mêmes accents, même casse, même singulier/pluriel. Proposer « Transports » alors que « Transport » existe, ou « Sante » alors que « Santé » existe, est une erreur — cela crée une catégorie en double au lieu d'enrichir l'existante. N'invente un nom que pour ce qu'aucune catégorie existante ne décrit.
+- **Décris l'arborescence complète**, pas seulement tes ajouts : les catégories existantes que tu conserves doivent figurer dans ta réponse, avec leurs sous-catégories.
+- Chaque transaction porte sa catégorie actuelle dans "category" (et sa parente dans "parentCategory"), ou "null" si elle n'est pas encore classée. Les transactions à "null" sont le principal indice de ce qui manque à l'arborescence.
 - Chaque catégorie parente doit avoir entre 2 et 8 sous-catégories.
 - Les noms sont courts, en français, sans jargon bancaire.
 - Regroupe par usage réel (ex. distinguer « Courses » de « Livraison » si les deux apparaissent nettement).
@@ -113,7 +177,7 @@ Règles :
 - Pour chaque sous-catégorie, liste dans "txnIds" les identifiants ("id") de toutes les transactions de l'échantillon qui en relèvent. Une transaction n'appartient qu'à une seule sous-catégorie.
 - Pour chaque catégorie parente (jamais les sous-catégories), choisis dans "parentColor" le code hexadécimal de la couleur qui lui correspond le mieux, parmi cette liste exclusivement :
 ${CATEGORY_COLOR_PROMPT_LIST}
-  Essaie d'utiliser une couleur différente pour chaque catégorie parente de cette proposition.
+  Une catégorie parente qui existe déjà garde la couleur indiquée entre crochets ci-dessus. Pour une nouvelle parente, essaie de choisir une couleur encore inutilisée.
 
 Transactions (JSON) :
 ${JSON.stringify(txns)}`;
@@ -139,6 +203,7 @@ export function sanitizeSuggestionColors(
 
 export async function analyzeAndSuggest(
   txns: TxnForAnalysis[],
+  tree: CategoryTreeNode[],
 ): Promise<CategorySuggestion[]> {
   const client = new Anthropic();
   const response = await client.messages.parse({
@@ -146,7 +211,7 @@ export async function analyzeAndSuggest(
     max_tokens: 8192,
     system:
       "Tu es un expert en catégorisation budgétaire pour les finances personnelles.",
-    messages: [{ role: "user", content: buildAnalysisPrompt(txns) }],
+    messages: [{ role: "user", content: buildAnalysisPrompt(txns, tree) }],
     output_config: { format: zodOutputFormat(rawCategorySuggestionsSchema) },
   });
 

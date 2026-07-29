@@ -2,19 +2,12 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import {
-  LandmarkIcon,
-  MonitorIcon,
-  MoonIcon,
-  SearchIcon,
-  SparklesIcon,
-  SunIcon,
-} from "lucide-react";
+import { LandmarkIcon, SearchIcon, SparklesIcon } from "lucide-react";
 
 import { REVIEW_QUEUE_LIMIT } from "@budget/shared";
-import { useTheme } from "@budget/ui/theme";
 
 import { SearchInput } from "~/component/search-input";
+import { HEADER_ICON_BUTTON, ThemeButton } from "~/component/theme-button";
 import { reviewScope } from "~/lib/transactions-search";
 import { useTRPC } from "~/lib/trpc";
 import { useRevueSearch } from "~/lib/use-revue-search";
@@ -108,9 +101,6 @@ function ReviewBadge() {
   );
 }
 
-const iconButton =
-  "border-border text-muted-foreground hover:bg-accent hover:text-foreground flex size-[26px] items-center justify-center rounded-[7px] border disabled:opacity-50";
-
 function IconLink({
   to,
   label,
@@ -121,29 +111,13 @@ function IconLink({
   children: React.ReactNode;
 }) {
   return (
-    <Link to={to} aria-label={label} title={label} className={iconButton}>
+    <Link
+      to={to}
+      aria-label={label}
+      title={label}
+      className={HEADER_ICON_BUTTON}
+    >
       {children}
     </Link>
-  );
-}
-
-// Reprend le ThemeToggle de @budget/ui (même cycle auto → clair → sombre, même
-// pilotage par les classes posées sur <html>) au gabarit 26 px de l'en-tête ;
-// celui du kit est dimensionné pour un Button `size="icon"`, 10 px plus haut,
-// et cassait l'alignement de la rangée.
-function ThemeButton() {
-  const { toggleMode } = useTheme();
-  return (
-    <button
-      type="button"
-      onClick={toggleMode}
-      aria-label="Basculer le thème"
-      title="Basculer le thème"
-      className={iconButton}
-    >
-      <SunIcon className="auto:hidden size-3.5 dark:hidden" />
-      <MoonIcon className="not-auto:dark:block hidden size-3.5" />
-      <MonitorIcon className="auto:block hidden size-3.5" />
-    </button>
   );
 }

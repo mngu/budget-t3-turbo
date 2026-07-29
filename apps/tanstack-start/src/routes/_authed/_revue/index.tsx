@@ -95,7 +95,7 @@ function RevueDuMois() {
     // a son propre onglet (« À revoir », /classer). La revue redevient une
     // lecture — sorties, puis entrées — et la correction se fait à côté.
     <div className="min-h-0 flex-1 overflow-y-auto">
-      <div className="max-w-[1500px] px-6 pt-5 pb-10">
+      <div className="px-6 pt-5 pb-10">
         {/* La revue n'a pas de barre de filtres — ils se posent depuis
             l'en-tête et depuis les deux autres onglets, et se conservent d'un
             écran à l'autre. Sans ce rappel, une sélection posée sur

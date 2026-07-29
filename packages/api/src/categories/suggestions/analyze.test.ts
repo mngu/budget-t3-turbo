@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { CATEGORY_COLOR_HEXES } from "@budget/shared";
 
+import type { CategoryTreeNode } from "../queries";
 import type { TxnForAnalysis } from "./analyze";
 import type { RawCategorySuggestion } from "./schema";
 
@@ -12,7 +13,7 @@ vi.mock("@budget/db/client", () => ({ db: {} }));
 const { buildAnalysisPrompt, sampleWindowStart, sanitizeSuggestionColors } =
   await import("./analyze");
 
-const txn = (id: number): TxnForAnalysis => ({
+const txn = (id: number, category: string | null = null): TxnForAnalysis => ({
   id,
   description: "CARTE 12/07 CARREFOUR PARIS",
   counterparty: "Carrefour",
@@ -20,7 +21,31 @@ const txn = (id: number): TxnForAnalysis => ({
   direction: "debit",
   bankName: "Société Générale",
   mcc: "5411",
+  category,
+  parentCategory: category === null ? null : "Alimentation",
 });
+
+const parent = (
+  id: number,
+  name: string,
+  children: string[],
+  color: string | null = "#0084c8",
+): CategoryTreeNode => ({
+  id,
+  name,
+  color,
+  icon: null,
+  parentId: null,
+  children: children.map((childName, i) => ({
+    id: id * 100 + i,
+    name: childName,
+    color: null,
+    icon: null,
+    parentId: id,
+  })),
+});
+
+const tree = [parent(1, "Transport", ["Essence", "Péage"])];
 
 describe("sampleWindowStart", () => {
   it("recule de 6 mois par défaut", () => {
@@ -39,13 +64,13 @@ describe("sampleWindowStart", () => {
 describe("buildAnalysisPrompt", () => {
   it("mentionne le nombre de transactions et embarque le JSON complet", () => {
     const txns = [txn(1), txn(2)];
-    const prompt = buildAnalysisPrompt(txns);
+    const prompt = buildAnalysisPrompt(txns, tree);
     expect(prompt).toContain("2 transactions bancaires réelles");
     expect(prompt).toContain(JSON.stringify(txns));
   });
 
   it("demande une arborescence à 2 niveaux avec txnIds", () => {
-    const prompt = buildAnalysisPrompt([txn(1)]);
+    const prompt = buildAnalysisPrompt([txn(1)], tree);
     expect(prompt).toContain(
       "arborescence de catégories budgétaires à 2 niveaux",
     );
@@ -53,11 +78,50 @@ describe("buildAnalysisPrompt", () => {
   });
 
   it("liste la palette de couleurs fermée pour parentColor", () => {
-    const prompt = buildAnalysisPrompt([txn(1)]);
+    const prompt = buildAnalysisPrompt([txn(1)], tree);
     expect(prompt).toContain('"parentColor"');
     for (const hex of CATEGORY_COLOR_HEXES) {
       expect(prompt).toContain(hex);
     }
+  });
+
+  // Sans ce bloc, le LLM ne voit aucun nom existant et propose des variantes
+  // (« Transports » face à « Transport ») qui deviennent des doublons en base.
+  it("liste les catégories existantes avec leur couleur et leurs enfants", () => {
+    const prompt = buildAnalysisPrompt([txn(1)], tree);
+    expect(prompt).toContain("« Transport » [#0084c8]");
+    expect(prompt).toContain("« Essence »");
+    expect(prompt).toContain("« Péage »");
+  });
+
+  it("signale une parente encore sans sous-catégorie", () => {
+    const prompt = buildAnalysisPrompt([txn(1)], [parent(2, "Santé", [])]);
+    expect(prompt).toContain("« Santé »");
+    expect(prompt).toContain("aucune sous-catégorie pour l'instant");
+  });
+
+  it("exige la réutilisation verbatim des noms existants", () => {
+    const prompt = buildAnalysisPrompt([txn(1)], tree);
+    expect(prompt).toContain("Réutilise les noms existants au caractère près");
+  });
+
+  // Garde-fou : une proposition réduite aux nouveautés ferait du mode
+  // "replace" d'applySuggestions une suppression de masse.
+  it("demande l'arborescence complète et non un delta", () => {
+    const prompt = buildAnalysisPrompt([txn(1)], tree);
+    expect(prompt).toContain("Décris l'arborescence complète");
+  });
+
+  it("bascule sur une consigne de création intégrale quand l'arbre est vide", () => {
+    const prompt = buildAnalysisPrompt([txn(1)], []);
+    expect(prompt).toContain("Aucune catégorie n'existe encore");
+    expect(prompt).not.toContain("Arborescence actuelle");
+  });
+
+  it("embarque la catégorie actuelle de chaque transaction", () => {
+    const prompt = buildAnalysisPrompt([txn(1, "Courses")], tree);
+    expect(prompt).toContain('"category":"Courses"');
+    expect(prompt).toContain('"parentCategory":"Alimentation"');
   });
 });
 

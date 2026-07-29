@@ -7,6 +7,7 @@ import { transactions } from "@budget/db/schema";
 
 import type { TxnForAnalysis } from "./analyze";
 import type { CategorySuggestion } from "./schema";
+import { listCategoryTree } from "../queries";
 import { analyzeAndSuggest, sampleTransactions } from "./analyze";
 
 export interface SuggestionsRun {
@@ -26,8 +27,13 @@ async function transactionsTotal(): Promise<number> {
 }
 
 export async function generateSuggestions(): Promise<SuggestionsRun> {
-  const sample = await sampleTransactions();
-  const suggestions = await analyzeAndSuggest(sample);
+  // L'arborescence réelle part avec l'échantillon : sans elle, le LLM invente
+  // des variantes des noms existants (voir buildAnalysisPrompt).
+  const [sample, tree] = await Promise.all([
+    sampleTransactions(),
+    listCategoryTree(),
+  ]);
+  const suggestions = await analyzeAndSuggest(sample, tree);
   const totalTransactionsAtRun = await transactionsTotal();
   lastRun = {
     generatedAt: new Date(),

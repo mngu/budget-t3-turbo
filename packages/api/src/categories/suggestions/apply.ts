@@ -1,6 +1,6 @@
 // Application en base d'une arborescence proposée (création/reparentage, et en
 // mode "replace" suppression du reste), puis re-catégorisation.
-import { eq, inArray, sql } from "@budget/db";
+import { and, eq, inArray, isNull, sql } from "@budget/db";
 import { db } from "@budget/db/client";
 import { categories, transactions } from "@budget/db/schema";
 
@@ -126,6 +126,70 @@ export async function previewReplace(
 ): Promise<ReplacePlan> {
   const existing = await fetchExistingWithManualCounts(db);
   return computeReplacePlan(existing, flattenProposedNames(suggestions));
+}
+
+export interface AcceptSuggestionResult {
+  parentCreated: boolean;
+  childCreated: boolean;
+  transactionsCategorized: number;
+}
+
+// Accepte UNE proposition (une sous-catégorie sous un parent), telle que la
+// page /categories la pose dans la liste. Volontairement séparée
+// d'`applySuggestions` et non un appel de celle-ci sur un tableau à un
+// élément : `applySuggestions` remet à NULL *toutes* les transactions à
+// `category_source = 'llm'` puis relance une passe LLM complète (voir plus
+// bas). Un « Ajouter » par proposition passant par là coûterait une passe
+// entière et défausserait le classement de toute la base — l'inverse de ce que
+// l'écran promet (« rien de ce qui est déjà rangé n'est remis en question »).
+//
+// Ce que fait celle-ci, et rien d'autre :
+//  - crée le parent s'il manque (jamais de recoloration d'un parent existant,
+//    sa teinte est un choix de l'utilisateur) ;
+//  - crée la sous-catégorie sous ce parent si elle manque ; si une catégorie
+//    de ce nom existe déjà ailleurs, elle est réutilisée telle quelle, jamais
+//    reparentée en douce ;
+//  - range les transactions listées **et encore sans catégorie**. Le garde
+//    `IS NULL` est ce qui rend vrai le « 0 transaction déjà classée touchée » :
+//    l'échantillon analysé contient aussi des transactions déjà rangées (voir
+//    sampleTransactions), et une correction manuelle a toujours une catégorie.
+//
+// `category_source = 'auto'` : rangement déterministe (les identifiants sont
+// énumérés, aucun appel LLM ici). Ni repris par `categorizeUncategorized` (garde
+// `IS NULL`), ni remis à zéro par un `applySuggestions` ultérieur, qui ne vise
+// que 'llm'.
+export async function acceptSuggestion(
+  parent: string,
+  parentColor: string,
+  child: { name: string; txnIds: number[] },
+): Promise<AcceptSuggestionResult> {
+  return db.transaction(async (tx) => {
+    const before = await tx.select({ id: categories.id }).from(categories);
+    const beforeIds = new Set(before.map((c) => c.id));
+
+    const parentId = await upsertCategory(tx, parent, null, false, parentColor);
+    const childId = await upsertCategory(tx, child.name, parentId, false);
+
+    const categorized =
+      child.txnIds.length === 0
+        ? []
+        : await tx
+            .update(transactions)
+            .set({ categoryId: childId, categorySource: "auto" })
+            .where(
+              and(
+                inArray(transactions.id, child.txnIds),
+                isNull(transactions.categoryId),
+              ),
+            )
+            .returning({ id: transactions.id });
+
+    return {
+      parentCreated: !beforeIds.has(parentId),
+      childCreated: !beforeIds.has(childId),
+      transactionsCategorized: categorized.length,
+    };
+  });
 }
 
 export type ApplyMode = "merge" | "replace";

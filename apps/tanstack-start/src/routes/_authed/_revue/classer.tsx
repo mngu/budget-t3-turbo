@@ -104,7 +104,7 @@ function Classer() {
     // Une seule colonne : le rail « à classer par catégorie » qui occupait la
     // droite redisait les en-têtes de groupe ci-dessous, à un tri près.
     <div className="min-h-0 flex-1 overflow-y-auto">
-      <div className="max-w-[1500px] px-6.5 pt-4.5 pb-7">
+      <div className="px-6.5 pt-4.5 pb-7">
         <div className="text-muted-foreground flex items-center gap-2 text-[12.5px]">
           <Link to="/" search={search} className="text-primary">
             Revue du mois

@@ -61,6 +61,10 @@ export const categories = pgTable("categories", {
   id: serial("id").primaryKey(),
   name: text("name").notNull().unique(),
   color: text("color"),
+  // Nom Lucide en kebab-case, membre de CATEGORY_ICON_NAMES (@budget/shared).
+  // Comme `color`, ne concerne que les catégories parentes : une
+  // sous-catégorie se lit dans la famille de son parent, sans identité propre.
+  icon: text("icon"),
   // NULL = catégorie parente ; sinon sous-catégorie. Les deux niveaux sont
   // assignables à une transaction ; choisir un parent dans le filtre de liste
   // inclut aussi ses sous-catégories (voir transactionsFilterQuery).
