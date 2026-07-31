@@ -18,6 +18,11 @@ const TABS = [
   { to: "/", label: "Revue du mois" },
   { to: "/classer", label: "À revoir" },
   { to: "/transactions", label: "Toutes les transactions" },
+  // Page de test (portage de la maquette « Revue du mois épurée »). Elle est
+  // ici et non dans la rangée d'icônes à droite parce qu'elle partage la search
+  // des autres onglets : y arriver doit conserver la période et les filtres,
+  // ce que `/categories` et `/banques` ne sauraient pas faire.
+  { to: "/revue-epuree", label: "Revue épurée" },
 ] as const;
 
 export function AppHeader() {

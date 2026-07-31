@@ -20,6 +20,7 @@ import { Route as ApiTrpcSplatRouteImport } from './routes/api/trpc.$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as AuthedBanquesAjouterRouteImport } from './routes/_authed/banques/ajouter'
 import { Route as AuthedRevueTransactionsRouteImport } from './routes/_authed/_revue/transactions'
+import { Route as AuthedRevueRevueEpureeRouteImport } from './routes/_authed/_revue/revue-epuree'
 import { Route as AuthedRevueClasserRouteImport } from './routes/_authed/_revue/classer'
 import { Route as AuthedRevueCategorieNameRouteImport } from './routes/_authed/_revue/categorie.$name'
 
@@ -76,6 +77,11 @@ const AuthedRevueTransactionsRoute = AuthedRevueTransactionsRouteImport.update({
   path: '/transactions',
   getParentRoute: () => AuthedRevueRoute,
 } as any)
+const AuthedRevueRevueEpureeRoute = AuthedRevueRevueEpureeRouteImport.update({
+  id: '/revue-epuree',
+  path: '/revue-epuree',
+  getParentRoute: () => AuthedRevueRoute,
+} as any)
 const AuthedRevueClasserRoute = AuthedRevueClasserRouteImport.update({
   id: '/classer',
   path: '/classer',
@@ -92,6 +98,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/callback': typeof AuthedCallbackRoute
   '/classer': typeof AuthedRevueClasserRoute
+  '/revue-epuree': typeof AuthedRevueRevueEpureeRoute
   '/transactions': typeof AuthedRevueTransactionsRoute
   '/banques/ajouter': typeof AuthedBanquesAjouterRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -105,6 +112,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/callback': typeof AuthedCallbackRoute
   '/classer': typeof AuthedRevueClasserRoute
+  '/revue-epuree': typeof AuthedRevueRevueEpureeRoute
   '/transactions': typeof AuthedRevueTransactionsRoute
   '/banques/ajouter': typeof AuthedBanquesAjouterRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -121,6 +129,7 @@ export interface FileRoutesById {
   '/_authed/_revue': typeof AuthedRevueRouteWithChildren
   '/_authed/callback': typeof AuthedCallbackRoute
   '/_authed/_revue/classer': typeof AuthedRevueClasserRoute
+  '/_authed/_revue/revue-epuree': typeof AuthedRevueRevueEpureeRoute
   '/_authed/_revue/transactions': typeof AuthedRevueTransactionsRoute
   '/_authed/banques/ajouter': typeof AuthedBanquesAjouterRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -136,6 +145,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/callback'
     | '/classer'
+    | '/revue-epuree'
     | '/transactions'
     | '/banques/ajouter'
     | '/api/auth/$'
@@ -149,6 +159,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/callback'
     | '/classer'
+    | '/revue-epuree'
     | '/transactions'
     | '/banques/ajouter'
     | '/api/auth/$'
@@ -164,6 +175,7 @@ export interface FileRouteTypes {
     | '/_authed/_revue'
     | '/_authed/callback'
     | '/_authed/_revue/classer'
+    | '/_authed/_revue/revue-epuree'
     | '/_authed/_revue/transactions'
     | '/_authed/banques/ajouter'
     | '/api/auth/$'
@@ -260,6 +272,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedRevueTransactionsRouteImport
       parentRoute: typeof AuthedRevueRoute
     }
+    '/_authed/_revue/revue-epuree': {
+      id: '/_authed/_revue/revue-epuree'
+      path: '/revue-epuree'
+      fullPath: '/revue-epuree'
+      preLoaderRoute: typeof AuthedRevueRevueEpureeRouteImport
+      parentRoute: typeof AuthedRevueRoute
+    }
     '/_authed/_revue/classer': {
       id: '/_authed/_revue/classer'
       path: '/classer'
@@ -279,6 +298,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthedRevueRouteChildren {
   AuthedRevueClasserRoute: typeof AuthedRevueClasserRoute
+  AuthedRevueRevueEpureeRoute: typeof AuthedRevueRevueEpureeRoute
   AuthedRevueTransactionsRoute: typeof AuthedRevueTransactionsRoute
   AuthedRevueIndexRoute: typeof AuthedRevueIndexRoute
   AuthedRevueCategorieNameRoute: typeof AuthedRevueCategorieNameRoute
@@ -286,6 +306,7 @@ interface AuthedRevueRouteChildren {
 
 const AuthedRevueRouteChildren: AuthedRevueRouteChildren = {
   AuthedRevueClasserRoute: AuthedRevueClasserRoute,
+  AuthedRevueRevueEpureeRoute: AuthedRevueRevueEpureeRoute,
   AuthedRevueTransactionsRoute: AuthedRevueTransactionsRoute,
   AuthedRevueIndexRoute: AuthedRevueIndexRoute,
   AuthedRevueCategorieNameRoute: AuthedRevueCategorieNameRoute,

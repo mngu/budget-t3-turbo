@@ -78,6 +78,45 @@ function referenceMonths(totals: MonthTotals[], anchorIso: string): string[] {
     .map((t) => t.month);
 }
 
+/**
+ * Moyenne de chaque catégorie parente sur la fenêtre de référence, en une passe.
+ * `null` quand aucun mois de référence n'est exploitable.
+ *
+ * Volontairement *pas* `compareToAverage` appliqué à l'historique filtré sur une
+ * catégorie, qui donnerait des écarts faux dans les deux sens :
+ * — la fenêtre est dérivée des totaux tous postes confondus. Un mois sans
+ *   dépense dans une catégorie n'a simplement pas de ligne dans `history` ;
+ *   `referenceMonths` l'écarterait (`count > 0`) et la moyenne d'un poste
+ *   sporadique ne porterait que sur ses mois actifs — surestimée au point
+ *   d'inverser le sens de l'écart affiché. Ici l'absence vaut zéro, ce qu'elle est.
+ * — le garde-fou « mois partiel » mesure un volume *global* : la médiane des
+ *   comptes d'une seule catégorie n'y veut rien dire.
+ *
+ * La clé est le nom de la catégorie parente, `""` pour les transactions sans
+ * catégorie — même convention que `transactions.byCategory`, qui les regroupe
+ * sous un libellé vide là où `history` les remonte à `null`.
+ */
+export function averagesByCategory(
+  history: MonthlyCategoryTotal[],
+  anchorIso: string,
+  pick: (row: MonthlyCategoryTotal) => number,
+): Map<string, number> | null {
+  const months = referenceMonths(totalsByMonth(history), anchorIso);
+  if (months.length === 0) return null;
+
+  const window = new Set(months);
+  const sums = new Map<string, number>();
+  for (const row of history) {
+    if (!window.has(row.month)) continue;
+    const key = row.category ?? "";
+    sums.set(key, (sums.get(key) ?? 0) + pick(row));
+  }
+  // Division par la fenêtre entière, pas par le nombre de mois où la catégorie
+  // apparaît : c'est tout l'objet du commentaire ci-dessus.
+  for (const [key, total] of sums) sums.set(key, total / months.length);
+  return sums;
+}
+
 export interface Comparison {
   /** Dernières valeurs mensuelles, la période affichée en dernier. */
   points: number[];
