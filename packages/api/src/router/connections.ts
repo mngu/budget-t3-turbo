@@ -5,6 +5,7 @@ import {
   completeAuth,
   getConnectionAccounts,
   listConnections,
+  listOrphanAccounts,
   revokeConnection,
   searchAspsps,
   startAuth,
@@ -32,6 +33,8 @@ export const connectionsRouter = {
     .mutation(({ input }) => completeAuth(input.code, input.state)),
 
   list: protectedProcedure.query(() => listConnections()),
+
+  orphans: protectedProcedure.query(() => listOrphanAccounts()),
 
   accounts: protectedProcedure
     .input(z.object({ connectionId: z.number().int().positive() }))

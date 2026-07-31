@@ -8,11 +8,17 @@ import {
   DialogTitle,
 } from "@budget/ui/dialog";
 
-import { euro } from "~/lib/format";
+import { dateFr, euro } from "~/lib/format";
 
 // Sous-ensemble minimal commun à TxnForAnalysis (échantillon LLM) et
 // TransactionRow (données réelles de la table transactions) — le drawer ne
 // lit que ces champs, pas besoin de caster l'un ou l'autre.
+//
+// Les trois derniers sont optionnels parce que l'échantillon d'analyse ne les
+// porte pas : `TxnForAnalysis` est sérialisé tel quel dans `buildAnalysisPrompt`
+// (`JSON.stringify(txns)`), y ajouter une date pour la seule vitrine changerait
+// un prompt calibré. La colonne de date disparaît alors au lieu de laisser une
+// cellule vide, qui se lirait comme une ligne cassée.
 export interface PreviewableTransaction {
   id: number;
   description: string;
@@ -20,6 +26,17 @@ export interface PreviewableTransaction {
   bankName: string;
   amount: string | number;
   direction: "debit" | "credit";
+  bookingDate?: string;
+  /** Chemin affiché « Parent › Enfant », ou la feuille seule. */
+  categoryPath?: string | null;
+  category?: string | null;
+}
+
+/** Teinte + icône de ce que le panneau montre, reprises de la ligne cliquée. */
+export interface PreviewBadge {
+  color: string;
+  soft: string;
+  icon: React.ReactNode;
 }
 
 interface TransactionPreviewDrawerProps {
@@ -28,6 +45,8 @@ interface TransactionPreviewDrawerProps {
   title: string;
   transactions: PreviewableTransaction[];
   description?: string;
+  badge?: PreviewBadge;
+  footer?: string;
 }
 
 export function TransactionPreviewDrawer({
@@ -36,47 +55,95 @@ export function TransactionPreviewDrawer({
   title,
   transactions,
   description,
+  badge,
+  footer,
 }: TransactionPreviewDrawerProps) {
+  const withDate = transactions.some((txn) => txn.bookingDate !== undefined);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent variant="drawer">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>
+      <DialogContent
+        variant="drawer"
+        className="w-[460px] max-w-[92vw] gap-0 p-0"
+      >
+        <DialogHeader className="flex-none border-b px-4 py-3.5">
+          <div className="flex items-center gap-2.5 pr-8">
+            {badge && (
+              <span
+                className="flex size-[26px] flex-none items-center justify-center rounded-lg"
+                style={{ background: badge.soft, color: badge.color }}
+              >
+                {badge.icon}
+              </span>
+            )}
+            <DialogTitle className="min-w-0 truncate text-[13.5px] font-semibold">
+              {title}
+            </DialogTitle>
+          </div>
+          <DialogDescription className="text-muted-foreground mt-1.5 text-[11.5px] text-pretty">
             {description ??
               `${transactions.length} transaction${transactions.length > 1 ? "s" : ""} de l'échantillon analysé.`}
           </DialogDescription>
         </DialogHeader>
-        <div className="flex flex-1 flex-col gap-2 overflow-y-auto">
+
+        <div className="min-h-0 flex-1 overflow-y-auto">
           {transactions.length === 0 ? (
-            <p className="text-muted-foreground text-sm">Aucune transaction.</p>
+            <p className="text-muted-foreground px-4 py-5 text-xs">
+              Aucune transaction.
+            </p>
           ) : (
-            transactions.map((txn) => (
-              <div
-                key={txn.id}
-                className="flex items-center justify-between gap-2 border-b pb-2 text-sm last:border-b-0"
-              >
-                <div className="min-w-0">
-                  <div className="truncate font-medium">{txn.description}</div>
-                  <div className="text-muted-foreground truncate text-xs">
-                    {txn.counterparty ?? txn.bankName}
-                  </div>
-                </div>
-                <span
-                  className={
-                    txn.direction === "debit"
-                      ? "shrink-0 text-red-600"
-                      : "shrink-0 text-green-600"
-                  }
+            transactions.map((txn) => {
+              const category = txn.categoryPath ?? txn.category ?? null;
+              return (
+                <div
+                  key={txn.id}
+                  className={`hover:bg-surface-2 grid items-center gap-2.5 border-b px-4 py-2.5 last:border-b-0 ${
+                    withDate
+                      ? "grid-cols-[78px_minmax(0,1fr)_88px]"
+                      : "grid-cols-[minmax(0,1fr)_88px]"
+                  }`}
                 >
-                  {euro.format(
-                    (txn.direction === "debit" ? -1 : 1) * Number(txn.amount),
+                  {withDate && (
+                    <span className="text-subtle text-[11.5px] whitespace-nowrap">
+                      {txn.bookingDate
+                        ? dateFr.format(new Date(txn.bookingDate))
+                        : ""}
+                    </span>
                   )}
-                </span>
-              </div>
-            ))
+                  <div className="min-w-0">
+                    <div className="num truncate text-xs">
+                      {txn.description}
+                    </div>
+                    <div className="text-subtle truncate text-[11px]">
+                      {txn.bankName}
+                      {" · "}
+                      {category ?? "Sans catégorie"}
+                    </div>
+                  </div>
+                  {/* Le montant reste signé : la maquette ne montre que des
+                      débits et préfixe un « − » d'office, ce qui rendrait un
+                      crédit indiscernable d'une dépense. C'est la catégorie
+                      absente, et elle seule, qui passe la ligne en warn. */}
+                  <span
+                    className={`num text-right text-[12.5px] ${
+                      category === null ? "text-warn" : ""
+                    }`}
+                  >
+                    {euro.format(
+                      (txn.direction === "debit" ? -1 : 1) * Number(txn.amount),
+                    )}
+                  </span>
+                </div>
+              );
+            })
           )}
         </div>
+
+        {footer && (
+          <div className="bg-sunken text-subtle flex-none border-t px-4 py-2.5 text-[11.5px]">
+            {footer}
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

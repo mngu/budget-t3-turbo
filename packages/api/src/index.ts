@@ -25,6 +25,7 @@ export type {
   AccountSummary,
   AspspOption,
   ConnectionSummary,
+  OrphanBankGroup,
 } from "./banking/connections";
 export type { SetupStatus } from "./banking/settings";
 export type { SyncOutcome } from "./banking/fetch-transactions";

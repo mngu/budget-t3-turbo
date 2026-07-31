@@ -1,9 +1,24 @@
 // Gestion des connexions bancaires Enable Banking (sessions PSD2 en DB).
 import { randomUUID } from "node:crypto";
 
-import { and, eq, inArray, lt, sql } from "@budget/db";
+import {
+  and,
+  count,
+  countDistinct,
+  eq,
+  inArray,
+  isNull,
+  lt,
+  max,
+  sql,
+} from "@budget/db";
 import { db } from "@budget/db/client";
-import { accounts, authRequests, bankConnections } from "@budget/db/schema";
+import {
+  accounts,
+  authRequests,
+  bankConnections,
+  transactions,
+} from "@budget/db/schema";
 
 import type { ConsentBadge } from "./domain";
 import { appJwt, ebApi, getAllAspsps, requireSettings } from "./client";
@@ -20,15 +35,26 @@ export interface AspspOption {
   logo: string | null;
 }
 
+// Les noms d'ASPSP d'Enable Banking sont sans accent (« Caisse d'Epargne Ile De
+// France », « Societe Generale ») alors que tout le reste de l'app les écrit
+// accentués — à commencer par `accounts.bank_name`, d'où part le lien
+// « Connecter … » des comptes orphelins. Comparer sans accent des deux côtés.
+function fold(s: string): string {
+  return s
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase();
+}
+
 export async function searchAspsps(
   q: string | undefined,
 ): Promise<AspspOption[]> {
   const settings = await requireSettings();
   const all = await getAllAspsps(appJwt(settings));
-  const needle = (q ?? "").trim().toLowerCase();
+  const needle = fold((q ?? "").trim());
 
   return all
-    .filter((a) => !needle || a.name.toLowerCase().includes(needle))
+    .filter((a) => !needle || fold(a.name).includes(needle))
     .sort(
       (x, y) =>
         Number(y.country === "FR") - Number(x.country === "FR") ||
@@ -180,7 +206,46 @@ export interface AccountSummary {
   iban: string | null;
   displayName: string | null;
   enabled: boolean;
+  /** Transactions déjà importées pour ce compte (0 pour un compte tout juste découvert). */
+  transactionCount: number;
+  /** Import le plus récent sur ce compte — pas la dernière *synchronisation* :
+   *  une synchro qui ne ramène rien ne le fait pas bouger (voir la note du
+   *  bloc d'état de /banques). */
+  lastImportedAt: string | null;
 }
+
+interface AccountStats {
+  transactionCount: number;
+  lastImportedAt: string | null;
+}
+
+// Un seul agrégat pour toute la page plutôt qu'une requête par compte.
+async function accountStats(
+  accountIds: number[],
+): Promise<Map<number, AccountStats>> {
+  if (accountIds.length === 0) return new Map();
+  const rows = await db
+    .select({
+      accountId: transactions.accountId,
+      transactionCount: count(),
+      lastImportedAt: max(transactions.importedAt),
+    })
+    .from(transactions)
+    .where(inArray(transactions.accountId, accountIds))
+    .groupBy(transactions.accountId);
+
+  return new Map(
+    rows.map((r) => [
+      r.accountId,
+      {
+        transactionCount: r.transactionCount,
+        lastImportedAt: r.lastImportedAt?.toISOString() ?? null,
+      },
+    ]),
+  );
+}
+
+const NO_STATS: AccountStats = { transactionCount: 0, lastImportedAt: null };
 
 export interface ConnectionSummary {
   id: number;
@@ -216,6 +281,8 @@ export async function listConnections(): Promise<ConnectionSummary[]> {
           .where(inArray(accounts.connectionId, ids))
       : [];
 
+  const stats = await accountStats(accountRows.map((a) => a.id));
+
   const now = new Date();
   return connections.map((c) => ({
     id: c.id,
@@ -236,8 +303,38 @@ export async function listConnections(): Promise<ConnectionSummary[]> {
         iban: a.iban,
         displayName: a.displayName,
         enabled: a.enabled,
+        ...(stats.get(a.id) ?? NO_STATS),
       })),
   }));
+}
+
+export interface OrphanBankGroup {
+  bankName: string;
+  accountCount: number;
+  transactionCount: number;
+}
+
+/**
+ * Comptes sans connexion (`accounts.connection_id IS NULL`) : historiques d'avant
+ * le wizard, ou dont la connexion n'a jamais été rétablie. Ils portent des
+ * transactions mais plus aucune autorisation — regroupés par banque, c'est le
+ * nom qu'il faut reconnecter.
+ */
+export async function listOrphanAccounts(): Promise<OrphanBankGroup[]> {
+  const rows = await db
+    .select({
+      bankName: accounts.bankName,
+      // countDistinct : la jointure sur les transactions duplique la ligne compte.
+      accountCount: countDistinct(accounts.id),
+      transactionCount: count(transactions.id),
+    })
+    .from(accounts)
+    .leftJoin(transactions, eq(transactions.accountId, accounts.id))
+    .where(isNull(accounts.connectionId))
+    .groupBy(accounts.bankName)
+    .orderBy(accounts.bankName);
+
+  return rows;
 }
 
 export async function getConnectionAccounts(
@@ -247,12 +344,15 @@ export async function getConnectionAccounts(
     .select()
     .from(accounts)
     .where(eq(accounts.connectionId, connectionId));
+  const stats = await accountStats(rows.map((a) => a.id));
+
   return rows.map((a) => ({
     id: a.id,
     uid: a.uid,
     iban: a.iban,
     displayName: a.displayName,
     enabled: a.enabled,
+    ...(stats.get(a.id) ?? NO_STATS),
   }));
 }
 

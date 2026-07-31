@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { CircleCheckIcon, Loader2Icon, SparklesIcon } from "lucide-react";
+import {
+  CircleCheckIcon,
+  Loader2Icon,
+  SparklesIcon,
+  TriangleAlertIcon,
+} from "lucide-react";
 
 import type { CategoryOverviewNode } from "@budget/api";
 import { CATEGORY_COLOR_PALETTE } from "@budget/shared";
@@ -8,13 +13,19 @@ import { toast } from "@budget/ui/toast";
 
 import type { DeleteTarget } from "./-components/category-delete-dialog";
 import type { IdentityTarget } from "./-components/category-identity-dialog";
-import type { PreviewableTransaction } from "./-components/transaction-preview-drawer";
+import type { PreviewRequest } from "./-components/category-overview-tree";
+import type {
+  PreviewableTransaction,
+  PreviewBadge,
+} from "./-components/transaction-preview-drawer";
 import type { GhostBranch } from "./-lib/suggestions";
+import { SettingsHeader } from "~/component/settings-header";
+import { softCategoryColor, useCategoryColor } from "~/lib/category-color";
 import { useTRPCClient } from "~/lib/trpc";
 import { CategoryDeleteDialog } from "./-components/category-delete-dialog";
+import { CategoryIcon } from "./-components/category-icon";
 import { CategoryIdentityDialog } from "./-components/category-identity-dialog";
 import { CategoryOverviewTree } from "./-components/category-overview-tree";
-import { SettingsHeader } from "./-components/settings-header";
 import {
   SuggestionsReviewPanel,
   SuggestionsWaitPanel,
@@ -37,12 +48,17 @@ interface PreviewState {
   title: string;
   description: string;
   txns: PreviewableTransaction[];
+  badge: PreviewBadge;
+  footer: string;
 }
+
+const PREVIEW_FOOTER = "Aperçu limité aux 25 transactions les plus récentes.";
 
 function CategoriesPage() {
   const { status, overview } = Route.useLoaderData();
   const router = useRouter();
   const trpcClient = useTRPCClient();
+  const resolveColor = useCategoryColor();
 
   const [generating, setGenerating] = useState(false);
   const [categorizing, setCategorizing] = useState(false);
@@ -137,20 +153,25 @@ function CategoriesPage() {
     });
   };
 
-  const openPreview = async (
-    categoryName: string,
-    includesChildren: boolean,
-  ) => {
+  const openPreview = async ({
+    name,
+    includesChildren,
+    color,
+    soft,
+    icon,
+  }: PreviewRequest) => {
     const result = await trpcClient.transactions.list.query({
       page: 1,
       sort: "date",
       order: "desc",
-      category: categoryName,
+      category: name,
     });
     setPreview({
-      title: categoryName,
+      title: name,
       description: `${result.rows.length} transaction(s) — aperçu de cette catégorie (25 plus récentes)${includesChildren ? ", y compris les sous-catégories" : ""}.`,
       txns: result.rows,
+      badge: categoryBadge(color, soft, icon),
+      footer: PREVIEW_FOOTER,
     });
   };
 
@@ -161,19 +182,12 @@ function CategoriesPage() {
       <SettingsHeader section="categories" />
 
       <div className="min-h-0 flex-1 overflow-y-auto">
-        <main className="px-6 pt-5 pb-12">
-          <div className="flex flex-wrap items-end gap-5">
-            <div>
-              <h1 className="text-2xl font-semibold tracking-tight">
-                Catégories
-              </h1>
-              <p className="text-muted-foreground mt-1.5 max-w-160 text-[12.5px] text-pretty">
-                Les catégories qui rangent toutes vos transactions. La couleur
-                et l'icône d'une catégorie principale l'identifient partout
-                ailleurs — elles se choisissent ici, et nulle part ailleurs.
-              </p>
-            </div>
-            <div className="ml-auto flex items-center gap-4.5">
+        <main className="mx-auto max-w-[1010px] px-6 pt-5 pb-12">
+          <div className="flex min-h-9.5 flex-wrap items-center gap-6">
+            <h1 className="text-2xl font-semibold tracking-tight">
+              Catégories
+            </h1>
+            <div className="ml-auto flex items-stretch">
               <Stat value={stats.parentCount} label="Parentes" />
               <Stat value={stats.childCount} label="Sous-catégories" />
               <Stat
@@ -183,6 +197,11 @@ function CategoriesPage() {
               />
             </div>
           </div>
+          <p className="text-muted-foreground mt-2 max-w-160 text-[12.5px] text-pretty">
+            Les catégories qui rangent toutes vos transactions. La couleur et
+            l'icône d'une catégorie principale l'identifient partout ailleurs —
+            elles se choisissent ici, et nulle part ailleurs.
+          </p>
 
           {!generating &&
             !showReviewPanel &&
@@ -274,9 +293,11 @@ function CategoriesPage() {
               Vos catégories
             </h2>
             <span className="text-subtle text-[11.5px]">
+              {/* Les décomptes vivent dans le bloc de compteurs en haut de
+                  page : ne reste ici que ce que ceux-ci ne disent pas. */}
               {tree.length === 0
                 ? "aucune catégorie pour le moment"
-                : `${stats.parentCount} parentes · ${stats.childCount} sous-catégories · le compteur d'une parente ne compte que ses transactions directes`}
+                : "le compteur d'une parente ne compte que ses transactions directes"}
             </span>
             <div className="ml-auto flex items-center gap-2">
               {stats.collisions > 0 && (
@@ -306,8 +327,10 @@ function CategoriesPage() {
             ghostsByParentId={suggestions.ghostsByParentId}
             proposedParents={suggestions.proposedParents}
             uncategorizedCount={uncategorizedCount}
+            ownersByColor={stats.ownersByColor}
             pendingGhosts={pending}
             expandAllSignal={expandAll}
+            onAnalyze={generate}
             onRename={async (id, name) =>
               (await run(
                 () => trpcClient.categories.rename.mutate({ id, name }),
@@ -344,8 +367,17 @@ function CategoriesPage() {
             onPreviewGhost={(ghost) =>
               setPreview({
                 title: `${ghost.parent} › ${ghost.name}`,
-                description: `${ghost.txnIds.length} transaction(s) sans catégorie qui se ressemblent — proposition : elles seraient rangées ici.`,
+                description: `${ghost.txnIds.length} transaction(s) sans catégorie qui se ressemblent — aperçu.`,
                 txns: ghostTransactions(ghost, status.sample ?? []),
+                // Une branche proposée n'a pas encore d'icône : la pastille
+                // creuse dans la teinte de sa parente est exactement l'état
+                // « aucune icône choisie ».
+                badge: categoryBadge(
+                  resolveColor(ghost.parentColor),
+                  softCategoryColor(resolveColor(ghost.parentColor)),
+                  null,
+                ),
+                footer: "Proposition : elles seraient rangées ici.",
               })
             }
           />
@@ -416,9 +448,27 @@ function CategoriesPage() {
         title={preview?.title ?? ""}
         description={preview?.description}
         transactions={preview?.txns ?? []}
+        badge={preview?.badge}
+        footer={preview?.footer}
       />
     </div>
   );
+}
+
+// Pastille d'en-tête du panneau d'aperçu : la teinte et l'aplat déjà résolus
+// pour le thème par l'appelant (l'aplat est celui de la parente, jamais dérivé
+// d'un palier de sous-catégorie — voir PreviewRequest), et l'icône de la
+// catégorie, creuse si elle n'en a pas.
+function categoryBadge(
+  color: string,
+  soft: string,
+  icon: string | null,
+): PreviewBadge {
+  return {
+    color,
+    soft,
+    icon: <CategoryIcon name={icon} className="size-3.5" />,
+  };
 }
 
 async function openUncategorizedPreview(
@@ -434,8 +484,16 @@ async function openUncategorizedPreview(
   });
   setPreview({
     title: "Sans catégorie",
-    description: `${total} transaction(s) qu'aucune branche ne décrit — aperçu des ${result.rows.length} plus récentes. Une transaction sans catégorie signale une branche manquante.`,
+    description: `${total} transaction(s) qu'aucune branche ne décrit — aperçu des ${result.rows.length} plus récentes.`,
     txns: result.rows,
+    // Pas de catégorie, donc pas de teinte : c'est le seul aperçu qui porte
+    // l'avertissement plutôt qu'une famille de couleur.
+    badge: {
+      color: "var(--warn)",
+      soft: "var(--warn-soft)",
+      icon: <TriangleAlertIcon className="size-3.5" />,
+    },
+    footer: "Une transaction sans catégorie signale une branche manquante.",
   });
 }
 
@@ -470,6 +528,8 @@ function computeStats(tree: CategoryOverviewNode[]) {
   };
 }
 
+// Filets verticaux entre les trois compteurs, comme la maquette : c'est ce qui
+// les tient ensemble comme un bloc sans les faire passer pour trois boutons.
 function Stat({
   value,
   label,
@@ -480,13 +540,13 @@ function Stat({
   warn?: boolean;
 }) {
   return (
-    <div className="text-right">
+    <div className="border-border border-l px-3 text-right first:border-l-0 first:pl-0 last:pr-0">
       <div
-        className={`num text-[19px] font-medium tracking-[-0.02em] ${warn ? "text-warn" : ""}`}
+        className={`num text-[15px] font-medium tracking-[-0.01em] ${warn ? "text-warn" : ""}`}
       >
         {value}
       </div>
-      <div className="label-caps">{label}</div>
+      <div className="label-caps mt-0.5">{label}</div>
     </div>
   );
 }

@@ -1,144 +1,166 @@
-import { useState } from "react";
-import { useRouter } from "@tanstack/react-router";
-import { Loader2Icon, RefreshCwIcon, Trash2Icon } from "lucide-react";
+"use client";
 
-import type { ConnectionSummary } from "@budget/api";
-import { Badge } from "@budget/ui/badge";
-import { Button } from "@budget/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@budget/ui/card";
-import { Separator } from "@budget/ui/separator";
-import { toast } from "@budget/ui/toast";
+import { Loader2Icon } from "lucide-react";
 
-import { useTRPCClient } from "~/lib/trpc";
+import type { AccountSummary, ConnectionSummary } from "@budget/api";
+import { cn } from "@budget/ui";
 
-function ConsentBadge({ connection }: { connection: ConnectionSummary }) {
-  if (connection.status === "revoked")
-    return <Badge variant="outline">Révoquée</Badge>;
-  const { badge } = connection;
-  if (badge.level === "expired")
-    return <Badge variant="destructive">Consentement expiré</Badge>;
-  if (badge.level === "warning") {
-    return (
-      <Badge className="bg-orange-500 text-white hover:bg-orange-500">
-        Expire dans {badge.daysLeft} j
-      </Badge>
-    );
-  }
-  return <Badge variant="secondary">Expire dans {badge.daysLeft} j</Badge>;
-}
+import { CONSENT_TONE, consentView } from "../-lib/consent";
+import { useRenewConnection } from "../-lib/use-renew";
+import { BankLogo } from "./bank-logo";
 
 export function ConnectionCard({
   connection,
+  onRevoke,
 }: {
   connection: ConnectionSummary;
+  onRevoke: () => void;
 }) {
-  const router = useRouter();
-  const trpcClient = useTRPCClient();
-  const [busy, setBusy] = useState(false);
-
-  const renew = async () => {
-    setBusy(true);
-    try {
-      const { url } = await trpcClient.connections.start.mutate({
-        name: connection.aspspName,
-        country: connection.aspspCountry,
-        connectionId: connection.id,
-      });
-      window.location.href = url;
-    } catch (err) {
-      toast.error(
-        err instanceof Error
-          ? err.message
-          : "Échec du lancement de l'autorisation.",
-      );
-      setBusy(false);
-    }
-  };
-
-  const revoke = async () => {
-    if (!window.confirm(`Révoquer l'accès à ${connection.aspspName} ?`)) return;
-    setBusy(true);
-    try {
-      await trpcClient.connections.revoke.mutate({
-        connectionId: connection.id,
-      });
-      toast.success("Accès révoqué.");
-      await router.invalidate();
-    } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "Échec de la révocation.",
-      );
-    } finally {
-      setBusy(false);
-    }
-  };
+  const view = consentView(connection);
+  const tone = CONSENT_TONE[view.tone];
+  const { renew, busy } = useRenewConnection();
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          {connection.logoUrl && (
-            <img
-              src={connection.logoUrl}
-              alt=""
-              className="size-8 rounded object-contain"
-            />
-          )}
-          <CardTitle>{connection.aspspName}</CardTitle>
-          <ConsentBadge connection={connection} />
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" disabled={busy} onClick={renew}>
-            {busy ? (
-              <Loader2Icon className="animate-spin" />
-            ) : (
-              <RefreshCwIcon />
-            )}
-            Renouveler
-          </Button>
-          {connection.status !== "revoked" && (
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={busy}
-              onClick={revoke}
+    <section
+      className={cn(
+        "bg-card rounded-2xl border",
+        view.critical ? tone.border : "border-border",
+      )}
+    >
+      <div className="grid grid-cols-[38px_minmax(0,1fr)_auto] items-center gap-3.5 px-4.5 py-3.5">
+        <BankLogo
+          name={connection.aspspName}
+          logoUrl={connection.logoUrl}
+          className="size-[38px] text-[13px]"
+        />
+
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span className="truncate text-sm font-semibold tracking-[-0.015em]">
+              {connection.aspspName}
+            </span>
+            <span className="text-subtle rounded-[5px] border px-1.5 text-[11px]">
+              {connection.aspspCountry}
+            </span>
+          </div>
+
+          <div className="mt-1.5 flex flex-wrap items-center gap-2.5">
+            <span
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-px text-[11.5px] font-semibold whitespace-nowrap",
+                tone.text,
+                tone.bg,
+                tone.border,
+              )}
             >
-              <Trash2Icon />
-              Révoquer
-            </Button>
+              <span className={cn("size-1.5 rounded-full", tone.fill)} />
+              {view.badge}
+            </span>
+            <span className="text-subtle text-[11.5px]">{view.meta}</span>
+          </div>
+
+          {view.pct > 0 && (
+            <div className="bg-track mt-2.5 h-1 max-w-[280px] overflow-hidden rounded-full">
+              <div
+                className={cn("h-full", tone.fill)}
+                style={{ width: `${view.pct}%` }}
+              />
+            </div>
           )}
         </div>
-      </CardHeader>
-      <CardContent>
-        <Separator className="mb-3" />
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void renew(connection)}
+            className={cn(
+              "flex h-[30px] items-center gap-1.5 rounded-[9px] border px-3.5 text-xs whitespace-nowrap disabled:opacity-60",
+              view.critical
+                ? cn(
+                    "text-primary-foreground border-transparent font-semibold",
+                    tone.fill,
+                  )
+                : "border-border-strong hover:bg-accent font-medium",
+            )}
+          >
+            {busy && <Loader2Icon className="size-3.5 animate-spin" />}
+            {view.critical ? "Réautoriser" : "Renouveler"}
+          </button>
+
+          {connection.status !== "revoked" && (
+            <button
+              type="button"
+              onClick={onRevoke}
+              className="text-muted-foreground hover:bg-bad-soft hover:border-bad hover:text-bad h-[30px] rounded-[9px] border px-3 text-xs whitespace-nowrap"
+            >
+              Révoquer
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="border-t">
         {connection.accounts.length === 0 ? (
-          <p className="text-muted-foreground text-sm">
-            Aucun compte rattaché.
+          <p className="text-subtle px-4.5 py-2.5 text-[11.5px]">
+            Aucun compte rattaché — la prochaine autorisation les découvrira.
           </p>
         ) : (
-          <ul className="flex flex-col gap-1 text-sm">
-            {connection.accounts.map((a) => (
-              <li key={a.id} className="flex items-center gap-2">
-                <span
-                  className={
-                    a.enabled ? "" : "text-muted-foreground line-through"
-                  }
-                >
-                  {a.displayName ?? connection.aspspName}
-                </span>
-                {a.iban && (
-                  <span className="text-muted-foreground text-xs">
-                    {a.iban}
-                  </span>
-                )}
-                {!a.enabled && (
-                  <span className="text-muted-foreground text-xs">(exclu)</span>
-                )}
-              </li>
-            ))}
-          </ul>
+          connection.accounts.map((account) => (
+            <AccountRow
+              key={account.id}
+              account={account}
+              fallbackName={connection.aspspName}
+            />
+          ))
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </section>
+  );
+}
+
+function AccountRow({
+  account,
+  fallbackName,
+}: {
+  account: AccountSummary;
+  fallbackName: string;
+}) {
+  return (
+    <div className="hover:bg-surface-2 grid min-h-10 grid-cols-[minmax(0,1fr)_auto] items-center gap-3.5 border-t px-4.5">
+      <div className="flex min-w-0 flex-wrap items-baseline gap-2.5">
+        <span
+          className={cn(
+            "text-[12.5px] font-medium",
+            account.enabled ? "" : "text-subtle line-through",
+          )}
+        >
+          {account.displayName ?? fallbackName}
+        </span>
+        {account.iban && (
+          <span
+            className={cn(
+              "text-subtle num text-[11.5px]",
+              account.enabled ? "" : "line-through",
+            )}
+          >
+            {account.iban}
+          </span>
+        )}
+        {!account.enabled && (
+          <span className="text-subtle rounded-[5px] border px-1.5 text-[11px]">
+            exclu du suivi
+          </span>
+        )}
+      </div>
+      {/* Compté même pour un compte exclu : ces transactions sont bien en base
+          et pèsent dans le total de l'en-tête. La maquette met « — » parce que
+          son compte exclu est vide ; un compte historique décoché en porte des
+          centaines, et les cacher ici ferait mentir les deux chiffres. */}
+      <span className="text-subtle num text-[11.5px] whitespace-nowrap">
+        {account.transactionCount} transaction
+        {account.transactionCount > 1 ? "s" : ""}
+      </span>
+    </div>
   );
 }

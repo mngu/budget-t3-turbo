@@ -1,44 +1,14 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { useRouter } from "@tanstack/react-router";
-import {
-  CheckCircle2Icon,
-  CircleIcon,
-  CopyIcon,
-  Loader2Icon,
-  XCircleIcon,
-} from "lucide-react";
+import { KeyRoundIcon, Loader2Icon } from "lucide-react";
 
 import type { SetupStatus } from "@budget/api";
-import { Button } from "@budget/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@budget/ui/card";
-import { Input } from "@budget/ui/input";
-import { Label } from "@budget/ui/label";
+import { cn } from "@budget/ui";
 import { toast } from "@budget/ui/toast";
 
 import { useTRPCClient } from "~/lib/trpc";
-
-function CheckItem({
-  ok,
-  pending,
-  label,
-}: {
-  ok: boolean;
-  pending?: boolean;
-  label: string;
-}) {
-  const Icon = pending ? CircleIcon : ok ? CheckCircle2Icon : XCircleIcon;
-  const color = pending
-    ? "text-muted-foreground"
-    : ok
-      ? "text-green-600"
-      : "text-red-600";
-  return (
-    <li className="flex items-center gap-2 text-sm">
-      <Icon className={`size-4 ${color}`} />
-      {label}
-    </li>
-  );
-}
 
 export function Onboarding({ setup }: { setup: SetupStatus }) {
   const router = useRouter();
@@ -46,6 +16,7 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
   const [applicationId, setApplicationId] = useState("");
   const [privateKeyPem, setPrivateKeyPem] = useState("");
   const [redirectUrl, setRedirectUrl] = useState(setup.redirectUrl ?? "");
+  const [copied, setCopied] = useState(false);
   const [saving, setSaving] = useState(false);
 
   // Suggestion par défaut : l'URL de callback de cette instance de l'app.
@@ -56,6 +27,7 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
 
   const copyRedirect = async () => {
     await navigator.clipboard.writeText(redirectUrl);
+    setCopied(true);
     toast.success("URL copiée.");
   };
 
@@ -81,108 +53,195 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
   };
 
   return (
-    <Card className="max-w-2xl">
-      <CardHeader>
-        <CardTitle>Configuration Enable Banking</CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-6">
-        <ol className="flex list-inside list-decimal flex-col gap-3 text-sm">
-          <li>
-            Créez un compte (gratuit, email suffit) puis une application{" "}
-            <b>PRODUCTION</b> sur{" "}
-            <a
-              href="https://enablebanking.com/cp/applications"
-              target="_blank"
-              rel="noreferrer"
-              className="underline"
-            >
-              enablebanking.com/cp/applications
-            </a>
-            . Le navigateur télécharge une clé privée <code>.pem</code> —
-            gardez-la.
-          </li>
-          <li className="flex flex-wrap items-center gap-2">
-            Déclarez cette URL de redirection dans le Control Panel :
-            <code className="bg-muted rounded px-1.5 py-0.5">
-              {redirectUrl}
-            </code>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Copier l'URL"
-              onClick={copyRedirect}
-            >
-              <CopyIcon />
-            </Button>
-          </li>
-          <li>
-            Renseignez ci-dessous l'application_id et le contenu de la clé
-            privée.
-          </li>
-        </ol>
-
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="application-id">Application ID</Label>
-            <Input
-              id="application-id"
-              value={applicationId}
-              onChange={(e) => setApplicationId(e.target.value)}
-              placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="redirect-url">
-              URL de redirection (déclarée dans le Control Panel)
-            </Label>
-            <Input
-              id="redirect-url"
-              value={redirectUrl}
-              onChange={(e) => setRedirectUrl(e.target.value)}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="private-key">
-              Clé privée (contenu du fichier .pem)
-            </Label>
-            <textarea
-              id="private-key"
-              value={privateKeyPem}
-              onChange={(e) => setPrivateKeyPem(e.target.value)}
-              rows={6}
-              placeholder="-----BEGIN PRIVATE KEY-----"
-              className="border-input focus-visible:ring-ring rounded-md border bg-transparent px-3 py-2 font-mono text-xs shadow-xs focus-visible:ring-2 focus-visible:outline-none"
-            />
-          </div>
+    <section className="border-border-strong bg-card mt-5 overflow-hidden rounded-2xl border">
+      <header className="bg-sunken border-b px-5 py-3.5">
+        <div className="flex items-center gap-2.5">
+          <KeyRoundIcon className="text-primary size-3.5" />
+          <h2 className="text-[13.5px] font-semibold">
+            Configuration Enable Banking
+          </h2>
+          <span className="text-subtle ml-auto text-[11.5px]">
+            une seule fois, à l'installation
+          </span>
         </div>
+        <p className="text-muted-foreground mt-1.5 max-w-[620px] text-[11.5px] text-pretty">
+          Ce sont les identifiants de{" "}
+          <span className="text-foreground font-medium">votre</span> compte
+          agrégateur, pas ceux d'une banque. Aucune banque ne vous demandera
+          jamais ses identifiants ici.
+        </p>
+      </header>
 
-        <ul className="flex flex-col gap-1">
-          <CheckItem
+      <ol className="flex flex-col gap-3.5 px-5 pt-4.5 pb-1.5">
+        <Step n="1">
+          Créez un compte (gratuit, email suffit) puis une application{" "}
+          <b>PRODUCTION</b> sur{" "}
+          <a
+            href="https://enablebanking.com/cp/applications"
+            target="_blank"
+            rel="noreferrer"
+          >
+            enablebanking.com
+          </a>
+          . Le navigateur télécharge une clé privée <code>.pem</code> —
+          gardez-la.
+        </Step>
+        <Step n="2">
+          Déclarez cette URL de redirection dans le Control Panel de votre
+          application :
+          <div className="mt-1.5 flex items-center gap-2">
+            <span className="bg-sunken num truncate rounded-[7px] border px-2.5 py-1 text-[11.5px]">
+              {redirectUrl}
+            </span>
+            <button
+              type="button"
+              onClick={copyRedirect}
+              className={cn(
+                "border-border-strong hover:bg-accent h-[26px] rounded-[7px] border px-2.5 text-[11.5px] whitespace-nowrap",
+                copied ? "text-ok" : "text-muted-foreground",
+              )}
+            >
+              {copied ? "✓ Copiée" : "Copier"}
+            </button>
+          </div>
+        </Step>
+        <Step n="3">
+          Renseignez ci-dessous l'identifiant de l'application et la clé privée
+          téléchargée.
+        </Step>
+      </ol>
+
+      <div className="flex flex-col gap-3.5 px-5 pt-3.5 pb-4.5">
+        <div>
+          <label htmlFor="application-id" className="label-caps mb-1.5 block">
+            Application ID
+          </label>
+          <input
+            id="application-id"
+            value={applicationId}
+            onChange={(e) => setApplicationId(e.target.value)}
+            placeholder="00000000-0000-0000-0000-000000000000"
+            className={FIELD}
+          />
+        </div>
+        <div>
+          <label htmlFor="redirect-url" className="label-caps mb-1.5 block">
+            URL de redirection
+          </label>
+          <input
+            id="redirect-url"
+            value={redirectUrl}
+            onChange={(e) => setRedirectUrl(e.target.value)}
+            className={FIELD}
+          />
+        </div>
+        <div>
+          <div className="mb-1.5 flex items-baseline gap-2.5">
+            <label htmlFor="private-key" className="label-caps">
+              Clé privée
+            </label>
+            <span className="text-subtle text-[11px]">
+              fichier .pem téléchargé sur enablebanking.com
+            </span>
+          </div>
+          <textarea
+            id="private-key"
+            value={privateKeyPem}
+            onChange={(e) => setPrivateKeyPem(e.target.value)}
+            rows={4}
+            placeholder="-----BEGIN PRIVATE KEY-----"
+            className={cn(FIELD, "h-auto resize-y py-2.5 leading-normal")}
+          />
+        </div>
+      </div>
+
+      <div className="bg-surface-2 border-t px-5 py-3.5">
+        <div className="flex flex-col gap-2.5">
+          <Check
             ok={setup.settingsPresent}
             pending={!setup.settingsPresent && !setup.error}
-            label="Identifiants renseignés"
-          />
-          <CheckItem
-            ok={setup.apiOk}
-            pending={!setup.settingsPresent}
-            label="Clé acceptée par l'API Enable Banking"
-          />
-          <CheckItem
-            ok={setup.redirectUrlRegistered}
-            pending={!setup.apiOk}
-            label="URL de redirection enregistrée dans le Control Panel"
-          />
-        </ul>
-        {setup.error && <p className="text-sm text-red-600">{setup.error}</p>}
+          >
+            Identifiants renseignés
+          </Check>
+          <Check ok={setup.apiOk} pending={!setup.settingsPresent}>
+            Clé acceptée par l'API Enable Banking
+          </Check>
+          <Check ok={setup.redirectUrlRegistered} pending={!setup.apiOk}>
+            URL de redirection enregistrée dans le Control Panel
+          </Check>
+        </div>
 
-        <Button
+        {setup.error && (
+          <div className="border-bad bg-bad-soft mt-3 rounded-[9px] border px-3 py-2.5">
+            <p className="text-bad text-[11.5px] font-semibold">
+              L'API Enable Banking a refusé la configuration
+            </p>
+            <p className="text-muted-foreground num mt-1.5 text-[11px] break-words">
+              {setup.error}
+            </p>
+          </div>
+        )}
+      </div>
+
+      <div className="flex items-center gap-3 border-t px-5 py-3">
+        <span className="text-subtle min-w-0 flex-1 text-[11.5px]">
+          Rien n'est envoyé à votre banque à cette étape.
+        </span>
+        <button
+          type="button"
           onClick={submit}
           disabled={saving || !applicationId || !privateKeyPem}
+          className="bg-primary text-primary-foreground flex h-8 flex-none items-center gap-1.5 rounded-[9px] px-3.5 text-[12.5px] font-semibold whitespace-nowrap disabled:opacity-60"
         >
-          {saving && <Loader2Icon className="animate-spin" />}
+          {saving && <Loader2Icon className="size-3.5 animate-spin" />}
           Valider la configuration
-        </Button>
-      </CardContent>
-    </Card>
+        </button>
+      </div>
+    </section>
+  );
+}
+
+const FIELD =
+  "border-input bg-background focus:border-primary num h-[33px] w-full max-w-[440px] rounded-[9px] border px-2.5 text-xs outline-none";
+
+function Step({ n, children }: { n: string; children: React.ReactNode }) {
+  return (
+    <li className="grid grid-cols-[22px_minmax(0,1fr)] items-start gap-3">
+      <span className="border-border-strong text-muted-foreground num flex size-[22px] items-center justify-center rounded-full border text-[11px]">
+        {n}
+      </span>
+      <div className="min-w-0 pt-px text-[12.5px]">{children}</div>
+    </li>
+  );
+}
+
+function Check({
+  ok,
+  pending,
+  children,
+}: {
+  ok: boolean;
+  pending: boolean;
+  children: React.ReactNode;
+}) {
+  const bad = !ok && !pending;
+  return (
+    <div className="grid grid-cols-[16px_minmax(0,1fr)] items-center gap-2.5">
+      <span
+        className={cn(
+          "text-primary-foreground flex size-[15px] items-center justify-center rounded-full border-[1.5px] text-[9px]",
+          bad && "border-bad bg-bad",
+          ok && "border-ok bg-ok",
+          pending && "border-border-strong",
+        )}
+      >
+        {bad ? "✕" : ok ? "✓" : ""}
+      </span>
+      <span
+        className={cn("text-xs", pending ? "text-subtle" : "text-foreground")}
+      >
+        {children}
+      </span>
+    </div>
   );
 }

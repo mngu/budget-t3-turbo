@@ -10,6 +10,7 @@ import {
   PaletteIcon,
   PlusIcon,
   Trash2Icon,
+  TriangleAlertIcon,
   XIcon,
 } from "lucide-react";
 
@@ -32,10 +33,30 @@ import { CategoryIcon } from "./category-icon";
 // proposition serait posée dans la liste sans que rien ne la montre.
 const COLLAPSE_THRESHOLD = 8;
 
+/**
+ * Ce que le panneau d'aperçu a besoin de savoir de la ligne cliquée : son nom,
+ * mais aussi sa teinte et son icône — l'en-tête du panneau les reprend, et les
+ * deux vont ensemble (une couleur sans icône y ferait une pastille creuse au
+ * milieu d'un titre). Une sous-catégorie porte son palier de teinte et l'icône
+ * de son parent, comme partout ailleurs.
+ *
+ * `soft` est fourni plutôt que dérivé de `color` : l'aplat de fond est toujours
+ * celui de la **parente**, y compris pour une sous-catégorie, où `color` est
+ * déjà un palier mélangé vers `--card`. Le repasser dans `softCategoryColor`
+ * mélangerait deux fois et rendrait la pastille indiscernable de la carte.
+ */
+export interface PreviewRequest {
+  name: string;
+  includesChildren: boolean;
+  color: string;
+  soft: string;
+  icon: string | null;
+}
+
 export interface CategoryOverviewTreeActions {
   onRename: (id: number, name: string) => Promise<boolean>;
   onOpenIdentity: (node: CategoryOverviewNode) => void;
-  onPreview: (categoryName: string, includesChildren: boolean) => void;
+  onPreview: (preview: PreviewRequest) => void;
   onDelete: (node: {
     id: number;
     name: string;
@@ -57,9 +78,12 @@ interface CategoryOverviewTreeProps extends CategoryOverviewTreeActions {
   /** Propositions dont la parente elle-même n'existe pas encore. */
   proposedParents: { name: string; color: string; branches: GhostBranch[] }[];
   uncategorizedCount: number;
+  /** Nom des parentes portant chaque teinte — sert le « même teinte que… ». */
+  ownersByColor: Map<string, string[]>;
   /** En cours d'acceptation — clés de GhostBranch. */
   pendingGhosts: ReadonlySet<string>;
   expandAllSignal: boolean | null;
+  onAnalyze: () => void;
 }
 
 export function CategoryOverviewTree({
@@ -67,8 +91,10 @@ export function CategoryOverviewTree({
   ghostsByParentId,
   proposedParents,
   uncategorizedCount,
+  ownersByColor,
   pendingGhosts,
   expandAllSignal,
+  onAnalyze,
   ...actions
 }: CategoryOverviewTreeProps) {
   // Les plis ouverts/fermés un par un, et le signal global qui les a précédés.
@@ -105,6 +131,13 @@ export function CategoryOverviewTree({
           >
             Créer une catégorie
           </button>
+          <button
+            type="button"
+            onClick={onAnalyze}
+            className="bg-primary text-primary-foreground h-[31px] rounded-[9px] px-3.5 text-xs font-semibold"
+          >
+            Analyser mes transactions
+          </button>
         </div>
       </div>
     );
@@ -128,6 +161,13 @@ export function CategoryOverviewTree({
             key={parent.id}
             parent={parent}
             ghosts={ghosts}
+            twin={
+              parent.color
+                ? (ownersByColor.get(parent.color) ?? []).find(
+                    (name) => name !== parent.name,
+                  )
+                : undefined
+            }
             expanded={expanded}
             forcedOpen={ghosts.length > 0}
             pendingGhosts={pendingGhosts}
@@ -168,6 +208,7 @@ export function CategoryOverviewTree({
 function ParentRow({
   parent,
   ghosts,
+  twin,
   expanded,
   forcedOpen,
   pendingGhosts,
@@ -183,6 +224,8 @@ function ParentRow({
 }: {
   parent: CategoryOverviewNode;
   ghosts: GhostBranch[];
+  /** Autre parente portant la même teinte, s'il y en a une. */
+  twin: string | undefined;
   expanded: boolean;
   forcedOpen: boolean;
   pendingGhosts: ReadonlySet<string>;
@@ -194,6 +237,17 @@ function ParentRow({
   const color = parent.color ?? FALLBACK_CATEGORY_COLOR;
   const hasIdentity = parent.color !== null || parent.icon !== null;
   const collapsible = parent.children.length > 0 || ghosts.length > 0;
+
+  const soft = softCategoryColor(resolve(color));
+
+  const previewParent = () =>
+    onPreview({
+      name: parent.name,
+      includesChildren: parent.children.length > 0,
+      color: resolve(color),
+      soft,
+      icon: parent.icon,
+    });
 
   return (
     <div className="border-b last:border-b-0">
@@ -241,6 +295,17 @@ function ParentRow({
             onRename={(name) => onRename(parent.id, name)}
             className="max-w-[280px] text-[13px] font-medium"
           />
+          {/* La modale d'identité promet noir sur blanc que « la ligne
+              affichera "même teinte que…" » quand on choisit une teinte déjà
+              prise : c'est ici que cette promesse se tient. Une collision est
+              un état normal à 13 teintes pour un nombre illimité de parentes —
+              signalée, jamais interdite. */}
+          {twin && (
+            <span className="text-warn bg-warn-soft flex items-center gap-1.5 rounded-md px-1.5 py-px text-[11px] whitespace-nowrap">
+              <TriangleAlertIcon className="size-3 flex-none" />
+              même teinte que {twin}
+            </span>
+          )}
           {!hasIdentity && (
             <span className="text-subtle border-border-strong rounded-md border border-dashed px-1.5 py-px text-[11px] whitespace-nowrap">
               sans couleur ni icône
@@ -278,7 +343,7 @@ function ParentRow({
 
         <CountButton
           count={parent.directTransactionCount}
-          onClick={() => onPreview(parent.name, parent.children.length > 0)}
+          onClick={previewParent}
           title="Voir les transactions directes"
         />
 
@@ -318,7 +383,7 @@ function ParentRow({
               icon={ListIcon}
               onClick={() => {
                 setMenuOpen(false);
-                onPreview(parent.name, parent.children.length > 0);
+                previewParent();
               }}
             >
               Voir les transactions
@@ -360,51 +425,64 @@ function ParentRow({
             />
           ))}
 
-          {parent.children.map((child, i) => (
-            <div
-              key={child.id}
-              className="hover:bg-surface-2 grid min-h-9 grid-cols-[61px_8px_minmax(0,1fr)_74px_26px] items-center gap-2 px-3"
-            >
-              <span />
-              <span
-                className="size-[7px] rounded-full"
-                style={{
-                  background: shadeCategoryColor(
-                    resolve(color),
-                    i,
-                    parent.children.length,
-                  ),
-                }}
-              />
-              <NameInput
-                name={child.name}
-                onRename={(name) => onRename(child.id, name)}
-                className="max-w-[260px] text-[12.5px]"
-              />
-              <CountButton
-                count={child.transactionCount}
-                onClick={() => onPreview(child.name, false)}
-                className="text-[11.5px]"
-              />
-              <button
-                type="button"
-                aria-label={`Supprimer ${child.name}`}
-                title="Supprimer"
-                onClick={() =>
-                  onDelete({
-                    id: child.id,
-                    name: child.name,
-                    transactionCount: child.transactionCount,
-                    childCount: 0,
-                    childNames: [],
-                  })
-                }
-                className="text-subtle hover:bg-bad-soft hover:text-bad flex size-6 items-center justify-center rounded-[7px]"
+          {parent.children.map((child, i) => {
+            const shade = shadeCategoryColor(
+              resolve(color),
+              i,
+              parent.children.length,
+            );
+            return (
+              <div
+                key={child.id}
+                className="hover:bg-surface-2 grid min-h-9 grid-cols-[61px_8px_minmax(0,1fr)_74px_26px] items-center gap-2 px-3"
               >
-                <XIcon className="size-3" />
-              </button>
-            </div>
-          ))}
+                <span />
+                <span
+                  className="size-[7px] rounded-full"
+                  style={{ background: shade }}
+                />
+                <NameInput
+                  name={child.name}
+                  onRename={(name) => onRename(child.id, name)}
+                  className="max-w-[260px] text-[12.5px]"
+                />
+                <CountButton
+                  count={child.transactionCount}
+                  onClick={() =>
+                    onPreview({
+                      name: child.name,
+                      includesChildren: false,
+                      // Palier de la teinte du parent, et son icône : une
+                      // sous-catégorie n'a ni l'une ni l'autre en propre. Le
+                      // fond reste l'aplat de la parente (voir
+                      // PreviewRequest.soft).
+                      color: shade,
+                      soft,
+                      icon: parent.icon,
+                    })
+                  }
+                  className="text-[11.5px]"
+                />
+                <button
+                  type="button"
+                  aria-label={`Supprimer ${child.name}`}
+                  title="Supprimer"
+                  onClick={() =>
+                    onDelete({
+                      id: child.id,
+                      name: child.name,
+                      transactionCount: child.transactionCount,
+                      childCount: 0,
+                      childNames: [],
+                    })
+                  }
+                  className="text-subtle hover:bg-bad-soft hover:text-bad flex size-6 items-center justify-center rounded-[7px]"
+                >
+                  <XIcon className="size-3" />
+                </button>
+              </div>
+            );
+          })}
 
           {parent.children.length === 0 && (
             <p className="text-subtle px-3 pt-1.5 pb-1 pl-[72px] text-[11.5px]">
