@@ -190,6 +190,53 @@ export async function listTransactions(
   return { rows: rows as TransactionRow[], total: countRow?.total ?? 0 };
 }
 
+export interface DirectionTotal {
+  total: number;
+  count: number;
+}
+
+export interface DirectionTotals {
+  debit: DirectionTotal;
+  credit: DirectionTotal;
+}
+
+// Totaux de la *sélection*, par sens : montant et nombre de lignes. Les deux
+// tuiles de `/transactions` les affichent côte à côte, d'où la même requête pour
+// les deux — un agrégat groupé sur `direction`, là où l'écran empilait deux
+// `transactionsByCategory` dont il ne gardait que la somme des parts.
+//
+// `direction` de la recherche n'est pas neutralisé : filtrer « Débits » doit
+// bien mettre les crédits à zéro, la sélection n'en contient aucun. Le sens
+// absent n'a alors simplement pas de groupe, d'où le repli sur zéro.
+export async function transactionTotals(
+  input: TransactionsSearch,
+): Promise<DirectionTotals> {
+  const where = transactionsFilterQuery(input);
+  const rows = await db
+    .select({
+      direction: transactions.direction,
+      total: sql<string>`sum(${transactions.amount})`,
+      count: count(),
+    })
+    .from(transactions)
+    // Les trois jointures sont celles que `transactionsFilterQuery` suppose :
+    // `bank` lit `accounts`, `aClasser` et `category` lisent les deux niveaux de
+    // `categories`. Sans elles la requête compile et ne casse qu'une fois un de
+    // ces filtres posé.
+    .innerJoin(accounts, eq(transactions.accountId, accounts.id))
+    .leftJoin(categories, eq(transactions.categoryId, categories.id))
+    .leftJoin(parentCategories, eq(categories.parentId, parentCategories.id))
+    .where(where)
+    .groupBy(transactions.direction);
+
+  const empty = { total: 0, count: 0 };
+  const find = (direction: "debit" | "credit") => {
+    const row = rows.find((r) => r.direction === direction);
+    return row ? { total: Number(row.total), count: row.count } : empty;
+  };
+  return { debit: find("debit"), credit: find("credit") };
+}
+
 // Part du graphique portant un montant rattaché directement à la catégorie
 // parente plutôt qu'à l'une de ses sous-catégories.
 const A_CLASSER_LABEL = "À classer";

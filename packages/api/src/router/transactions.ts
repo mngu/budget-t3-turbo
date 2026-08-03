@@ -11,6 +11,7 @@ import {
   reviewQueue,
   setTransactionCategory,
   transactionsByCategory,
+  transactionTotals,
 } from "../transactions/queries";
 import { protectedProcedure } from "../trpc";
 
@@ -28,6 +29,10 @@ export const transactionsRouter = {
   byCategory: protectedProcedure
     .input(transactionsSearchSchema)
     .query(({ input }) => transactionsByCategory(input)),
+
+  totals: protectedProcedure
+    .input(transactionsSearchSchema)
+    .query(({ input }) => transactionTotals(input)),
 
   banks: protectedProcedure.query(() => listBankLabels()),
 
