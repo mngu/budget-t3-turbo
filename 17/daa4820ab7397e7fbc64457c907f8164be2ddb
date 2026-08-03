@@ -1,0 +1,114 @@
+docs/superpowers/specs/2026-08-03-virements-internes-design.md
+  s_5b14016cfe8717::t_4e3e463237254a 136-139
+  s_5b14016cfe8717::t_9aec7bc418fb94 184-186,188-198
+  s_5b14016cfe8717::t_16a0ea4200fc10 122
+  s_5b14016cfe8717::t_29ad20bbfe204d 11,55,72-77,83-87,149
+  s_5b14016cfe8717::t_8273d4274ac98e 128-135
+  s_5b14016cfe8717::t_1fb20fa8cb44cd 1-10,12-54,56-71,78-82,88-113,123-127,140-148,150-183,187
+  s_5b14016cfe8717::t_d163758aca4c05 114-121
+apps/tanstack-start/src/routes/_authed/categories/index.tsx
+  s_5b14016cfe8717::t_1715e437e4836c 167
+  s_5b14016cfe8717::t_fb31d8e217951a 484
+apps/tanstack-start/src/routes/_authed/_revue/-components/refine-bar.tsx
+  s_5b14016cfe8717::t_29ad20bbfe204d 40-41
+  s_5b14016cfe8717::t_f3ccbeab5ebfcd 97
+  s_5b14016cfe8717::t_6693c4caaf1c08 390-394
+  s_5b14016cfe8717::t_3ceac8ad380b45 189-191
+  s_5b14016cfe8717::t_2fe4f88830ab42 148
+  s_5b14016cfe8717::t_37d9dbbdb15093 28-39,42-49,57-59
+  s_5b14016cfe8717::t_67b2eab90fa147 161-165
+  s_5b14016cfe8717::t_16251e4836bd87 125-129
+  s_5b14016cfe8717::t_e9ca1487f83270 300-305,313-320,322-333
+  s_5b14016cfe8717::t_76630b396994f5 306-312,321
+  s_5b14016cfe8717::t_17d7c5f4b67a7c 5
+  s_5b14016cfe8717::t_c7724ce618eb54 160
+CLAUDE.md
+  s_5b14016cfe8717::t_d6b1fddaf406b2 17
+  s_5b14016cfe8717::t_283b3809a59945 18,37-38,46-47,50,54,59,61
+  s_5b14016cfe8717::t_e687bbd2753a19 19-21
+packages/api/src/pipeline.test.ts
+  s_5b14016cfe8717::t_aa5697ffcee443 7
+  s_5b14016cfe8717::t_1461dddaebb285 15-17,22,26
+  s_5b14016cfe8717::t_efa305e26cce52 111-142
+apps/tanstack-start/src/lib/transactions-search.ts
+  s_5b14016cfe8717::t_a4f004b2ebd733 86-102
+  s_5b14016cfe8717::t_d6ac4fd8f35d2b 44
+  s_5b14016cfe8717::t_ee33160d150347 111-114
+  s_5b14016cfe8717::t_2d2bdda0c26858 130-133
+apps/tanstack-start/src/routes/_authed/_revue/-components/transactions-table.tsx
+  s_5b14016cfe8717::t_78cac07be1d775 143
+  s_5b14016cfe8717::t_6d85ec969d3d7a 15
+apps/tanstack-start/src/routes/_authed/_revue/-components/transfer-badge.tsx
+  s_5b14016cfe8717::t_660caabfac3673 1-83,85-127
+  s_5b14016cfe8717::t_29ad20bbfe204d 84
+apps/tanstack-start/src/routes/_authed/banques/ajouter.tsx
+  s_5b14016cfe8717::t_b9aff5a106a089 239
+apps/tanstack-start/src/routes/_authed/_revue/categorie.$name.tsx
+  s_5b14016cfe8717::t_aca97e6af1cb2e 18
+  s_5b14016cfe8717::t_1aab4bb31ad873 53
+packages/api/src/transactions/internal-transfers.test.ts
+  s_5b14016cfe8717::t_c515b94eab8ef6 1-185
+apps/tanstack-start/src/routes/_authed/_revue/transactions.tsx
+  s_5b14016cfe8717::t_5411fd2d9660ac 12
+  s_5b14016cfe8717::t_963d709c6cb722 131
+  s_5b14016cfe8717::t_e8f90824020a0c 111-122
+  s_5b14016cfe8717::t_aab9027eeae858 157,162-163,166-167,175-197
+packages/api/src/pipeline.ts
+  s_5b14016cfe8717::t_22d8b95e8d5670 14-16,23-31
+  s_5b14016cfe8717::t_5082f74d85e879 7
+  s_5b14016cfe8717::t_4f47c16c1432a7 32-33
+packages/db/src/schema.ts
+  s_5b14016cfe8717::t_0d8595e95792ea 111-121
+  s_5b14016cfe8717::t_861e57217d3383 136
+  s_5b14016cfe8717::t_29ad20bbfe204d 2-14,108-110
+packages/api/src/router/transactions.ts
+  s_5b14016cfe8717::t_cdede39aca88bb 58-66
+  s_5b14016cfe8717::t_40808a367c979e 7-9
+  s_5b14016cfe8717::t_093aa0450735b9 6
+packages/api/src/transactions/queries.ts
+  s_5b14016cfe8717::t_8258ccef1e11dc 11,17
+  s_5b14016cfe8717::t_dbdff98a226473 680
+  s_5b14016cfe8717::t_813e9975724beb 260-261,267-268
+  s_5b14016cfe8717::t_262fe25383320f 551-553
+  s_5b14016cfe8717::t_4a887cae6cf2bf 294-300,311-315,319-320,324-327
+  s_5b14016cfe8717::t_e5b832a37738a4 732-738,742
+  s_5b14016cfe8717::t_29ad20bbfe204d 169-170,344-346
+  s_5b14016cfe8717::t_2b20068a1722d7 36-39,43-46
+  s_5b14016cfe8717::t_a6ed1df06f4a6a 739-741,743
+  s_5b14016cfe8717::t_21067557751825 519-525,535
+  s_5b14016cfe8717::t_f916e5a8e6c471 377-380
+  s_5b14016cfe8717::t_00c8aff389ccf9 343,347-357
+  s_5b14016cfe8717::t_4ef731dafa6d18 222-229
+  s_5b14016cfe8717::t_81d6dbe71a20e2 124-136
+  s_5b14016cfe8717::t_7a2eaf36b9d556 163-168,171-172
+  s_5b14016cfe8717::t_4a7d3144484b7c 40-42,47-98
+packages/api/src/transactions/internal-transfers.ts
+  s_5b14016cfe8717::t_891dc77a4e435a 155
+  s_5b14016cfe8717::t_256d17c6398517 1-91,94-98,103-106,108-154,156-159,166-286
+  s_5b14016cfe8717::t_77661a95d9e286 92-93,99-102,107
+  s_5b14016cfe8717::t_29ad20bbfe204d 160-165
+apps/expo/src/app/(tabs)/index.tsx
+  s_5b14016cfe8717::t_400a60e7b7ab5e 43,56,70
+  s_5b14016cfe8717::t_b1b1cb74b5486b 42,55,69
+packages/shared/src/schemas.ts
+  s_5b14016cfe8717::t_330f2f167536e7 50-59
+apps/tanstack-start/src/routes/_authed/_revue/classer.tsx
+  s_5b14016cfe8717::t_ded36ebb19a203 41
+  s_5b14016cfe8717::t_aca97e6af1cb2e 13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "17daa4820ab7397e7fbc64457c907f8164be2ddb",
+  "prompts": {},
+  "sessions": {
+    "s_5b14016cfe8717": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cc0fa150-239c-4bac-a684-93f06f52d9a4",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
