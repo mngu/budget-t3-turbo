@@ -67,7 +67,11 @@ function buildPresets(anchor: Date): Preset[] {
       to: endOfMonth(previous),
     },
     { label: "30 derniers jours", from: subDays(monthEnd, 29), to: monthEnd },
-    { label: "Ce trimestre", from: startOfQuarter(anchor), to: endOfQuarter(anchor) },
+    {
+      label: "Ce trimestre",
+      from: startOfQuarter(anchor),
+      to: endOfQuarter(anchor),
+    },
     { label: "Cette année", from: startOfYear(anchor), to: endOfYear(anchor) },
   ];
 }
@@ -171,13 +175,16 @@ export function PeriodPicker() {
                 locale={fr}
                 numberOfMonths={1}
                 defaultMonth={anchor}
-                selected={draft ? { from: draft } : from ? { from, to } : undefined}
+                selected={
+                  draft ? { from: draft } : from ? { from, to } : undefined
+                }
                 onSelect={(_range, day) => {
                   if (!draft) {
                     setDraft(day);
                     return;
                   }
-                  const [start, end] = day < draft ? [day, draft] : [draft, day];
+                  const [start, end] =
+                    day < draft ? [day, draft] : [draft, day];
                   commit(start, end);
                 }}
                 className="p-0"

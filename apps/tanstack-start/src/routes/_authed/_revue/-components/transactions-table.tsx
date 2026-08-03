@@ -75,7 +75,9 @@ export function TransactionsTable({
           row={row}
           flagged={flagged.has(row.id)}
           parents={parents}
-          repeatsDate={grouped && rows[index - 1]?.bookingDate === row.bookingDate}
+          repeatsDate={
+            grouped && rows[index - 1]?.bookingDate === row.bookingDate
+          }
         />
       ))}
 

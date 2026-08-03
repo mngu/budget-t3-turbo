@@ -7,8 +7,8 @@ import type { AccountSummary, AspspOption } from "@budget/api";
 import { cn } from "@budget/ui";
 import { toast } from "@budget/ui/toast";
 
-import { SearchInput } from "~/component/search-input";
 import { AppHeader } from "~/component/app-header";
+import { SearchInput } from "~/component/search-input";
 import { toastSyncOutcome } from "~/lib/sync-toast";
 import { useTRPCClient } from "~/lib/trpc";
 import { BankLogo } from "./-components/bank-logo";

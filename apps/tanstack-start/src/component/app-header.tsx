@@ -25,11 +25,10 @@ import { SEARCH_DEFAULTS } from "~/lib/transactions-search";
 import { useRevueSearch } from "~/lib/use-revue-search";
 
 /**
- * Écran mis en avant dans l'en-tête. `undefined` est un état légitime : `/`,
+ * Écran mis en avant dans l'en-tête. `undefined` est un état légitime :
  * `/classer` et `/categorie/$name` vivent bien dans la coque de la revue mais
- * n'ont plus d'icône depuis que la rangée est réduite à deux entrées — allumer
- * celle de la revue y ferait promettre « vous êtes ici » à un lien qui emmène
- * ailleurs.
+ * n'ont pas d'icône, la rangée étant réduite à deux entrées — allumer celle de
+ * la revue y ferait promettre « vous êtes ici » à un lien qui emmène ailleurs.
  */
 export type HeaderPage = "revue" | "transactions" | "categories" | "banques";
 
@@ -82,7 +81,7 @@ export function AppHeader({ page }: { page?: HeaderPage }) {
 
       <nav className="ml-2.5 flex items-center gap-4">
         <NavIcon
-          to="/revue-epuree"
+          to="/"
           search={linkSearch}
           label="Revue du mois"
           active={page === "revue"}
@@ -134,8 +133,7 @@ function useScrolled() {
   useEffect(() => {
     const onScroll = (event: Event) => {
       const target = event.target;
-      const top =
-        target instanceof Element ? target.scrollTop : window.scrollY;
+      const top = target instanceof Element ? target.scrollTop : window.scrollY;
       setScrolled(top > 2);
     };
     document.addEventListener("scroll", onScroll, true);
@@ -152,7 +150,7 @@ function NavIcon({
   active,
   children,
 }: {
-  to: "/revue-epuree" | "/transactions";
+  to: "/" | "/transactions";
   search: TransactionsSearch;
   label: string;
   active: boolean;
@@ -179,12 +177,15 @@ function NavIcon({
   );
 }
 
-const THEME_OPTIONS: { mode: ThemeMode; label: string; Icon: typeof SunIcon }[] =
-  [
-    { mode: "auto", label: "Système", Icon: MonitorIcon },
-    { mode: "light", label: "Clair", Icon: SunIcon },
-    { mode: "dark", label: "Sombre", Icon: MoonIcon },
-  ];
+const THEME_OPTIONS: {
+  mode: ThemeMode;
+  label: string;
+  Icon: typeof SunIcon;
+}[] = [
+  { mode: "auto", label: "Système", Icon: MonitorIcon },
+  { mode: "light", label: "Clair", Icon: SunIcon },
+  { mode: "dark", label: "Sombre", Icon: MoonIcon },
+];
 
 /**
  * Menu de l'engrenage : les deux écrans de réglages et le choix du thème.

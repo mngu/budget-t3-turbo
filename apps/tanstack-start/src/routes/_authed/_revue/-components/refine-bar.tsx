@@ -199,13 +199,18 @@ export function RefineBar({
           }}
         >
           {search.category ? (
-            <CategoryIcon name={activeParent?.icon ?? null} className="size-[13px]" />
+            <CategoryIcon
+              name={activeParent?.icon ?? null}
+              className="size-[13px]"
+            />
           ) : (
             <TagIcon className="size-[13px]" />
           )}
         </span>
         <span className="min-w-0 truncate">
-          {search.category ? categoryFilterLabel(search.category) : "Toutes catégories"}
+          {search.category
+            ? categoryFilterLabel(search.category)
+            : "Toutes catégories"}
         </span>
         <span className="text-subtle flex-none text-[9px]">▾</span>
       </button>
@@ -376,7 +381,9 @@ function CategoryFilterDialog({
             <button
               key={item.category || "sans-categorie"}
               type="button"
-              onClick={() => pick(item.category === "" ? "none" : item.category)}
+              onClick={() =>
+                pick(item.category === "" ? "none" : item.category)
+              }
               className={cn(
                 "hover:bg-accent grid w-full grid-cols-[22px_minmax(0,1fr)_78px] items-center gap-2.5 rounded-lg px-2.5 py-1 text-left",
                 search.category === item.category && "bg-accent-soft",

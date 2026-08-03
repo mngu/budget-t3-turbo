@@ -1,7 +1,5 @@
 import type { MonthlyCategoryTotal } from "@budget/api";
 
-// Nombre de points de la sparkline des tuiles.
-const SPARK_MONTHS = 6;
 // Fenêtre de la moyenne de référence (« vs moy. 3 mois »).
 const AVERAGE_MONTHS = 3;
 
@@ -82,7 +80,7 @@ function referenceMonths(totals: MonthTotals[], anchorIso: string): string[] {
  * Moyenne de chaque catégorie parente sur la fenêtre de référence, en une passe.
  * `null` quand aucun mois de référence n'est exploitable.
  *
- * Volontairement *pas* `compareToAverage` appliqué à l'historique filtré sur une
+ * Volontairement *pas* `referenceAverage` appliqué à l'historique filtré sur une
  * catégorie, qui donnerait des écarts faux dans les deux sens :
  * — la fenêtre est dérivée des totaux tous postes confondus. Un mois sans
  *   dépense dans une catégorie n'a simplement pas de ligne dans `history` ;
@@ -117,60 +115,28 @@ export function averagesByCategory(
   return sums;
 }
 
-export interface Comparison {
-  /** Dernières valeurs mensuelles, la période affichée en dernier. */
-  points: number[];
-  /** Moyenne des mois de référence. `null` si l'historique manque. */
-  average: number | null;
-  /** Écart relatif à cette moyenne, en pourcentage signé. */
-  deltaPct: number | null;
-}
-
-export function compareToAverage(
+/**
+ * Moyenne d'une série mensuelle sur la fenêtre de référence — le « vs moy. »
+ * des trois chiffres de tête de la revue. `null` quand aucun mois de référence
+ * n'est exploitable, ce que l'écran affiche tel quel (« Pas d'historique de
+ * comparaison ») plutôt que de comparer à zéro.
+ *
+ * Elle renvoyait autrefois aussi la sparkline et l'écart déjà calculé, pour les
+ * tuiles de synthèse de l'ancienne revue ; celle-ci a été remplacée par l'anneau
+ * le 2026-08-03, qui calcule son écart lui-même (`deltaTo`) et n'a pas de
+ * sparkline.
+ */
+export function referenceAverage(
   totals: MonthTotals[],
   anchorIso: string,
   pick: (t: MonthTotals) => number,
-  current: number,
-): Comparison {
+): number | null {
   const byMonth = new Map(totals.map((t) => [t.month, t]));
-  const anchor = monthKey(anchorIso);
-  const spark = monthsEndingAt(anchorIso, SPARK_MONTHS).map((m) => {
-    if (m === anchor) return current;
-    const entry = byMonth.get(m);
-    return entry ? pick(entry) : 0;
-  });
-
   const previous = referenceMonths(totals, anchorIso)
     .map((m) => byMonth.get(m))
     .filter((t): t is MonthTotals => t !== undefined)
     .map(pick);
 
-  if (previous.length === 0)
-    return { points: spark, average: null, deltaPct: null };
-  const average = previous.reduce((a, b) => a + b, 0) / previous.length;
-  return {
-    points: spark,
-    average,
-    deltaPct: average === 0 ? null : ((current - average) / average) * 100,
-  };
-}
-
-// Nombre de mois consécutifs, en remontant depuis le mois affiché, où les
-// dépenses dépassent les revenus. 0 quand le mois affiché est à l'équilibre.
-export function negativeStreak(
-  totals: MonthTotals[],
-  anchorIso: string,
-  currentBalance: number,
-): number {
-  if (currentBalance >= 0) return 0;
-  const anchor = monthKey(anchorIso);
-  const byMonth = new Map(totals.map((t) => [t.month, t]));
-  let streak = 1;
-  for (const month of [...byMonth.keys()].sort().reverse()) {
-    if (month >= anchor) continue;
-    const entry = byMonth.get(month);
-    if (!entry || entry.credit - entry.debit >= 0) break;
-    streak += 1;
-  }
-  return streak;
+  if (previous.length === 0) return null;
+  return previous.reduce((a, b) => a + b, 0) / previous.length;
 }

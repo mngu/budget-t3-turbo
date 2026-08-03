@@ -82,7 +82,10 @@ function analysisQuery() {
     .from(transactions)
     .innerJoin(accounts, eq(transactions.accountId, accounts.id))
     .leftJoin(txnCategory, eq(transactions.categoryId, txnCategory.id))
-    .leftJoin(txnParentCategory, eq(txnCategory.parentId, txnParentCategory.id));
+    .leftJoin(
+      txnParentCategory,
+      eq(txnCategory.parentId, txnParentCategory.id),
+    );
 }
 
 // Échantillon stratifié, plafonné à SAMPLE_LIMIT :

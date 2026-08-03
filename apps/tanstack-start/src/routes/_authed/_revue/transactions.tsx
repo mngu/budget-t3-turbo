@@ -81,7 +81,9 @@ function ToutesLesTransactions() {
   // Une seule chaîne, et non deux `<span>` : c'est elle que la tuile coupe à sa
   // largeur, et qu'elle redonne entière au survol.
   const scope = [
-    filters.length > 0 ? filters.join(" · ") : "toutes les lignes de la période",
+    filters.length > 0
+      ? filters.join(" · ")
+      : "toutes les lignes de la période",
     pageCount > 1 ? `page ${search.page} sur ${pageCount}` : undefined,
   ]
     .filter((part) => part !== undefined)

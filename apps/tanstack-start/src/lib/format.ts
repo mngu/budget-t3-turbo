@@ -34,8 +34,10 @@ export function titleCase(value: string) {
   // ressort en « Durand ». L'apostrophe, non : elle produirait « L'Oreal ».
   return value
     .toLocaleLowerCase("fr-FR")
-    .replace(/(^|[\s-])(\p{L})/gu, (_, boundary: string, letter: string) =>
-      boundary + letter.toLocaleUpperCase("fr-FR"),
+    .replace(
+      /(^|[\s-])(\p{L})/gu,
+      (_, boundary: string, letter: string) =>
+        boundary + letter.toLocaleUpperCase("fr-FR"),
     );
 }
 

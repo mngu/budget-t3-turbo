@@ -2,18 +2,43 @@ import { createFileRoute, stripSearchParams } from "@tanstack/react-router";
 
 import { transactionsSearchSchema } from "@budget/shared";
 
-import { compareToAverage, negativeStreak, totalsByMonth } from "~/lib/history";
+import type { Delta, EpureeCategory } from "./-components/epuree-panel";
+import {
+  averagesByCategory,
+  referenceAverage,
+  totalsByMonth,
+} from "~/lib/history";
 import {
   defaultToCurrentMonth,
   reviewScope,
   SEARCH_DEFAULTS,
   wholePeriod,
 } from "~/lib/transactions-search";
-import { CategoryIncomeList } from "./-components/category-income-list";
-import { CategorySpendList } from "./-components/category-spend-list";
+import { EpureePanel } from "./-components/epuree-panel";
 import { ActiveFilters } from "./-components/refine-bar";
-import { SummaryTiles } from "./-components/summary-tiles";
 
+/**
+ * Revue du mois — portage de la maquette « Revue du mois épurée » (Claude
+ * Design, projet fc13100e-7ea1-4dac-8d2f-6614e40a7209, importée le 2026-07-31).
+ * Elle a vécu sur `/revue-epuree` jusqu'au 2026-08-03, date à laquelle elle a
+ * *remplacé* l'ancienne revue (tuiles de synthèse + deux listes de catégories à
+ * barres segmentées) : un anneau et une liste dépliable disent la même chose en
+ * un écran, et les composants de l'ancienne ont été supprimés avec elle.
+ *
+ * Trois branches de la maquette ne sont pas portées : elles y sont **mortes**,
+ * pas oubliées. `mode` est fixé à `'anneau'` (tout le pavage/treemap et la
+ * bascule des deux vues sont inatteignables), `sv` est fixé à `'liste'`, et le
+ * booléen `montants` ne nourrit que les tuiles du pavage. `ecarts`,
+ * `reviewCount` et `reviewDots` sont calculés dans le script mais jamais liés
+ * au template — ce dernier n'a d'ailleurs aucun équivalent en base (pas de
+ * score de confiance, voir CLAUDE.md).
+ *
+ * L'anneau interne de sous-catégories de la maquette n'est pas porté non plus,
+ * lui pour une raison de fond : elle ne l'affiche qu'*à la place* de la liste,
+ * quand celle-ci ne tient plus en largeur. Ici la liste — le même histogramme
+ * horizontal qu'en grand — reste affichée à toutes les largeurs, sous l'anneau
+ * plutôt qu'à côté. Un second anneau ne dirait rien de plus et se lit moins bien.
+ */
 export const Route = createFileRoute("/_authed/_revue/")({
   validateSearch: transactionsSearchSchema,
   search: {
@@ -21,12 +46,12 @@ export const Route = createFileRoute("/_authed/_revue/")({
   },
   loaderDeps: ({ search }) => search,
   loader: async ({ deps, context }) => {
-    // `category` et `aClasser` sont retirés des agrégats : la revue garde la
+    // `category` et `aClasser` sont retirés des agrégats : l'anneau garde la
     // répartition complète et se contente de surligner la sélection, sinon
-    // filtrer une catégorie la porterait à 100 % du total et il n'y aurait
-    // plus de quoi naviguer.
+    // filtrer une catégorie la porterait à 100 % du total et il n'y aurait plus
+    // de quoi naviguer.
     const period = wholePeriod(deps);
-    const [expenses, revenues, history, review] = await Promise.all([
+    const [expenses, revenues, history, tree] = await Promise.all([
       context.trpcClient.transactions.byCategory.query({
         ...period,
         direction: "debit",
@@ -36,13 +61,13 @@ export const Route = createFileRoute("/_authed/_revue/")({
         direction: "credit",
       }),
       context.trpcClient.transactions.history.query(period),
-      // L'arborescence, les compteurs par banque et la file de relecture ne
-      // sont pas retournés tels quels : leurs consommateurs (sélecteur de
-      // catégorie, pastilles de la barre de filtres, badge de l'onglet
-      // « À revoir ») les lisent dans le cache react-query, que le loader
-      // réalimente à chaque passage — `router.invalidate()` suffit donc à les
-      // rafraîchir. La file est en plus *lue* ici pour la note de bas des
-      // entrées ; c'est bien la même entrée de cache que celle du badge.
+      // Les icônes de l'anneau : `transactions.byCategory` ne remonte que le
+      // libellé et la couleur, `categories.icon` vit dans l'arborescence. Lue
+      // par le client tRPC, à la différence des trois `fetchQuery` qui suivent :
+      // ceux-là n'alimentent que le cache react-query dont se sert l'en-tête
+      // partagé (badge « À revoir », sélecteur de comptes), comme sur les
+      // trois autres écrans du layout.
+      context.trpcClient.categories.tree.query(),
       context.queryClient.fetchQuery({
         ...context.trpc.transactions.review.queryOptions(reviewScope(deps)),
         staleTime: 0,
@@ -60,7 +85,7 @@ export const Route = createFileRoute("/_authed/_revue/")({
         staleTime: 0,
       }),
     ]);
-    return { expenses, revenues, history, review };
+    return { expenses, revenues, history, tree };
   },
   errorComponent: ({ error }) => (
     <main className="p-8">
@@ -78,63 +103,85 @@ export const Route = createFileRoute("/_authed/_revue/")({
 const sum = (items: { total: number }[]) =>
   items.reduce((acc, item) => acc + item.total, 0);
 
+// Écart à la moyenne, tel que la maquette le calcule : le pourcentage se
+// rapporte à la *valeur absolue* de la référence, sinon une moyenne négative
+// (le solde d'un mois déficitaire) inverse le signe affiché. `null` quand il
+// n'y a pas d'historique ; `pct` seul est `null` quand la référence vaut zéro —
+// l'écart en euros reste lisible, le pourcentage n'aurait aucun sens.
+function deltaTo(current: number, average: number | null): Delta | null {
+  if (average === null) return null;
+  const amount = current - average;
+  return {
+    amount,
+    pct: average === 0 ? null : (amount / Math.abs(average)) * 100,
+  };
+}
+
 function RevueDuMois() {
-  const { expenses, revenues, history, review } = Route.useLoaderData();
+  const { expenses, revenues, history, tree } = Route.useLoaderData();
   const search = Route.useSearch();
 
   const expensesTotal = sum(expenses);
   const revenuesTotal = sum(revenues);
 
-  // Ancre de comparaison : la fin de la période affichée. `history` est bâti
-  // sur la même ancre côté serveur, les deux ne peuvent pas diverger.
+  // Ancre de comparaison : la fin de la période affichée, sur laquelle
+  // `history` est bâti côté serveur — les deux ne peuvent pas diverger.
   const anchor = search.dateTo ?? search.dateFrom ?? new Date().toISOString();
   const monthly = totalsByMonth(history);
+  const revenuesAverage = referenceAverage(monthly, anchor, (m) => m.credit);
+  const expensesAverage = referenceAverage(monthly, anchor, (m) => m.debit);
+
+  const iconByCategory = new Map(tree.map((node) => [node.name, node.icon]));
+  const averageByCategory = averagesByCategory(history, anchor, (r) => r.debit);
+
+  const categories: EpureeCategory[] = [...expenses]
+    .sort((a, b) => b.total - a.total)
+    .map((item) => {
+      // `transactions.byCategory` regroupe les transactions sans catégorie sous
+      // un libellé vide ; `history` les remonte à `null`. La clé de jointure est
+      // la chaîne vide des deux côtés (voir `averagesByCategory`), le libellé
+      // affiché est celui de la revue.
+      const key = item.category;
+      return {
+        name: key || "Sans catégorie",
+        total: item.total,
+        color: item.color,
+        icon: iconByCategory.get(key) ?? null,
+        subs: item.breakdown.map((b) => ({ name: b.category, total: b.total })),
+        // Une catégorie absente de toute la fenêtre de référence a bien une
+        // moyenne de zéro : c'est un poste neuf, pas une donnée manquante.
+        delta: averageByCategory
+          ? deltaTo(item.total, averageByCategory.get(key) ?? 0)
+          : null,
+      };
+    });
+
+  const balance = revenuesTotal - expensesTotal;
+  const balanceAverage =
+    revenuesAverage === null || expensesAverage === null
+      ? null
+      : revenuesAverage - expensesAverage;
 
   return (
-    // Pleine largeur : la file de relecture qui occupait la colonne de droite
-    // a son propre onglet (« À revoir », /classer). La revue redevient une
-    // lecture — sorties, puis entrées — et la correction se fait à côté.
-    <div className="min-h-0 flex-1 overflow-y-auto">
-      <div className="px-6 pt-5 pb-10">
-        {/* La revue n'a pas de barre de filtres — ils se posent depuis
-            l'en-tête et depuis les deux autres onglets, et se conservent d'un
-            écran à l'autre. Sans ce rappel, une sélection posée sur
-            « Toutes les transactions » resterait active ici sans rien qui le
-            dise ni aucun moyen de la retirer. */}
-        <ActiveFilters className="mb-3" />
+    <>
+      {/* Rappel des filtres, hors de `EpureePanel` : le panneau est le portage
+          de la maquette, ce rappel est du mobilier d'application. La revue n'a
+          pas de barre de filtres — ils se posent depuis l'en-tête et depuis les
+          deux autres onglets, et se conservent d'un écran à l'autre. `q` et le
+          sens ne sont pas neutralisés par `wholePeriod` : sans ce rappel, une
+          sélection posée sur « Toutes les transactions » resserrerait l'anneau
+          ici sans rien qui le dise ni aucun moyen de la retirer. */}
+      <ActiveFilters className="flex-none px-5 pt-3" />
 
-        <SummaryTiles
-          expenses={expensesTotal}
-          revenues={revenuesTotal}
-          expensesComparison={compareToAverage(
-            monthly,
-            anchor,
-            (m) => m.debit,
-            expensesTotal,
-          )}
-          revenuesComparison={compareToAverage(
-            monthly,
-            anchor,
-            (m) => m.credit,
-            revenuesTotal,
-          )}
-          negativeMonths={negativeStreak(
-            monthly,
-            anchor,
-            revenuesTotal - expensesTotal,
-          )}
-        />
-
-        <CategorySpendList items={expenses} total={expensesTotal} />
-
-        <CategoryIncomeList
-          items={revenues}
-          total={revenuesTotal}
-          oddDirectionCount={
-            review.filter((item) => item.reason === "sens-inhabituel").length
-          }
-        />
-      </div>
-    </div>
+      <EpureePanel
+        categories={categories}
+        revenues={revenuesTotal}
+        expenses={expensesTotal}
+        balance={balance}
+        revenuesDelta={deltaTo(revenuesTotal, revenuesAverage)}
+        expensesDelta={deltaTo(expensesTotal, expensesAverage)}
+        balanceDelta={deltaTo(balance, balanceAverage)}
+      />
+    </>
   );
 }
