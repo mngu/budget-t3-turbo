@@ -1,0 +1,32 @@
+packages/api/src/transactions/queries.ts
+  s_4919787d9b0dd1::t_550f20214cf81f 193-239
+packages/api/src/router/transactions.ts
+  s_4919787d9b0dd1::t_c0fadf5c22b5c4 14
+  s_4919787d9b0dd1::t_bb24f3eba4ad5f 33-36
+apps/tanstack-start/src/routes/_authed/_revue/transactions.tsx
+  s_4919787d9b0dd1::t_0bb449f79bd379 62-75
+  s_4919787d9b0dd1::t_f29f78df2585a0 22,25-27
+  s_4919787d9b0dd1::t_27337d7666bf97 50
+  s_4919787d9b0dd1::t_fe3b1d6042de75 150
+  s_4919787d9b0dd1::t_3c89ab19a7deb6 93,100-104
+  s_4919787d9b0dd1::t_63d34e33188080 81-88
+  s_4919787d9b0dd1::t_684a45aed08c26 134-138,142,146,152-157
+  s_4919787d9b0dd1::t_96918c8821f44a 108-109
+  s_4919787d9b0dd1::t_ba5e5ceae648f9 77
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "b45c6cd57d95446c6cf4f82347573aaad0bef232",
+  "prompts": {},
+  "sessions": {
+    "s_4919787d9b0dd1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "83f795c4-9655-4f2b-98ee-d2a642f6e703",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
