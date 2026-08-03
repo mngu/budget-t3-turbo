@@ -1,0 +1,37 @@
+apps/tanstack-start/src/lib/history.ts
+  s_4919787d9b0dd1::t_e6cce267f6163d 83
+  s_4919787d9b0dd1::t_81d1e21f98d238 118-129,133,140-141
+apps/tanstack-start/src/routes/_authed/_revue.tsx
+  s_4919787d9b0dd1::t_86cb663bcef0c9 11-13
+  s_4919787d9b0dd1::t_ff80f2e1e1133f 21-22
+  s_4919787d9b0dd1::t_be08e4201b113b 30-32,35-36,42
+apps/tanstack-start/src/routes/_authed/_revue/index.tsx
+  s_4919787d9b0dd1::t_4644808681d6f8 8
+  s_4919787d9b0dd1::t_3a21800bc3a800 131-132
+  s_4919787d9b0dd1::t_a972862594929f 5-7,9-10,17,20-41,49,51-52,54,64-70,88,106-119,121,127-128,134-157,159-163,165-174,176-185
+apps/tanstack-start/src/component/app-header.tsx
+  s_4919787d9b0dd1::t_0c91e63fb17970 153
+  s_4919787d9b0dd1::t_b47dee6cc0e284 84
+  s_4919787d9b0dd1::t_9d5a16ca0dd07b 28,30-31
+CLAUDE.md
+  s_4919787d9b0dd1::t_5bfaedbeed3f16 59
+  s_4919787d9b0dd1::t_ddeb65b5c978bb 54-56
+  s_4919787d9b0dd1::t_6b0a73bcfc6213 42
+  s_4919787d9b0dd1::t_e089056515fc0b 58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "e2705a07e4be9384184553669034e3159703a805",
+  "prompts": {},
+  "sessions": {
+    "s_4919787d9b0dd1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "83f795c4-9655-4f2b-98ee-d2a642f6e703",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
