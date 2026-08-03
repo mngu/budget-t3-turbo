@@ -1,0 +1,95 @@
+apps/tanstack-start/src/routes/_authed/categories/index.tsx
+  s_e0f4fb4d997548::t_2617311f1e185b 22,182
+apps/tanstack-start/src/routes/_authed/_revue/-components/transactions-table.tsx
+  s_e0f4fb4d997548::t_2adf3016834ed1 20-21,27,30
+  s_e0f4fb4d997548::t_c8ccc5b1110dac 8-10,13,16-19,22-26,28,40,46-53,56,60-62,67,72-80,82-86,88-107,109,113-123,125,128-134,137,139-143,151-152,154,156-158,160,162,168-186,189-192,207,212-213,215-220,222-237,239,243,247
+  s_e0f4fb4d997548::t_85a9512dd42c7b 193-204
+  s_e0f4fb4d997548::t_7b26f14125d94f 221,246
+apps/tanstack-start/src/routes/_authed/_revue.tsx
+  s_e0f4fb4d997548::t_b97632c658a95f 3-4,7,11-15,17-20,41,45,51
+  s_e0f4fb4d997548::t_f28ff8ce12893f 1
+  s_e0f4fb4d997548::t_41a5f6d08d1602 26-32,37-40,43-44
+  s_e0f4fb4d997548::t_cda436b9611aef 33-36
+apps/tanstack-start/src/routes/_authed/_revue/-components/epuree-panel.tsx
+  s_e0f4fb4d997548::t_10af5555ec645f 259
+  s_e0f4fb4d997548::t_0c76b1914bc9d6 307
+  s_e0f4fb4d997548::t_a0a72a4e3b1419 74-79
+apps/tanstack-start/src/lib/category-lookup.ts
+  s_e0f4fb4d997548::t_eb0852f4d99120 1-53
+apps/tanstack-start/src/routes/_authed/_revue/-components/category-path-picker.tsx
+  s_e0f4fb4d997548::t_38f4a410e3a05f 14
+  s_e0f4fb4d997548::t_d5382e80e91517 56-57,64-65
+  s_e0f4fb4d997548::t_22b4344e27be96 165-175
+  s_e0f4fb4d997548::t_44ceed14ca543c 24-27
+  s_e0f4fb4d997548::t_155f1610050439 194-216
+  s_e0f4fb4d997548::t_56f91c7ef3c688 85-86,95-103
+apps/tanstack-start/src/routes/_authed/_revue/-components/refine-bar.tsx
+  s_e0f4fb4d997548::t_d9a23b61658fa1 158,161-182,185-192,194-207,209-211,213-219,221-224,291
+  s_e0f4fb4d997548::t_477c01c4908e8d 12
+  s_e0f4fb4d997548::t_346a0fa401873c 11
+  s_e0f4fb4d997548::t_8f8f667be23b8f 226-253
+  s_e0f4fb4d997548::t_6880e7443169b2 122-124
+  s_e0f4fb4d997548::t_21eba2fbd8e445 20-21,24-25
+  s_e0f4fb4d997548::t_3886564c0151f3 259-262,275-290
+  s_e0f4fb4d997548::t_aea62071b034d2 118,129-136
+  s_e0f4fb4d997548::t_481ad0540c84b7 75-83
+  s_e0f4fb4d997548::t_123feaee1883ed 95,208,379
+  s_e0f4fb4d997548::t_4b39b023a25ebb 350
+  s_e0f4fb4d997548::t_a52fd926a8b6f3 381,385-387,389-399
+  s_e0f4fb4d997548::t_3c968b17827fc9 143-150
+  s_e0f4fb4d997548::t_2c430f01616ae7 5,13,18
+  s_e0f4fb4d997548::t_3996f09a0b1f64 104-108
+  s_e0f4fb4d997548::t_45dbce13678f6d 74
+  s_e0f4fb4d997548::t_00a0a86661deb2 225
+  s_e0f4fb4d997548::t_44d8971263bfeb 292
+apps/tanstack-start/src/component/period-picker.tsx
+  s_e0f4fb4d997548::t_3639e6ed00f69c 1-236
+apps/tanstack-start/src/lib/use-revue-search.ts
+  s_e0f4fb4d997548::t_099851ada7995c 17-23
+apps/tanstack-start/src/lib/format.ts
+  s_e0f4fb4d997548::t_b287640017a10f 33-34,37-39
+  s_e0f4fb4d997548::t_210a1aec43e4d6 19-32,35-36,40-41
+apps/tanstack-start/src/routes/_authed/_revue/transactions.tsx
+  s_e0f4fb4d997548::t_ca1d9446362f78 4
+  s_e0f4fb4d997548::t_7a56dc44234076 74-78,86-102,104-112,120,133-152
+  s_e0f4fb4d997548::t_1a4209382b43da 119
+  s_e0f4fb4d997548::t_b2d591d3477eea 103
+  s_e0f4fb4d997548::t_0af43095766222 153-155
+apps/tanstack-start/src/routes/_authed/banques/ajouter.tsx
+  s_e0f4fb4d997548::t_2617311f1e185b 11,49
+apps/tanstack-start/src/routes/_authed/banques/index.tsx
+  s_e0f4fb4d997548::t_2617311f1e185b 8,65
+packages/api/src/transactions/queries.ts
+  s_e0f4fb4d997548::t_8757e51a57eb9e 163
+  s_e0f4fb4d997548::t_8e2ca1750593c4 49-54
+apps/tanstack-start/src/routes/_authed/_revue/-components/breakdown-list.tsx
+  s_e0f4fb4d997548::t_08702c4b5a97e8 31-47
+apps/tanstack-start/src/component/bank-picker.tsx
+  s_e0f4fb4d997548::t_7fa57c467205f4 1-191
+apps/tanstack-start/src/component/app-header.tsx
+  s_e0f4fb4d997548::t_3374ca0ee70bab 156
+  s_e0f4fb4d997548::t_66e8db267358fc 60-64
+  s_e0f4fb4d997548::t_1f5ce994ffdabf 1-15,17-59,65-155,157-300
+  s_e0f4fb4d997548::t_3b55ec532fc4e6 16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "70840087672f82a778698ade6487ccd2b0baa580",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_e0f4fb4d997548": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9d03e27e-e88a-441a-b677-a956f8d921fe",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
