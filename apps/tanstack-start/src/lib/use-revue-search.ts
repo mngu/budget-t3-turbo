@@ -14,6 +14,13 @@ import type { TransactionsSearch } from "@budget/shared";
  * routes sous ce layout valident `transactionsSearchSchema` — mais il ne tient
  * que tant que c'est vrai : y placer une route à la search différente casserait
  * silencieusement l'en-tête.
+ *
+ * Depuis le portage du nouvel en-tête, `AppHeader` est aussi monté **hors** de
+ * ce layout (`/categories`, `/banques`), où le cast est donc faux : la search
+ * rendue est celle de ces routes-là. Il l'appelle quand même — un hook ne se
+ * conditionne pas — mais n'en lit la valeur que sur les écrans de la revue, et
+ * n'y monte ni `PeriodPicker` ni `BankPicker`, les deux seuls consommateurs.
+ * Toute nouvelle lecture dans l'en-tête doit passer par la même garde.
  */
 export function useRevueSearch() {
   const search: TransactionsSearch = useSearch({ strict: false });

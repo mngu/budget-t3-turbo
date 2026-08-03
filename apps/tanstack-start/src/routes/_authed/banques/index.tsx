@@ -5,7 +5,7 @@ import { UnlinkIcon } from "lucide-react";
 import type { ConnectionSummary } from "@budget/api";
 import { toast } from "@budget/ui/toast";
 
-import { SettingsHeader } from "~/component/settings-header";
+import { AppHeader } from "~/component/app-header";
 import { useTRPCClient } from "~/lib/trpc";
 import { ConnectionCard } from "./-components/connection-card";
 import { ConsentAlert } from "./-components/consent-alert";
@@ -62,7 +62,7 @@ function BanquesPage() {
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden text-[13px] leading-[1.45]">
-      <SettingsHeader section="banques" />
+      <AppHeader page="banques" />
 
       <div className="min-h-0 flex-1 overflow-y-auto">
         <main className="mx-auto max-w-[1010px] px-6 pt-5 pb-12">

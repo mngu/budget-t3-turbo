@@ -12,7 +12,6 @@ import { cn } from "@budget/ui";
 
 import type { BreakdownRow } from "./breakdown-list";
 import type { RingSlice } from "./category-ring";
-import { HEADER_ICON_BUTTON } from "~/component/theme-button";
 import { shadeCategoryColor, useCategoryColor } from "~/lib/category-color";
 import { euro, sharePercent } from "~/lib/format";
 import { CategoryIcon } from "../../categories/-components/category-icon";
@@ -71,6 +70,12 @@ const AMOUNT_CLASS =
 // de fermeture. La maquette la calcule (`rdStackPx = listW - 46`) parce qu'elle
 // mesure tout ; ici les deux valeurs sont posées, la liste à 300 px.
 const STACK_CLASS = "flex w-[254px] max-w-full flex-none flex-col items-end";
+
+// Gabarit 26 px hérité des anciennes rangées d'icônes d'en-tête. Le nouvel
+// en-tête n'a plus de boutons bordés — ce bouton de fermeture est le dernier
+// usage, la constante partagée (`~/component/theme-button`) a disparu avec eux.
+const ICON_BUTTON_CLASS =
+  "border-border text-muted-foreground hover:bg-accent hover:text-foreground flex size-[26px] items-center justify-center rounded-[7px] border disabled:opacity-50";
 
 export function EpureePanel({
   categories,
@@ -251,7 +256,7 @@ export function EpureePanel({
             aria-label="Revenir au mois"
             // `invisible` et non `hidden` : le bouton garde sa place, sinon la
             // colonne de droite se décalerait à l'ouverture d'un poste.
-            className={cn(HEADER_ICON_BUTTON, !parent && "invisible")}
+            className={cn(ICON_BUTTON_CLASS, !parent && "invisible")}
           >
             <XIcon className="size-3.5" />
           </button>
@@ -299,7 +304,7 @@ export function EpureePanel({
           }}
         />
 
-        <BreakdownList rows={listRows} />
+        <BreakdownList rows={listRows} fold={parent !== null} />
       </div>
     </div>
   );

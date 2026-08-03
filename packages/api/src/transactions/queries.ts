@@ -46,6 +46,12 @@ export interface TransactionRow {
   status: "booked" | "pending";
   /** Catégorie feuille — c'est elle que `updateCategory` réécrit. */
   category: string | null;
+  /**
+   * Qui a posé la catégorie : `manual` = corrigée à la main, le seul état que
+   * la table signale (pastille « modifiée »). `llm` / `auto` sont le régime
+   * normal et n'ont rien à dire au lecteur ; `null` = aucune catégorie.
+   */
+  categorySource: string | null;
   /** Chemin affiché : « Parent › Enfant », ou « Parent » seul. */
   categoryPath: string | null;
   /** Couleur de la catégorie *parente* : les lignes se lisent par famille. */
@@ -154,6 +160,7 @@ export async function listTransactions(
         direction: transactions.direction,
         status: transactions.status,
         category: categories.name,
+        categorySource: transactions.categorySource,
         categoryPath: sql<
           string | null
         >`case when ${parentCategories.name} is null then ${categories.name}

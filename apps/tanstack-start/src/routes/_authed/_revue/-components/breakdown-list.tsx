@@ -28,9 +28,23 @@ const MAX_ROWS = 13;
  * le décompte des sous-catégories a migré en tête de la colonne de droite du
  * bandeau, au-dessus du poste ouvert.
  */
-export function BreakdownList({ rows }: { rows: BreakdownRow[] }) {
-  const shown = rows.slice(0, MAX_ROWS);
-  const rest = rows.slice(MAX_ROWS);
+export function BreakdownList({
+  rows,
+  fold = false,
+}: {
+  rows: BreakdownRow[];
+  /**
+   * Replier la queue de liste sous un « + N autres ». La maquette ne le fait
+   * **que** sur les sous-catégories (`shown = subs.slice(0, LIST_MAX)`), jamais
+   * sur les catégories parentes, dont elle rend toujours la liste entière : au
+   * premier niveau chaque ligne est une porte d'entrée vers ses enfants, et le
+   * repli la condamnerait — c'est ce qui faisait disparaître « Sans catégorie »,
+   * dernière de la liste par construction, derrière un « + 1 autres ».
+   */
+  fold?: boolean;
+}) {
+  const shown = fold ? rows.slice(0, MAX_ROWS) : rows;
+  const rest = fold ? rows.slice(MAX_ROWS) : [];
   const restTotal = rest.reduce((acc, r) => acc + r.total, 0);
   const max = Math.max(...rows.map((r) => r.total), 1);
 

@@ -1,6 +1,7 @@
 import { createFileRoute, stripSearchParams } from "@tanstack/react-router";
 
 import { PAGE_SIZE, transactionsSearchSchema } from "@budget/shared";
+import { cn } from "@budget/ui";
 
 import { euro } from "~/lib/format";
 import {
@@ -70,6 +71,11 @@ export const Route = createFileRoute("/_authed/_revue/transactions")({
   component: ToutesLesTransactions,
 });
 
+const countFr = new Intl.NumberFormat("fr-FR");
+
+const AMOUNT_CLASS =
+  "num mt-0.5 text-[clamp(24px,2.4vw,30px)] leading-[1.1] font-medium tracking-[-0.03em]";
+
 function ToutesLesTransactions() {
   const { rows, total, debits, credits, flagged } = Route.useLoaderData();
   const search = Route.useSearch();
@@ -77,39 +83,42 @@ function ToutesLesTransactions() {
   const filters = describeFilters(search);
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <div className="flex min-h-0 flex-1 flex-col px-5 pt-4.5">
+      <div className="flex min-h-[68px] flex-none flex-wrap items-end gap-x-[clamp(11px,1.9vw,32px)] gap-y-3">
+        <div className="min-w-max flex-[0_1_auto]">
+          <div className="label-caps">Transactions</div>
+          <div className={AMOUNT_CLASS}>{countFr.format(total)}</div>
+          {/* La maquette met ici « sur N lignes », rapporté au total *non
+              filtré* — la table n'en charge pas d'autre que la sélection. À la
+              place : ce que la sélection est, et où on en est dedans, la
+              pagination vivant sinon tout en bas du conteneur défilant. */}
+          <div className="text-subtle mt-1.5 flex min-h-[19px] items-center gap-2.5 text-[11px] whitespace-nowrap">
+            <span>
+              {filters.length > 0
+                ? filters.join(" · ")
+                : "toutes les lignes de la période"}
+            </span>
+            {pageCount > 1 && (
+              <span>
+                · page {search.page} sur {pageCount}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <Total label="Débits" amount={debits} className="text-bad" />
+        <Total label="Crédits" amount={credits} className="text-ok" />
+      </div>
+
       {/* Seul écran à porter tous les filtres : c'est le seul dont la liste est
           la sélection elle-même, et non une répartition qu'un filtre de
           catégorie porterait à 100 % du total. */}
       <RefineBar
-        label="Affiner cette liste"
         sens
         aClasser
-        className="border-border flex-none border-b px-8 py-3"
+        searchField
+        className="border-border bg-surface-2 mt-3 flex-none rounded-[11px] border px-2.5 py-2"
       />
-
-      <div className="bg-secondary border-border flex flex-none items-center gap-3 border-b px-8 py-3">
-        <span className="text-muted-foreground text-[11.5px]">
-          {total} transactions · page {search.page} sur {pageCount}
-        </span>
-        {filters.length > 0 && (
-          <span className="text-subtle text-[11.5px]">
-            · {filters.join(" · ")}
-          </span>
-        )}
-        <span className="ml-auto flex items-baseline gap-4.5">
-          <span className="text-muted-foreground text-[11.5px]">
-            Débits{" "}
-            <b className="num text-foreground text-[12.5px]">
-              {euro.format(debits)}
-            </b>
-          </span>
-          <span className="text-muted-foreground text-[11.5px]">
-            Crédits{" "}
-            <b className="num text-ok text-[12.5px]">{euro.format(credits)}</b>
-          </span>
-        </span>
-      </div>
 
       <TransactionsTable
         rows={rows}
@@ -118,6 +127,29 @@ function ToutesLesTransactions() {
         pageCount={pageCount}
         total={total}
       />
+    </div>
+  );
+}
+
+/**
+ * Les deux totaux de la sélection. Sans sous-ligne, là où la maquette compte
+ * « N lignes » par sens : aucune requête ne remonte ce décompte — `byCategory`
+ * agrège des montants, et le `total` de `list` ne connaît pas le sens. La
+ * hauteur minimale de la rangée garde malgré tout les trois chiffres alignés.
+ */
+function Total({
+  label,
+  amount,
+  className,
+}: {
+  label: string;
+  amount: number;
+  className: string;
+}) {
+  return (
+    <div className="min-w-max flex-[0_1_auto]">
+      <div className="label-caps">{label}</div>
+      <div className={cn(AMOUNT_CLASS, className)}>{euro.format(amount)}</div>
     </div>
   );
 }

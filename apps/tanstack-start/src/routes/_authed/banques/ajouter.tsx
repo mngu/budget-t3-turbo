@@ -8,7 +8,7 @@ import { cn } from "@budget/ui";
 import { toast } from "@budget/ui/toast";
 
 import { SearchInput } from "~/component/search-input";
-import { SettingsHeader } from "~/component/settings-header";
+import { AppHeader } from "~/component/app-header";
 import { toastSyncOutcome } from "~/lib/sync-toast";
 import { useTRPCClient } from "~/lib/trpc";
 import { BankLogo } from "./-components/bank-logo";
@@ -46,7 +46,7 @@ function AjouterBanquePage() {
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden text-[13px] leading-[1.45]">
-      <SettingsHeader section="banques" />
+      <AppHeader page="banques" />
 
       <div className="min-h-0 flex-1 overflow-y-auto">
         <main className="mx-auto max-w-[1010px] px-6 pt-5 pb-12">

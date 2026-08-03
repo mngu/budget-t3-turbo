@@ -19,7 +19,7 @@ import type {
   PreviewBadge,
 } from "./-components/transaction-preview-drawer";
 import type { GhostBranch } from "./-lib/suggestions";
-import { SettingsHeader } from "~/component/settings-header";
+import { AppHeader } from "~/component/app-header";
 import { softCategoryColor, useCategoryColor } from "~/lib/category-color";
 import { useTRPCClient } from "~/lib/trpc";
 import { CategoryDeleteDialog } from "./-components/category-delete-dialog";
@@ -179,7 +179,7 @@ function CategoriesPage() {
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden text-[13px] leading-[1.45]">
-      <SettingsHeader section="categories" />
+      <AppHeader page="categories" />
 
       <div className="min-h-0 flex-1 overflow-y-auto">
         <main className="mx-auto max-w-[1010px] px-6 pt-5 pb-12">

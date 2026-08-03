@@ -16,6 +16,29 @@ export const dayMonthFr = new Intl.DateTimeFormat("fr-FR", {
   month: "short",
 });
 
+// Montant signé : le « + » n'apparaît que sur les crédits, jamais sur zéro.
+// Les débits gardent leur signe naturel. C'est le format de la colonne Montant
+// de la table, où les deux sens se croisent ligne à ligne.
+export const signedEuro = new Intl.NumberFormat("fr-FR", {
+  style: "currency",
+  currency: "EUR",
+  signDisplay: "exceptZero",
+});
+
+// Les contreparties arrivent des banques en capitales (« CAMILLE DURAND »),
+// ce qui crie au milieu d'une colonne de 11,5 px. La maquette les repasse en
+// casse de titre ; les libellés de transaction, eux, n'y touchent pas — ce sont
+// des chaînes bancaires brutes, que réécrire rendrait moins reconnaissables.
+export function titleCase(value: string) {
+  // Le trait d'union compte comme une frontière de mot, sinon « DURAND »
+  // ressort en « Durand ». L'apostrophe, non : elle produirait « L'Oreal ».
+  return value
+    .toLocaleLowerCase("fr-FR")
+    .replace(/(^|[\s-])(\p{L})/gu, (_, boundary: string, letter: string) =>
+      boundary + letter.toLocaleUpperCase("fr-FR"),
+    );
+}
+
 const percentFr = new Intl.NumberFormat("fr-FR", {
   style: "percent",
   maximumFractionDigits: 0,

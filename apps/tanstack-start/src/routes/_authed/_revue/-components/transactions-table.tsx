@@ -3,23 +3,31 @@
 import { useState } from "react";
 
 import type { TransactionRow } from "@budget/api";
-import { FALLBACK_CATEGORY_COLOR } from "@budget/shared";
 import { cn } from "@budget/ui";
 
-import { useCategoryColor } from "~/lib/category-color";
-import { dayMonthFr, euro } from "~/lib/format";
+import type { ParentCategory } from "~/lib/category-lookup";
+import { useParentCategories } from "~/lib/category-lookup";
+import { dayMonthFr, signedEuro, titleCase } from "~/lib/format";
 import { useRevueSearch } from "~/lib/use-revue-search";
 import { useSetCategory } from "~/lib/use-set-category";
+import { CategoryIcon } from "../../categories/-components/category-icon";
 import { CategoryPathPicker } from "./category-path-picker";
 
-// Une seule définition de gabarit pour l'en-tête et les lignes : deux grilles
-// déclarées séparément finissent toujours par diverger d'un pixel.
-//
-// Gouttière et marges reprises de la maquette au facteur ~0,77 appliqué partout
-// dans le portage (24 px → 18, 40 px → 32) ; les tailles de texte et de
-// contrôles, elles, sont au ratio 1:1 comme sur les autres écrans.
+/**
+ * Une seule définition de gabarit pour l'en-tête et les lignes : deux grilles
+ * déclarées séparément finissent toujours par diverger d'un pixel.
+ *
+ * Une seule colonne s'écarte de la maquette : « Compte », 220 px au lieu de 168.
+ * Elle dimensionne la sienne sur des noms de banque *tronqués* — son script
+ * retire « (Commun) » et « (perso) » avant d'afficher. Ici ces suffixes sont ce
+ * qui distingue les deux comptes Caisse d'Épargne : les retirer rendrait deux
+ * lignes indiscernables. À 168 px, l'appariement le plus fréquent des données
+ * réelles (« Revolut (Commun) · Camille Durand », 157 lignes) coupait en
+ * plein milieu du nom — la colonne aurait remplacé deux colonnes lisibles par
+ * une seule tronquée. Les 52 px viennent de « Libellé », seule colonne libre.
+ */
 const GRID =
-  "grid grid-cols-[74px_minmax(120px,1.4fr)_minmax(88px,1fr)_minmax(80px,1fr)_minmax(140px,1.4fr)_96px] items-center gap-4.5 px-8";
+  "grid grid-cols-[74px_minmax(120px,1fr)_220px_244px_118px] items-center gap-4.5 pr-2.5 pl-2";
 
 export function TransactionsTable({
   rows,
@@ -29,84 +37,110 @@ export function TransactionsTable({
   total,
 }: {
   rows: TransactionRow[];
-  /** Ids remontés par la file de relecture — la ligne est teintée. */
+  /** Ids remontés par la file de relecture — la ligne porte une pastille. */
   flagged: Set<number>;
   page: number;
   pageCount: number;
   total: number;
 }) {
-  const { setSearch } = useRevueSearch();
+  const { search, setSearch } = useRevueSearch();
+  const parents = useParentCategories();
+
+  // La maquette éteint la date des lignes qui répètent celle du dessus, pour
+  // faire ressortir les ruptures de journée. Uniquement sous tri par date :
+  // trié par montant, deux dates identiques qui se suivent ne veulent rien dire
+  // et l'estompage mentirait sur la structure de la liste.
+  const grouped = search.sort === "date";
 
   return (
-    <>
+    <div className="min-h-0 flex-1 overflow-y-auto pr-2">
       <div
         className={cn(
           GRID,
-          "label-caps bg-sunken border-border-strong h-[29px] flex-none border-b",
+          // Opaque et au-dessus des lignes : il reste collé en haut pendant que
+          // la liste défile dessous.
+          "label-caps border-border-strong bg-background sticky top-0 z-[2] h-[30px] border-b",
         )}
       >
         <SortableHead label="Date" sortKey="date" />
         <span>Libellé</span>
-        <span>Banque</span>
-        <span>Nom</span>
+        <span>Compte</span>
         <span>Catégorie</span>
         <SortableHead label="Montant" sortKey="amount" className="text-right" />
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        {rows.map((row) => (
-          <Row key={row.id} row={row} flagged={flagged.has(row.id)} />
-        ))}
+      {rows.map((row, index) => (
+        <Row
+          key={row.id}
+          row={row}
+          flagged={flagged.has(row.id)}
+          parents={parents}
+          repeatsDate={grouped && rows[index - 1]?.bookingDate === row.bookingDate}
+        />
+      ))}
 
-        {rows.length === 0 && (
-          <p className="text-muted-foreground py-10 text-center text-[11.5px]">
-            Aucune transaction ne correspond aux filtres.
-          </p>
-        )}
+      {rows.length === 0 && (
+        <p className="text-subtle py-15 text-center text-xs">
+          Aucune transaction ne correspond à ces filtres.
+        </p>
+      )}
 
-        <div className="text-subtle flex items-center justify-center gap-3 p-4 text-[11.5px]">
-          <button
-            type="button"
-            disabled={page <= 1}
-            onClick={() => setSearch({ page: page - 1 })}
-            className="border-border text-muted-foreground hover:bg-accent rounded-[7px] border px-2.5 py-[3px] disabled:opacity-40"
-          >
-            ‹ Précédent
-          </button>
-          <span>
-            Page {page} sur {pageCount} — {total} transactions
-          </span>
-          <button
-            type="button"
-            disabled={page >= pageCount}
-            onClick={() => setSearch({ page: page + 1 })}
-            className="border-border-strong hover:bg-accent rounded-[7px] border px-2.5 py-[3px] disabled:opacity-40"
-          >
-            Suivant ›
-          </button>
-        </div>
+      <div className="text-subtle flex items-center justify-center gap-3 p-4 text-[11.5px]">
+        <button
+          type="button"
+          disabled={page <= 1}
+          onClick={() => setSearch({ page: page - 1 })}
+          className="border-border text-muted-foreground hover:bg-accent rounded-[7px] border px-2.5 py-[3px] disabled:opacity-40"
+        >
+          ‹ Précédent
+        </button>
+        <span>
+          Page {page} sur {pageCount} — {total} transactions
+        </span>
+        <button
+          type="button"
+          disabled={page >= pageCount}
+          onClick={() => setSearch({ page: page + 1 })}
+          className="border-border-strong hover:bg-accent rounded-[7px] border px-2.5 py-[3px] disabled:opacity-40"
+        >
+          Suivant ›
+        </button>
       </div>
-    </>
+    </div>
   );
 }
 
-function Row({ row, flagged }: { row: TransactionRow; flagged: boolean }) {
+function Row({
+  row,
+  flagged,
+  parents,
+  repeatsDate,
+}: {
+  row: TransactionRow;
+  flagged: boolean;
+  parents: Map<string, ParentCategory>;
+  repeatsDate: boolean;
+}) {
   const signed = (row.direction === "debit" ? -1 : 1) * Number(row.amount);
-  const debtor = row.raw.debtor?.name;
+  const debtor = row.raw.debtor?.name ?? row.counterparty;
 
   return (
-    <div
-      className={cn(
-        GRID,
-        "border-border hover:bg-accent h-9 border-b",
-        flagged && "bg-bad-soft",
-      )}
-    >
-      <span className="text-muted-foreground num text-[11.5px]">
+    <div className={cn(GRID, "border-border hover:bg-accent h-11 border-b")}>
+      <span
+        className={cn(
+          "num text-[11.5px]",
+          repeatsDate ? "text-subtle" : "text-muted-foreground",
+        )}
+      >
         {dayMonthFr.format(new Date(row.bookingDate))}
       </span>
+
       <span className="flex min-w-0 items-center gap-1.5">
-        <span className="num truncate text-[12.5px]">{row.description}</span>
+        <span className="truncate text-[13px]">{row.description}</span>
+        {/* La maquette met ici une pastille de « catégorisation peu sûre »,
+            calculée sur un score de confiance dont la base n'a aucun équivalent
+            (voir CLAUDE.md). Même emplacement, mais adossé au seul fait
+            vérifiable : la transaction est dans la file « À revoir ». */}
         {flagged && (
           <span
             className="bg-bad size-1.5 flex-none rounded-full"
@@ -114,51 +148,103 @@ function Row({ row, flagged }: { row: TransactionRow; flagged: boolean }) {
           />
         )}
       </span>
-      <span className="text-muted-foreground truncate text-[12px]">
+
+      <span className="text-subtle truncate text-[11.5px]">
         {row.bankName}
+        {debtor && ` · ${titleCase(debtor)}`}
       </span>
-      <span className="text-subtle truncate text-[12px]">
-        {debtor ?? row.counterparty ?? "—"}
-      </span>
-      <CategoryCell row={row} />
+
+      <CategoryCell row={row} parents={parents} />
+
       <span
-        className={cn("num text-right text-[12.5px]", signed > 0 && "text-ok")}
+        className={cn("num text-right text-[13px]", signed > 0 && "text-ok")}
       >
-        {euro.format(signed)}
+        {signedEuro.format(signed)}
       </span>
     </div>
   );
 }
 
-function CategoryCell({ row }: { row: TransactionRow }) {
+/**
+ * Cellule de catégorie : c'est le bouton « Reclasser » de la maquette, discret
+ * jusqu'au survol.
+ *
+ * Le libellé affiché est la **sous-catégorie** seule, pas le chemin complet —
+ * l'icône de la parente dit déjà la famille. Trois états, dans l'ordre où le
+ * lecteur les rencontre :
+ * — aucune catégorie du tout ;
+ * — posée sur une parente qui a des sous-catégories : c'est « à classer », et le
+ *   libellé nomme la parente pour dire dans laquelle ;
+ * — posée sur une parente sans enfant : classée, rien à ajouter.
+ */
+function CategoryCell({
+  row,
+  parents,
+}: {
+  row: TransactionRow;
+  parents: Map<string, ParentCategory>;
+}) {
   const [picking, setPicking] = useState(false);
   const { setCategory, pending } = useSetCategory();
-  const resolveColor = useCategoryColor();
+  const { setSearch } = useRevueSearch();
+
+  // `categoryPath` vaut « Parent › Enfant », ou le seul nom quand la
+  // transaction est posée sur la parente.
+  const path = row.categoryPath?.split(" › ") ?? [];
+  const parentName = path[0] ?? null;
+  const subName = path[1] ?? null;
+  const parent = parentName === null ? undefined : parents.get(parentName);
+  const aClasser = subName === null && !!parent?.hasChildren;
+
+  const label =
+    parentName === null
+      ? "Sans catégorie"
+      : aClasser
+        ? `À classer · ${parentName}`
+        : (subName ?? parentName);
 
   return (
-    <span className="flex min-w-0 items-center gap-1.5">
-      <span
-        className="size-2 flex-none rounded-[2px]"
-        style={{
-          background: resolveColor(
-            row.categoryColor ?? FALLBACK_CATEGORY_COLOR,
-          ),
-        }}
-      />
+    <span className="flex min-w-0">
       <button
         type="button"
         disabled={pending}
         onClick={() => setPicking(true)}
-        className="hover:border-primary hover:bg-background h-7 min-w-0 flex-1 truncate rounded-[7px] border border-transparent px-1 text-left text-[11.5px]"
+        title="Reclasser"
+        className="hover:border-border-strong hover:bg-card -ml-2 flex h-7 min-w-0 flex-1 items-center gap-2 rounded-[7px] border border-transparent px-1.5 text-left"
       >
-        {row.categoryPath ?? "Sans catégorie"}
+        <span className="flex flex-none" style={{ color: parent?.color }}>
+          <CategoryIcon name={parent?.icon ?? null} className="size-[15px]" />
+        </span>
+        <span
+          className={cn(
+            "min-w-0 truncate text-xs",
+            aClasser || parentName === null
+              ? "text-subtle"
+              : "text-muted-foreground",
+          )}
+        >
+          {label}
+        </span>
+        {/* Corrigée à la main : `category_source = 'manual'` est la seule des
+            trois valeurs qui dise quelque chose au lecteur — llm et auto sont
+            le régime normal. */}
+        {row.categorySource === "manual" && (
+          <span
+            className="bg-primary size-[5px] flex-none rounded-full"
+            title="Catégorie corrigée à la main"
+          />
+        )}
+        <span className="text-subtle ml-auto flex-none text-[9px]">▾</span>
       </button>
+
       <CategoryPathPicker
         open={picking}
         onOpenChange={setPicking}
-        subtitle={`${row.description}  ·  ${euro.format((row.direction === "debit" ? -1 : 1) * Number(row.amount))}`}
+        subtitle={`${row.description}  ·  ${signedEuro.format((row.direction === "debit" ? -1 : 1) * Number(row.amount))}`}
         current={row.category}
         onPick={(name) => void setCategory(row.id, name)}
+        filterOn={parentName}
+        onFilter={(category) => setSearch({ category })}
       />
     </span>
   );

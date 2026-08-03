@@ -2,21 +2,27 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { SearchIcon, TagIcon } from "lucide-react";
 
 import type { TransactionsSearch } from "@budget/shared";
 import { cn } from "@budget/ui";
 import { Dialog, DialogContent, DialogTitle } from "@budget/ui/dialog";
 
-import { useCategoryColor } from "~/lib/category-color";
+import { SearchInput } from "~/component/search-input";
+import { softCategoryColor, useCategoryColor } from "~/lib/category-color";
+import { useParentCategories } from "~/lib/category-lookup";
 import { euro } from "~/lib/format";
 import { wholePeriod } from "~/lib/transactions-search";
 import { useTRPC } from "~/lib/trpc";
 import { useRevueSearch } from "~/lib/use-revue-search";
+import { CategoryIcon } from "../../categories/-components/category-icon";
 
+// Au pluriel, comme les deux totaux qui les surplombent sur `/transactions` :
+// le bouton nomme un ensemble de lignes, pas le sens d'une transaction.
 const SENSES = [
   { value: undefined, label: "Tous" },
-  { value: "debit" as const, label: "Débit" },
-  { value: "credit" as const, label: "Crédit" },
+  { value: "debit" as const, label: "Débits" },
+  { value: "credit" as const, label: "Crédits" },
 ];
 
 // Filtres de *contenu* : ceux que les barres ci-dessous posent et retirent. La
@@ -66,6 +72,16 @@ export function Chip({
 type FilterKey = "category" | "direction" | "aClasser" | "q";
 
 /**
+ * `category` porte une sentinelle : `"none"` ne désigne pas une catégorie
+ * nommée « none » mais l'absence de catégorie (`transactionsFilterQuery` la
+ * traduit en `category_id is null`). Sans cette traduction à l'affichage, la
+ * barre de filtres et le rappel des filtres en cours annonçaient « none ».
+ */
+export function categoryFilterLabel(category: string) {
+  return category === "none" ? "Sans catégorie" : category;
+}
+
+/**
  * Intitulés des filtres de contenu en cours, pour les rappeler ou les compter.
  * La banque n'y figure pas : la pastille de l'en-tête dit déjà « 3/4 comptes »
  * depuis les quatre écrans, la répéter ici ferait trois entrées pour un filtre.
@@ -76,13 +92,18 @@ export function describeFilters(
 ): string[] {
   const keep = (key: FilterKey) => !exclude.includes(key);
   return [
-    keep("category") && search.category,
+    keep("category") && search.category && categoryFilterLabel(search.category),
     keep("direction") &&
       search.direction &&
       (search.direction === "debit" ? "débits" : "crédits"),
     keep("aClasser") && search.aClasser && "à classer",
     keep("q") && search.q && `« ${search.q} »`,
   ].filter((label): label is string => typeof label === "string");
+}
+
+// Séparateur vertical entre groupes de contrôles de la barre (maquette : 1×20).
+function Divider() {
+  return <span className="bg-border h-5 w-px flex-none" />;
 }
 
 /**
@@ -94,33 +115,39 @@ export function RefineBar({
   label,
   sens,
   aClasser,
+  searchField,
   right,
   className,
 }: {
-  label: string;
+  /** Intitulé en capitales. Absent sur `/transactions`, dont la maquette pose
+   *  une barre encadrée qui se passe de titre. */
+  label?: string;
   /** Sélecteur Tous / Débit / Crédit. */
   sens?: boolean;
   /** Pastille « à classer seulement ». */
   aClasser?: boolean;
+  /**
+   * Champ de recherche `q`. Il vivait dans l'en-tête tant que celui-ci portait
+   * les filtres des quatre écrans ; le nouvel en-tête n'en a plus, et
+   * `Transactions.dc.html` le pose dans cette barre — c'est un outil de table,
+   * pas de périmètre. Seule `/transactions` l'affiche : ailleurs, `q` reste
+   * visible et retirable via `<ActiveFilters>`.
+   */
+  searchField?: boolean;
   /** Contenu aligné à droite (compteur de périmètre). */
   right?: React.ReactNode;
   className?: string;
 }) {
   const { search, setSearch } = useRevueSearch();
   const [catOpen, setCatOpen] = useState(false);
-  const resolveColor = useCategoryColor();
-  const trpc = useTRPC();
-
-  // Uniquement pour colorer la pastille d'une catégorie sélectionnée : sans le
-  // garde, chaque changement de filtre relancerait un agrégat complet dont
-  // aucun loader ne préchauffe la clé (ils passent tous un `direction`).
-  const { data: categories } = useQuery({
-    ...trpc.transactions.byCategory.queryOptions(wholePeriod(search)),
-    enabled: !!search.category,
-  });
-  const activeCategory = categories?.find(
-    (c) => c.category === search.category,
-  );
+  // Identité de la catégorie filtrée (icône + teinte). Lue dans l'arborescence
+  // et non dans `transactions.byCategory` : celui-ci n'a pas les icônes, et
+  // aucun loader ne préchauffe sa clé sans `direction` — la pastille déclenchait
+  // un agrégat complet à chaque changement de filtre.
+  const parents = useParentCategories();
+  const activeParent = search.category
+    ? parents.get(search.category)
+    : undefined;
 
   const dirty = !!(search.direction ?? search.category ?? search.aClasser);
 
@@ -128,63 +155,111 @@ export function RefineBar({
     <div
       className={cn("flex flex-wrap items-center gap-x-3 gap-y-2.5", className)}
     >
-      <span className="label-caps mr-0.5">{label}</span>
+      {label && <span className="label-caps mr-0.5">{label}</span>}
 
       {sens && (
-        <div className="bg-secondary border-border flex gap-0.5 rounded-[7px] border p-0.5">
-          {SENSES.map((item) => (
-            <button
-              key={item.label}
-              type="button"
-              onClick={() => setSearch({ direction: item.value })}
-              className={cn(
-                "rounded-[5px] px-2.5 py-0.5 text-[11.5px]",
-                search.direction === item.value
-                  ? "bg-card text-foreground font-semibold"
-                  : "text-muted-foreground",
-              )}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
+        <>
+          {/* Trois boutons autonomes, pas des pastilles dans une coque : seul
+              l'actif prend un bord et le fond de carte. */}
+          <div className="flex flex-none items-center gap-0.5">
+            {SENSES.map((item) => (
+              <button
+                key={item.label}
+                type="button"
+                onClick={() => setSearch({ direction: item.value })}
+                className={cn(
+                  "flex h-[26px] items-center rounded-[7px] border px-2.5 text-xs",
+                  search.direction === item.value
+                    ? "border-border bg-card text-foreground font-semibold"
+                    : "text-muted-foreground border-transparent",
+                )}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+          <Divider />
+        </>
       )}
 
-      <Chip active={!!search.category} onClick={() => setCatOpen(true)}>
-        {activeCategory && (
-          <span
-            className="size-2 rounded-[2px]"
-            style={{ background: resolveColor(activeCategory.color) }}
-          />
+      <button
+        type="button"
+        onClick={() => setCatOpen(true)}
+        className={cn(
+          "flex h-[26px] max-w-[250px] flex-none items-center gap-1.5 rounded-[7px] border px-2.5 text-xs",
+          search.category
+            ? "border-border-strong bg-card font-semibold"
+            : "text-muted-foreground hover:bg-card border-transparent",
         )}
-        {search.category ?? "Toutes"}
-        <span className="text-subtle text-[9px]">▾</span>
-      </Chip>
+      >
+        <span
+          className="flex flex-none"
+          style={{
+            color: activeParent?.color ?? "var(--subtle)",
+          }}
+        >
+          {search.category ? (
+            <CategoryIcon name={activeParent?.icon ?? null} className="size-[13px]" />
+          ) : (
+            <TagIcon className="size-[13px]" />
+          )}
+        </span>
+        <span className="min-w-0 truncate">
+          {search.category ? categoryFilterLabel(search.category) : "Toutes catégories"}
+        </span>
+        <span className="text-subtle flex-none text-[9px]">▾</span>
+      </button>
+
+      {search.category && (
+        <button
+          type="button"
+          title="Retirer le filtre de catégorie"
+          aria-label="Retirer le filtre de catégorie"
+          onClick={() => setSearch({ category: undefined })}
+          className="text-subtle hover:bg-accent hover:text-foreground flex size-[22px] flex-none items-center justify-center rounded-md text-[11px]"
+        >
+          ✕
+        </button>
+      )}
 
       {aClasser && (
-        <Chip
-          tone="warn"
-          active={search.aClasser}
-          onClick={() =>
-            setSearch({ aClasser: search.aClasser ? undefined : true })
-          }
-          title="Transactions rattachées à une catégorie parente qui a des sous-catégories"
-        >
-          <span
-            className="h-[7px] w-3.5 rounded-[2px]"
-            style={{
-              background:
-                "repeating-linear-gradient(115deg,currentColor 0 3px,transparent 3px 7px)",
-            }}
-          />
-          À classer seulement
-        </Chip>
+        <>
+          <Divider />
+          {/* La maquette teinte ce bouton en rouge ; il reste `warn` ici, comme
+              partout dans la revue où les hachures signalent « à classer » (voir
+              CLAUDE.md). Seule la géométrie suit la maquette : h26, rayon 7. */}
+          <button
+            type="button"
+            onClick={() =>
+              setSearch({ aClasser: search.aClasser ? undefined : true })
+            }
+            title="Transactions rattachées à une catégorie parente qui a des sous-catégories"
+            className={cn(
+              "flex h-[26px] flex-none items-center gap-1.5 rounded-[7px] border px-2.5 text-xs font-medium",
+              search.aClasser
+                ? "border-warn bg-warn text-background"
+                : "bg-warn-soft text-warn border-transparent",
+            )}
+          >
+            <span
+              className="h-[7px] w-3.5 rounded-[2px]"
+              style={{
+                background:
+                  "repeating-linear-gradient(115deg,currentColor 0 3px,transparent 3px 7px)",
+              }}
+            />
+            À classer seulement
+          </button>
+        </>
       )}
 
       {dirty && (
         <button
           type="button"
-          className={cn("text-primary text-[11.5px]", !right && "ml-auto")}
+          className={cn(
+            "text-primary text-[11.5px]",
+            !right && !searchField && "ml-auto",
+          )}
           onClick={() => setSearch(CONTEXT_FILTERS)}
         >
           Retirer ces filtres
@@ -195,6 +270,24 @@ export function RefineBar({
         <span className="text-subtle ml-auto text-[11.5px] whitespace-nowrap">
           {right}
         </span>
+      )}
+
+      {searchField && (
+        <div
+          className={cn(
+            "bg-card ml-auto flex h-[30px] max-w-[420px] min-w-[150px] flex-1 items-center gap-2 rounded-lg border px-2.5",
+            search.q ? "border-primary" : "border-border",
+          )}
+        >
+          <SearchIcon className="text-subtle size-3.5 flex-none" />
+          <SearchInput
+            param="q"
+            resetParams={{ page: 1 }}
+            className="h-auto border-0 bg-transparent p-0 text-[12.5px] shadow-none focus-visible:ring-0"
+            placeholder="Rechercher un libellé, une catégorie, un montant…"
+            aria-label="Recherche"
+          />
+        </div>
       )}
 
       <CategoryFilterDialog open={catOpen} onOpenChange={setCatOpen} />
@@ -254,6 +347,7 @@ function CategoryFilterDialog({
   const trpc = useTRPC();
   const { search, setSearch } = useRevueSearch();
   const resolveColor = useCategoryColor();
+  const parents = useParentCategories();
   const { data } = useQuery({
     ...trpc.transactions.byCategory.queryOptions(wholePeriod(search)),
     enabled: open,
@@ -282,16 +376,27 @@ function CategoryFilterDialog({
             <button
               key={item.category || "sans-categorie"}
               type="button"
-              onClick={() => pick(item.category || undefined)}
+              onClick={() => pick(item.category === "" ? "none" : item.category)}
               className={cn(
-                "hover:bg-accent grid w-full grid-cols-[14px_minmax(0,1fr)_78px] items-center gap-2.5 rounded-lg px-2.5 py-1 text-left",
+                "hover:bg-accent grid w-full grid-cols-[22px_minmax(0,1fr)_78px] items-center gap-2.5 rounded-lg px-2.5 py-1 text-left",
                 search.category === item.category && "bg-accent-soft",
               )}
             >
+              {/* Pastille d'icône de la maquette : la teinte de la famille en
+                  fond très pâle, l'icône pleine par-dessus. Le mélange vise
+                  `--card`, donc il s'inverse tout seul en thème sombre. */}
               <span
-                className="size-2.5 rounded-[2px]"
-                style={{ background: resolveColor(item.color) }}
-              />
+                className="flex size-[22px] items-center justify-center rounded-[7px]"
+                style={{
+                  background: softCategoryColor(resolveColor(item.color)),
+                  color: resolveColor(item.color),
+                }}
+              >
+                <CategoryIcon
+                  name={parents.get(item.category)?.icon ?? null}
+                  className="size-[13px]"
+                />
+              </span>
               <span
                 className={cn(
                   "truncate text-[12.5px]",

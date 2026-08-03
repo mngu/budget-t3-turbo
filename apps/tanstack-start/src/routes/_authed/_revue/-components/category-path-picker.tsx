@@ -11,6 +11,7 @@ import { Input } from "@budget/ui/input";
 
 import { shadeCategoryColor, useCategoryColor } from "~/lib/category-color";
 import { useTRPC } from "~/lib/trpc";
+import { CategoryIcon } from "../../categories/-components/category-icon";
 
 export interface CategoryPath {
   /** Catégorie parente. */
@@ -20,6 +21,10 @@ export interface CategoryPath {
   /** Nom réellement écrit en base — c'est lui que la mutation attend. */
   name: string;
   color: string;
+  /** Icône de la parente : elle porte l'identité de la famille entière. */
+  parentIcon: string | null;
+  /** Teinte pleine de la parente, pour son icône (la ligne, elle, se nuance). */
+  parentColor: string;
 }
 
 // Rattacher une transaction à la catégorie parente, c'est précisément ce que la
@@ -48,12 +53,16 @@ function flattenTree(
         sub: PARENT_SUB_LABEL,
         name: parent.name,
         color: base,
+        parentIcon: parent.icon,
+        parentColor: base,
       },
       ...parent.children.map((child, i) => ({
         parent: parent.name,
         sub: child.name,
         name: child.name,
         color: shadeCategoryColor(base, i, count),
+        parentIcon: parent.icon,
+        parentColor: base,
       })),
     ];
   });
@@ -73,6 +82,8 @@ export function CategoryPathPicker({
   subtitle,
   current,
   onPick,
+  filterOn,
+  onFilter,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -81,6 +92,15 @@ export function CategoryPathPicker({
   /** Nom de la catégorie actuellement portée par la transaction. */
   current?: string | null;
   onPick: (name: string) => void;
+  /**
+   * Parente de la transaction, pour le raccourci « Filtrer sur … » du pied de
+   * modale. Absent = pas de pied : le raccourci pose un filtre de catégorie sur
+   * la liste courante, ce qui n'a de sens que là où la liste *est* la sélection
+   * (`/transactions`). Sur `/classer` ou le zoom d'une catégorie, il
+   * restreindrait un écran qui porte déjà son propre périmètre.
+   */
+  filterOn?: string | null;
+  onFilter?: (category: string) => void;
 }) {
   const paths = useCategoryPaths();
   const [query, setQuery] = useState("");
@@ -142,8 +162,17 @@ export function CategoryPathPicker({
                   className="size-2.5 rounded-[2px]"
                   style={{ background: path.color }}
                 />
-                <span className="text-muted-foreground truncate text-[11.5px]">
-                  {path.parent}
+                <span className="text-muted-foreground flex min-w-0 items-center gap-1.5 text-[11.5px]">
+                  <span
+                    className="flex flex-none"
+                    style={{ color: path.parentColor }}
+                  >
+                    <CategoryIcon
+                      name={path.parentIcon}
+                      className="size-[13px]"
+                    />
+                  </span>
+                  <span className="truncate">{path.parent}</span>
                 </span>
                 <span
                   className={`truncate text-[12.5px] ${active ? "font-semibold" : ""}`}
@@ -161,6 +190,29 @@ export function CategoryPathPicker({
               Aucune catégorie ne correspond.
             </p>
           )}
+        </div>
+
+        <div className="border-border text-subtle flex flex-none items-center gap-3 border-t px-3.5 py-2 text-[11px]">
+          {filterOn && onFilter && (
+            <button
+              type="button"
+              className="text-muted-foreground hover:text-foreground text-[11.5px]"
+              onClick={() => {
+                onFilter(filterOn);
+                setQuery("");
+                onOpenChange(false);
+              }}
+            >
+              Filtrer sur {filterOn}
+            </button>
+          )}
+          <button
+            type="button"
+            className="text-primary ml-auto text-[11.5px]"
+            onClick={() => onOpenChange(false)}
+          >
+            Fermer
+          </button>
         </div>
       </DialogContent>
     </Dialog>

@@ -15,7 +15,7 @@ import { useTRPC, useTRPCClient } from "~/lib/trpc";
 import { useRevueSearch } from "~/lib/use-revue-search";
 
 /**
- * Sélecteur de comptes de l'en-tête : les quatre écrans partagent la même
+ * Sélecteur de comptes de l'en-tête : les écrans de la revue partagent la même
  * search, et le filtre banque est le seul qui vaille pour tous. Il vit donc là
  * plutôt que dans les barres « Affiner » propres à chaque écran.
  *
@@ -23,6 +23,10 @@ import { useRevueSearch } from "~/lib/use-revue-search";
  * ne connaît que les banques ayant des transactions sur la période, et un
  * compte sans mouvement ce mois-ci disparaîtrait du panneau — avec lui la seule
  * façon de comprendre pourquoi il ne pèse rien.
+ *
+ * L'en-tête ne le monte que sur les écrans de la revue : sur `/categories` et
+ * `/banques`, il ne commanderait rien (leur search n'a pas de `bank`), et un
+ * filtre qui ne filtre rien est pire qu'un filtre absent.
  */
 export function BankPicker() {
   const trpc = useTRPC();
@@ -50,8 +54,9 @@ export function BankPicker() {
         render={(props) => (
           <button
             type="button"
+            title="Comptes inclus"
             className={cn(
-              "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-[3px] text-[11.5px] whitespace-nowrap",
+              "inline-flex h-[26px] items-center gap-1.5 rounded-full border px-2.5 text-[11.5px] whitespace-nowrap",
               offCount > 0
                 ? "border-primary bg-accent-soft text-primary font-semibold"
                 : "border-border text-muted-foreground hover:border-primary font-medium",
@@ -71,9 +76,16 @@ export function BankPicker() {
           </button>
         )}
       />
-      <PopoverContent align="end" className="w-[308px] p-0">
-        <div className="border-border label-caps border-b p-3.5 text-[11px]">
-          Comptes inclus
+      <PopoverContent align="end" className="w-[290px] gap-0 p-0">
+        {/* La maquette met un « sync 07:12 » en bout de cette rangée. Rien en
+            base n'enregistre qu'une synchronisation a eu lieu (voir CLAUDE.md et
+            `banques/-components/sync-status.tsx`) : la place revient au seul
+            chiffre vérifiable, le volume réellement couvert par la sélection. */}
+        <div className="border-border flex items-baseline gap-2 border-b px-3.5 py-2.5">
+          <span className="label-caps text-[11px]">Comptes inclus</span>
+          <span className="text-subtle ml-auto text-[11px]">
+            {total} transaction{total > 1 ? "s" : ""} sur la période
+          </span>
         </div>
 
         <div className="p-1.5">
@@ -119,20 +131,22 @@ export function BankPicker() {
           )}
         </div>
 
-        <div className="border-border bg-sunken flex items-center gap-2.5 border-t px-3.5 py-2">
-          <span className="text-subtle text-[11px]">
-            {total} transaction{total > 1 ? "s" : ""} sur la période
-          </span>
-          {offCount > 0 && (
+        {/* Rangée d'exclusion : elle n'apparaît que lorsqu'il y a quelque chose
+            à réinitialiser, sinon elle annoncerait « 0 compte exclu ». */}
+        {offCount > 0 && (
+          <div className="border-border bg-sunken flex items-center border-t px-3.5 py-2">
+            <span className="text-subtle text-[11px]">
+              {offCount} compte{offCount > 1 ? "s exclus" : " exclu"}
+            </span>
             <button
               type="button"
               className="text-primary ml-auto text-[11.5px]"
               onClick={() => setSearch({ bank: undefined })}
             >
-              Tout réinitialiser
+              Tout inclure
             </button>
-          )}
-        </div>
+          </div>
+        )}
 
         <div className="border-border border-t p-2">
           <SyncButton onDone={() => setOpen(false)} />
@@ -171,7 +185,7 @@ function SyncButton({ onDone }: { onDone: () => void }) {
       }}
     >
       <RefreshCwIcon className={cn("size-3.5", syncing && "animate-spin")} />
-      {syncing ? "Synchronisation…" : "Synchroniser les comptes"}
+      {syncing ? "Synchronisation…" : "Synchroniser"}
     </button>
   );
 }
