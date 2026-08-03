@@ -164,6 +164,7 @@ function CategoriesPage() {
       page: 1,
       sort: "date",
       order: "desc",
+      internes: "toutes",
       category: name,
     });
     setPreview({
@@ -480,6 +481,7 @@ async function openUncategorizedPreview(
     page: 1,
     sort: "date",
     order: "desc",
+    internes: "toutes",
     category: "none",
   });
   setPreview({

@@ -39,6 +39,8 @@ export default function TransactionsScreen() {
         page: 1,
         sort: "date",
         order: "desc",
+        // Pas de sélecteur de virements internes côté mobile : défaut du schéma.
+        internes: "toutes",
       }),
   });
   const { data: revenuesByCategory = [] } = useQuery({
@@ -50,6 +52,8 @@ export default function TransactionsScreen() {
         page: 1,
         sort: "date",
         order: "desc",
+        // Pas de sélecteur de virements internes côté mobile : défaut du schéma.
+        internes: "toutes",
       }),
   });
 
@@ -62,6 +66,8 @@ export default function TransactionsScreen() {
           page: pageParam,
           sort: "date",
           order: "desc",
+          // Pas de sélecteur de virements internes côté mobile : défaut du schéma.
+          internes: "toutes",
         }),
       initialPageParam: 1,
       getNextPageParam: (_lastPage, pages) =>

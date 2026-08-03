@@ -41,6 +41,7 @@ export const SEARCH_DEFAULTS = {
   page: 1,
   sort: "date",
   order: "desc",
+  internes: "toutes",
 } as const;
 
 // Banques explicitement retenues, sous forme de liste. Vide = aucun filtre,
@@ -82,6 +83,23 @@ export const withoutPaging = <T extends { page: number }>(search: T) => ({
   page: 1,
 });
 
+// Liste qui *détaille un agrégat* — les cartes de « À revoir », les lignes du
+// zoom d'une catégorie. Elles passent par `transactions.list`, qui honore le
+// param `internes` parce qu'il sert aussi le relevé : sans ce retrait explicite,
+// elles montreraient des virements que l'agrégat au-dessus d'elles a écartés
+// (un total qui ne fait pas la somme de ses lignes, sans la mention qui
+// l'explique sur `/transactions`), et `/classer` présenterait un virement
+// interne comme du travail à faire.
+//
+// C'est le prix de la règle « seul le relevé les montre » : elle déplace la
+// décision de la seule `transactionsFilterQuery` vers chaque liste de détail.
+// Toute nouvelle liste bâtie sur `transactions.list` doit passer par ici, sauf
+// à vouloir délibérément le relevé complet.
+export const aggregateDetail = <T extends TransactionsSearch>(search: T) => ({
+  ...search,
+  internes: "masquer" as const,
+});
+
 // Périmètre du mois, tous filtres de contenu retirés : sert aux graphiques et
 // aux tuiles, qui gardent la répartition complète et se contentent de surligner
 // la sélection — sinon cliquer une catégorie la réduirait à 100 % du total.
@@ -90,6 +108,10 @@ export const wholePeriod = <T extends TransactionsSearch>(search: T) => ({
   page: 1,
   category: undefined,
   aClasser: undefined,
+  // Les agrégats écartent les virements internes d'eux-mêmes, quelle que soit
+  // la valeur du param : le laisser passer donnerait trois clés react-query
+  // pour trois réponses identiques, rechargées à chaque bascule de la puce.
+  internes: "toutes" as const,
 });
 
 // Clé de la file de relecture. Les filtres de contenu comptent (le compteur de
@@ -105,4 +127,8 @@ export const reviewScope = <T extends TransactionsSearch>(search: T) => ({
   page: 1,
   sort: "date" as const,
   order: "desc" as const,
+  // Même raison que la pagination : `reviewQueue` écarte les virements internes
+  // sans consulter le param, une clé par valeur ferait clignoter le compteur de
+  // l'onglet au premier clic sur la puce.
+  internes: "toutes" as const,
 });

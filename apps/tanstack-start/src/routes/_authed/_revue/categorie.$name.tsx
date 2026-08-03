@@ -15,6 +15,7 @@ import {
 } from "~/lib/category-color";
 import { euro, sharePercent } from "~/lib/format";
 import {
+  aggregateDetail,
   defaultToCurrentMonth,
   reviewScope,
   SEARCH_DEFAULTS,
@@ -49,7 +50,7 @@ export const Route = createFileRoute("/_authed/_revue/categorie/$name")({
       // Le filtre SQL par catégorie est parent-inclusif : passer le nom du
       // parent remonte aussi les transactions de ses sous-catégories.
       context.trpcClient.transactions.list.query({
-        ...deps,
+        ...aggregateDetail(deps),
         page: 1,
         category: params.name,
         limit: ZOOM_LIMIT,

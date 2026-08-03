@@ -9,6 +9,7 @@ import {
   reviewScope,
   SEARCH_DEFAULTS,
 } from "~/lib/transactions-search";
+import { useRevueSearch } from "~/lib/use-revue-search";
 import { describeFilters, RefineBar } from "./-components/refine-bar";
 import { TransactionsTable } from "./-components/transactions-table";
 
@@ -107,8 +108,18 @@ function ToutesLesTransactions() {
           </div>
         </div>
 
-        <Total label="Débits" totals={totals.debit} className="text-bad" />
-        <Total label="Crédits" totals={totals.credit} className="text-ok" />
+        <Total
+          label="Débits"
+          totals={totals.debit}
+          internal={totals.internal.debit}
+          className="text-bad"
+        />
+        <Total
+          label="Crédits"
+          totals={totals.credit}
+          internal={totals.internal.credit}
+          className="text-ok"
+        />
       </div>
 
       {/* Seul écran à porter tous les filtres : c'est le seul dont la liste est
@@ -117,6 +128,7 @@ function ToutesLesTransactions() {
       <RefineBar
         sens
         aClasser
+        internes
         searchField
         className="border-border bg-surface-2 mt-3 flex-none rounded-[11px] border px-2.5 py-2"
       />
@@ -142,12 +154,17 @@ function ToutesLesTransactions() {
 function Total({
   label,
   totals,
+  internal,
   className,
 }: {
   label: string;
   totals: { total: number; count: number };
+  /** Virements internes écartés de ce total — voir la sous-ligne. */
+  internal: { total: number; count: number };
   className: string;
 }) {
+  const { setSearch } = useRevueSearch();
+
   return (
     <div className={TILE_CLASS}>
       <div className="label-caps">{label}</div>
@@ -155,7 +172,29 @@ function Total({
         {euro.format(totals.total)}
       </div>
       <div className="text-subtle mt-1.5 flex min-h-[19px] items-center text-[11px] whitespace-nowrap">
-        {countFr.format(totals.count)} {totals.count > 1 ? "lignes" : "ligne"}
+        {/* Le total ne fait plus la somme des lignes affichées : les virements
+            entre deux comptes suivis en sont retirés, mais restent listés — le
+            relevé doit se réconcilier avec ce qu'affiche la banque. C'est cette
+            mention qui rend l'écart lisible ; sans elle, mieux vaudrait ne rien
+            exclure. Elle mène à l'écran d'audit, où l'on vérifie ce qui a été
+            apparié et où l'on écarte un faux positif. */}
+        {internal.count > 0 ? (
+          <button
+            type="button"
+            onClick={() => setSearch({ internes: "seulement", page: 1 })}
+            title="Voir les virements entre comptes retirés de ce total"
+            className="hover:text-foreground underline decoration-dotted underline-offset-2"
+          >
+            hors {countFr.format(internal.count)} virement
+            {internal.count > 1 ? "s" : ""} interne
+            {internal.count > 1 ? "s" : ""} ({euro.format(internal.total)})
+          </button>
+        ) : (
+          <>
+            {countFr.format(totals.count)}{" "}
+            {totals.count > 1 ? "lignes" : "ligne"}
+          </>
+        )}
       </div>
     </div>
   );

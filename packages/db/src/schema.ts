@@ -1,5 +1,17 @@
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
-import { boolean, date, index, integer, jsonb, numeric, pgTable, serial, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  date,
+  index,
+  integer,
+  jsonb,
+  numeric,
+  pgTable,
+  serial,
+  text,
+  timestamp,
+  uniqueIndex,
+} from "drizzle-orm/pg-core";
 
 // Configuration Enable Banking (ligne unique, id=1) — alimentée par l'onboarding.
 export const appSettings = pgTable("app_settings", {
@@ -93,7 +105,20 @@ export const transactions = pgTable(
     // 'manual' : corrigé par l'utilisateur — jamais écrasé.
     // 'auto'   : court-circuit déterministe (≥2 similaires même contrepartie).
     // 'llm'    : catégorisé par le LLM (few-shot ou générique).
-    categorySource: text("category_source", { enum: ["llm", "manual", "auto"] }),
+    categorySource: text("category_source", {
+      enum: ["llm", "manual", "auto"],
+    }),
+    // L'autre jambe d'un virement entre deux comptes suivis : les deux lignes
+    // se pointent mutuellement. Une paire n'est neutralisée dans les agrégats
+    // que si ses *deux* jambes sont dans les comptes sélectionnés — voir
+    // `internalTransferOutOfScope` (transactions/queries.ts).
+    transferPairId: integer("transfer_pair_id").references(
+      (): AnyPgColumn => transactions.id,
+    ),
+    // Même contrat que `category_source` : 'manual' n'est jamais écrasé par la
+    // détection. Un `transfer_pair_id` nul avec une source 'manual' est un
+    // « ce n'est pas un virement interne » — la paire ne sera plus reformée.
+    transferSource: text("transfer_source", { enum: ["auto", "manual"] }),
     raw: jsonb("raw").notNull(),
     importedAt: timestamp("imported_at", { withTimezone: true })
       .notNull()
@@ -108,6 +133,7 @@ export const transactions = pgTable(
     index("transactions_direction_idx").on(t.direction),
     index("transactions_status_idx").on(t.status),
     index("transactions_category_id_idx").on(t.categoryId),
+    index("transactions_transfer_pair_id_idx").on(t.transferPairId),
   ],
 );
 

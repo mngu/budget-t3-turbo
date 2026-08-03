@@ -4,6 +4,7 @@ import { syncBanks } from "./banking/fetch-transactions";
 import { categorizeUncategorized } from "./categorization/run";
 import { performImport, performSync } from "./pipeline";
 import { importTransactions } from "./transactions/import";
+import { detectInternalTransfers } from "./transactions/internal-transfers";
 
 // Mocks explicites (avec factory) plutôt que l'automock de vi.mock(path) seul :
 // l'automock importerait le vrai module pour en inspecter la forme, ce qui
@@ -11,13 +12,18 @@ import { importTransactions } from "./transactions/import";
 vi.mock("./banking/fetch-transactions", () => ({ syncBanks: vi.fn() }));
 vi.mock("./transactions/import", () => ({ importTransactions: vi.fn() }));
 vi.mock("./categorization/run", () => ({ categorizeUncategorized: vi.fn() }));
+vi.mock("./transactions/internal-transfers", () => ({
+  detectInternalTransfers: vi.fn(),
+}));
 
 const syncMock = vi.mocked(syncBanks);
 const runImportMock = vi.mocked(importTransactions);
 const runCategorizeMock = vi.mocked(categorizeUncategorized);
+const detectTransfersMock = vi.mocked(detectInternalTransfers);
 
 beforeEach(() => {
   vi.clearAllMocks();
+  detectTransfersMock.mockResolvedValue({ pairs: 0, updated: 0 });
 });
 
 describe("performSync", () => {
@@ -102,6 +108,38 @@ describe("performSync", () => {
 
     await expect(performSync()).rejects.toThrow("Échec de l'import");
     expect(runCategorizeMock).not.toHaveBeenCalled();
+    expect(detectTransfersMock).not.toHaveBeenCalled();
+  });
+
+  it("apparie les virements internes après l'import et avant la catégorisation", async () => {
+    syncMock.mockResolvedValue({ expired: [], rateLimited: [] });
+    runImportMock.mockResolvedValue(false);
+    runCategorizeMock.mockResolvedValue({ categorized: 0, remaining: 0 });
+
+    await performSync();
+
+    expect(detectTransfersMock).toHaveBeenCalledTimes(1);
+    expect(detectTransfersMock.mock.invocationCallOrder[0]).toBeGreaterThan(
+      runImportMock.mock.invocationCallOrder[0] ?? 0,
+    );
+    expect(detectTransfersMock.mock.invocationCallOrder[0]).toBeLessThan(
+      runCategorizeMock.mock.invocationCallOrder[0] ?? 0,
+    );
+  });
+
+  it("n'échoue pas si l'appariement échoue (best-effort)", async () => {
+    // Même contrat que la catégorisation : un import réussi ne doit jamais être
+    // invalidé par une étape d'enrichissement.
+    syncMock.mockResolvedValue({ expired: [], rateLimited: [] });
+    runImportMock.mockResolvedValue(false);
+    runCategorizeMock.mockResolvedValue({ categorized: 0, remaining: 0 });
+    detectTransfersMock.mockRejectedValue(new Error("boom appariement"));
+
+    await expect(performSync()).resolves.toEqual({
+      expired: [],
+      rateLimited: [],
+    });
+    expect(runCategorizeMock).toHaveBeenCalledTimes(1);
   });
 
   it("n'échoue pas si la catégorisation échoue (best-effort)", async () => {

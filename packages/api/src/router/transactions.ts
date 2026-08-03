@@ -4,6 +4,10 @@ import { z } from "zod/v4";
 import { transactionsSearchSchema } from "@budget/shared";
 
 import {
+  detectInternalTransfers,
+  unlinkInternalTransfer,
+} from "../transactions/internal-transfers";
+import {
   bankCounts,
   listBankLabels,
   listTransactions,
@@ -51,4 +55,13 @@ export const transactionsRouter = {
   updateCategory: protectedProcedure
     .input(z.object({ id: z.number().int().positive(), category: z.string() }))
     .mutation(({ input }) => setTransactionCategory(input.id, input.category)),
+
+  // « Ce n'est pas un virement interne » : casse la paire et la marque `manual`,
+  // hors de portée de la détection — sans quoi la passe suivante la reformerait.
+  unlinkTransfer: protectedProcedure
+    .input(z.object({ id: z.number().int().positive() }))
+    .mutation(({ input }) => unlinkInternalTransfer(input.id)),
+
+  // Relance l'appariement seul, sans import ni appel bancaire. Idempotent.
+  detectTransfers: protectedProcedure.mutation(() => detectInternalTransfers()),
 } satisfies TRPCRouterRecord;

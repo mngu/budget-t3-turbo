@@ -47,6 +47,16 @@ export const transactionsSearchSchema = z.object({
   // autre chose — deux noms voisins pour deux notions distinctes se
   // confondraient à la première relecture.
   aClasser: z.boolean().optional().catch(undefined),
+  // Virements entre deux comptes suivis (`transfer_pair_id`). Ne gouverne que
+  // le **relevé** : les agrégats les excluent en dur, à l'intérieur de chaque
+  // fonction, sans jamais consulter ce param — un agrégat qui laisserait le
+  // choix à l'appelant finirait par afficher des totaux gonflés sans que rien
+  // ne le signale à l'écran (même raison que la neutralisation de `direction`
+  // dans `monthlyHistory`).
+  //
+  // Défaut `toutes` : la table est un relevé, elle doit se réconcilier avec ce
+  // que la banque affiche. `seulement` est l'écran d'audit de la détection.
+  internes: z.enum(["toutes", "masquer", "seulement"]).catch("toutes"),
   sort: z.enum(["date", "amount"]).catch("date"),
   order: z.enum(["asc", "desc"]).catch("desc"),
 });

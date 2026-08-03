@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { SearchIcon, TagIcon } from "lucide-react";
+import { ArrowLeftRightIcon, SearchIcon, TagIcon } from "lucide-react";
 
 import type { TransactionsSearch } from "@budget/shared";
 import { cn } from "@budget/ui";
@@ -25,6 +25,28 @@ const SENSES = [
   { value: "credit" as const, label: "Crédits" },
 ];
 
+// Les trois états des virements entre comptes suivis. « Seulement » est le
+// complément exact de « Masquer » côté serveur : il montre précisément ce que
+// les totaux ont écarté, ce qui en fait l'écran d'audit de la détection.
+const INTERNES = [
+  {
+    value: "toutes" as const,
+    label: "Afficher",
+    title: "Le relevé complet, virements internes compris",
+  },
+  {
+    value: "masquer" as const,
+    label: "Masquer",
+    title:
+      "Retirer les virements dont les deux jambes sont dans les comptes affichés",
+  },
+  {
+    value: "seulement" as const,
+    label: "Seulement",
+    title: "N'afficher que ce que les totaux ont écarté",
+  },
+];
+
 // Filtres de *contenu* : ceux que les barres ci-dessous posent et retirent. La
 // banque n'en fait pas partie — elle se règle depuis l'en-tête, où son état est
 // visible depuis n'importe quel écran.
@@ -32,6 +54,9 @@ const CONTEXT_FILTERS = {
   direction: undefined,
   category: undefined,
   aClasser: undefined,
+  // Valeur par défaut et non `undefined` : `internes` n'est pas optionnel, le
+  // relevé montre tout tant qu'on ne lui demande rien.
+  internes: "toutes",
 } satisfies Partial<TransactionsSearch>;
 
 /**
@@ -69,7 +94,7 @@ export function Chip({
  * Filtres qu'un écran peut neutraliser lui-même. Le zoom d'une catégorie force
  * la sienne : y rappeler `category` annoncerait une restriction qui n'agit pas.
  */
-type FilterKey = "category" | "direction" | "aClasser" | "q";
+type FilterKey = "category" | "direction" | "aClasser" | "q" | "internes";
 
 /**
  * `category` porte une sentinelle : `"none"` ne désigne pas une catégorie
@@ -97,6 +122,11 @@ export function describeFilters(
       search.direction &&
       (search.direction === "debit" ? "débits" : "crédits"),
     keep("aClasser") && search.aClasser && "à classer",
+    keep("internes") &&
+      search.internes !== "toutes" &&
+      (search.internes === "masquer"
+        ? "hors virements internes"
+        : "virements internes seuls"),
     keep("q") && search.q && `« ${search.q} »`,
   ].filter((label): label is string => typeof label === "string");
 }
@@ -115,6 +145,7 @@ export function RefineBar({
   label,
   sens,
   aClasser,
+  internes,
   searchField,
   right,
   className,
@@ -126,6 +157,12 @@ export function RefineBar({
   sens?: boolean;
   /** Pastille « à classer seulement ». */
   aClasser?: boolean;
+  /**
+   * Sélecteur des virements entre comptes suivis. Réservé à `/transactions` :
+   * c'est le seul écran où ces lignes sont visibles — partout ailleurs elles
+   * sont écartées d'office, et un sélecteur n'y commanderait rien.
+   */
+  internes?: boolean;
   /**
    * Champ de recherche `q`. Il vivait dans l'en-tête tant que celui-ci portait
    * les filtres des quatre écrans ; le nouvel en-tête n'en a plus, et
@@ -149,7 +186,9 @@ export function RefineBar({
     ? parents.get(search.category)
     : undefined;
 
-  const dirty = !!(search.direction ?? search.category ?? search.aClasser);
+  const dirty =
+    !!(search.direction ?? search.category ?? search.aClasser) ||
+    search.internes !== "toutes";
 
   return (
     <div
@@ -258,6 +297,40 @@ export function RefineBar({
         </>
       )}
 
+      {internes && (
+        <>
+          <Divider />
+          {/* Trois états plutôt qu'une bascule : « Seulement » n'est pas un
+              filtre de confort, c'est l'écran d'audit de la détection — c'est
+              là qu'on vérifie une paire et qu'on écarte un faux positif. */}
+          <span
+            className="text-subtle flex flex-none items-center gap-1.5 text-[11px]"
+            title="Virements entre deux comptes suivis : ils sont écartés de tous les totaux, mais restent listés ici"
+          >
+            <ArrowLeftRightIcon className="size-[13px]" />
+            Internes
+          </span>
+          <div className="flex flex-none items-center gap-0.5">
+            {INTERNES.map((item) => (
+              <button
+                key={item.value}
+                type="button"
+                title={item.title}
+                onClick={() => setSearch({ internes: item.value, page: 1 })}
+                className={cn(
+                  "flex h-[26px] items-center rounded-[7px] border px-2.5 text-xs",
+                  search.internes === item.value
+                    ? "border-border bg-card text-foreground font-semibold"
+                    : "text-muted-foreground border-transparent",
+                )}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+
       {dirty && (
         <button
           type="button"
@@ -314,7 +387,11 @@ export function ActiveFilters({
   exclude?: FilterKey[];
 }) {
   const { search, setSearch } = useRevueSearch();
-  const filters = describeFilters(search, exclude);
+  // `internes` est toujours retiré ici : seul le relevé l'honore, les écrans qui
+  // affichent ce rappel écartent les virements internes d'office. Le rappeler y
+  // annoncerait une restriction qui n'agit pas — la règle même qui vaut à
+  // `category` d'être exclu sur le zoom.
+  const filters = describeFilters(search, [...(exclude ?? []), "internes"]);
   if (filters.length === 0) return null;
 
   return (

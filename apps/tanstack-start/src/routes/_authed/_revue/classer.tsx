@@ -10,6 +10,7 @@ import { REVIEW_QUEUE_LIMIT, transactionsSearchSchema } from "@budget/shared";
 import { useCategoryColor } from "~/lib/category-color";
 import { euro } from "~/lib/format";
 import {
+  aggregateDetail,
   defaultToCurrentMonth,
   reviewScope,
   SEARCH_DEFAULTS,
@@ -37,7 +38,7 @@ export const Route = createFileRoute("/_authed/_revue/classer")({
   loader: async ({ deps, context }) => {
     const [nv, expenses, review] = await Promise.all([
       context.trpcClient.transactions.list.query({
-        ...deps,
+        ...aggregateDetail(deps),
         page: 1,
         aClasser: true,
         direction: "debit",

@@ -12,6 +12,7 @@ import { useRevueSearch } from "~/lib/use-revue-search";
 import { useSetCategory } from "~/lib/use-set-category";
 import { CategoryIcon } from "../../categories/-components/category-icon";
 import { CategoryPathPicker } from "./category-path-picker";
+import { TransferBadge } from "./transfer-badge";
 
 /**
  * Une seule définition de gabarit pour l'en-tête et les lignes : deux grilles
@@ -139,6 +140,7 @@ function Row({
 
       <span className="flex min-w-0 items-center gap-1.5">
         <span className="truncate text-[13px]">{row.description}</span>
+        <TransferBadge row={row} />
         {/* La maquette met ici une pastille de « catégorisation peu sûre »,
             calculée sur un score de confiance dont la base n'a aucun équivalent
             (voir CLAUDE.md). Même emplacement, mais adossé au seul fait

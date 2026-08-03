@@ -236,7 +236,7 @@ function StepComptes() {
       );
       void navigate({
         to: "/",
-        search: { page: 1, sort: "date", order: "desc" },
+        search: { page: 1, sort: "date", order: "desc", internes: "toutes" },
       });
     } catch (err) {
       toast.error(
