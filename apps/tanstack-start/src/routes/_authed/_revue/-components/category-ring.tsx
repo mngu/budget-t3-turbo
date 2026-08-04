@@ -19,6 +19,11 @@ const RADIUS = 112;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 const ARC_GAP = 2.5;
 const ARC_WIDTH = { base: 30, hover: 36, active: 44 };
+// Halo coloré sous chaque arc. La maquette le calcule sur la teinte à une
+// clarté fixe ; ici il est mélangé depuis la couleur déjà résolue au thème, et
+// c'est le *taux* de mélange qui change de thème — d'où les deux variables CSS
+// posées sur le conteneur plutôt qu'un `resolvedTheme` relu en JS.
+const ARC_GLOW = { base: "6px", lit: "9px" };
 // Une part plus fine que ça n'a pas la place de porter son icône.
 const ICON_MIN_SHARE = 0.022;
 // Rayon de l'icône, en % de la boîte carrée : elle avance vers l'extérieur à
@@ -103,7 +108,10 @@ export function CategoryRing({
     // rendu serveur à zéro qui ferait clignoter l'anneau à l'hydratation.
     <div className="[container-type:size] flex min-h-0 min-w-0 flex-1 items-center justify-center">
       <div
-        className="relative aspect-square w-[min(100cqw,100cqh)]"
+        // Taux de mélange du halo, plus soutenu sur fond sombre. Lu par le
+        // `filter` de chaque arc, qui ne peut pas porter de variante `dark:` :
+        // sa couleur dépend de l'arc et vit donc en style inline.
+        className="relative aspect-square w-[min(100cqw,100cqh)] [--arc-glow-lit:48%] [--arc-glow:32%] dark:[--arc-glow-lit:65%] dark:[--arc-glow:45%]"
         onMouseLeave={() => onHover(null)}
       >
         <svg viewBox="0 0 340 340" className="absolute inset-0 size-full">
@@ -119,7 +127,17 @@ export function CategoryRing({
               strokeWidth={arc.width}
               strokeDasharray={dash(CIRCUMFERENCE, arc.share, ARC_GAP, 1.5)}
               transform={`rotate(${(-90 + arc.offset * 360).toFixed(3)} 170 170)`}
-              className="cursor-pointer"
+              style={{
+                filter: `drop-shadow(0 0 ${
+                  arc.active || arc.hovered ? ARC_GLOW.lit : ARC_GLOW.base
+                } color-mix(in oklab, ${arc.slice.color} var(${
+                  arc.active || arc.hovered ? "--arc-glow-lit" : "--arc-glow"
+                }), transparent))`,
+              }}
+              // La transition est une classe et non un style inline : c'est ce
+              // qui laisse `motion-reduce` la neutraliser, un style inline
+              // gagnant contre toute règle.
+              className="cursor-pointer [transition:stroke-width_200ms_cubic-bezier(0.22,1,0.36,1),stroke-opacity_200ms_ease,filter_200ms_ease] motion-reduce:transition-none"
               onMouseEnter={() => onHover(arc.index)}
               onClick={(event) => {
                 event.stopPropagation();
@@ -142,40 +160,51 @@ export function CategoryRing({
         )}
 
         {/* Le centre ne capte pas la souris : il survolerait les arcs. */}
-        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-[33%] text-center">
-          {center.icon !== null && (
-            <span className="mb-2" style={{ color: center.iconColor }}>
-              <CategoryIcon name={center.icon} className="size-5" />
-            </span>
-          )}
-          {center.name && (
-            <div className="mb-1 max-w-full truncate text-xs font-semibold tracking-[-0.015em]">
-              {center.name}
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-[24%]">
+          {/* Carte translucide posée sur les arcs : c'est le flou qui la
+              détache du halo coloré, pas un aplat opaque — le fond doit rester
+              devinable au travers. */}
+          <div className="border-glass-border bg-glass flex max-w-full flex-col items-center rounded-[18px] border px-[19px] pt-[15px] pb-3.5 text-center shadow-[0_1px_2px_oklch(0_0_0/0.05),0_22px_44px_-22px_oklch(0.25_0.03_265/0.4)] backdrop-blur-[14px] backdrop-saturate-[1.3]">
+            {center.icon !== null && (
+              <span className="mb-2" style={{ color: center.iconColor }}>
+                <CategoryIcon name={center.icon} className="size-5" />
+              </span>
+            )}
+            {center.name && (
+              <div className="mb-1 max-w-full truncate text-xs font-semibold tracking-[-0.015em]">
+                {center.name}
+              </div>
+            )}
+            <div className="num text-[23px] leading-none font-medium tracking-[-0.03em]">
+              {center.amount}
             </div>
-          )}
-          <div className="num text-[23px] leading-none font-medium tracking-[-0.03em]">
-            {center.amount}
+            <div className="label-caps mt-1 whitespace-nowrap">
+              {center.label}
+            </div>
+            {/* Le centre est `pointer-events-none` (il survolerait les arcs) :
+                le bouton doit se les rendre pour lui seul, sans quoi il
+                s'affiche sans jamais répondre au clic. */}
+            {center.onBack && (
+              <button
+                type="button"
+                title="Revenir à toutes les catégories"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  center.onBack?.();
+                }}
+                className="border-border-strong bg-card text-muted-foreground hover:border-subtle hover:text-foreground pointer-events-auto mt-[11px] flex h-6 items-center gap-1.5 rounded-full border pr-2.5 pl-2 text-[11.5px] font-semibold whitespace-nowrap"
+              >
+                <ArrowLeftIcon className="size-[13px]" aria-hidden />
+                Toutes catégories
+                {/* La touche est *aussi* une voie de sortie, mais elle ne
+                    s'annonçait nulle part : la maquette la fait dire par le
+                    bouton plutôt que d'ajouter une mention à part. */}
+                <kbd className="border-border bg-surface-2 num text-subtle ml-0.5 flex h-4 items-center rounded-[4px] border px-[5px] text-[9.5px] font-medium tracking-[0.02em]">
+                  Esc
+                </kbd>
+              </button>
+            )}
           </div>
-          <div className="label-caps mt-1 whitespace-nowrap">
-            {center.label}
-          </div>
-          {/* Le centre est `pointer-events-none` (il survolerait les arcs) : le
-              bouton doit se les rendre pour lui seul, sans quoi il s'affiche
-              sans jamais répondre au clic. */}
-          {center.onBack && (
-            <button
-              type="button"
-              title="Revenir à toutes les catégories"
-              onClick={(event) => {
-                event.stopPropagation();
-                center.onBack?.();
-              }}
-              className="border-border-strong bg-card text-muted-foreground hover:border-subtle hover:text-foreground pointer-events-auto mt-[11px] flex h-6 items-center gap-1.5 rounded-full border pr-2.5 pl-2 text-[11.5px] font-semibold whitespace-nowrap"
-            >
-              <ArrowLeftIcon className="size-[13px]" aria-hidden />
-              Toutes catégories
-            </button>
-          )}
         </div>
       </div>
     </div>

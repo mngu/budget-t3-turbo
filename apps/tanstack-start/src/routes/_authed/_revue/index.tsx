@@ -21,6 +21,13 @@ import { EpureePanel } from "./-components/epuree-panel";
  * `reviewCount` et `reviewDots` sont calculés dans le script mais jamais liés
  * au template — ce dernier n'a d'ailleurs aucun équivalent en base (pas de
  * score de confiance, voir CLAUDE.md).
+ *
+ * S'y est ajouté le 2026-08-04 le **halo derrière l'anneau** : `haloBg`
+ * (dégradé conique des trois plus gros postes, radial une fois un poste ouvert)
+ * et l'animation `@keyframes breathe` qui l'accompagnait sont calculés et
+ * déclarés, mais aucun nœud du template ne les porte. Non portés pour la même
+ * raison que les trois branches ci-dessus : morts dans la maquette, pas
+ * oubliés ici.
  */
 export const Route = createFileRoute("/_authed/_revue/")({
   component: RevueDuMois,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   ArrowLeftRightIcon,
@@ -49,7 +49,6 @@ export type HeaderPage = "revue" | "transactions" | "categories" | "banques";
  * et `Transactions.dc.html` ne le pose pas non plus.
  */
 export function AppHeader({ page }: { page?: HeaderPage }) {
-  const scrolled = useScrolled();
   const isSettings = page === "categories" || page === "banques";
 
   // Appelé inconditionnellement (règle des hooks) mais lu seulement hors des
@@ -65,11 +64,7 @@ export function AppHeader({ page }: { page?: HeaderPage }) {
   return (
     <header
       className={cn(
-        // Fond de page et non fond de carte, sans bordure : la maquette ne
-        // sépare l'en-tête du contenu qu'une fois celui-ci défilé.
         "bg-background relative z-30 flex h-[52px] flex-none items-center gap-3.5 px-5 transition-shadow duration-200",
-        scrolled &&
-          "shadow-[0_1px_0_var(--border),0_6px_16px_-10px_oklch(0_0_0/0.35)]",
       )}
     >
       <div className="flex items-center gap-2.5">
@@ -120,27 +115,6 @@ export function AppHeader({ page }: { page?: HeaderPage }) {
       </div>
     </header>
   );
-}
-
-/**
- * Ombre portée dès que *quelque chose* a défilé. En capture, sur `document` :
- * l'app n'a pas un conteneur défilant unique (la revue en a un par volet,
- * `/categories` en a deux), et l'événement `scroll` ne remonte pas.
- */
-function useScrolled() {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = (event: Event) => {
-      const target = event.target;
-      const top = target instanceof Element ? target.scrollTop : window.scrollY;
-      setScrolled(top > 2);
-    };
-    document.addEventListener("scroll", onScroll, true);
-    return () => document.removeEventListener("scroll", onScroll, true);
-  }, []);
-
-  return scrolled;
 }
 
 function NavIcon({

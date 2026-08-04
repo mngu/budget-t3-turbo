@@ -27,6 +27,8 @@
   --color-subtle: var(--subtle);
   --color-border-strong: var(--border-strong);
   --color-track: var(--track);
+  --color-glass: var(--glass);
+  --color-glass-border: var(--glass-border);
   --color-ok: var(--ok);
   --color-ok-soft: var(--ok-soft);
   --color-warn: var(--warn);
@@ -111,6 +113,11 @@
   --subtle: oklch(0.598 0.012 250);
   --border-strong: oklch(0.852 0.008 250);
   --track: oklch(0.928 0.005 250);
+  /* Carte translucide posée *sur* un fond coloré — le centre de l'anneau. Ce
+     n'est pas `--card` à l'opacité près : elle est plus claire que le fond en
+     thème sombre (0,300 contre 0,262) pour se détacher des arcs. */
+  --glass: oklch(1 0 0 / 72%);
+  --glass-border: oklch(1 0 0 / 90%);
   --accent-soft: oklch(0.954 0.03 265);
   --ok: oklch(0.555 0.14 150);
   --ok-soft: oklch(0.954 0.045 152);
@@ -168,6 +175,8 @@
   --subtle: oklch(0.625 0.011 265);
   --border-strong: oklch(1 0 0 / 15%);
   --track: oklch(1 0 0 / 8%);
+  --glass: oklch(0.3 0.012 265 / 62%);
+  --glass-border: oklch(1 0 0 / 12%);
   --accent-soft: oklch(0.335 0.07 266);
   --ok: oklch(0.752 0.11 152);
   --ok-soft: oklch(0.328 0.055 152);
