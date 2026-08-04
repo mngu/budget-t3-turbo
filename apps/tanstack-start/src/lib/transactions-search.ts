@@ -100,37 +100,23 @@ export const aggregateDetail = <T extends TransactionsSearch>(search: T) => ({
   internes: "masquer" as const,
 });
 
-// Périmètre du mois, tous filtres de contenu retirés : sert aux graphiques et
-// aux tuiles, qui gardent la répartition complète et se contentent de surligner
-// la sélection — sinon cliquer une catégorie la réduirait à 100 % du total.
+// Périmètre du mois, tous filtres de contenu retirés : sert au bandeau, à
+// l'anneau et à la colonne des postes, qui gardent la répartition complète et se
+// contentent de surligner la sélection — sinon cliquer une catégorie la
+// réduirait à 100 % du total.
+//
+// `q` en fait partie : le bandeau annonce le *solde du mois*, une recherche de
+// libellé dans le relevé ne peut pas le déplacer. Ne restent donc que la période
+// et les comptes — un périmètre, pas un filtre.
 export const wholePeriod = <T extends TransactionsSearch>(search: T) => ({
   ...search,
   page: 1,
   category: undefined,
   aClasser: undefined,
+  q: undefined,
   // Les agrégats écartent les virements internes d'eux-mêmes, quelle que soit
   // la valeur du param : le laisser passer donnerait trois clés react-query
   // pour trois réponses identiques, rechargées à chaque bascule de la puce.
-  internes: "toutes" as const,
-});
-
-// Clé de l'historique mensuel dont les écarts « vs moy. » du bandeau tirent leur
-// référence. Les filtres de contenu sont **conservés** : `monthlyHistory`
-// réécrit lui-même les bornes de date et neutralise le sens, mais honore
-// catégorie, « à classer », recherche et comptes. La moyenne porte donc sur le
-// même périmètre que les totaux qu'elle commente — resserrer sur une catégorie
-// compare ce mois-ci aux trois mois de cette catégorie, et non à ceux de toute
-// la base, ce qui ferait annoncer un écart mesuré sur une population que le
-// chiffre au-dessus ne décrit pas.
-//
-// Pagination, tri et `internes` sont neutralisés : la réponse n'en dépend pas
-// (l'historique écarte les virements internes sans consulter le param), et les
-// laisser dans la clé rechargerait tout l'historique à chaque « Suivant ».
-export const historyScope = <T extends TransactionsSearch>(search: T) => ({
-  ...search,
-  page: 1,
-  sort: "date" as const,
-  order: "desc" as const,
   internes: "toutes" as const,
 });
 

@@ -11,10 +11,9 @@ import { euro0, signedEuro0 } from "~/lib/format";
  * de barres proportionnelles ; chacun des trois chiffres porte son écart à la
  * moyenne de référence, en pastille (pourcentage) et en clair (euros).
  *
- * Composant partagé : `/transactions` le monte sur les totaux de la sélection,
- * la revue du mois sur ceux de la période. Il ne calcule aucun écart lui-même —
- * la moyenne de référence dépend du périmètre de l'écran, c'est à l'appelant de
- * la choisir (voir `~/lib/history`).
+ * Monté une seule fois, par le layout `_revue` : les deux écrans qu'il coiffe
+ * disent la même chose du même périmètre. Il ne calcule aucun écart lui-même —
+ * la moyenne de référence est choisie par l'appelant (voir `~/lib/history`).
  */
 /** Un flux du bandeau : son montant *positif* et son écart à la moyenne. */
 interface Flow {
@@ -101,6 +100,49 @@ export function KpiBand({
           />
         </div>
       )}
+    </div>
+  );
+}
+
+/**
+ * Colonne de droite du bandeau, le poste ouvert : intitulé calé à gauche,
+ * contenu sur une rangée de 33 px calée à droite, écart en dessous. Elle
+ * n'existe que tant qu'un poste l'occupe — c'est la contrepartie du bloc de
+ * flux, qui disparaît au même moment.
+ *
+ * Pas de prop de polarité : un poste est toujours une sortie, et une sortie qui
+ * monte est toujours une mauvaise nouvelle.
+ */
+export function KpiFocus({
+  label,
+  delta,
+  children,
+}: {
+  label: string;
+  delta: Delta | null;
+  children: React.ReactNode;
+}) {
+  return (
+    // Largeur de la colonne de droite. La maquette la calcule (`rdStackPx =
+    // listW - 46`) parce qu'elle mesure tout ; ici les deux valeurs sont posées,
+    // la colonne des postes à 300 px.
+    <div className="flex w-[254px] max-w-full flex-none flex-col items-end">
+      <div className="label-caps self-start whitespace-nowrap">{label}</div>
+      <div className="mt-0.5 flex h-[33px] w-full min-w-0 items-center justify-between gap-3.5">
+        {children}
+      </div>
+      <div className="mt-1.5 flex min-h-[19px] items-center justify-end gap-2.5 whitespace-nowrap">
+        {delta ? (
+          <>
+            <DeltaPill delta={delta} worseWhenUp />
+            <DeltaAmount delta={delta} className="text-subtle text-[11px]" />
+          </>
+        ) : (
+          <span className="text-subtle text-[11px]">
+            Pas d'historique de comparaison
+          </span>
+        )}
+      </div>
     </div>
   );
 }

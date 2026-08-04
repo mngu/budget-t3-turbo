@@ -19,12 +19,8 @@ export interface BreakdownItem {
   title?: string;
 }
 
-/**
- * Largeur de la colonne des postes, partagée par les deux listes qui
- * l'occupent — `BreakdownList` à droite de l'anneau, `CategorySideList` à droite
- * de la table : d'un écran à l'autre c'est la même colonne.
- */
-export const BREAKDOWN_WIDTH = "lg:w-[300px]";
+/** Largeur de la colonne des postes, la même sur les deux écrans du layout. */
+const BREAKDOWN_WIDTH = "w-[300px]";
 
 // La maquette coupe à 13 lignes et replie le reste : au-delà, les barres
 // deviennent illisibles et la colonne déborde.
@@ -36,11 +32,12 @@ export const breakdownScale = (rows: BreakdownItem[]) =>
 
 /**
  * Les postes du niveau affiché, du plus élevé au plus faible, chacun avec sa
- * barre de fond proportionnelle — l'histogramme horizontal qui accompagne
- * l'anneau.
+ * barre de fond proportionnelle — la colonne de droite du layout `_revue`, à
+ * droite de l'anneau sur `/` et de la table sur `/transactions`.
  *
- * Affiché à **toutes** les largeurs : à droite de l'anneau à partir de `lg`,
- * en dessous sur les fenêtres plus étroites.
+ * Masquée sous `lg` : elle ne peut pas s'empiler sous l'écran courant, la table
+ * y prendrait toute la hauteur. L'anneau, lui, se lit seul — son centre affiche
+ * déjà le poste survolé et sa part.
  *
  * Sans intitulé : la maquette calcule toujours son « du plus élevé au plus
  * faible » / « N sous-catégories » mais le masque (`listMetaDisplay: 'none'`) —
@@ -71,15 +68,7 @@ export function BreakdownList({
 
   return (
     <div
-      // `max-h-[45%]` en colonne : l'anneau garde la moitié haute de l'écran et
-      // la liste défile pour son compte, comme elle le fait déjà à droite.
-      className={cn(
-        "flex max-h-[45%] w-full flex-none flex-col pt-0.5 lg:max-h-none",
-        BREAKDOWN_WIDTH,
-      )}
-      // Cliquer *à côté* de l'anneau referme la sélection ; la liste fait
-      // partie de l'écran actif, pas du décor.
-      onClick={(event) => event.stopPropagation()}
+      className={cn("hidden flex-none flex-col pt-0.5 lg:flex", BREAKDOWN_WIDTH)}
     >
       <div className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto">
         {shown.map((row) => (
