@@ -1,5 +1,7 @@
 "use client";
 
+import { ArrowLeftIcon } from "lucide-react";
+
 import { CategoryIcon } from "../../categories/-components/category-icon";
 
 export interface RingSlice {
@@ -68,6 +70,12 @@ export function CategoryRing({
     name: string;
     amount: string;
     label: string;
+    /**
+     * Remonter d'un niveau. Absent tant que rien n'est sélectionné : le bouton
+     * n'occupe alors aucune place, plutôt que de creuser un trou permanent sous
+     * le libellé du centre.
+     */
+    onBack?: () => void;
   };
 }) {
   const layout = arcLayout(slices.map((s) => s.total));
@@ -151,6 +159,23 @@ export function CategoryRing({
           <div className="label-caps mt-1 whitespace-nowrap">
             {center.label}
           </div>
+          {/* Le centre est `pointer-events-none` (il survolerait les arcs) : le
+              bouton doit se les rendre pour lui seul, sans quoi il s'affiche
+              sans jamais répondre au clic. */}
+          {center.onBack && (
+            <button
+              type="button"
+              title="Revenir à toutes les catégories"
+              onClick={(event) => {
+                event.stopPropagation();
+                center.onBack?.();
+              }}
+              className="border-border-strong bg-card text-muted-foreground hover:border-subtle hover:text-foreground pointer-events-auto mt-[11px] flex h-6 items-center gap-1.5 rounded-full border pr-2.5 pl-2 text-[11.5px] font-semibold whitespace-nowrap"
+            >
+              <ArrowLeftIcon className="size-[13px]" aria-hidden />
+              Toutes catégories
+            </button>
+          )}
         </div>
       </div>
     </div>

@@ -26,14 +26,8 @@ export function shadeCategoryColor(
   return `color-mix(in oklab, ${color} ${ratio}%, var(--card))`;
 }
 
-// Aplat très pâle de la teinte d'une catégorie : fond de la portion non
-// à classer des barres, sous les hachures. Même principe de mélange vers `--card`.
+// Aplat très pâle de la teinte d'une catégorie : pastille de couleur, fond de
+// puce. Même principe de mélange vers `--card`.
 export function softCategoryColor(color: string) {
   return `color-mix(in oklab, ${color} 22%, var(--card))`;
-}
-
-// Hachures à 115° : c'est le motif qui signale « à classer » partout dans la
-// revue — barres de catégories, jauges des tuiles, rangs du rail « À revoir ».
-export function hatchedBackground(color: string, background: string) {
-  return `repeating-linear-gradient(115deg, ${color} 0 4px, transparent 4px 9px), ${background}`;
 }

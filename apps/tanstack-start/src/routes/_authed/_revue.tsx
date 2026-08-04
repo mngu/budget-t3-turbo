@@ -7,11 +7,10 @@ import {
 
 import { transactionsSearchSchema } from "@budget/shared";
 
-import type { BreakdownItem } from "./_revue/-components/breakdown-list";
 import type { EpureeCategory } from "./_revue/-components/epuree-panel";
 import type { HeaderPage } from "~/component/app-header";
 import { AppHeader } from "~/component/app-header";
-import { shadeCategoryColor, useCategoryColor } from "~/lib/category-color";
+import { useCategoryColor } from "~/lib/category-color";
 import { euro } from "~/lib/format";
 import {
   averagesByCategory,
@@ -26,23 +25,26 @@ import {
   wholePeriod,
 } from "~/lib/transactions-search";
 import { useRevueSearch } from "~/lib/use-revue-search";
-import { BreakdownList } from "./_revue/-components/breakdown-list";
 import { KpiBand, KpiFocus } from "./_revue/-components/kpi-band";
 import { CategoryIcon } from "./categories/-components/category-icon";
 
 /**
- * Coque des écrans de la revue : en-tête persistant, bandeau de tête et colonne
- * des postes de sortie, autour de l'écran courant (l'anneau sur `/`, la table
- * sur `/transactions`). Hauteur fixée au viewport, chaque volet scrollant pour
- * son compte.
+ * Coque des écrans de la revue : en-tête persistant et bandeau de tête, autour
+ * de l'écran courant (l'anneau sur `/`, la table sur `/transactions`). Hauteur
+ * fixée au viewport, chaque volet scrollant pour son compte.
  *
- * **Le bandeau et la colonne sont ici et non dans les routes** : les deux écrans
- * en disent désormais la même chose, sur le même périmètre — celui de la revue.
+ * **Le bandeau est ici et non dans les routes** : les deux écrans en disent
+ * désormais la même chose, sur le même périmètre — celui de la revue.
  * `/transactions` affichait auparavant les totaux de la *sélection*
  * (`transactions.totals`, tous filtres appliqués) sous le libellé « Solde de la
  * sélection » ; ils ont été retirés avec `historyScope` et `CategorySideList`.
  * Conséquence assumée : filtrer une catégorie ne bouge plus les chiffres du
  * bandeau, il décrit le mois entier pendant que la table décrit la sélection.
+ *
+ * La **colonne des postes**, elle, est montée par chaque écran : sur `/` un clic
+ * sur une de ses lignes fait descendre l'anneau, geste qu'elle ne pourrait pas
+ * commander d'ici (voir `EpureePanel`). Le layout lui fournit ses données —
+ * `categories` — et rien d'autre.
  *
  * Le périmètre est `wholePeriod` : `category`, `aClasser` et la recherche en
  * sont retirés, sinon filtrer un poste le porterait à 100 % de sa propre
@@ -216,7 +218,7 @@ function RevueLayout() {
     expensesDelta,
     balanceDelta,
   } = Route.useLoaderData();
-  const { search, setSearch } = useRevueSearch();
+  const { search } = useRevueSearch();
   const resolveColor = useCategoryColor();
 
   // Le poste ouvert est une fonction pure du search param : filtrer une parente
@@ -230,28 +232,6 @@ function RevueLayout() {
         categories.find((c) =>
           c.subs.some((s) => s.filter === search.category),
         ))) ?? null;
-
-  const rows: BreakdownItem[] = parent
-    ? // Une sous-catégorie n'a pas de couleur propre : c'est un palier de la
-      // teinte de son parent, du plus dense au plus proche de la surface. Lignes
-      // de lecture seule — les sous-catégories ne se creusent pas, et sur `/`
-      // c'est l'anneau qui les sélectionne.
-      parent.subs.map((sub, index) => ({
-        name: sub.name,
-        total: sub.total,
-        color: shadeCategoryColor(
-          resolveColor(parent.color),
-          index,
-          parent.subs.length,
-        ),
-      }))
-    : categories.map((category) => ({
-        name: category.name,
-        total: category.total,
-        color: resolveColor(category.color),
-        title: `N'afficher que « ${category.name} »`,
-        onSelect: () => setSearch({ category: category.filter }),
-      }));
 
   return (
     // text-[13px] : la base typographique de la maquette. Les tailles fines
@@ -270,11 +250,10 @@ function RevueLayout() {
               label="Solde du mois"
               balance={balance}
               balanceDelta={balanceDelta}
-              // Les deux rangées de flux **cèdent la place** au poste ouvert
-              // (`showFlow: !parent` dans la maquette) : elles ne se compriment
-              // pas à côté de lui. C'est ce qui laisse au poste toute la droite
-              // du bandeau, et au solde du mois le seul rôle d'ancre pendant
-              // qu'on navigue dans les postes.
+              // Les deux rangées de flux restent affichées quand un poste
+              // s'ouvre (`showFlow: true` dans la maquette depuis le passage du
+              // poste ouvert en colonne à part) : le solde et les deux flux
+              // décrivent le mois, le poste vient à côté et non à leur place.
               flow={{
                 revenues: { amount: revenues, delta: revenuesDelta },
                 expenses: { amount: expenses, delta: expensesDelta },
@@ -307,9 +286,9 @@ function RevueLayout() {
           )}
         </div>
 
+        {/* Chaque écran rend son contenu **et** sa colonne des postes. */}
         <div className="mt-5 flex min-h-0 flex-1 gap-5">
           <Outlet />
-          <BreakdownList rows={rows} fold={parent !== null} />
         </div>
       </div>
     </div>

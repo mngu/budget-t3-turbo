@@ -75,31 +75,6 @@ export function toggleBank(
     : next;
 }
 
-// Périmètre « toutes les transactions du mois » : les listes qui ne paginent pas
-// (revue, « À revoir », zoom catégorie) doivent neutraliser la pagination du
-// schéma partagé plutôt que d'hériter de la page courante de la table.
-export const withoutPaging = <T extends { page: number }>(search: T) => ({
-  ...search,
-  page: 1,
-});
-
-// Liste qui *détaille un agrégat* — les cartes de « À revoir », les lignes du
-// zoom d'une catégorie. Elles passent par `transactions.list`, qui honore le
-// param `internes` parce qu'il sert aussi le relevé : sans ce retrait explicite,
-// elles montreraient des virements que l'agrégat au-dessus d'elles a écartés
-// (un total qui ne fait pas la somme de ses lignes, sans la mention qui
-// l'explique sur `/transactions`), et `/classer` présenterait un virement
-// interne comme du travail à faire.
-//
-// C'est le prix de la règle « seul le relevé les montre » : elle déplace la
-// décision de la seule `transactionsFilterQuery` vers chaque liste de détail.
-// Toute nouvelle liste bâtie sur `transactions.list` doit passer par ici, sauf
-// à vouloir délibérément le relevé complet.
-export const aggregateDetail = <T extends TransactionsSearch>(search: T) => ({
-  ...search,
-  internes: "masquer" as const,
-});
-
 // Périmètre du mois, tous filtres de contenu retirés : sert au bandeau, à
 // l'anneau et à la colonne des postes, qui gardent la répartition complète et se
 // contentent de surligner la sélection — sinon cliquer une catégorie la

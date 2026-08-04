@@ -7,6 +7,7 @@ import type { Delta } from "~/lib/history";
 import { shadeCategoryColor, useCategoryColor } from "~/lib/category-color";
 import { euro0, sharePercent } from "~/lib/format";
 import { useRevueSearch } from "~/lib/use-revue-search";
+import { BreakdownList, breakdownRows } from "./breakdown-list";
 import { CategoryRing } from "./category-ring";
 
 /** Une catégorie parente de sortie, telle que l'anneau la manipule. */
@@ -39,8 +40,14 @@ export interface EpureeCategory {
 }
 
 /**
- * L'anneau de la revue du mois, et lui seul : le bandeau de tête et la colonne
- * des postes vivent dans le layout `_revue`, partagés avec `/transactions`.
+ * L'anneau de la revue du mois et la colonne des postes à sa droite. Le bandeau
+ * de tête, lui, vit dans le layout `_revue`, partagé avec `/transactions`.
+ *
+ * **La colonne est montée ici et non par le layout** : cliquer une de ses lignes
+ * fait *descendre* l'anneau dans les sous-catégories du poste, et ce niveau est
+ * un état de cet écran (`sel`). Le composant qui commande le niveau doit donc
+ * porter le gestionnaire de la ligne — toute autre répartition demanderait de
+ * partager cet état à travers l'`Outlet`.
  *
  * L'anneau interne de sous-catégories de la maquette n'est pas porté : elle ne
  * l'affiche qu'*à la place* de la colonne, quand celle-ci ne tient plus en
@@ -59,15 +66,9 @@ export function EpureePanel({
   const { search, setSearch } = useRevueSearch();
 
   // `sel` et « l'arc surligné » ne sont pas deux tailles du même geste, et c'est
-  // tout le ressort de l'écran : cliquer un arc fait *descendre* l'anneau dans
-  // les sous-catégories du poste, cliquer une ligne de la colonne de droite le
-  // met **en avant** sans quitter le niveau des parents.
-  //
-  // Les deux gestes étaient inversés jusqu'au passage du bandeau et de la
-  // colonne dans le layout `_revue` : la colonne n'est plus ici, elle ne peut
-  // plus commander le niveau de l'anneau, et c'est donc l'arc qui descend.
-  // L'ensemble des états atteignables est le même, seule la correspondance
-  // geste → état change.
+  // tout le ressort de l'écran : cliquer une ligne de la colonne fait *descendre*
+  // l'anneau dans les sous-catégories du poste, cliquer un arc le met **en
+  // avant** sans quitter le niveau des parents (et le re-cliquer le relâche).
   //
   // L'arc surligné vit dans l'URL (`category`) et non dans un état local : c'est
   // la même sélection que celle de la table, et elle la suit. Le niveau, lui,
@@ -164,76 +165,112 @@ export function EpureePanel({
     (activeIndex >= 0 ? slices[activeIndex] : null) ??
     null;
 
-  return (
-    // Cliquer à côté referme, comme la touche Échap. L'anneau s'étire sur toute
-    // la place disponible (pas d'`items-center`) : c'est de là qu'il tire sa
-    // taille, sa boîte carrée étant en confinement de taille — centrée dans un
-    // conteneur à dimension automatique, elle s'effondrerait à zéro.
-    <div className="relative flex min-h-0 min-w-0 flex-1" onClick={clear}>
-      <CategoryRing
-        slices={slices}
-        activeIndex={activeIndex >= 0 ? activeIndex : null}
-        hoverIndex={hover}
-        onHover={setHover}
-        // Les arcs sont dans l'ordre de `subs` / `categories`, dont `slices`
-        // est le calque : l'index désigne la même part des deux côtés.
-        onActivate={(index) => {
-          // Au niveau des parents, l'arc fait descendre. Le survol est remis à
-          // zéro : son index désignerait une part de l'ancien niveau.
-          if (!selected) {
-            const category = categories[index];
-            if (!category) return;
-            setSel(category.name);
-            setHover(null);
-            setAClasserSel(false);
-            setSearch({ category: category.filter });
-            return;
-          }
-          const sub = selected.subs[index];
-          if (!sub) return;
-          // Ancrer la descente avant de toucher au param. Sans ça, une visite
-          // arrivée par une sous-catégorie (`sel` encore nul, le niveau ne
-          // tenant qu'au param) remonterait d'un cran dès que le filtre
-          // revient sur la parente — ce que font le dépointage et « À classer ».
-          setSel(selected.name);
-          // « À classer » n'est pas une catégorie de la base : le poser dans
-          // l'URL donnerait un filtre sans résultat. Seul segment dont le
-          // surlignage ne quitte pas la page.
-          if (sub.filter === null) {
-            setAClasserSel((current) => !current);
-            // Le filtre revient sur la parente : c'est ce que le segment
-            // désigne de plus précis, et c'est aussi ce qui ancre le
-            // pense-bête local (voir `subSelected`).
-            setSearch({ category: selected.filter });
-            return;
-          }
+  // Les lignes de la colonne. Au niveau des parents chacune est une porte
+  // d'entrée vers ses enfants ; une fois descendu, elles sont en lecture seule —
+  // c'est l'anneau qui surligne une sous-catégorie.
+  const rows = breakdownRows(categories, parent, resolveColor).map(
+    (row, index) => {
+      if (parent) return row;
+      const category = categories[index];
+      return {
+        ...row,
+        title: `Voir la répartition de « ${row.name} »`,
+        onSelect: () => {
+          if (!category) return;
+          setSel(category.name);
+          // Le survol est remis à zéro : son index désignerait une part de
+          // l'ancien niveau.
+          setHover(null);
           setAClasserSel(false);
-          setSearch({
-            category:
-              search.category === sub.filter
-                ? // Retirer le surlignage d'une sous-catégorie ne remonte pas
-                  // d'un cran : on est toujours *dans* le poste ouvert, et le
-                  // filtre revient donc à lui, pas à rien.
-                  selected.filter
-                : sub.filter,
-          });
-        }}
-        center={{
-          icon: focus
-            ? selected
-              ? null
-              : (categories.find((c) => c.name === focus.name)?.icon ?? null)
-            : (selected?.icon ?? null),
-          iconColor: focus ? focus.color : parentColor || "var(--subtle)",
-          name: focus?.name ?? selected?.name ?? "",
-          amount: euro0.format(focus?.total ?? selected?.total ?? levelTotal),
-          label: focus
-            ? `${sharePercent(focus.total, levelTotal)} ${selected ? "du poste" : "du total"}`
-            : selected
-              ? `${sharePercent(selected.total, expenses)} du total`
-              : "Sorties",
-        }}
-      />
-    </div>
+          setSearch({ category: category.filter });
+        },
+      };
+    },
+  );
+
+  return (
+    <>
+      {/* L'anneau s'étire sur toute la place disponible (pas d'`items-center`) :
+          c'est de là qu'il tire sa taille, sa boîte carrée étant en confinement
+          de taille — centrée dans un conteneur à dimension automatique, elle
+          s'effondrerait à zéro. */}
+      <div className="relative flex min-h-0 min-w-0 flex-1">
+        <CategoryRing
+          slices={slices}
+          activeIndex={activeIndex >= 0 ? activeIndex : null}
+          hoverIndex={hover}
+          onHover={setHover}
+          // Les arcs sont dans l'ordre de `subs` / `categories`, dont `slices`
+          // est le calque : l'index désigne la même part des deux côtés.
+          onActivate={(index) => {
+            // Au niveau des parents, l'arc surligne sans faire descendre, et le
+            // re-cliquer relâche — c'est la colonne qui descend.
+            if (!selected) {
+              const category = categories[index];
+              if (!category) return;
+              setHover(null);
+              setAClasserSel(false);
+              setSearch({
+                category:
+                  search.category === category.filter
+                    ? undefined
+                    : category.filter,
+              });
+              return;
+            }
+            const sub = selected.subs[index];
+            if (!sub) return;
+            // Ancrer la descente avant de toucher au param. Sans ça, une visite
+            // arrivée par une sous-catégorie (`sel` encore nul, le niveau ne
+            // tenant qu'au param) remonterait d'un cran dès que le filtre
+            // revient sur la parente — ce que font le dépointage et « À classer ».
+            setSel(selected.name);
+            // « À classer » n'est pas une catégorie de la base : le poser dans
+            // l'URL donnerait un filtre sans résultat. Seul segment dont le
+            // surlignage ne quitte pas la page.
+            if (sub.filter === null) {
+              setAClasserSel((current) => !current);
+              // Le filtre revient sur la parente : c'est ce que le segment
+              // désigne de plus précis, et c'est aussi ce qui ancre le
+              // pense-bête local (voir `subSelected`).
+              setSearch({ category: selected.filter });
+              return;
+            }
+            setAClasserSel(false);
+            setSearch({
+              category:
+                search.category === sub.filter
+                  ? // Retirer le surlignage d'une sous-catégorie ne remonte pas
+                    // d'un cran : on est toujours *dans* le poste ouvert, et le
+                    // filtre revient donc à lui, pas à rien.
+                    selected.filter
+                  : sub.filter,
+            });
+          }}
+          center={{
+            icon: focus
+              ? selected
+                ? null
+                : (categories.find((c) => c.name === focus.name)?.icon ?? null)
+              : (selected?.icon ?? null),
+            iconColor: focus ? focus.color : parentColor || "var(--subtle)",
+            name: focus?.name ?? selected?.name ?? "",
+            amount: euro0.format(focus?.total ?? selected?.total ?? levelTotal),
+            label: focus
+              ? `${sharePercent(focus.total, levelTotal)} ${selected ? "du poste" : "du total"}`
+              : selected
+                ? `${sharePercent(selected.total, expenses)} du total`
+                : "Sorties",
+            // Troisième voie de sortie, avec Échap et le clic à côté : la
+            // maquette l'a ajoutée parce que les deux autres ne s'annoncent
+            // nulle part. Ne pas en supprimer une en croyant les autres
+            // suffisantes.
+            onBack: parent ? clear : undefined,
+          }}
+        />
+      </div>
+
+      <BreakdownList rows={rows} fold={parent !== null} />
+    </>
   );
 }

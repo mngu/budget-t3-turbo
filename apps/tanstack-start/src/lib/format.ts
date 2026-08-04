@@ -1,7 +1,6 @@
-// Formateurs Intl partagés. Ils étaient redéclarés à l'identique dans la route
-// des transactions, transaction-preview-drawer et range-picker : un
-// Intl.NumberFormat est coûteux à construire et doit de toute façon rester
-// cohérent d'un écran à l'autre.
+// Formateurs Intl partagés. Ils étaient redéclarés à l'identique d'un écran à
+// l'autre : un Intl.NumberFormat est coûteux à construire et doit de toute
+// façon rester cohérent partout.
 export const euro = new Intl.NumberFormat("fr-FR", {
   style: "currency",
   currency: "EUR",

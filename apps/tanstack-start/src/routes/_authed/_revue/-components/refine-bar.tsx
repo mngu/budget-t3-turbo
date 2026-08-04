@@ -60,43 +60,6 @@ const CONTEXT_FILTERS = {
 } satisfies Partial<TransactionsSearch>;
 
 /**
- * Pastille de filtre : même gabarit pour catégorie, « à classer » et comptes.
- * La variante `warn` sert au seul filtre « à classer », qui reprend partout
- * dans la revue la couleur d'alerte plutôt que l'accent.
- */
-export function Chip({
-  active,
-  tone = "accent",
-  className,
-  ...props
-}: React.ComponentProps<"button"> & {
-  active?: boolean;
-  tone?: "accent" | "warn";
-}) {
-  return (
-    <button
-      type="button"
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-[3px] text-[11.5px]",
-        active
-          ? tone === "warn"
-            ? "border-warn bg-warn-soft text-warn font-semibold"
-            : "border-primary bg-accent-soft text-primary font-semibold"
-          : "border-border bg-card text-muted-foreground hover:border-primary",
-        className,
-      )}
-      {...props}
-    />
-  );
-}
-
-/**
- * Filtres qu'un écran peut neutraliser lui-même. Le zoom d'une catégorie force
- * la sienne : y rappeler `category` annoncerait une restriction qui n'agit pas.
- */
-type FilterKey = "category" | "direction" | "aClasser" | "q" | "internes";
-
-/**
  * `category` porte une sentinelle : `"none"` ne désigne pas une catégorie
  * nommée « none » mais l'absence de catégorie (`transactionsFilterQuery` la
  * traduit en `category_id is null`). Sans cette traduction à l'affichage, la
@@ -104,31 +67,6 @@ type FilterKey = "category" | "direction" | "aClasser" | "q" | "internes";
  */
 export function categoryFilterLabel(category: string) {
   return category === "none" ? "Sans catégorie" : category;
-}
-
-/**
- * Intitulés des filtres de contenu en cours, pour les rappeler ou les compter.
- * La banque n'y figure pas : la pastille de l'en-tête dit déjà « 3/4 comptes »
- * depuis les quatre écrans, la répéter ici ferait trois entrées pour un filtre.
- */
-export function describeFilters(
-  search: TransactionsSearch,
-  exclude: FilterKey[] = [],
-): string[] {
-  const keep = (key: FilterKey) => !exclude.includes(key);
-  return [
-    keep("category") && search.category && categoryFilterLabel(search.category),
-    keep("direction") &&
-      search.direction &&
-      (search.direction === "debit" ? "débits" : "crédits"),
-    keep("aClasser") && search.aClasser && "à classer",
-    keep("internes") &&
-      search.internes !== "toutes" &&
-      (search.internes === "masquer"
-        ? "hors virements internes"
-        : "virements internes seuls"),
-    keep("q") && search.q && `« ${search.q} »`,
-  ].filter((label): label is string => typeof label === "string");
 }
 
 // Séparateur vertical entre groupes de contrôles de la barre (maquette : 1×20).

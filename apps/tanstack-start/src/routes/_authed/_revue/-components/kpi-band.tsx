@@ -123,10 +123,11 @@ export function KpiFocus({
   children: React.ReactNode;
 }) {
   return (
-    // Largeur de la colonne de droite. La maquette la calcule (`rdStackPx =
-    // listW - 46`) parce qu'elle mesure tout ; ici les deux valeurs sont posées,
-    // la colonne des postes à 300 px.
-    <div className="flex w-[254px] max-w-full flex-none flex-col items-end">
+    // Largeur de la colonne de droite. La maquette la calcule, mais avec la
+    // *même* expression que la colonne des postes (`rdStackPx === listPx`) :
+    // c'est un alignement, pas une coïncidence — d'où la reprise à l'identique
+    // du `BREAKDOWN_WIDTH` de `breakdown-list.tsx`.
+    <div className="flex w-[300px] max-w-full flex-none flex-col items-end">
       <div className="label-caps self-start whitespace-nowrap">{label}</div>
       <div className="mt-0.5 flex h-[33px] w-full min-w-0 items-center justify-between gap-3.5">
         {children}
