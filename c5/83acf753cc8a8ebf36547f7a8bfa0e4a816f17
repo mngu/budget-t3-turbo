@@ -1,0 +1,104 @@
+apps/tanstack-start/src/routes/_authed/_revue/transactions.tsx
+  s_1d04036ae4e69f::t_476a0b1e415b39 15
+  s_1d04036ae4e69f::t_8e127337cac84c 54-57,59
+  s_1d04036ae4e69f::t_ccf5ac48075824 75-76,97,102-103,115,128-130,132-156,172
+  s_1d04036ae4e69f::t_00064a8fc6981e 14
+  s_1d04036ae4e69f::t_119d491e62d673 32-34
+  s_1d04036ae4e69f::t_38d7fbb6c3d506 58,60-61
+  s_1d04036ae4e69f::t_237a56f0fe2ef1 79,82-93,98-101,104-105,118-123,126,131,164-171,173-176,178-181,184-190,192-203,206-220
+  s_1d04036ae4e69f::t_3ad513e98a8cc4 28-30
+  s_40fa13b406b068::t_e6d1a1fb361810 157
+  s_1d04036ae4e69f::t_170920da308978 6
+  s_40fa13b406b068::t_a3a2d824117979 9
+  s_1d04036ae4e69f::t_ccfccbc4d6c581 106-114
+  s_1d04036ae4e69f::t_eed91dd3868be2 66
+  s_1d04036ae4e69f::t_f7c713b5722d21 26
+  s_40fa13b406b068::t_2999f411490b00 158
+apps/tanstack-start/src/routes/_authed/_revue/-components/epuree-panel.tsx
+  s_1d04036ae4e69f::t_11aa3759e65f14 56-58
+  s_40fa13b406b068::t_4b5c28610d04ce 273-274,276-277,283-287,294-296,303
+  s_40fa13b406b068::t_49f15362f85bb6 192-193,197-198
+  s_40fa13b406b068::t_a509cbaaa8c0e0 297-302
+  s_1d04036ae4e69f::t_413eeb22e4bc37 329-332
+  s_40fa13b406b068::t_6f7938d33ca604 278-282
+  s_40fa13b406b068::t_e861c1a76e9aa7 80,82-84,86-91,94-96,101,112,116,118-124,126-127,130-132,145
+  s_1d04036ae4e69f::t_5c9eacdc5b59bc 4,17
+  s_1d04036ae4e69f::t_4f70adeeca47fb 48-50
+  s_40fa13b406b068::t_b05840580ca13f 8,182
+  s_40fa13b406b068::t_dd02837803d72d 171-173
+  s_1d04036ae4e69f::t_b84b2ea0f8655c 12
+  s_1d04036ae4e69f::t_b335639ab5ae10 205-227,229-243,245-246,248-255
+  s_40fa13b406b068::t_05296d84fc14c4 102-106
+  s_40fa13b406b068::t_ade5c020ffb5e2 288-291
+  s_40fa13b406b068::t_44488cf0d80005 134-144,146
+  s_40fa13b406b068::t_eb37c98626dc7c 13
+  s_1d04036ae4e69f::t_43c0340490b512 10
+  s_40fa13b406b068::t_13b8e3fe1b8449 23-28,38-42,44
+  s_1d04036ae4e69f::t_8f23bae162b2f4 348
+apps/tanstack-start/src/routes/_authed/_revue/-components/kpi-band.tsx
+  s_1d04036ae4e69f::t_28740a3b8fd049 81-103
+  s_1d04036ae4e69f::t_02b23d58978bbe 179
+  s_1d04036ae4e69f::t_04e7312811afac 191-193
+  s_1d04036ae4e69f::t_f61a8b485d0efb 19-24,29,35-42,46
+  s_1d04036ae4e69f::t_a6f13cc6c354a3 3-4,6-8,13,18,25-27,30-31,33,43-45,47-57,59-67,78-80,104-112,115-120,123-144,160,230-231
+  s_1d04036ae4e69f::t_277891a9565bd7 1-2,5,9-12,14-17,28,32,34,58,68-77,113-114,121-122,145-159,161-178,180-190,194-229,232-236
+apps/tanstack-start/src/routes/_authed/_revue/-components/breakdown-list.tsx
+  s_40fa13b406b068::t_76df64427487e2 33-36
+  h_baa52ab231f280 84
+  s_40fa13b406b068::t_917b6d09350201 3-4,7,14-19,22-27,54,68-70,76-79,86,89,103-120,128,131-140,153,163-165
+  s_40fa13b406b068::t_69ca0b6aa40cc2 28
+CLAUDE.md
+  s_1d04036ae4e69f::t_604964eadca6ec 46
+  s_1d04036ae4e69f::t_69f91565614949 63-66
+  s_1d04036ae4e69f::t_640b37dcdf3eba 49
+  s_1d04036ae4e69f::t_64f9e98f6f4062 50-52
+  s_1d04036ae4e69f::t_0dcfbb356fb098 53
+apps/tanstack-start/src/routes/_authed/_revue/index.tsx
+  h_baa52ab231f280 8
+  s_1d04036ae4e69f::t_b373d4df0eedb8 5
+  s_40fa13b406b068::t_00c4f0dc7f7c7a 133-135,139-146
+  h_baa52ab231f280 162-170
+apps/tanstack-start/src/lib/history.ts
+  s_1d04036ae4e69f::t_ae4fe178981b0c 36-59
+apps/tanstack-start/src/lib/transactions-search.ts
+  s_1d04036ae4e69f::t_a094723bf808ca 117-134
+  s_40fa13b406b068::t_a2e1fb73376fea 115-116
+apps/tanstack-start/src/lib/format.ts
+  s_1d04036ae4e69f::t_ed6b2a6693018c 10-26
+apps/tanstack-start/src/routes/_authed/_revue/-components/category-side-list.tsx
+  s_40fa13b406b068::t_503fdebb5c3fe1 8,35-41,64-71,73-87,89-90,95,99-101
+  s_40fa13b406b068::t_a3a2d824117979 13-17
+  s_1d04036ae4e69f::t_c54180dc81fc7d 31-33,42-55,62
+  s_1d04036ae4e69f::t_395f0728a22f82 5,7,18-27
+  s_1d04036ae4e69f::t_ebc97397dc1ab2 1-4,9-12,28-30,34,56-61,63,72,88,91-94,96-98,102-104
+  s_1d04036ae4e69f::t_00064a8fc6981e 6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "c583acf753cc8a8ebf36547f7a8bfa0e4a816f17",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_1d04036ae4e69f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e9c4c41c-d4fe-4922-8a20-2ec3d6783c40",
+        "model": "claude-opus-5"
+      },
+      "human_author": null
+    },
+    "s_40fa13b406b068": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d667d016-fbdc-4835-a4e9-f1b4edee0cf2",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
