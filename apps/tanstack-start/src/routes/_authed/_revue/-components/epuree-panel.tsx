@@ -1,35 +1,31 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  MinusIcon,
-  TrendingDownIcon,
-  TrendingUpIcon,
-  XIcon,
-} from "lucide-react";
+import { MinusIcon, TrendingDownIcon, TrendingUpIcon } from "lucide-react";
 
 import { cn } from "@budget/ui";
 
-import type { BreakdownRow } from "./breakdown-list";
+import type { BreakdownItem } from "./breakdown-list";
 import type { RingSlice } from "./category-ring";
+import type { Delta } from "~/lib/history";
 import { shadeCategoryColor, useCategoryColor } from "~/lib/category-color";
-import { euro, sharePercent } from "~/lib/format";
+import { euro, euro0, sharePercent, signedEuro0 } from "~/lib/format";
+import { useRevueSearch } from "~/lib/use-revue-search";
 import { CategoryIcon } from "../../categories/-components/category-icon";
 import { BreakdownList } from "./breakdown-list";
 import { CategoryRing } from "./category-ring";
-
-/** Écart d'un montant à sa moyenne de référence. */
-export interface Delta {
-  /** En euros, signé. */
-  amount: number;
-  /** En pourcentage de la moyenne, signé. `null` si la moyenne vaut zéro. */
-  pct: number | null;
-}
+import { KpiBand } from "./kpi-band";
 
 /** Une catégorie parente de sortie, telle que l'anneau la manipule. */
 export interface EpureeCategory {
   /** Libellé affiché — « Sans catégorie » pour le groupe sans rattachement. */
   name: string;
+  /**
+   * Valeur à poser dans le search param `category` pour désigner ce poste :
+   * le libellé affiché n'en tient pas lieu, le groupe sans rattachement se
+   * filtrant par la sentinelle `"none"` (voir `categoryFilterLabel`).
+   */
+  filter: string;
   total: number;
   /** Hex canonique de la palette, à résoudre au thème au rendu. */
   color: string;
@@ -39,43 +35,28 @@ export interface EpureeCategory {
    * Sous-catégories, déjà triées du plus gros au plus petit, « À classer »
    * compris — c'est l'ordre que `transactions.byCategory` garantit, et dont les
    * nuances de la teinte parente dérivent.
+   *
+   * `filter: null` désigne le segment « À classer », que `byCategory` fabrique
+   * (le reliquat porté par la parente elle-même) et qui n'est **pas** une ligne
+   * de `categories` : aucune valeur de `category` ne le sélectionne, le poser
+   * dans l'URL donnerait un filtre sans résultat.
    */
-  subs: { name: string; total: number }[];
+  subs: { name: string; total: number; filter: string | null }[];
   delta: Delta | null;
 }
 
-// Les chiffres de tête sont à l'euro près dans la maquette — les centimes ne se
-// lisent pas à 30 px et font sauter la colonne d'un mois à l'autre. Le détail
-// (liste, survol) garde le `euro` partagé, à deux décimales.
-const euro0 = new Intl.NumberFormat("fr-FR", {
-  style: "currency",
-  currency: "EUR",
-  maximumFractionDigits: 0,
-});
-const signedEuro0 = new Intl.NumberFormat("fr-FR", {
-  style: "currency",
-  currency: "EUR",
-  maximumFractionDigits: 0,
-  signDisplay: "exceptZero",
-});
+// Les chiffres de tête sont à l'euro près dans la maquette (`euro0`/`signedEuro0`,
+// partagés avec le bandeau de `/transactions` depuis `~/lib/format`) ; le détail
+// — liste, survol — garde le `euro` à deux décimales.
 const signedPercent = new Intl.NumberFormat("fr-FR", {
   maximumFractionDigits: 0,
   signDisplay: "exceptZero",
 });
 
-const AMOUNT_CLASS =
-  "num text-[clamp(24px,2.4vw,30px)] leading-[1.1] font-medium tracking-[-0.03em]";
-
-// Largeur de la colonne de droite : celle de la liste, moins la place du bouton
-// de fermeture. La maquette la calcule (`rdStackPx = listW - 46`) parce qu'elle
-// mesure tout ; ici les deux valeurs sont posées, la liste à 300 px.
+// Largeur de la colonne de droite. La maquette la calcule (`rdStackPx = listW -
+// 46`) parce qu'elle mesure tout ; ici les deux valeurs sont posées, la liste à
+// 300 px.
 const STACK_CLASS = "flex w-[254px] max-w-full flex-none flex-col items-end";
-
-// Gabarit 26 px hérité des anciennes rangées d'icônes d'en-tête. Le nouvel
-// en-tête n'a plus de boutons bordés — ce bouton de fermeture est le dernier
-// usage, la constante partagée (`~/component/theme-button`) a disparu avec eux.
-const ICON_BUTTON_CLASS =
-  "border-border text-muted-foreground hover:bg-accent hover:text-foreground flex size-[26px] items-center justify-center rounded-[7px] border disabled:opacity-50";
 
 export function EpureePanel({
   categories,
@@ -96,45 +77,73 @@ export function EpureePanel({
   balanceDelta: Delta | null;
 }) {
   const resolveColor = useCategoryColor();
+  const { search, setSearch } = useRevueSearch();
 
-  // `sel` et `open` ne sont pas deux tailles du même geste, et c'est tout le
-  // ressort de l'écran : `open` (clic sur un arc) met un poste en avant sans
-  // quitter le niveau des parents, `sel` (clic sur une ligne de la liste) fait
+  // `sel` et « l'arc surligné » ne sont pas deux tailles du même geste, et c'est
+  // tout le ressort de l'écran : cliquer un arc met un poste **en avant** sans
+  // quitter le niveau des parents, cliquer une ligne de la liste fait
   // *descendre* l'anneau dans ses sous-catégories.
+  //
+  // L'arc surligné vit dans l'URL (`category`) et non dans un état local : c'est
+  // la même sélection que celle des trois autres écrans, et elle les suit. Le
+  // niveau, lui, reste local — un nom de catégorie ne peut pas dire à la fois
+  // « surligné parmi ses pairs » et « ouvert sur ses enfants », et c'est `sel`
+  // qui départage les deux lectures du même param.
   const [sel, setSel] = useState<string | null>(null);
-  const [open, setOpen] = useState<string | null>(null);
-  const [subSel, setSubSel] = useState<string | null>(null);
   const [hover, setHover] = useState<number | null>(null);
+  // Le segment « À classer » n'a pas de filtre qui le désigne (voir
+  // `EpureeCategory.subs`) : son surlignage est le seul qui reste local.
+  const [aClasserSel, setAClasserSel] = useState(false);
 
   const clear = () => {
     setSel(null);
-    setOpen(null);
-    setSubSel(null);
     setHover(null);
+    setAClasserSel(false);
+    // Ne naviguer que s'il y a un filtre à retirer : `setSearch` relance le
+    // loader de la route, et Échap est *aussi* la touche qui referme les
+    // popovers de l'en-tête — sans cette garde, chaque fermeture de sélecteur
+    // rejouerait les agrégats de l'écran pour rien.
+    if (search.category !== undefined) setSearch({ category: undefined });
   };
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
-      setSel(null);
-      setOpen(null);
-      setSubSel(null);
-      setHover(null);
+      clear();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  });
 
-  const selected = sel
-    ? (categories.find((c) => c.name === sel) ?? null)
+  // Le param désigne une sous-catégorie : l'anneau *descend* de lui-même, sinon
+  // l'arc surligné ne serait pas à l'écran. C'est ce qui rend une URL partagée
+  // fidèle à ce qu'elle montrait.
+  const subOwner = search.category
+    ? (categories.find((c) =>
+        c.subs.some((s) => s.filter === search.category),
+      ) ?? null)
     : null;
+  const selected =
+    subOwner ?? (sel ? (categories.find((c) => c.name === sel) ?? null) : null);
   // Un poste ne peut pas être « en avant » et « ouvert » à la fois : descendre
   // dans une catégorie remet l'anneau à plat sur ses enfants.
-  const opened =
-    !selected && open
-      ? (categories.find((c) => c.name === open) ?? null)
-      : null;
+  const opened = selected
+    ? null
+    : (categories.find((c) => c.filter === search.category) ?? null);
   const parent = opened ?? selected;
+  // Sous-catégorie surlignée. Le param prime toujours : le pense-bête local du
+  // segment « À classer » ne vaut qu'à défaut, et seulement tant que le filtre
+  // est resté sur la parente — sans quoi retirer le filtre depuis le rappel
+  // laisserait un arc surligné que plus rien dans l'URL ne justifie.
+  const subByParam =
+    selected?.subs.find(
+      (s) => s.filter !== null && s.filter === search.category,
+    ) ?? null;
+  const subSelected =
+    subByParam ??
+    (aClasserSel && selected && search.category === selected.filter
+      ? (selected.subs.find((s) => s.filter === null) ?? null)
+      : null);
   const parentColor = parent ? resolveColor(parent.color) : "";
 
   // Une sous-catégorie n'a pas de couleur propre à l'écran : c'est un palier de
@@ -159,7 +168,9 @@ export function EpureePanel({
       }));
 
   const levelTotal = slices.reduce((acc, s) => acc + s.total, 0);
-  const activeName = selected ? subSel : (opened?.name ?? null);
+  const activeName = selected
+    ? (subSelected?.name ?? null)
+    : (opened?.name ?? null);
   const activeIndex = activeName
     ? slices.findIndex((s) => s.name === activeName)
     : -1;
@@ -168,7 +179,7 @@ export function EpureePanel({
     (activeIndex >= 0 ? slices[activeIndex] : null) ??
     null;
 
-  const listRows: BreakdownRow[] = parent
+  const listRows: BreakdownItem[] = parent
     ? parent.subs.map((sub, index) => ({
         name: sub.name,
         total: sub.total,
@@ -178,89 +189,70 @@ export function EpureePanel({
         name: category.name,
         total: category.total,
         color: resolveColor(category.color),
+        // Descendre pose *aussi* le filtre : c'est `sel` qui distingue les deux
+        // lectures du même param (voir plus haut), pas l'absence de `category`.
         onSelect: () => {
           setSel(category.name);
           setHover(null);
-          setSubSel(null);
+          setAClasserSel(false);
+          setSearch({ category: category.filter });
         },
       }));
 
   return (
     <div className="flex min-h-0 flex-1 flex-col px-5 pt-4.5 pb-4">
       {/* `flex-wrap` n'est pas dans la maquette, qui ne descend pas sous 460 px :
-          il évite que la colonne de droite, à largeur fixe, ne pousse les deux
-          chiffres de gauche hors de l'écran sur une fenêtre étroite. */}
-      <div className="flex min-h-[68px] flex-none flex-wrap items-end gap-x-[clamp(11px,1.9vw,32px)] gap-y-3">
-        <Kpi
-          label="Solde"
-          amount={euro0.format(balance)}
-          amountClassName={balance < 0 ? "text-bad" : "text-ok"}
-          delta={balanceDelta}
-          worseWhenUp={false}
-        />
-        <Kpi
-          label="Entrées"
-          amount={euro0.format(revenues)}
-          amountClassName="text-ok"
-          delta={revenuesDelta}
-          worseWhenUp={false}
-        />
-
-        <div className="ml-auto flex flex-none items-center gap-3">
-          {/* Le poste ouvert prend la place des sorties, il ne s'ajoute pas à
-              côté : c'est la même colonne, calée sur la largeur de la liste, et
-              c'est ce qui évite au bandeau de chiffres de sauter au premier
-              clic. Rien n'apparaît ni ne disparaît, le contenu change. */}
-          {parent ? (
-            <Stack
-              label={`${parent.subs.length} sous-catégorie${parent.subs.length > 1 ? "s" : ""}`}
-              // Une sortie qui monte est une mauvaise nouvelle, à l'inverse des
-              // entrées : les pastilles de l'écran n'ont pas toutes la même
-              // polarité.
-              delta={parent.delta}
-              worseWhenUp
-            >
-              <span className="flex min-w-0 flex-1 items-center gap-2">
-                <span
-                  className="flex flex-none self-center"
-                  style={{ color: parentColor }}
-                >
-                  <CategoryIcon name={parent.icon} className="size-[15px]" />
-                </span>
-                <span className="line-clamp-2 min-w-0 text-sm leading-[1.15] font-semibold tracking-[-0.01em]">
-                  {parent.name}
-                </span>
-              </span>
-              {/* Deux décimales, comme les lignes de la liste : ce chiffre-là
-                  est un montant précis, pas un ordre de grandeur. */}
-              <span className="num min-w-24 flex-none text-right text-[19px] font-medium tracking-[-0.02em]">
-                {euro.format(parent.total)}
-              </span>
-            </Stack>
-          ) : (
-            <Stack
-              label="Sorties"
-              delta={expensesDelta}
-              worseWhenUp
-              align="baseline"
-            >
-              <span className={cn(AMOUNT_CLASS, "text-bad")}>
-                {euro0.format(expenses)}
-              </span>
-            </Stack>
-          )}
-          <button
-            type="button"
-            onClick={clear}
-            title="Revenir au mois (Échap)"
-            aria-label="Revenir au mois"
-            // `invisible` et non `hidden` : le bouton garde sa place, sinon la
-            // colonne de droite se décalerait à l'ouverture d'un poste.
-            className={cn(ICON_BUTTON_CLASS, !parent && "invisible")}
-          >
-            <XIcon className="size-3.5" />
-          </button>
+          il évite que la colonne de droite, à largeur fixe, ne pousse le solde
+          hors de l'écran sur une fenêtre étroite. */}
+      <div className="flex min-h-[68px] flex-none flex-wrap items-end gap-x-[clamp(11px,1.85vw,25px)] gap-y-3">
+        <div className="min-w-0 flex-1">
+          <KpiBand
+            label="Solde du mois"
+            balance={balance}
+            balanceDelta={balanceDelta}
+            // Les deux rangées de flux **cèdent la place** au poste ouvert
+            // (`showFlow: !parent` dans la maquette) : elles ne se compriment
+            // pas à côté de lui. C'est ce qui laisse au poste toute la droite du
+            // bandeau, et au solde du mois le seul rôle d'ancre pendant qu'on
+            // navigue dans l'anneau.
+            flow={
+              parent
+                ? undefined
+                : {
+                    revenues: { amount: revenues, delta: revenuesDelta },
+                    expenses: { amount: expenses, delta: expensesDelta },
+                  }
+            }
+          />
         </div>
+
+        {parent && (
+          <Stack
+            label={`${parent.subs.length} sous-catégorie${parent.subs.length > 1 ? "s" : ""}`}
+            // Une sortie qui monte est une mauvaise nouvelle, à l'inverse des
+            // entrées : les pastilles de l'écran n'ont pas toutes la même
+            // polarité.
+            delta={parent.delta}
+            worseWhenUp
+          >
+            <span className="flex min-w-0 flex-1 items-center gap-2">
+              <span
+                className="flex flex-none self-center"
+                style={{ color: parentColor }}
+              >
+                <CategoryIcon name={parent.icon} className="size-[15px]" />
+              </span>
+              <span className="line-clamp-2 min-w-0 text-sm leading-[1.15] font-semibold tracking-[-0.01em]">
+                {parent.name}
+              </span>
+            </span>
+            {/* Deux décimales, comme les lignes de la liste : ce chiffre-là est
+                un montant précis, pas un ordre de grandeur. */}
+            <span className="num min-w-24 flex-none text-right text-[19px] font-medium tracking-[-0.02em]">
+              {euro.format(parent.total)}
+            </span>
+          </Stack>
+        )}
       </div>
 
       {/* Cliquer à côté referme, comme la touche Échap. L'anneau et la liste
@@ -278,14 +270,37 @@ export function EpureePanel({
           activeIndex={activeIndex >= 0 ? activeIndex : null}
           hoverIndex={hover}
           onHover={setHover}
+          // Les arcs sont dans l'ordre de `subs` / `categories`, dont `slices`
+          // est le calque : l'index désigne la même part des deux côtés.
           onActivate={(index) => {
-            const name = slices[index]?.name;
-            if (name === undefined) return;
-            if (selected) {
-              setSubSel((current) => (current === name ? null : name));
+            const slice = selected ? selected.subs[index] : categories[index];
+            if (!slice) return;
+            // Ancrer la descente avant de toucher au param. Sans ça, une visite
+            // arrivée par une sous-catégorie (`sel` encore nul, le niveau ne
+            // tenant qu'au param) remonterait d'un cran dès que le filtre
+            // revient sur la parente — ce que font le dépointage et « À classer ».
+            if (selected) setSel(selected.name);
+            // « À classer » n'est pas une catégorie de la base : le poser dans
+            // l'URL donnerait un filtre sans résultat. Seul segment dont le
+            // surlignage ne quitte pas la page.
+            if (slice.filter === null) {
+              setAClasserSel((current) => !current);
+              // Le filtre revient sur la parente : c'est ce que le segment
+              // désigne de plus précis, et c'est aussi ce qui ancre le
+              // pense-bête local (voir `subSelected`).
+              setSearch({ category: selected?.filter });
               return;
             }
-            setOpen((current) => (current === name ? null : name));
+            setAClasserSel(false);
+            setSearch({
+              category:
+                search.category === slice.filter
+                  ? // Retirer le surlignage d'une sous-catégorie ne remonte pas
+                    // d'un cran : on est toujours *dans* le poste ouvert, et le
+                    // filtre revient donc à lui, pas à rien.
+                    selected?.filter
+                  : slice.filter,
+            });
           }}
           center={{
             icon: focus
@@ -310,59 +325,27 @@ export function EpureePanel({
   );
 }
 
-function Kpi({
-  label,
-  amount,
-  amountClassName,
-  delta,
-  worseWhenUp,
-}: {
-  label: string;
-  amount: string;
-  amountClassName?: string;
-  delta: Delta | null;
-  /** Sens dans lequel une hausse est une mauvaise nouvelle. */
-  worseWhenUp: boolean;
-}) {
-  return (
-    <div className="min-w-max flex-[0_1_auto]">
-      <div className="label-caps">{label}</div>
-      <div className={cn(AMOUNT_CLASS, "mt-0.5", amountClassName)}>
-        {amount}
-      </div>
-      <DeltaRow delta={delta} worseWhenUp={worseWhenUp} />
-    </div>
-  );
-}
-
 /**
- * Colonne de droite du bandeau : intitulé calé à gauche, contenu sur une rangée
- * de 33 px calée à droite, écart en dessous. Deux occupants qui se relaient —
- * les sorties du mois, ou le poste ouvert.
+ * Colonne de droite du bandeau, le poste ouvert : intitulé calé à gauche,
+ * contenu sur une rangée de 33 px calée à droite, écart en dessous. Elle
+ * n'existe que tant qu'un poste l'occupe — c'est la contrepartie du bandeau de
+ * flux, qui disparaît au même moment.
  */
 function Stack({
   label,
   delta,
   worseWhenUp,
-  align = "center",
   children,
 }: {
   label: string;
   delta: Delta | null;
   worseWhenUp: boolean;
-  /** Le gros chiffre des sorties s'aligne sur sa ligne de base, pas son centre. */
-  align?: "center" | "baseline";
   children: React.ReactNode;
 }) {
   return (
     <div className={STACK_CLASS}>
       <div className="label-caps self-start whitespace-nowrap">{label}</div>
-      <div
-        className={cn(
-          "mt-0.5 flex h-[33px] w-full min-w-0 justify-between gap-3.5",
-          align === "baseline" ? "items-baseline justify-end" : "items-center",
-        )}
-      >
+      <div className="mt-0.5 flex h-[33px] w-full min-w-0 items-center justify-between gap-3.5">
         {children}
       </div>
       <DeltaRow delta={delta} worseWhenUp={worseWhenUp} justify="end" />

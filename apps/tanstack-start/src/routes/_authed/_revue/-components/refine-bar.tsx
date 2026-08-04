@@ -373,49 +373,6 @@ export function RefineBar({
   );
 }
 
-/**
- * Rappel des filtres en cours sur les écrans qui n'ont pas de barre pour les
- * régler (revue, zoom catégorie). Ils sont conservés d'un onglet à l'autre :
- * sans ce rappel, une sélection posée sur la table resterait active ici sans
- * rien qui le dise ni aucun moyen de la retirer.
- */
-export function ActiveFilters({
-  className,
-  exclude,
-}: {
-  className?: string;
-  exclude?: FilterKey[];
-}) {
-  const { search, setSearch } = useRevueSearch();
-  // `internes` est toujours retiré ici : seul le relevé l'honore, les écrans qui
-  // affichent ce rappel écartent les virements internes d'office. Le rappeler y
-  // annoncerait une restriction qui n'agit pas — la règle même qui vaut à
-  // `category` d'être exclu sur le zoom.
-  const filters = describeFilters(search, [...(exclude ?? []), "internes"]);
-  if (filters.length === 0) return null;
-
-  return (
-    <div
-      className={cn(
-        "text-subtle flex flex-wrap items-center gap-x-2 gap-y-1 text-[11.5px]",
-        className,
-      )}
-    >
-      <span className="label-caps">Filtres en cours</span>
-      <span>{filters.join(" · ")}</span>
-      <button
-        type="button"
-        className="text-primary"
-        onClick={() =>
-          setSearch({ ...CONTEXT_FILTERS, q: undefined, bank: undefined })
-        }
-      >
-        Tout retirer
-      </button>
-    </div>
-  );
-}
-
 // Liste des catégories parentes avec leur poids sur la période — le même
 // classement que « Où est parti l'argent », pour filtrer depuis n'importe quel
 // écran sans revenir à la revue.

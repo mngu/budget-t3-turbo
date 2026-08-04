@@ -114,6 +114,26 @@ export const wholePeriod = <T extends TransactionsSearch>(search: T) => ({
   internes: "toutes" as const,
 });
 
+// Clé de l'historique mensuel dont les écarts « vs moy. » du bandeau tirent leur
+// référence. Les filtres de contenu sont **conservés** : `monthlyHistory`
+// réécrit lui-même les bornes de date et neutralise le sens, mais honore
+// catégorie, « à classer », recherche et comptes. La moyenne porte donc sur le
+// même périmètre que les totaux qu'elle commente — resserrer sur une catégorie
+// compare ce mois-ci aux trois mois de cette catégorie, et non à ceux de toute
+// la base, ce qui ferait annoncer un écart mesuré sur une population que le
+// chiffre au-dessus ne décrit pas.
+//
+// Pagination, tri et `internes` sont neutralisés : la réponse n'en dépend pas
+// (l'historique écarte les virements internes sans consulter le param), et les
+// laisser dans la clé rechargerait tout l'historique à chaque « Suivant ».
+export const historyScope = <T extends TransactionsSearch>(search: T) => ({
+  ...search,
+  page: 1,
+  sort: "date" as const,
+  order: "desc" as const,
+  internes: "toutes" as const,
+});
+
 // Clé de la file de relecture. Les filtres de contenu comptent (le compteur de
 // l'onglet « À revoir » parle bien du périmètre affiché), mais pagination et tri
 // sont neutralisés : `reviewQueue` les ignore côté serveur, et les laisser dans

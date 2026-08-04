@@ -20,8 +20,6 @@ import { Route as ApiTrpcSplatRouteImport } from './routes/api/trpc.$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as AuthedBanquesAjouterRouteImport } from './routes/_authed/banques/ajouter'
 import { Route as AuthedRevueTransactionsRouteImport } from './routes/_authed/_revue/transactions'
-import { Route as AuthedRevueClasserRouteImport } from './routes/_authed/_revue/classer'
-import { Route as AuthedRevueCategorieNameRouteImport } from './routes/_authed/_revue/categorie.$name'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -76,22 +74,10 @@ const AuthedRevueTransactionsRoute = AuthedRevueTransactionsRouteImport.update({
   path: '/transactions',
   getParentRoute: () => AuthedRevueRoute,
 } as any)
-const AuthedRevueClasserRoute = AuthedRevueClasserRouteImport.update({
-  id: '/classer',
-  path: '/classer',
-  getParentRoute: () => AuthedRevueRoute,
-} as any)
-const AuthedRevueCategorieNameRoute =
-  AuthedRevueCategorieNameRouteImport.update({
-    id: '/categorie/$name',
-    path: '/categorie/$name',
-    getParentRoute: () => AuthedRevueRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/callback': typeof AuthedCallbackRoute
-  '/classer': typeof AuthedRevueClasserRoute
   '/transactions': typeof AuthedRevueTransactionsRoute
   '/banques/ajouter': typeof AuthedBanquesAjouterRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -99,12 +85,10 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthedRevueIndexRoute
   '/banques': typeof AuthedBanquesIndexRoute
   '/categories': typeof AuthedCategoriesIndexRoute
-  '/categorie/$name': typeof AuthedRevueCategorieNameRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/callback': typeof AuthedCallbackRoute
-  '/classer': typeof AuthedRevueClasserRoute
   '/transactions': typeof AuthedRevueTransactionsRoute
   '/banques/ajouter': typeof AuthedBanquesAjouterRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -112,7 +96,6 @@ export interface FileRoutesByTo {
   '/': typeof AuthedRevueIndexRoute
   '/banques': typeof AuthedBanquesIndexRoute
   '/categories': typeof AuthedCategoriesIndexRoute
-  '/categorie/$name': typeof AuthedRevueCategorieNameRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -120,7 +103,6 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_authed/_revue': typeof AuthedRevueRouteWithChildren
   '/_authed/callback': typeof AuthedCallbackRoute
-  '/_authed/_revue/classer': typeof AuthedRevueClasserRoute
   '/_authed/_revue/transactions': typeof AuthedRevueTransactionsRoute
   '/_authed/banques/ajouter': typeof AuthedBanquesAjouterRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -128,14 +110,12 @@ export interface FileRoutesById {
   '/_authed/_revue/': typeof AuthedRevueIndexRoute
   '/_authed/banques/': typeof AuthedBanquesIndexRoute
   '/_authed/categories/': typeof AuthedCategoriesIndexRoute
-  '/_authed/_revue/categorie/$name': typeof AuthedRevueCategorieNameRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/login'
     | '/callback'
-    | '/classer'
     | '/transactions'
     | '/banques/ajouter'
     | '/api/auth/$'
@@ -143,12 +123,10 @@ export interface FileRouteTypes {
     | '/'
     | '/banques'
     | '/categories'
-    | '/categorie/$name'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
     | '/callback'
-    | '/classer'
     | '/transactions'
     | '/banques/ajouter'
     | '/api/auth/$'
@@ -156,14 +134,12 @@ export interface FileRouteTypes {
     | '/'
     | '/banques'
     | '/categories'
-    | '/categorie/$name'
   id:
     | '__root__'
     | '/_authed'
     | '/login'
     | '/_authed/_revue'
     | '/_authed/callback'
-    | '/_authed/_revue/classer'
     | '/_authed/_revue/transactions'
     | '/_authed/banques/ajouter'
     | '/api/auth/$'
@@ -171,7 +147,6 @@ export interface FileRouteTypes {
     | '/_authed/_revue/'
     | '/_authed/banques/'
     | '/_authed/categories/'
-    | '/_authed/_revue/categorie/$name'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -260,35 +235,17 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedRevueTransactionsRouteImport
       parentRoute: typeof AuthedRevueRoute
     }
-    '/_authed/_revue/classer': {
-      id: '/_authed/_revue/classer'
-      path: '/classer'
-      fullPath: '/classer'
-      preLoaderRoute: typeof AuthedRevueClasserRouteImport
-      parentRoute: typeof AuthedRevueRoute
-    }
-    '/_authed/_revue/categorie/$name': {
-      id: '/_authed/_revue/categorie/$name'
-      path: '/categorie/$name'
-      fullPath: '/categorie/$name'
-      preLoaderRoute: typeof AuthedRevueCategorieNameRouteImport
-      parentRoute: typeof AuthedRevueRoute
-    }
   }
 }
 
 interface AuthedRevueRouteChildren {
-  AuthedRevueClasserRoute: typeof AuthedRevueClasserRoute
   AuthedRevueTransactionsRoute: typeof AuthedRevueTransactionsRoute
   AuthedRevueIndexRoute: typeof AuthedRevueIndexRoute
-  AuthedRevueCategorieNameRoute: typeof AuthedRevueCategorieNameRoute
 }
 
 const AuthedRevueRouteChildren: AuthedRevueRouteChildren = {
-  AuthedRevueClasserRoute: AuthedRevueClasserRoute,
   AuthedRevueTransactionsRoute: AuthedRevueTransactionsRoute,
   AuthedRevueIndexRoute: AuthedRevueIndexRoute,
-  AuthedRevueCategorieNameRoute: AuthedRevueCategorieNameRoute,
 }
 
 const AuthedRevueRouteWithChildren = AuthedRevueRoute._addFileChildren(

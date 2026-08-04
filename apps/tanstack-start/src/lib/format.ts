@@ -7,6 +7,23 @@ export const euro = new Intl.NumberFormat("fr-FR", {
   currency: "EUR",
 });
 
+// Arrondi à l'euro, pour les chiffres de tête des bandeaux : les centimes ne se
+// lisent pas à 30 ou 44 px et font sauter la colonne d'un mois à l'autre. Le
+// détail (lignes de liste, survol, table) garde `euro`, à deux décimales.
+export const euro0 = new Intl.NumberFormat("fr-FR", {
+  style: "currency",
+  currency: "EUR",
+  maximumFractionDigits: 0,
+});
+
+// Même arrondi, signé : un solde annonce son sens, un total de flux non.
+export const signedEuro0 = new Intl.NumberFormat("fr-FR", {
+  style: "currency",
+  currency: "EUR",
+  maximumFractionDigits: 0,
+  signDisplay: "exceptZero",
+});
+
 export const dateFr = new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium" });
 
 // Sans l'année : les écrans de la revue sont déjà bornés à un mois, la répéter

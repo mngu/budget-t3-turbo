@@ -33,6 +33,30 @@ function median(values: number[]): number {
     : (sorted[middle] ?? 0);
 }
 
+/** Écart d'un montant à sa moyenne de référence. */
+export interface Delta {
+  /** En euros, signé. */
+  amount: number;
+  /** En pourcentage de la moyenne, signé. `null` si la moyenne vaut zéro. */
+  pct: number | null;
+}
+
+/**
+ * Écart à la moyenne, tel que les maquettes le calculent : le pourcentage se
+ * rapporte à la *valeur absolue* de la référence, sinon une moyenne négative (le
+ * solde d'un mois déficitaire) inverse le signe affiché. `null` quand il n'y a
+ * pas d'historique ; `pct` seul est `null` quand la référence vaut zéro —
+ * l'écart en euros reste lisible, le pourcentage n'aurait aucun sens.
+ */
+export function deltaTo(current: number, average: number | null): Delta | null {
+  if (average === null) return null;
+  const amount = current - average;
+  return {
+    amount,
+    pct: average === 0 ? null : (amount / Math.abs(average)) * 100,
+  };
+}
+
 export interface MonthTotals {
   month: string;
   debit: number;

@@ -2,9 +2,10 @@ import { createFileRoute, stripSearchParams } from "@tanstack/react-router";
 
 import { transactionsSearchSchema } from "@budget/shared";
 
-import type { Delta, EpureeCategory } from "./-components/epuree-panel";
+import type { EpureeCategory } from "./-components/epuree-panel";
 import {
   averagesByCategory,
+  deltaTo,
   referenceAverage,
   totalsByMonth,
 } from "~/lib/history";
@@ -15,7 +16,6 @@ import {
   wholePeriod,
 } from "~/lib/transactions-search";
 import { EpureePanel } from "./-components/epuree-panel";
-import { ActiveFilters } from "./-components/refine-bar";
 
 /**
  * Revue du mois — portage de la maquette « Revue du mois épurée » (Claude
@@ -103,20 +103,6 @@ export const Route = createFileRoute("/_authed/_revue/")({
 const sum = (items: { total: number }[]) =>
   items.reduce((acc, item) => acc + item.total, 0);
 
-// Écart à la moyenne, tel que la maquette le calcule : le pourcentage se
-// rapporte à la *valeur absolue* de la référence, sinon une moyenne négative
-// (le solde d'un mois déficitaire) inverse le signe affiché. `null` quand il
-// n'y a pas d'historique ; `pct` seul est `null` quand la référence vaut zéro —
-// l'écart en euros reste lisible, le pourcentage n'aurait aucun sens.
-function deltaTo(current: number, average: number | null): Delta | null {
-  if (average === null) return null;
-  const amount = current - average;
-  return {
-    amount,
-    pct: average === 0 ? null : (amount / Math.abs(average)) * 100,
-  };
-}
-
 function RevueDuMois() {
   const { expenses, revenues, history, tree } = Route.useLoaderData();
   const search = Route.useSearch();
@@ -144,10 +130,20 @@ function RevueDuMois() {
       const key = item.category;
       return {
         name: key || "Sans catégorie",
+        // Sentinelle du search param : le groupe sans rattachement se filtre
+        // par « none », pas par la chaîne vide ni par son libellé d'affichage.
+        filter: key || "none",
         total: item.total,
         color: item.color,
         icon: iconByCategory.get(key) ?? null,
-        subs: item.breakdown.map((b) => ({ name: b.category, total: b.total })),
+        subs: item.breakdown.map((b) => ({
+          name: b.category,
+          total: b.total,
+          // Le segment « À classer » est fabriqué par `byCategory` (le reliquat
+          // porté par la parente) : son libellé ne correspond à aucune ligne de
+          // `categories`, aucun filtre ne peut le désigner.
+          filter: b.unallocated ? null : b.category,
+        })),
         // Une catégorie absente de toute la fenêtre de référence a bien une
         // moyenne de zéro : c'est un poste neuf, pas une donnée manquante.
         delta: averageByCategory
@@ -163,25 +159,14 @@ function RevueDuMois() {
       : revenuesAverage - expensesAverage;
 
   return (
-    <>
-      {/* Rappel des filtres, hors de `EpureePanel` : le panneau est le portage
-          de la maquette, ce rappel est du mobilier d'application. La revue n'a
-          pas de barre de filtres — ils se posent depuis l'en-tête et depuis les
-          deux autres onglets, et se conservent d'un écran à l'autre. `q` et le
-          sens ne sont pas neutralisés par `wholePeriod` : sans ce rappel, une
-          sélection posée sur « Toutes les transactions » resserrerait l'anneau
-          ici sans rien qui le dise ni aucun moyen de la retirer. */}
-      <ActiveFilters className="flex-none px-5 pt-3" />
-
-      <EpureePanel
-        categories={categories}
-        revenues={revenuesTotal}
-        expenses={expensesTotal}
-        balance={balance}
-        revenuesDelta={deltaTo(revenuesTotal, revenuesAverage)}
-        expensesDelta={deltaTo(expensesTotal, expensesAverage)}
-        balanceDelta={deltaTo(balance, balanceAverage)}
-      />
-    </>
+    <EpureePanel
+      categories={categories}
+      revenues={revenuesTotal}
+      expenses={expensesTotal}
+      balance={balance}
+      revenuesDelta={deltaTo(revenuesTotal, revenuesAverage)}
+      expensesDelta={deltaTo(expensesTotal, expensesAverage)}
+      balanceDelta={deltaTo(balance, balanceAverage)}
+    />
   );
 }
