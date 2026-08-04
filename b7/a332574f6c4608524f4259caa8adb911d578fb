@@ -1,0 +1,20 @@
+apps/tanstack-start/src/routes/_authed/_revue/transactions.tsx
+  h_baa52ab231f280 14,89,113
+apps/tanstack-start/src/routes/_authed/_revue/-components/kpi-band.tsx
+  h_baa52ab231f280 57,70,82
+  h_baa52ab231f280 58
+apps/tanstack-start/src/routes/_authed/_revue/-components/epuree-panel.tsx
+  h_baa52ab231f280 6-7,10-11,212,223
+  h_baa52ab231f280 23,224-226
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "b7a332574f6c4608524f4259caa8adb911d578fb",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
