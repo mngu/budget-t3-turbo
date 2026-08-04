@@ -3,7 +3,11 @@
 import { useEffect, useState } from "react";
 import { MinusIcon, TrendingDownIcon, TrendingUpIcon } from "lucide-react";
 
+
+
 import { cn } from "@budget/ui";
+
+
 
 import type { BreakdownItem } from "./breakdown-list";
 import type { RingSlice } from "./category-ring";
@@ -15,6 +19,7 @@ import { CategoryIcon } from "../../categories/-components/category-icon";
 import { BreakdownList } from "./breakdown-list";
 import { CategoryRing } from "./category-ring";
 import { KpiBand } from "./kpi-band";
+
 
 /** Une catégorie parente de sortie, telle que l'anneau la manipule. */
 export interface EpureeCategory {
@@ -204,7 +209,7 @@ export function EpureePanel({
       {/* `flex-wrap` n'est pas dans la maquette, qui ne descend pas sous 460 px :
           il évite que la colonne de droite, à largeur fixe, ne pousse le solde
           hors de l'écran sur une fenêtre étroite. */}
-      <div className="flex min-h-[68px] flex-none flex-wrap items-end gap-x-[clamp(11px,1.85vw,25px)] gap-y-3">
+      <div className="flex min-h-[68px] flex-1 flex-none flex-wrap items-end gap-x-[clamp(11px,1.85vw,25px)] gap-y-3">
         <div className="min-w-0 flex-1">
           <KpiBand
             label="Solde du mois"
@@ -215,14 +220,10 @@ export function EpureePanel({
             // pas à côté de lui. C'est ce qui laisse au poste toute la droite du
             // bandeau, et au solde du mois le seul rôle d'ancre pendant qu'on
             // navigue dans l'anneau.
-            flow={
-              parent
-                ? undefined
-                : {
-                    revenues: { amount: revenues, delta: revenuesDelta },
-                    expenses: { amount: expenses, delta: expensesDelta },
-                  }
-            }
+            flow={{
+              revenues: { amount: revenues, delta: revenuesDelta },
+              expenses: { amount: expenses, delta: expensesDelta },
+            }}
           />
         </div>
 

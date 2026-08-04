@@ -54,8 +54,8 @@ export function KpiBand({
     // `flex-wrap` n'est pas dans la maquette, qui mesure son conteneur : il
     // évite que le bloc de flux, à largeur minimale, ne pousse le solde hors de
     // l'écran sur une fenêtre étroite.
-    <div className="flex min-h-[68px] flex-none flex-wrap items-end gap-x-[clamp(15px,2.3vw,31px)] gap-y-3">
-      <div className="flex-none">
+    <div className="flex flex-none flex-wrap items-center gap-x-[clamp(15px,2.3vw,31px)] gap-y-3">
+      <div>
         <div className="label-caps">{label}</div>
         <div
           className={cn(
@@ -67,7 +67,7 @@ export function KpiBand({
         </div>
         {/* Hauteur fixe, occupée ou non : sans elle le gros chiffre remonterait
             dès qu'un écran n'a pas d'historique à comparer. */}
-        <div className="mt-1.5 flex h-[19px] items-center gap-2.5 whitespace-nowrap">
+        <div className="mt-1.5 flex items-center gap-2.5 whitespace-nowrap">
           <DeltaPill delta={balanceDelta} worseWhenUp={false} />
           {/* La maquette masque cette mention sous 1 200 px de conteneur, la
               pastille disant déjà le sens ; ici c'est un point d'arrêt. */}
@@ -79,7 +79,7 @@ export function KpiBand({
       </div>
 
       {flow && (
-        <div className="ml-auto flex max-w-[560px] min-w-[300px] flex-1 flex-col pb-[3px]">
+        <div className="flex max-w-[560px] min-w-[300px] flex-1 flex-col">
           <FlowRow
             label="Entrées"
             tone="ok"
