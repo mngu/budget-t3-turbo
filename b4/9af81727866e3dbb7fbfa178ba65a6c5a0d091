@@ -1,0 +1,23 @@
+apps/tanstack-start/src/component/app-header.tsx
+  s_f613a33bf149cb::t_23adacb87a844f 191,194-200
+  s_f613a33bf149cb::t_8971c16fd8b96b 4,9
+  s_f613a33bf149cb::t_1675632f8866ab 274-286
+  s_f613a33bf149cb::t_656fbe83c4a392 24
+  s_f613a33bf149cb::t_4216eab8795077 201
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "b49af81727866e3dbb7fbfa178ba65a6c5a0d091",
+  "prompts": {},
+  "sessions": {
+    "s_f613a33bf149cb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5930b211-b811-475f-ab21-7937c429249b",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
