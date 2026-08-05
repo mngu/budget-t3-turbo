@@ -117,6 +117,13 @@ export function CategoryRing({
         <svg viewBox="0 0 340 340" className="absolute inset-0 size-full">
           {arcs.map((arc) => (
             <circle
+              // Clé = le nom, et surtout **pas** la position (contrairement aux
+              // lignes de `BreakdownRow`, où le nom change à chaque niveau) :
+              // c'est ce qui borne l'animation à ce qui a du sens. Un poste qui
+              // reste glisse vers sa nouvelle géométrie ; un poste qui apparaît
+              // se pose là, sans transition. Avec une clé positionnelle le même
+              // cercle passait d'une catégorie à l'autre, et toute part insérée
+              // faisait balayer l'anneau à celles qui la suivent.
               key={arc.slice.name}
               cx="170"
               cy="170"
@@ -136,8 +143,14 @@ export function CategoryRing({
               }}
               // La transition est une classe et non un style inline : c'est ce
               // qui laisse `motion-reduce` la neutraliser, un style inline
-              // gagnant contre toute règle.
-              className="cursor-pointer [transition:stroke-width_200ms_cubic-bezier(0.22,1,0.36,1),stroke-opacity_200ms_ease,filter_200ms_ease] motion-reduce:transition-none"
+              // gagnant contre toute règle. Seule `stroke-dasharray` suit le
+              // changement de *données* : le `transform` en est délibérément
+              // absent, alors qu'il porte l'origine angulaire de l'arc (la somme
+              // des parts qui le précèdent). L'arc se pose donc d'un coup à sa
+              // nouvelle origine pendant que sa longueur glisse — c'est un
+              // arbitrage assumé pour la sobriété du mouvement, pas un oubli :
+              // l'y remettre relance le balayage de tout l'anneau.
+              className="cursor-pointer [transition:stroke-width_200ms_cubic-bezier(0.22,1,0.36,1),stroke-opacity_200ms_ease,filter_200ms_ease,stroke-dasharray_200ms_cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
               onMouseEnter={() => onHover(arc.index)}
               onClick={(event) => {
                 event.stopPropagation();
@@ -234,7 +247,9 @@ function IconOnRing({
 
   return (
     <div
-      className="pointer-events-none absolute flex -translate-x-1/2 -translate-y-1/2"
+      // Même durée que l'arc pour la position, même durée que le survol pour
+      // l'estompage : l'icône glisse *avec* sa part, elle ne la rattrape pas.
+      className="pointer-events-none absolute flex -translate-x-1/2 -translate-y-1/2 [transition:left_200ms_cubic-bezier(0.22,1,0.36,1),top_200ms_cubic-bezier(0.22,1,0.36,1),opacity_200ms_ease] motion-reduce:transition-none"
       style={{
         left: `${(50 + Math.cos(angle) * radius).toFixed(2)}%`,
         top: `${(50 + Math.sin(angle) * radius).toFixed(2)}%`,
