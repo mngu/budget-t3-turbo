@@ -39,12 +39,14 @@ export type HeaderPage =
   | "transactions"
   | "categories"
   | "budgets"
-  | "banques";
+  | "banques"
+  | "espaces";
 
 const SETTINGS_TITLES: Partial<Record<HeaderPage, string>> = {
   categories: "Catégories",
   budgets: "Budgets",
   banques: "Banques",
+  espaces: "Espaces",
 };
 
 /**
@@ -246,6 +248,14 @@ function SettingsMenu({ page }: { page?: HeaderPage }) {
         >
           <LandmarkIcon className="size-3.5" />
         </SettingsLink>
+        <SettingsLink
+          to="/espaces"
+          label="Espaces"
+          active={page === "espaces"}
+          onNavigate={() => setOpen(false)}
+        >
+          <UsersIcon className="size-3.5" />
+        </SettingsLink>
 
         <div className="bg-border mx-2.5 my-1.5 h-px" />
 
@@ -355,7 +365,7 @@ function SettingsLink({
   onNavigate,
   children,
 }: {
-  to: "/categories" | "/budgets" | "/banques";
+  to: "/categories" | "/budgets" | "/banques" | "/espaces";
   label: string;
   active: boolean;
   onNavigate: () => void;

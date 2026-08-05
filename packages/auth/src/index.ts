@@ -40,6 +40,7 @@ async function createPersonalOrganization(newUser: {
   await db.insert(orgTable).values({
     id: organizationId,
     name: label,
+    isPersonal: true,
     // Le slug n'est affiché nulle part : le suffixe aléatoire évite d'avoir à
     // gérer les collisions sur une valeur que personne ne lit.
     slug: `${label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${randomUUID().slice(0, 8)}`,
@@ -133,7 +134,27 @@ export function initAuth<
         },
       },
     },
-    plugins: [expo(), organization(), ...(options.extraPlugins ?? [])],
+    plugins: [
+      expo(),
+      organization({
+        schema: {
+          organization: {
+            additionalFields: {
+              // Un espace personnel ne se déduit pas de son nombre de membres :
+              // un espace partagé dont on n'a encore invité personne lui
+              // ressemblerait trait pour trait, alors qu'il ne se comporte pas
+              // pareil (suppression, conversion). D'où le drapeau explicite.
+              isPersonal: {
+                type: "boolean",
+                defaultValue: false,
+                input: false,
+              },
+            },
+          },
+        },
+      }),
+      ...(options.extraPlugins ?? []),
+    ],
     trustedOrigins: ["expo://", ...(options.trustedOrigins ?? [])],
     onAPIError: {
       onError(error, ctx) {

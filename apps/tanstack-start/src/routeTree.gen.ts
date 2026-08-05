@@ -11,8 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthedRouteImport } from './routes/_authed'
+import { Route as InvitationInvitationIdRouteImport } from './routes/invitation.$invitationId'
 import { Route as AuthedCallbackRouteImport } from './routes/_authed/callback'
 import { Route as AuthedRevueRouteImport } from './routes/_authed/_revue'
+import { Route as AuthedEspacesIndexRouteImport } from './routes/_authed/espaces/index'
 import { Route as AuthedCategoriesIndexRouteImport } from './routes/_authed/categories/index'
 import { Route as AuthedBudgetsIndexRouteImport } from './routes/_authed/budgets/index'
 import { Route as AuthedBanquesIndexRouteImport } from './routes/_authed/banques/index'
@@ -31,6 +33,11 @@ const AuthedRoute = AuthedRouteImport.update({
   id: '/_authed',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InvitationInvitationIdRoute = InvitationInvitationIdRouteImport.update({
+  id: '/invitation/$invitationId',
+  path: '/invitation/$invitationId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthedCallbackRoute = AuthedCallbackRouteImport.update({
   id: '/callback',
   path: '/callback',
@@ -38,6 +45,11 @@ const AuthedCallbackRoute = AuthedCallbackRouteImport.update({
 } as any)
 const AuthedRevueRoute = AuthedRevueRouteImport.update({
   id: '/_revue',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedEspacesIndexRoute = AuthedEspacesIndexRouteImport.update({
+  id: '/espaces/',
+  path: '/espaces/',
   getParentRoute: () => AuthedRoute,
 } as any)
 const AuthedCategoriesIndexRoute = AuthedCategoriesIndexRouteImport.update({
@@ -84,6 +96,7 @@ const AuthedRevueTransactionsRoute = AuthedRevueTransactionsRouteImport.update({
 export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/callback': typeof AuthedCallbackRoute
+  '/invitation/$invitationId': typeof InvitationInvitationIdRoute
   '/transactions': typeof AuthedRevueTransactionsRoute
   '/banques/ajouter': typeof AuthedBanquesAjouterRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -92,10 +105,12 @@ export interface FileRoutesByFullPath {
   '/banques': typeof AuthedBanquesIndexRoute
   '/budgets': typeof AuthedBudgetsIndexRoute
   '/categories': typeof AuthedCategoriesIndexRoute
+  '/espaces': typeof AuthedEspacesIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/callback': typeof AuthedCallbackRoute
+  '/invitation/$invitationId': typeof InvitationInvitationIdRoute
   '/transactions': typeof AuthedRevueTransactionsRoute
   '/banques/ajouter': typeof AuthedBanquesAjouterRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -104,6 +119,7 @@ export interface FileRoutesByTo {
   '/banques': typeof AuthedBanquesIndexRoute
   '/budgets': typeof AuthedBudgetsIndexRoute
   '/categories': typeof AuthedCategoriesIndexRoute
+  '/espaces': typeof AuthedEspacesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -111,6 +127,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_authed/_revue': typeof AuthedRevueRouteWithChildren
   '/_authed/callback': typeof AuthedCallbackRoute
+  '/invitation/$invitationId': typeof InvitationInvitationIdRoute
   '/_authed/_revue/transactions': typeof AuthedRevueTransactionsRoute
   '/_authed/banques/ajouter': typeof AuthedBanquesAjouterRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -119,12 +136,14 @@ export interface FileRoutesById {
   '/_authed/banques/': typeof AuthedBanquesIndexRoute
   '/_authed/budgets/': typeof AuthedBudgetsIndexRoute
   '/_authed/categories/': typeof AuthedCategoriesIndexRoute
+  '/_authed/espaces/': typeof AuthedEspacesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/login'
     | '/callback'
+    | '/invitation/$invitationId'
     | '/transactions'
     | '/banques/ajouter'
     | '/api/auth/$'
@@ -133,10 +152,12 @@ export interface FileRouteTypes {
     | '/banques'
     | '/budgets'
     | '/categories'
+    | '/espaces'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
     | '/callback'
+    | '/invitation/$invitationId'
     | '/transactions'
     | '/banques/ajouter'
     | '/api/auth/$'
@@ -145,12 +166,14 @@ export interface FileRouteTypes {
     | '/banques'
     | '/budgets'
     | '/categories'
+    | '/espaces'
   id:
     | '__root__'
     | '/_authed'
     | '/login'
     | '/_authed/_revue'
     | '/_authed/callback'
+    | '/invitation/$invitationId'
     | '/_authed/_revue/transactions'
     | '/_authed/banques/ajouter'
     | '/api/auth/$'
@@ -159,11 +182,13 @@ export interface FileRouteTypes {
     | '/_authed/banques/'
     | '/_authed/budgets/'
     | '/_authed/categories/'
+    | '/_authed/espaces/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AuthedRoute: typeof AuthedRouteWithChildren
   LoginRoute: typeof LoginRoute
+  InvitationInvitationIdRoute: typeof InvitationInvitationIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiTrpcSplatRoute: typeof ApiTrpcSplatRoute
 }
@@ -184,6 +209,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/invitation/$invitationId': {
+      id: '/invitation/$invitationId'
+      path: '/invitation/$invitationId'
+      fullPath: '/invitation/$invitationId'
+      preLoaderRoute: typeof InvitationInvitationIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authed/callback': {
       id: '/_authed/callback'
       path: '/callback'
@@ -196,6 +228,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: ''
       preLoaderRoute: typeof AuthedRevueRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/espaces/': {
+      id: '/_authed/espaces/'
+      path: '/espaces'
+      fullPath: '/espaces'
+      preLoaderRoute: typeof AuthedEspacesIndexRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/_authed/categories/': {
@@ -278,6 +317,7 @@ interface AuthedRouteChildren {
   AuthedBanquesIndexRoute: typeof AuthedBanquesIndexRoute
   AuthedBudgetsIndexRoute: typeof AuthedBudgetsIndexRoute
   AuthedCategoriesIndexRoute: typeof AuthedCategoriesIndexRoute
+  AuthedEspacesIndexRoute: typeof AuthedEspacesIndexRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
@@ -287,6 +327,7 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedBanquesIndexRoute: AuthedBanquesIndexRoute,
   AuthedBudgetsIndexRoute: AuthedBudgetsIndexRoute,
   AuthedCategoriesIndexRoute: AuthedCategoriesIndexRoute,
+  AuthedEspacesIndexRoute: AuthedEspacesIndexRoute,
 }
 
 const AuthedRouteWithChildren =
@@ -295,6 +336,7 @@ const AuthedRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   AuthedRoute: AuthedRouteWithChildren,
   LoginRoute: LoginRoute,
+  InvitationInvitationIdRoute: InvitationInvitationIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiTrpcSplatRoute: ApiTrpcSplatRoute,
 }

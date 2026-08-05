@@ -54,6 +54,13 @@ export type {
 } from "./categories/suggestions/schema";
 export type { ReplacePlan } from "./categories/suggestions/replace-plan";
 export type {
+  InvitationDetail,
+  Space,
+  SpaceInvitation,
+  SpaceMember,
+  SpaceRole,
+} from "./spaces/queries";
+export type {
   SuggestionsRun,
   TxnForAnalysis,
 } from "./categories/suggestions/analyze";

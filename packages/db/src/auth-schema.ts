@@ -82,6 +82,7 @@ export const organization = pgTable("organization", {
   logo: text("logo"),
   createdAt: timestamp("created_at").notNull(),
   metadata: text("metadata"),
+  isPersonal: boolean("is_personal").default(false),
 });
 
 export const member = pgTable("member", {

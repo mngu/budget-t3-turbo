@@ -53,6 +53,9 @@
     "POSTGRES_URL",
     "AUTH_SECRET",
     "ANTHROPIC_API_KEY",
+    "AUTH_URL",
+    "RESEND_API_KEY",
+    "EMAIL_FROM",
     "PORT"
   ],
   "globalPassThroughEnv": [

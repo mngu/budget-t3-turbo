@@ -1,0 +1,384 @@
+import { useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import {
+  CircleCheckIcon,
+  ClockAlertIcon,
+  Loader2Icon,
+  UserIcon,
+  UserPlusIcon,
+  UsersIcon,
+} from "lucide-react";
+
+import { cn } from "@budget/ui";
+import { toast } from "@budget/ui/toast";
+
+import { authClient } from "~/auth/client";
+import { useTRPCClient } from "~/lib/trpc";
+
+/**
+ * Écran d'acceptation d'une invitation — **hors du layout `_authed`** : l'invité
+ * n'a pas forcément de compte, et l'inscription n'étant ouverte que sur
+ * invitation, c'est ici qu'elle se fait.
+ *
+ * Quatre états, qui viennent tous du statut de l'invitation croisé avec la
+ * session : à accepter (connecté), à créer un compte (déconnecté), lien expiré,
+ * lien déjà utilisé.
+ */
+export const Route = createFileRoute("/invitation/$invitationId")({
+  loader: async ({ context, params }) => {
+    const [invitation, session] = await Promise.all([
+      context.trpcClient.spaces.invitation.query({
+        invitationId: params.invitationId,
+      }),
+      context.trpcClient.auth.getSession.query(),
+    ]);
+    return { invitation, email: session?.user.email ?? null };
+  },
+  component: InvitationPage,
+});
+
+function InvitationPage() {
+  const { invitation, email } = Route.useLoaderData();
+  const { invitationId } = Route.useParams();
+  const navigate = useNavigate();
+  const trpcClient = useTRPCClient();
+
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+  const [pending, setPending] = useState(false);
+
+  if (!invitation) {
+    return (
+      <Shell
+        icon={<ClockAlertIcon className="size-[17px]" />}
+        tone="bad"
+        title="Cette invitation est introuvable"
+        body="Le lien est incomplet ou l'invitation a été supprimée. Demandez-en un nouveau à la personne qui vous a invité."
+        footnote="Rien n'a été créé."
+      />
+    );
+  }
+
+  const join = async () => {
+    setPending(true);
+    try {
+      const { organizationId } =
+        await trpcClient.spaces.acceptInvitation.mutate({ invitationId });
+      // L'espace rejoint devient l'espace actif : sans ça, l'invité arrive sur
+      // la revue de son espace personnel, vide, en croyant que rien n'a marché.
+      await authClient.organization.setActive({ organizationId });
+      window.location.href = "/";
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Échec de l'acceptation.",
+      );
+      setPending(false);
+    }
+  };
+
+  const signUpAndJoin = async () => {
+    setPending(true);
+    const { error } = await authClient.signUp.email({
+      email: invitation.email,
+      password,
+      // Le nom est facultatif : l'adresse invitée fournit un repli lisible.
+      name: name.trim() || (invitation.email.split("@")[0] ?? invitation.email),
+    });
+    if (error) {
+      toast.error(error.message ?? "Création de compte impossible");
+      setPending(false);
+      return;
+    }
+    await join();
+  };
+
+  if (invitation.status === "expired") {
+    return (
+      <Shell
+        icon={<ClockAlertIcon className="size-[17px]" />}
+        tone="bad"
+        title="Cette invitation a expiré"
+        body={`Les liens d'invitation valent 7 jours. Demandez à ${invitation.invitedBy} d'en renvoyer un depuis l'écran Espaces — l'adresse invitée reste la même.`}
+        note={`Invitation pour ${invitation.email}.`}
+        footnote="Rien n'a été créé : votre compte n'existe pas encore."
+        secondary={{
+          label: "Retour à l'application",
+          onClick: () => void navigate({ to: "/login" }),
+        }}
+      />
+    );
+  }
+
+  if (invitation.status === "accepted" || invitation.status === "canceled") {
+    const used = invitation.status === "accepted";
+    return (
+      <Shell
+        icon={<CircleCheckIcon className="size-[17px]" />}
+        tone={used ? "ok" : "bad"}
+        title={
+          used ? "Ce lien a déjà été utilisé" : "Cette invitation a été annulée"
+        }
+        body={
+          used
+            ? `L'invitation a été acceptée. Vous faites déjà partie de l'espace ${invitation.spaceName} — connectez-vous pour y accéder.`
+            : `${invitation.invitedBy} a annulé cette invitation. Demandez-lui d'en envoyer une nouvelle si c'est une erreur.`
+        }
+        footnote="Un lien d'invitation ne sert qu'une fois."
+        primary={{
+          label: "Se connecter",
+          onClick: () => void navigate({ to: "/login" }),
+        }}
+      />
+    );
+  }
+
+  // Statut `pending` : reste à savoir si la personne a déjà un compte.
+  const signedInAsInvited =
+    email !== null && email.toLowerCase() === invitation.email.toLowerCase();
+
+  if (email !== null && !signedInAsInvited) {
+    return (
+      <Shell
+        icon={<UserIcon className="size-[17px]" />}
+        tone="bad"
+        title="Cette invitation vise une autre adresse"
+        body={`Elle a été envoyée à ${invitation.email}, et vous êtes connecté avec ${email}. Déconnectez-vous pour l'accepter avec le bon compte.`}
+        footnote="Un lien d'invitation ne vaut que pour l'adresse invitée."
+        primary={{
+          label: "Se déconnecter",
+          onClick: () => {
+            void authClient.signOut().then(() => window.location.reload());
+          },
+        }}
+      />
+    );
+  }
+
+  return (
+    <Shell
+      icon={
+        signedInAsInvited ? (
+          <UsersIcon className="size-[17px]" />
+        ) : (
+          <UserPlusIcon className="size-[17px]" />
+        )
+      }
+      tone="primary"
+      title={
+        signedInAsInvited
+          ? `${invitation.invitedBy} vous invite dans l'espace ${invitation.spaceName}`
+          : `Créez votre compte pour rejoindre ${invitation.spaceName}`
+      }
+      body={
+        signedInAsInvited
+          ? "En acceptant, vous verrez les comptes bancaires, les catégories et les transactions de cet espace, exactement comme les autres membres."
+          : `${invitation.invitedBy} vous invite. Il vous faut un compte pour accéder à l'espace — l'inscription se fait ici, avec l'adresse invitée.`
+      }
+      stats={
+        signedInAsInvited
+          ? [
+              { label: "Comptes", value: invitation.counts.accounts },
+              { label: "Catégories", value: invitation.counts.categories },
+              { label: "Membres", value: invitation.counts.members },
+            ]
+          : undefined
+      }
+      note={
+        signedInAsInvited ? "Vous pourrez quitter l'espace à tout moment." : ""
+      }
+      footnote={
+        signedInAsInvited
+          ? "Votre espace personnel reste séparé et n'est pas partagé."
+          : "L'adresse ne peut pas être changée : le lien d'invitation ne vaut que pour elle."
+      }
+      pending={pending}
+      primary={{
+        label: signedInAsInvited
+          ? "Rejoindre l'espace"
+          : "Créer mon compte et rejoindre",
+        onClick: () => void (signedInAsInvited ? join() : signUpAndJoin()),
+        disabled: !signedInAsInvited && password.length < 8,
+      }}
+      secondary={
+        signedInAsInvited
+          ? {
+              label: "Refuser",
+              onClick: () => {
+                void trpcClient.spaces.declineInvitation
+                  .mutate({ invitationId })
+                  .then(() => navigate({ to: "/login" }));
+              },
+            }
+          : undefined
+      }
+    >
+      {signedInAsInvited ? (
+        <div className="border-border flex items-center gap-2.5 border-b px-5 py-3.5">
+          <UserIcon className="text-subtle size-3.5 flex-none" />
+          <div className="text-muted-foreground min-w-0 text-[12.5px]">
+            Connecté en tant que{" "}
+            <span className="text-foreground font-medium">
+              {invitation.email}
+            </span>
+          </div>
+        </div>
+      ) : (
+        <div className="border-border flex flex-col gap-3 border-b px-5 py-4">
+          <Field label="Adresse email">
+            <div className="border-border bg-surface-2 text-muted-foreground flex h-[33px] items-center rounded-[9px] border px-3 text-[12.5px]">
+              {invitation.email}
+            </div>
+          </Field>
+          <Field label="Votre nom">
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Julie Rossi"
+              autoComplete="name"
+              className="border-border-strong bg-background focus:border-primary h-[33px] w-full rounded-[9px] border px-3 text-[12.5px] outline-none"
+            />
+          </Field>
+          <Field label="Mot de passe">
+            <input
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              type="password"
+              placeholder="au moins 8 caractères"
+              autoComplete="new-password"
+              className="border-border-strong bg-background focus:border-primary h-[33px] w-full rounded-[9px] border px-3 text-[12.5px] outline-none"
+            />
+          </Field>
+          <div className="text-subtle text-[11.5px] text-pretty">
+            L'inscription n'est ouverte que sur invitation : ce formulaire crée
+            votre compte et vous ajoute à l'espace.
+          </div>
+        </div>
+      )}
+    </Shell>
+  );
+}
+
+const TONE = {
+  primary: "bg-accent-soft text-primary",
+  ok: "bg-ok-soft text-ok",
+  bad: "bg-bad-soft text-bad",
+};
+
+function Shell({
+  icon,
+  tone,
+  title,
+  body,
+  stats,
+  note,
+  footnote,
+  primary,
+  secondary,
+  pending,
+  children,
+}: {
+  icon: React.ReactNode;
+  tone: keyof typeof TONE;
+  title: string;
+  body: string;
+  stats?: { label: string; value: number }[];
+  note?: string;
+  footnote: string;
+  primary?: { label: string; onClick: () => void; disabled?: boolean };
+  secondary?: { label: string; onClick: () => void };
+  pending?: boolean;
+  children?: React.ReactNode;
+}) {
+  return (
+    <main className="flex min-h-dvh justify-center px-6 pt-14 pb-20 text-[13px] leading-[1.45]">
+      <div className="w-full max-w-[470px]">
+        <div className="flex items-center justify-center gap-2.5">
+          <div className="bg-primary size-2.5 rounded-[2px]" />
+          <span className="text-[13.5px] font-semibold tracking-[-0.02em]">
+            Budget
+          </span>
+        </div>
+
+        <div className="border-border-strong bg-card mt-5 overflow-hidden rounded-[14px] border">
+          <div className="border-border border-b px-5 pt-5 pb-4">
+            <span
+              className={cn(
+                "flex size-[34px] items-center justify-center rounded-[11px]",
+                TONE[tone],
+              )}
+            >
+              {icon}
+            </span>
+            <div className="mt-3 text-base font-semibold tracking-[-0.02em] text-pretty">
+              {title}
+            </div>
+            <div className="text-muted-foreground mt-1.5 text-[12.5px] text-pretty">
+              {body}
+            </div>
+          </div>
+
+          {stats && (
+            <div className="border-border bg-surface-2 grid grid-cols-3 border-b">
+              {stats.map((stat) => (
+                <div
+                  key={stat.label}
+                  className="border-border border-r px-4 py-2.5 last:border-r-0"
+                >
+                  <div className="num text-sm font-medium">{stat.value}</div>
+                  <div className="label-caps mt-0.5">{stat.label}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {children}
+
+          <div className="flex items-center gap-3 px-5 py-3.5">
+            <span className="text-subtle min-w-0 flex-1 text-[11.5px] text-pretty">
+              {note}
+            </span>
+            {secondary && (
+              <button
+                type="button"
+                onClick={secondary.onClick}
+                className="text-muted-foreground hover:bg-accent hover:text-foreground flex h-8 flex-none items-center justify-center rounded-[9px] px-3 text-xs font-medium whitespace-nowrap"
+              >
+                {secondary.label}
+              </button>
+            )}
+            {primary && (
+              <button
+                type="button"
+                onClick={primary.onClick}
+                disabled={primary.disabled ?? pending}
+                className="bg-primary text-primary-foreground flex h-8 flex-none items-center justify-center gap-2 rounded-[9px] px-4 text-[12.5px] font-semibold whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-45"
+              >
+                {pending && <Loader2Icon className="size-3.5 animate-spin" />}
+                {primary.label}
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="text-subtle mt-3.5 text-center text-[11.5px] text-pretty">
+          {footnote}
+        </div>
+      </div>
+    </main>
+  );
+}
+
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <div className="label-caps mb-1.5">{label}</div>
+      {children}
+    </div>
+  );
+}
