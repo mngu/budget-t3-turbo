@@ -284,7 +284,7 @@ function RevueLayout() {
         </div>
 
         {/* Chaque écran rend son contenu **et** sa colonne des postes. */}
-        <div className="mt-5 flex min-h-0 flex-1 gap-5">
+        <div className="mt-3 flex min-h-0 flex-1 gap-5">
           <Outlet />
         </div>
       </div>

@@ -179,47 +179,52 @@ export function RevuePanel({
   );
 
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-      {/* Le fil d'ariane nomme le **niveau** que l'anneau affiche, et lui seul :
-          mettre un arc en avant ne le déplace pas — c'est une position, pas une
-          sélection. */}
-      <div className="flex min-w-0 flex-none items-center gap-[11px]">
-        <span
-          className={cn(
-            "flex size-[27px] flex-none items-center justify-center rounded-lg",
-            !selected && "bg-sunken text-subtle",
-          )}
-          style={
-            selected
-              ? {
-                  background: softCategoryColor(selectedColor),
-                  color: selectedColor,
-                }
-              : undefined
-          }
-        >
-          {selected ? (
-            <CategoryIcon name={selected.icon} className="size-[15px]" />
-          ) : (
-            <LayersIcon className="size-[15px]" aria-hidden />
-          )}
-        </span>
-        <span className="min-w-0 truncate text-base font-semibold tracking-[-0.02em]">
-          {selected ? selected.name : "Toutes catégories"}
-        </span>
-        <span className="text-subtle flex-none text-[11.5px] whitespace-nowrap">
-          {selected
-            ? `${selected.subs.length} sous-catégorie${selected.subs.length > 1 ? "s" : ""} · ${sharePercent(selected.total, expenses)} des sorties`
-            : `${categories.length} poste${categories.length > 1 ? "s" : ""} de dépense`}
-        </span>
-      </div>
+    // Fragment, comme `/transactions` : la colonne des postes est une **sœur**
+    // de la colonne [fil d'ariane + anneau] et non sa cadette. Le fil d'ariane
+    // ne coiffe donc que l'anneau, qu'il nomme, et la colonne récupère sa
+    // hauteur — c'est le `ch - 41` que la maquette retranche au diamètre de
+    // l'anneau, et lui seul.
+    <>
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        {/* Le fil d'ariane nomme le **niveau** que l'anneau affiche, et lui
+            seul : mettre un arc en avant ne le déplace pas — c'est une
+            position, pas une sélection. */}
+        <div className="flex min-w-0 flex-none items-center gap-[11px]">
+          <span
+            className={cn(
+              "flex size-[27px] flex-none items-center justify-center rounded-lg",
+              !selected && "bg-sunken text-subtle",
+            )}
+            style={
+              selected
+                ? {
+                    background: softCategoryColor(selectedColor),
+                    color: selectedColor,
+                  }
+                : undefined
+            }
+          >
+            {selected ? (
+              <CategoryIcon name={selected.icon} className="size-[15px]" />
+            ) : (
+              <LayersIcon className="size-[15px]" aria-hidden />
+            )}
+          </span>
+          <span className="min-w-0 truncate text-base font-semibold tracking-[-0.02em]">
+            {selected ? selected.name : "Toutes catégories"}
+          </span>
+          <span className="text-subtle flex-none text-[11.5px] whitespace-nowrap">
+            {selected
+              ? `${selected.subs.length} sous-catégorie${selected.subs.length > 1 ? "s" : ""} · ${sharePercent(selected.total, expenses)} des sorties`
+              : `${categories.length} poste${categories.length > 1 ? "s" : ""} de dépense`}
+          </span>
+        </div>
 
-      <div className="mt-3 flex min-h-0 flex-1 gap-5">
         {/* L'anneau s'étire sur toute la place disponible (pas d'`items-center`) :
-            c'est de là qu'il tire sa taille, sa boîte carrée étant en confinement
-            de taille — centrée dans un conteneur à dimension automatique, elle
-            s'effondrerait à zéro. */}
-        <div className="relative flex min-h-0 min-w-0 flex-1">
+          c'est de là qu'il tire sa taille, sa boîte carrée étant en confinement
+          de taille — centrée dans un conteneur à dimension automatique, elle
+          s'effondrerait à zéro. */}
+        <div className="relative mt-3 flex min-h-0 min-w-0 flex-1">
           <CategoryRing
             slices={slices}
             activeIndex={activeIndex >= 0 ? activeIndex : null}
@@ -292,9 +297,9 @@ export function RevuePanel({
             }}
           />
         </div>
-
-        <BreakdownList rows={rows} fold={selected !== null} />
       </div>
-    </div>
+
+      <BreakdownList rows={rows} fold={selected !== null} />
+    </>
   );
 }

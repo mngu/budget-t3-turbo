@@ -111,8 +111,8 @@
   --sunken: oklch(0.966 0.004 95);
   --surface-2: oklch(0.977 0.004 95);
   --subtle: oklch(0.598 0.012 250);
-  --border-strong: oklch(0.852 0.008 250);
-  --track: oklch(0.928 0.005 250);
+  --border-strong: oklch(0.855 0.008 250);
+  --track: oklch(0.935 0.005 250);
   /* Carte translucide posée *sur* un fond coloré — le centre de l'anneau. Ce
      n'est pas `--card` à l'opacité près : elle est plus claire que le fond en
      thème sombre (0,300 contre 0,262) pour se détacher des arcs. */
@@ -151,9 +151,9 @@
   --popover-foreground: oklch(0.905 0.005 265);
   --primary: oklch(0.735 0.11 266);
   --primary-foreground: oklch(0.232 0.011 265);
-  --secondary: oklch(0.245 0.011 265);
+  --secondary: oklch(0.285 0.012 265);
   --secondary-foreground: oklch(0.905 0.005 265);
-  --muted: oklch(0.245 0.011 265);
+  --muted: oklch(0.285 0.012 265);
   --muted-foreground: oklch(0.712 0.011 265);
   --accent: oklch(0.298 0.013 265);
   --accent-foreground: oklch(0.905 0.005 265);
@@ -171,10 +171,10 @@
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
   --sunken: oklch(0.208 0.011 265);
-  --surface-2: oklch(0.245 0.011 265);
+  --surface-2: oklch(0.285 0.012 265);
   --subtle: oklch(0.625 0.011 265);
   --border-strong: oklch(1 0 0 / 15%);
-  --track: oklch(1 0 0 / 8%);
+  --track: oklch(1 0 0 / 9%);
   --glass: oklch(0.3 0.012 265 / 62%);
   --glass-border: oklch(1 0 0 / 12%);
   --accent-soft: oklch(0.335 0.07 266);

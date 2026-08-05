@@ -153,7 +153,7 @@ export function CategoryRing({
           // Durée et courbe en variables CSS, transition en **classe** : c'est
           // ce qui laisse `motion-reduce` la neutraliser (un style inline gagne
           // contre toute règle), comme pour les arcs plus bas.
-          className="absolute inset-0 size-full origin-center [transition:transform_var(--drill-duration)_var(--drill-ease),opacity_240ms_ease] motion-reduce:transition-none"
+          className="absolute inset-0 size-full origin-center [transition:transform_var(--drill-duration)_var(--drill-ease),opacity_140ms_ease] motion-reduce:transition-none"
           style={
             {
               // Le sens du forage se lit dans la rotation : on quitte le niveau
@@ -251,7 +251,7 @@ export function CategoryRing({
           {/* La carte s'efface pendant le forage : elle nomme le niveau, elle
               ne peut pas rester lisible pendant qu'il change. */}
           <div
-            className="border-glass-border bg-glass flex max-w-full flex-col items-center rounded-[18px] border px-[19px] pt-[15px] pb-3.5 text-center shadow-[0_1px_2px_oklch(0_0_0/0.05),0_22px_44px_-22px_oklch(0.25_0.03_265/0.4)] backdrop-blur-[14px] backdrop-saturate-[1.3] [transition:opacity_220ms_ease] motion-reduce:transition-none"
+            className="border-glass-border bg-glass flex max-w-full flex-col items-center rounded-[18px] border px-[19px] pt-[15px] pb-3.5 text-center shadow-[0_1px_2px_oklch(0_0_0/0.05),0_22px_44px_-22px_oklch(0.25_0.03_265/0.4)] backdrop-blur-[14px] backdrop-saturate-[1.3] [transition:opacity_130ms_ease] motion-reduce:transition-none"
             style={{ opacity: folded ? 0 : 1 }}
           >
             {center.icon !== null && (
@@ -346,7 +346,7 @@ function ArcLabel({
       // Même durée que l'arc pour la position, même durée que le survol pour
       // l'estompage : l'étiquette glisse *avec* sa part, elle ne la rattrape pas.
       className={cn(
-        "pointer-events-none absolute flex -translate-y-1/2 items-center gap-[5px] whitespace-nowrap [transition:left_200ms_cubic-bezier(0.22,1,0.36,1),top_200ms_cubic-bezier(0.22,1,0.36,1),opacity_260ms_ease] motion-reduce:transition-none",
+        "pointer-events-none absolute flex -translate-y-1/2 items-center gap-[5px] whitespace-nowrap [transition:left_200ms_cubic-bezier(0.22,1,0.36,1),top_200ms_cubic-bezier(0.22,1,0.36,1),opacity_160ms_ease] motion-reduce:transition-none",
         right
           ? "translate-x-[2px]"
           : "translate-x-[calc(-100%_-_2px)] flex-row-reverse",

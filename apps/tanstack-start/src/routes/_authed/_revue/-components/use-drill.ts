@@ -9,13 +9,13 @@ import { useEffect, useRef, useState } from "react";
  * fini de se replier.
  */
 export const DRILL = {
-  outMs: 200,
+  outMs: 120,
   outEase: "cubic-bezier(0.4,0.05,0.9,0.3)",
-  inMs: 560,
+  inMs: 340,
   inEase: "cubic-bezier(0.18,0.78,0.16,1)",
   /** Décalage du dépliage d'un arc au suivant, et son plafond. */
-  staggerMs: 16,
-  staggerMaxMs: 190,
+  staggerMs: 9,
+  staggerMaxMs: 100,
   /**
    * Filet du relâchement. `requestAnimationFrame` **ne s'exécute pas** dans un
    * onglet caché : sans ce doublon, un forage déclenché puis quitté des yeux
@@ -100,7 +100,7 @@ export function useDrill(level: string | undefined) {
     // replié sur un niveau que plus personne n'attend.
     if (pending.current || target === level) return;
     // Mouvement réduit : l'échange se fait sur place. Ce n'est pas qu'une
-    // affaire de CSS — c'est le délai de 200 ms qu'il faut sauter, et
+    // affaire de CSS — c'est le délai du repli qu'il faut sauter, et
     // `motion-reduce:transition-none` ne peut rien contre un `setTimeout`.
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       apply();
