@@ -1,6 +1,6 @@
 "use client";
 
-import { ClockIcon, SparklesIcon, XIcon } from "lucide-react";
+import { SparklesIcon, XIcon } from "lucide-react";
 
 const dateTimeFr = new Intl.DateTimeFormat("fr-FR", {
   dateStyle: "long",
@@ -61,20 +61,16 @@ export function SuggestionsWaitPanel({ onClose }: { onClose: () => void }) {
 
 export function SuggestionsReviewPanel({
   generatedAt,
-  newTransactionsCount,
   branchCount,
   touchedExistingParents,
   newParentCount,
   onClose,
-  onRegenerate,
 }: {
   generatedAt: Date;
-  newTransactionsCount: number;
   branchCount: number;
   touchedExistingParents: number;
   newParentCount: number;
   onClose: () => void;
-  onRegenerate: () => void;
 }) {
   return (
     <PanelShell
@@ -82,28 +78,6 @@ export function SuggestionsReviewPanel({
       tagline={`analyse du ${dateTimeFr.format(generatedAt)}`}
       onClose={onClose}
     >
-      {newTransactionsCount > 0 && (
-        <div className="bg-warn-soft flex flex-wrap items-center gap-2.5 border-b px-4 py-2.5">
-          <ClockIcon className="text-warn size-3.5 flex-none" />
-          <span className="text-muted-foreground text-[11.5px]">
-            <span className="text-foreground font-medium">
-              {newTransactionsCount} nouvelle
-              {newTransactionsCount > 1 ? "s" : ""} transaction
-              {newTransactionsCount > 1 ? "s" : ""} arrivée
-              {newTransactionsCount > 1 ? "s" : ""} depuis
-            </span>
-            . Elles ne sont pas dans cette proposition.
-          </span>
-          <button
-            type="button"
-            onClick={onRegenerate}
-            className="text-warn ml-auto text-[11.5px] font-medium"
-          >
-            Relancer
-          </button>
-        </div>
-      )}
-
       <div className="flex flex-wrap items-center gap-3.5 px-4 py-3.5">
         <p className="text-muted-foreground max-w-[560px] text-xs text-pretty">
           {branchCount === 0 ? (

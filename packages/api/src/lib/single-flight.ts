@@ -1,6 +1,7 @@
 // Verrou en mémoire process : empêche deux exécutions concurrentes d'une même
 // opération longue (elles écrivent toutes dans `transactions`). Suffisant pour
-// ce MVP mono-utilisateur mono-process — aucune coordination entre instances.
+// un déploiement mono-process — aucune coordination entre instances. Les clés
+// portent l'espace (`sync:<orgId>`), donc deux espaces ne s'attendent jamais.
 const inFlight = new Set<string>();
 
 export async function withSingleFlight<T>(

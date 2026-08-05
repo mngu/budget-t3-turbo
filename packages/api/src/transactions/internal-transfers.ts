@@ -7,9 +7,11 @@
 // L'appariement est une propriété de la *paire*, jamais d'une ligne isolée :
 // c'est pourquoi il ne peut pas venir de la catégorisation, qui regarde une
 // transaction à la fois. Voir docs/superpowers/specs/2026-08-03-virements-internes-design.md.
-import { eq, inArray, isNull, or, sql } from "@budget/db";
+import { and, eq, inArray, isNull, or, sql } from "@budget/db";
 import { db } from "@budget/db/client";
-import { accounts, transactions } from "@budget/db/schema";
+import { bankAccounts, transactions } from "@budget/db/schema";
+
+import { ownedByOrganization } from "./queries";
 
 // Écart maximal entre les deux jambes. Au-delà de UNCONFIRMED_MAX_GAP, seule
 // une confirmation par IBAN autorise l'appariement : sur les données réelles,
@@ -206,10 +208,13 @@ export interface DetectionResult {
  * `manual` — posés ou retirés à la main — sont hors de son périmètre, dans un
  * sens comme dans l'autre, même contrat que `category_source`.
  */
-export async function detectInternalTransfers(): Promise<DetectionResult> {
+export async function detectInternalTransfers(
+  organizationId: string,
+): Promise<DetectionResult> {
   const accountRows = await db
-    .select({ id: accounts.id, iban: accounts.iban })
-    .from(accounts);
+    .select({ id: bankAccounts.id, iban: bankAccounts.iban })
+    .from(bankAccounts)
+    .where(eq(bankAccounts.organizationId, organizationId));
   const ibanByAccount: OwnIbans = new Map();
   for (const row of accountRows) {
     if (row.iban) ibanByAccount.set(row.id, row.iban);
@@ -220,6 +225,8 @@ export async function detectInternalTransfers(): Promise<DetectionResult> {
     sql`${transactions.transferSource} <> 'manual'`,
   );
 
+  // Scopé par la jointure : deux comptes de deux espaces ne doivent jamais
+  // former une paire, même s'ils partagent montant, date et IBAN.
   const legs = await db
     .select({
       id: transactions.id,
@@ -235,7 +242,8 @@ export async function detectInternalTransfers(): Promise<DetectionResult> {
       )`,
     })
     .from(transactions)
-    .where(notManual);
+    .innerJoin(bankAccounts, eq(transactions.accountId, bankAccounts.id))
+    .where(and(eq(bankAccounts.organizationId, organizationId), notManual));
 
   const pairs = matchInternalTransfers(legs, ibanByAccount);
 
@@ -247,7 +255,12 @@ export async function detectInternalTransfers(): Promise<DetectionResult> {
     const cleared = await tx
       .update(transactions)
       .set({ transferPairId: null, transferSource: null })
-      .where(eq(transactions.transferSource, "auto"))
+      .where(
+        and(
+          eq(transactions.transferSource, "auto"),
+          ownedByOrganization(organizationId),
+        ),
+      )
       .returning({ id: transactions.id });
 
     for (const pair of pairs) {
@@ -272,15 +285,26 @@ export async function detectInternalTransfers(): Promise<DetectionResult> {
  * Sans ce marquage la passe suivante reformerait la paire, l'utilisateur ayant
  * corrigé un résultat que rien n'aurait mémorisé.
  */
-export async function unlinkInternalTransfer(id: number): Promise<void> {
+export async function unlinkInternalTransfer(
+  organizationId: string,
+  id: number,
+): Promise<void> {
   const [row] = await db
     .select({ pairId: transactions.transferPairId })
     .from(transactions)
-    .where(eq(transactions.id, id));
+    .where(and(eq(transactions.id, id), ownedByOrganization(organizationId)));
   if (!row?.pairId) return;
 
+  // La jumelle est dans le même espace par construction (la détection ne
+  // franchit pas la frontière) ; le garde reste posé sur les deux, une paire
+  // héritée d'avant le cloisonnement pouvant l'enjamber.
   await db
     .update(transactions)
     .set({ transferPairId: null, transferSource: "manual" })
-    .where(inArray(transactions.id, [id, row.pairId]));
+    .where(
+      and(
+        inArray(transactions.id, [id, row.pairId]),
+        ownedByOrganization(organizationId),
+      ),
+    );
 }

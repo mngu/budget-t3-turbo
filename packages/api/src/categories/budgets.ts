@@ -4,9 +4,14 @@
 // ce sont alors ses sous-catégories qui portent chacune un montant, et la
 // parente affiche leur somme. Les deux lectures ne coexistent jamais — c'est
 // `budgetSlots` qui tranche, et c'est de lui que sortent tous les compteurs.
-import { and, eq, gte, isNotNull, isNull, lt, sql } from "@budget/db";
+import { and, eq, gte, inArray, isNotNull, isNull, lt, sql } from "@budget/db";
 import { db } from "@budget/db/client";
-import { categories, categoryBudgets, transactions } from "@budget/db/schema";
+import {
+  bankAccounts,
+  categories,
+  categoryBudgets,
+  transactions,
+} from "@budget/db/schema";
 
 // Fenêtre de référence : les 6 derniers mois **complets**. Le mois en cours en
 // est exclu — il ne couvre qu'une fraction du calendrier et tirerait toute
@@ -94,7 +99,9 @@ function historyWindow(now = new Date()) {
   };
 }
 
-export async function budgetPlan(): Promise<CategoryBudgetPlan> {
+export async function budgetPlan(
+  organizationId: string,
+): Promise<CategoryBudgetPlan> {
   const { start, end } = historyWindow();
   const month = sql<string>`to_char(${transactions.bookingDate}, 'YYYY-MM')`;
 
@@ -102,8 +109,19 @@ export async function budgetPlan(): Promise<CategoryBudgetPlan> {
     db
       .select({ id: categories.id, parentId: categories.parentId })
       .from(categories)
+      .where(eq(categories.organizationId, organizationId))
       .orderBy(categories.id),
-    db.select().from(categoryBudgets),
+    // `category_budgets` n'a pas de colonne d'espace : la ligne tient le sien
+    // de sa catégorie, comme une transaction le tient de son compte.
+    db
+      .select({
+        categoryId: categoryBudgets.categoryId,
+        amount: categoryBudgets.amount,
+        detailed: categoryBudgets.detailed,
+      })
+      .from(categoryBudgets)
+      .innerJoin(categories, eq(categories.id, categoryBudgets.categoryId))
+      .where(eq(categories.organizationId, organizationId)),
     db
       .select({
         categoryId: transactions.categoryId,
@@ -111,8 +129,10 @@ export async function budgetPlan(): Promise<CategoryBudgetPlan> {
         debit: sql<string>`sum(${transactions.amount})`,
       })
       .from(transactions)
+      .innerJoin(bankAccounts, eq(transactions.accountId, bankAccounts.id))
       .where(
         and(
+          eq(bankAccounts.organizationId, organizationId),
           eq(transactions.direction, "debit"),
           isNotNull(transactions.categoryId),
           // Périmètre « tous les comptes » : les deux jambes d'un virement
@@ -185,9 +205,11 @@ export async function budgetPlan(): Promise<CategoryBudgetPlan> {
 // `amount` nul retire le budget sans effacer la ligne : elle peut encore porter
 // le mode « Détaillé » de la parente.
 export async function setCategoryBudget(
+  organizationId: string,
   categoryId: number,
   amount: number | null,
 ): Promise<void> {
+  await assertCategoryInOrg(organizationId, categoryId);
   const value = amount === null ? null : amount.toFixed(2);
   await db
     .insert(categoryBudgets)
@@ -199,9 +221,11 @@ export async function setCategoryBudget(
 }
 
 export async function setCategoryDetailed(
+  organizationId: string,
   categoryId: number,
   detailed: boolean,
 ): Promise<void> {
+  await assertCategoryInOrg(organizationId, categoryId);
   await db
     .insert(categoryBudgets)
     .values({ categoryId, detailed })
@@ -211,6 +235,40 @@ export async function setCategoryDetailed(
     });
 }
 
-export async function clearCategoryBudgets(): Promise<void> {
-  await db.delete(categoryBudgets);
+// « Tout vider » ne vide que l'espace courant. Le `IN` plutôt qu'une jointure :
+// `DELETE ... USING` ne se dit pas en Drizzle aussi simplement, et la liste des
+// catégories d'un foyer tient dans une sous-requête.
+export async function clearCategoryBudgets(
+  organizationId: string,
+): Promise<void> {
+  await db
+    .delete(categoryBudgets)
+    .where(
+      inArray(
+        categoryBudgets.categoryId,
+        db
+          .select({ id: categories.id })
+          .from(categories)
+          .where(eq(categories.organizationId, organizationId)),
+      ),
+    );
+}
+
+// Les budgets sont écrits par id de catégorie, venu du client : sans cette
+// vérification, un id d'un autre espace créerait une ligne de budget orpheline
+// dans son arborescence.
+async function assertCategoryInOrg(
+  organizationId: string,
+  categoryId: number,
+): Promise<void> {
+  const [row] = await db
+    .select({ id: categories.id })
+    .from(categories)
+    .where(
+      and(
+        eq(categories.id, categoryId),
+        eq(categories.organizationId, organizationId),
+      ),
+    );
+  if (!row) throw new Error("Catégorie introuvable.");
 }

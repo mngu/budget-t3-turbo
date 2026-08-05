@@ -1,14 +1,14 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 
 import { performImport, performSync } from "../pipeline";
-import { protectedProcedure } from "../trpc";
+import { orgProcedure } from "../trpc";
 
 export const syncRouter = {
   // Rejoue l'import des data/*.json déjà présents puis la catégorisation, sans
   // aucun appel bancaire (donc sans SCA ni consommation du quota PSD2).
-  import: protectedProcedure.mutation(() => performImport()),
+  import: orgProcedure.mutation(({ ctx }) => performImport(ctx.organizationId)),
 
-  run: protectedProcedure.mutation(({ ctx }) => {
+  run: orgProcedure.mutation(({ ctx }) => {
     // Sync déclenché depuis l'app = utilisateur présent : relayer son IP et son
     // user-agent (PSU headers) classe l'accès « PSU présent » côté banque, ce qui
     // l'exempte du plafond PSD2 des accès non-assistés (~4/jour).
@@ -18,6 +18,6 @@ export const syncRouter = {
     if (ip) psuHeaders["Psu-Ip-Address"] = ip;
     if (userAgent) psuHeaders["Psu-User-Agent"] = userAgent;
 
-    return performSync(psuHeaders);
+    return performSync(ctx.organizationId, psuHeaders);
   }),
 } satisfies TRPCRouterRecord;

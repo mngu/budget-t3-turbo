@@ -55,6 +55,5 @@ export type {
 export type { ReplacePlan } from "./categories/suggestions/replace-plan";
 export type {
   SuggestionsRun,
-  SuggestionsStatus,
-} from "./categories/suggestions/state";
-export type { TxnForAnalysis } from "./categories/suggestions/analyze";
+  TxnForAnalysis,
+} from "./categories/suggestions/analyze";

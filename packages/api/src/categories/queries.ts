@@ -1,7 +1,7 @@
 // Lectures de l'arborescence de catégories.
-import { count, eq, isNull } from "@budget/db";
+import { and, count, eq, isNull } from "@budget/db";
 import { db } from "@budget/db/client";
-import { categories, transactions } from "@budget/db/schema";
+import { bankAccounts, categories, transactions } from "@budget/db/schema";
 
 export interface CategoryOption {
   id: number;
@@ -68,6 +68,7 @@ function buildCategoryTree<T extends CategoryOption>(
 // `parentId` omis : liste plate complète. `parentId: null` : catégories
 // racines. `parentId: n` : sous-catégories de n.
 export async function listCategories(
+  organizationId: string,
   parentId?: number | null,
 ): Promise<CategoryOption[]> {
   const where =
@@ -79,15 +80,18 @@ export async function listCategories(
   return db
     .select(categoryColumns)
     .from(categories)
-    .where(where)
+    .where(and(eq(categories.organizationId, organizationId), where))
     .orderBy(categories.id);
 }
 
 // Arborescence complète : catégories parentes avec leurs sous-catégories.
-export async function listCategoryTree(): Promise<CategoryTreeNode[]> {
+export async function listCategoryTree(
+  organizationId: string,
+): Promise<CategoryTreeNode[]> {
   const rows = await db
     .select(categoryColumns)
     .from(categories)
+    .where(eq(categories.organizationId, organizationId))
     .orderBy(categories.id);
   return buildCategoryTree(rows);
 }
@@ -99,7 +103,9 @@ export async function listCategoryTree(): Promise<CategoryTreeNode[]> {
 // Ils coïncident sur une sous-catégorie, qui n'a pas d'enfant.
 // Part de `categories` (pas `transactions`, contrairement à
 // `transactions.byCategory`) pour ne perdre aucune catégorie à 0 transaction.
-export async function categoriesOverview(): Promise<CategoriesOverview> {
+export async function categoriesOverview(
+  organizationId: string,
+): Promise<CategoriesOverview> {
   const [rows, [uncategorized]] = await Promise.all([
     db
       .select({
@@ -111,12 +117,21 @@ export async function categoriesOverview(): Promise<CategoriesOverview> {
       })
       .from(categories)
       .leftJoin(transactions, eq(transactions.categoryId, categories.id))
+      .where(eq(categories.organizationId, organizationId))
       .groupBy(categories.id)
       .orderBy(categories.id),
     db
       .select({ total: count() })
       .from(transactions)
-      .where(isNull(transactions.categoryId)),
+      // Compte des orphelines : elles n'ont aucune catégorie, l'espace ne peut
+      // donc venir que de leur compte.
+      .innerJoin(bankAccounts, eq(transactions.accountId, bankAccounts.id))
+      .where(
+        and(
+          eq(bankAccounts.organizationId, organizationId),
+          isNull(transactions.categoryId),
+        ),
+      ),
   ]);
 
   const tree = buildCategoryTree(rows).map((parent) => ({

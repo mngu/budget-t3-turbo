@@ -7,7 +7,7 @@ import {
   TriangleAlertIcon,
 } from "lucide-react";
 
-import type { CategoryOverviewNode } from "@budget/api";
+import type { CategoryOverviewNode, SuggestionsRun } from "@budget/api";
 import { CATEGORY_COLOR_PALETTE } from "@budget/shared";
 import { toast } from "@budget/ui/toast";
 
@@ -34,15 +34,23 @@ import { TransactionPreviewDrawer } from "./-components/transaction-preview-draw
 import { deriveSuggestions, ghostTransactions } from "./-lib/suggestions";
 
 export const Route = createFileRoute("/_authed/categories/")({
-  loader: async ({ context }) => {
-    const [status, overview] = await Promise.all([
-      context.trpcClient.categories.suggestions.status.query(),
-      context.trpcClient.categories.overview.query(),
-    ]);
-    return { status, overview };
-  },
+  loader: ({ context }) => context.trpcClient.categories.overview.query(),
   component: CategoriesPage,
 });
+
+/**
+ * La proposition de l'analyse, telle que cet écran la retient — **en mémoire du
+ * navigateur, nulle part ailleurs**. Le serveur ne garde rien : quitter la page
+ * ou recharger la perd, et il suffit de relancer l'analyse. C'est assumé — elle
+ * ne fait que proposer, rien n'est écrit en base tant qu'on n'a pas cliqué
+ * « Ajouter ».
+ *
+ * Le seul ajout à ce que renvoie `generate` est l'horodatage : c'est le client
+ * qui le pose, l'instant qui compte étant celui où *il* a reçu la proposition.
+ */
+interface Analysis extends SuggestionsRun {
+  generatedAt: Date;
+}
 
 interface PreviewState {
   title: string;
@@ -55,16 +63,18 @@ interface PreviewState {
 const PREVIEW_FOOTER = "Aperçu limité aux 25 transactions les plus récentes.";
 
 function CategoriesPage() {
-  const { status, overview } = Route.useLoaderData();
+  const overview = Route.useLoaderData();
   const router = useRouter();
   const trpcClient = useTRPCClient();
   const resolveColor = useCategoryColor();
 
+  const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [generating, setGenerating] = useState(false);
   const [categorizing, setCategorizing] = useState(false);
   const [panelClosed, setPanelClosed] = useState(false);
-  // Le rejet d'une proposition n'a rien à écrire en base : l'état du run vit en
-  // mémoire côté serveur et disparaît au prochain « Lancer l'analyse ».
+  // Le rejet d'une proposition n'a rien à écrire en base : la proposition
+  // elle-même n'existe que dans cette page, et disparaît au prochain
+  // « Lancer l'analyse ».
   const [dismissed, setDismissed] = useState<ReadonlySet<string>>(new Set());
   const [pending, setPending] = useState<ReadonlySet<string>>(new Set());
   const [identityTarget, setIdentityTarget] = useState<IdentityTarget | null>(
@@ -78,12 +88,15 @@ function CategoriesPage() {
   const { tree, uncategorizedCount } = overview;
   const stats = computeStats(tree);
   const suggestions = deriveSuggestions(
-    status.suggestions ?? [],
+    analysis?.suggestions ?? [],
     tree,
     dismissed,
   );
   const showReviewPanel =
-    !generating && status.exists && !panelClosed && suggestions.branchCount > 0;
+    !generating &&
+    analysis !== null &&
+    !panelClosed &&
+    suggestions.branchCount > 0;
 
   // ── Mutations ────────────────────────────────────────────────────────────
 
@@ -101,14 +114,17 @@ function CategoriesPage() {
     }
   };
 
+  // Pas d'`invalidate` : l'analyse n'écrit rien, il n'y a rien à recharger.
   const generate = async () => {
     setGenerating(true);
     setPanelClosed(false);
     setDismissed(new Set());
-    await run(
-      () => trpcClient.categories.suggestions.generate.mutate(),
-      "Échec de l'analyse.",
-    );
+    try {
+      const result = await trpcClient.categories.suggestions.generate.mutate();
+      setAnalysis({ ...result, generatedAt: new Date() });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Échec de l'analyse.");
+    }
     setGenerating(false);
   };
 
@@ -277,15 +293,15 @@ function CategoriesPage() {
             <SuggestionsWaitPanel onClose={() => setPanelClosed(true)} />
           )}
 
-          {showReviewPanel && status.generatedAt && (
+          {/* `showReviewPanel` porte déjà le `analysis !== null` : TypeScript
+              affine à travers la constante, un second test serait mort. */}
+          {showReviewPanel && (
             <SuggestionsReviewPanel
-              generatedAt={status.generatedAt}
-              newTransactionsCount={status.newTransactionsCount}
+              generatedAt={analysis.generatedAt}
               branchCount={suggestions.branchCount}
               touchedExistingParents={suggestions.touchedExistingParents}
               newParentCount={suggestions.proposedParents.length}
               onClose={() => setPanelClosed(true)}
-              onRegenerate={generate}
             />
           )}
 
@@ -369,7 +385,7 @@ function CategoriesPage() {
               setPreview({
                 title: `${ghost.parent} › ${ghost.name}`,
                 description: `${ghost.txnIds.length} transaction(s) sans catégorie qui se ressemblent — aperçu.`,
-                txns: ghostTransactions(ghost, status.sample ?? []),
+                txns: ghostTransactions(ghost, analysis?.sample ?? []),
                 // Une branche proposée n'a pas encore d'icône : la pastille
                 // creuse dans la teinte de sa parente est exactement l'état
                 // « aucune icône choisie ».

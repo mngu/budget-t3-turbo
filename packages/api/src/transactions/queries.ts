@@ -19,7 +19,7 @@ import {
   sql,
 } from "@budget/db";
 import { db } from "@budget/db/client";
-import { accounts, categories, transactions } from "@budget/db/schema";
+import { bankAccounts, categories, transactions } from "@budget/db/schema";
 import {
   FALLBACK_CATEGORY_COLOR,
   PAGE_SIZE,
@@ -27,7 +27,7 @@ import {
 } from "@budget/shared";
 
 // Nom de banque affiché : display_name choisi par l'utilisateur, sinon nom ASPSP.
-const bankLabel = sql<string>`coalesce(${accounts.displayName}, ${accounts.bankName})`;
+const bankLabel = sql<string>`coalesce(${bankAccounts.displayName}, ${bankAccounts.bankName})`;
 
 // Utilisé pour matcher une transaction dont la sous-catégorie appartient
 // au parent choisi dans le filtre (categories.tree, 2 niveaux).
@@ -38,11 +38,11 @@ const parentCategories = alias(categories, "parent_categories");
 // du relevé. Les confondre ferait déclarer deux fois le même alias dès qu'un
 // écran filtre *et* affiche le compte de la jumelle — Postgres le refuse.
 const twin = alias(transactions, "transfer_twin");
-const twinAccount = alias(accounts, "transfer_twin_account");
+const twinAccount = alias(bankAccounts, "transfer_twin_account");
 const twinBankLabel = sql<string>`coalesce(${twinAccount.displayName}, ${twinAccount.bankName})`;
 
 const listTwin = alias(transactions, "list_transfer_twin");
-const listTwinAccount = alias(accounts, "list_transfer_twin_account");
+const listTwinAccount = alias(bankAccounts, "list_transfer_twin_account");
 const listTwinBankLabel = sql<string>`coalesce(${listTwinAccount.displayName}, ${listTwinAccount.bankName})`;
 
 // Le filtre de comptes, appliqué à la transaction courante ou à sa jumelle.
@@ -81,7 +81,10 @@ function bankCondition(
  *   partageant un libellé sont indissociables dans l'UI, la condition doit dire
  *   la même chose que le filtre.
  */
-function twinWithinScope(query: TransactionsSearch): SQL {
+function twinWithinScope(
+  organizationId: string,
+  query: TransactionsSearch,
+): SQL {
   return exists(
     db
       .select({ one: sql`1` })
@@ -90,6 +93,10 @@ function twinWithinScope(query: TransactionsSearch): SQL {
       .where(
         and(
           eq(twin.id, transactions.transferPairId),
+          // Redondant tant que la détection n'apparie que dans un espace, et
+          // gardé pour ça : c'est la seule ligne qui rend le périmètre vrai
+          // même si une paire inter-espaces apparaissait un jour en base.
+          eq(twinAccount.organizationId, organizationId),
           bankCondition(query.bank, twinBankLabel),
         ),
       ),
@@ -156,10 +163,20 @@ export interface CategoryBreakdownItem {
   breakdown: CategoryBreakdownDetail[];
 }
 
+/**
+ * Le filtre commun à toutes les lectures de transactions — et **le point de
+ * passage du cloisonnement** : `organization_id` y est une condition non
+ * négociable, posée avant tout filtre venu de l'URL, et non un critère de plus.
+ *
+ * Il porte sur `bank_accounts` : les transactions n'ont pas de colonne d'espace,
+ * elles tiennent le leur de leur compte. Toute requête qui utilise ce filtre
+ * doit donc joindre `bank_accounts` (`innerJoin`), sans quoi Postgres refuse.
+ */
 function transactionsFilterQuery(
+  organizationId: string,
   query: TransactionsSearch,
 ): SQL<unknown> | undefined {
-  const conditions: SQL[] = [];
+  const conditions: SQL[] = [eq(bankAccounts.organizationId, organizationId)];
   // `bank` accepte une banque ou une liste (voir @budget/shared).
   const bank = bankCondition(query.bank, bankLabel);
   if (bank) conditions.push(bank);
@@ -167,9 +184,9 @@ function transactionsFilterQuery(
   // — leur réunion est `toutes` — pour que l'écran d'audit montre ce que les
   // totaux ont écarté, ni plus ni moins.
   if (query.internes === "masquer")
-    conditions.push(not(twinWithinScope(query)));
+    conditions.push(not(twinWithinScope(organizationId, query)));
   else if (query.internes === "seulement")
-    conditions.push(twinWithinScope(query));
+    conditions.push(twinWithinScope(organizationId, query));
   if (query.direction)
     conditions.push(eq(transactions.direction, query.direction));
   if (query.status) conditions.push(eq(transactions.status, query.status));
@@ -207,17 +224,18 @@ function transactionsFilterQuery(
       conditions.push(qFilter);
     }
   }
-  return conditions.length > 0 ? and(...conditions) : undefined;
+  return and(...conditions);
 }
 
 // `limit` déroge à PAGE_SIZE pour les écrans qui ne paginent pas (« À revoir »,
 // zoom catégorie) : ils affichent une tranche plus large d'un coup plutôt que de
 // faire naviguer l'utilisateur. La pagination reste le cas par défaut.
 export async function listTransactions(
+  organizationId: string,
   input: TransactionsSearch,
   limit = PAGE_SIZE,
 ): Promise<{ rows: TransactionRow[]; total: number }> {
-  const where = transactionsFilterQuery(input);
+  const where = transactionsFilterQuery(organizationId, input);
 
   // Même règle de périmètre que `twinWithinScope`, sur la jumelle jointe : la
   // jointure est déjà là pour afficher son compte, un `EXISTS` de plus serait
@@ -261,7 +279,7 @@ export async function listTransactions(
         transferInScope: twinInListScope,
       })
       .from(transactions)
-      .innerJoin(accounts, eq(transactions.accountId, accounts.id))
+      .innerJoin(bankAccounts, eq(transactions.accountId, bankAccounts.id))
       .leftJoin(categories, eq(transactions.categoryId, categories.id))
       .leftJoin(parentCategories, eq(categories.parentId, parentCategories.id))
       .leftJoin(listTwin, eq(listTwin.id, transactions.transferPairId))
@@ -273,7 +291,7 @@ export async function listTransactions(
     db
       .select({ total: count() })
       .from(transactions)
-      .innerJoin(accounts, eq(transactions.accountId, accounts.id))
+      .innerJoin(bankAccounts, eq(transactions.accountId, bankAccounts.id))
       .leftJoin(categories, eq(transactions.categoryId, categories.id))
       .leftJoin(parentCategories, eq(categories.parentId, parentCategories.id))
       .where(where),
@@ -314,10 +332,14 @@ export interface DirectionTotals {
 // nom ne commande que la *liste*. Sans cette neutralisation, auditer les
 // virements internes changerait aussi les chiffres qui les excluent.
 export async function transactionTotals(
+  organizationId: string,
   input: TransactionsSearch,
 ): Promise<DirectionTotals> {
-  const where = transactionsFilterQuery({ ...input, internes: "toutes" });
-  const interne = twinWithinScope(input);
+  const where = transactionsFilterQuery(organizationId, {
+    ...input,
+    internes: "toutes",
+  });
+  const interne = twinWithinScope(organizationId, input);
   const rows = await db
     .select({
       direction: transactions.direction,
@@ -328,10 +350,10 @@ export async function transactionTotals(
     })
     .from(transactions)
     // Les trois jointures sont celles que `transactionsFilterQuery` suppose :
-    // `bank` lit `accounts`, `aClasser` et `category` lisent les deux niveaux de
+    // `bank` lit `bank_accounts`, `aClasser` et `category` lisent les deux niveaux de
     // `categories`. Sans elles la requête compile et ne casse qu'une fois un de
     // ces filtres posé.
-    .innerJoin(accounts, eq(transactions.accountId, accounts.id))
+    .innerJoin(bankAccounts, eq(transactions.accountId, bankAccounts.id))
     .leftJoin(categories, eq(transactions.categoryId, categories.id))
     .leftJoin(parentCategories, eq(categories.parentId, parentCategories.id))
     .where(where)
@@ -372,12 +394,16 @@ const A_CLASSER_LABEL = "À classer";
 // feuilles, donc l'ordre des barres comme celui des segments est refait ici
 // sur le total replié.
 export async function transactionsByCategory(
+  organizationId: string,
   input: TransactionsSearch,
 ): Promise<CategoryBreakdownItem[]> {
   // Les virements internes sont écartés ici comme dans tous les agrégats, sans
   // consulter le param : une jambe reste catégorisée (`Revenus › Apport …` sur
   // les données réelles) et pèserait sur sa part de l'anneau.
-  const where = transactionsFilterQuery({ ...input, internes: "masquer" });
+  const where = transactionsFilterQuery(organizationId, {
+    ...input,
+    internes: "masquer",
+  });
   const rows = await db
     .select({
       parentId: parentCategories.id,
@@ -389,7 +415,7 @@ export async function transactionsByCategory(
       total: sql<string>`sum(${transactions.amount})`,
     })
     .from(transactions)
-    .innerJoin(accounts, eq(transactions.accountId, accounts.id))
+    .innerJoin(bankAccounts, eq(transactions.accountId, bankAccounts.id))
     .leftJoin(categories, eq(transactions.categoryId, categories.id))
     .leftJoin(parentCategories, eq(categories.parentId, parentCategories.id))
     .where(where)
@@ -507,6 +533,7 @@ const DIRECTION_MIN_SAMPLE = 8;
 // de reprendre à la main. Une correction manuelle (`category_source = 'manual'`)
 // vaut confirmation et sort définitivement de la file.
 export async function reviewQueue(
+  organizationId: string,
   input: TransactionsSearch,
   limit: number = REVIEW_QUEUE_LIMIT,
 ): Promise<ReviewItem[]> {
@@ -530,9 +557,20 @@ export async function reviewQueue(
       credit: sql<string>`count(*) filter (where ${transactions.direction} = 'credit')`,
     })
     .from(transactions)
+    // Seule statistique de l'écran à ne pas passer par
+    // `transactionsFilterQuery` : elle ignore volontairement les filtres. La
+    // jointure sur `bank_accounts` n'est donc là que pour l'espace — sans elle, le
+    // sens dominant d'une catégorie serait calculé sur les transactions de tous
+    // les foyers.
+    .innerJoin(bankAccounts, eq(transactions.accountId, bankAccounts.id))
     .leftJoin(categories, eq(transactions.categoryId, categories.id))
     .leftJoin(parentCategories, eq(categories.parentId, parentCategories.id))
-    .where(isNull(transactions.transferPairId))
+    .where(
+      and(
+        eq(bankAccounts.organizationId, organizationId),
+        isNull(transactions.transferPairId),
+      ),
+    )
     .groupBy(parentName);
 
   const oddDirection = new Map<string, "debit" | "credit">();
@@ -550,7 +588,10 @@ export async function reviewQueue(
 
   // Un virement interne n'a rien à faire dans une file de relecture : il n'est
   // ni mal classé ni à classer, il ne compte simplement pas.
-  const base = transactionsFilterQuery({ ...input, internes: "masquer" });
+  const base = transactionsFilterQuery(organizationId, {
+    ...input,
+    internes: "masquer",
+  });
   const oddPairs = [...oddDirection].map(([category, direction]) =>
     and(eq(parentName, category), eq(transactions.direction, direction)),
   );
@@ -590,7 +631,7 @@ export async function reviewQueue(
       parentId: categories.parentId,
     })
     .from(transactions)
-    .innerJoin(accounts, eq(transactions.accountId, accounts.id))
+    .innerJoin(bankAccounts, eq(transactions.accountId, bankAccounts.id))
     .leftJoin(categories, eq(transactions.categoryId, categories.id))
     .leftJoin(parentCategories, eq(categories.parentId, parentCategories.id))
     .where(
@@ -666,6 +707,7 @@ const HISTORY_MONTHS = 12;
 // du mois, eux, viennent de `byCategory` et restent justes), la garde ne doit
 // pas dépendre de l'appelant.
 export async function monthlyHistory(
+  organizationId: string,
   input: TransactionsSearch,
 ): Promise<MonthlyCategoryTotal[]> {
   const anchor = input.dateTo ?? input.dateFrom ?? new Date().toISOString();
@@ -674,7 +716,7 @@ export async function monthlyHistory(
     Date.UTC(end.getUTCFullYear(), end.getUTCMonth() - (HISTORY_MONTHS - 1), 1),
   );
 
-  const where = transactionsFilterQuery({
+  const where = transactionsFilterQuery(organizationId, {
     ...input,
     direction: undefined,
     internes: "masquer",
@@ -700,7 +742,7 @@ export async function monthlyHistory(
       count: count(),
     })
     .from(transactions)
-    .innerJoin(accounts, eq(transactions.accountId, accounts.id))
+    .innerJoin(bankAccounts, eq(transactions.accountId, bankAccounts.id))
     .leftJoin(categories, eq(transactions.categoryId, categories.id))
     .leftJoin(parentCategories, eq(categories.parentId, parentCategories.id))
     .where(where)
@@ -715,10 +757,13 @@ export async function monthlyHistory(
   }));
 }
 
-export async function listBankLabels(): Promise<string[]> {
+export async function listBankLabels(
+  organizationId: string,
+): Promise<string[]> {
   const rows = await db
     .selectDistinct({ bankName: bankLabel })
-    .from(accounts)
+    .from(bankAccounts)
+    .where(eq(bankAccounts.organizationId, organizationId))
     .orderBy(asc(bankLabel));
   return rows.map((r) => r.bankName);
 }
@@ -727,6 +772,7 @@ export async function listBankLabels(): Promise<string[]> {
 // `bank` est retiré du filtre : sinon sélectionner une banque mettrait les
 // autres à zéro et on ne saurait plus vers quoi basculer.
 export async function bankCounts(
+  organizationId: string,
   input: TransactionsSearch,
 ): Promise<{ bank: string; count: number }[]> {
   // Seul agrégat à *ne pas* écarter les virements internes, et c'est délibéré :
@@ -736,7 +782,7 @@ export async function bankCounts(
   // alors que le clic restreindra la sélection, si bien que des paires
   // aujourd'hui neutralisées cesseront de l'être : la pastille annoncerait 2
   // pour une table qui en listerait 3.
-  const where = transactionsFilterQuery({
+  const where = transactionsFilterQuery(organizationId, {
     ...input,
     bank: undefined,
     internes: "toutes",
@@ -744,7 +790,7 @@ export async function bankCounts(
   const rows = await db
     .select({ bank: bankLabel, count: count() })
     .from(transactions)
-    .innerJoin(accounts, eq(transactions.accountId, accounts.id))
+    .innerJoin(bankAccounts, eq(transactions.accountId, bankAccounts.id))
     .leftJoin(categories, eq(transactions.categoryId, categories.id))
     .leftJoin(parentCategories, eq(categories.parentId, parentCategories.id))
     .where(where)
@@ -755,18 +801,48 @@ export async function bankCounts(
 
 // Une correction manuelle écrase la valeur précédente (LLM ou manuelle) ; le
 // garde IS NULL de categorization/run.ts empêche le LLM d'y retoucher ensuite.
+//
+// Les **deux** côtés portent l'espace, et c'est le point à ne pas alléger : la
+// catégorie parce que son nom n'est unique que dans l'espace, la transaction
+// parce que son id vient du client — sans le `EXISTS`, l'id d'une ligne d'un
+// autre foyer serait recatégorisé sans un mot.
 export async function setTransactionCategory(
+  organizationId: string,
   id: number,
   categoryName: string,
 ): Promise<void> {
   const [match] = await db
     .select({ id: categories.id })
     .from(categories)
-    .where(eq(categories.name, categoryName));
+    .where(
+      and(
+        eq(categories.organizationId, organizationId),
+        eq(categories.name, categoryName),
+      ),
+    );
   if (!match) throw new Error(`Catégorie inconnue : ${categoryName}`);
 
   await db
     .update(transactions)
     .set({ categoryId: match.id, categorySource: "manual" })
-    .where(eq(transactions.id, id));
+    .where(and(eq(transactions.id, id), ownedByOrganization(organizationId)));
+}
+
+/**
+ * « Cette transaction est bien dans l'espace. » À poser sur toute écriture
+ * ciblée par un id venu du client — l'`UPDATE` n'a pas de `FROM bank_accounts` où
+ * accrocher la condition, d'où le `EXISTS` corrélé.
+ */
+export function ownedByOrganization(organizationId: string): SQL {
+  return exists(
+    db
+      .select({ one: sql`1` })
+      .from(bankAccounts)
+      .where(
+        and(
+          eq(bankAccounts.id, transactions.accountId),
+          eq(bankAccounts.organizationId, organizationId),
+        ),
+      ),
+  );
 }

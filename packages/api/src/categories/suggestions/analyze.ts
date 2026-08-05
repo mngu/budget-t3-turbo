@@ -5,7 +5,7 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 
 import { alias, and, desc, eq, gte, isNotNull, isNull } from "@budget/db";
 import { db } from "@budget/db/client";
-import { accounts, categories, transactions } from "@budget/db/schema";
+import { bankAccounts, categories, transactions } from "@budget/db/schema";
 import {
   CATEGORY_COLOR_HEXES,
   CATEGORY_COLOR_PALETTE,
@@ -14,6 +14,7 @@ import {
 
 import type { CategoryTreeNode } from "../queries";
 import type { CategorySuggestion, RawCategorySuggestion } from "./schema";
+import { listCategoryTree } from "../queries";
 import { rawCategorySuggestionsSchema } from "./schema";
 
 export interface TxnForAnalysis {
@@ -67,7 +68,7 @@ const analysisColumns = {
   counterparty: transactions.counterparty,
   amount: transactions.amount,
   direction: transactions.direction,
-  bankName: accounts.bankName,
+  bankName: bankAccounts.bankName,
   mcc: transactions.mcc,
   category: txnCategory.name,
   parentCategory: txnParentCategory.name,
@@ -80,7 +81,7 @@ function analysisQuery() {
   return db
     .select(analysisColumns)
     .from(transactions)
-    .innerJoin(accounts, eq(transactions.accountId, accounts.id))
+    .innerJoin(bankAccounts, eq(transactions.accountId, bankAccounts.id))
     .leftJoin(txnCategory, eq(transactions.categoryId, txnCategory.id))
     .leftJoin(
       txnParentCategory,
@@ -99,18 +100,25 @@ function analysisQuery() {
 // catégorisation classe avec l'existant, les suggestions créent ce qui manque »
 // ne se refermerait jamais.
 export async function sampleTransactions(
+  organizationId: string,
   limit = SAMPLE_LIMIT,
 ): Promise<TxnForAnalysis[]> {
   const since = sampleWindowStart(new Date());
 
   const uncategorized = await analysisQuery()
-    .where(isNull(transactions.categoryId))
+    .where(
+      and(
+        eq(bankAccounts.organizationId, organizationId),
+        isNull(transactions.categoryId),
+      ),
+    )
     .orderBy(desc(transactions.bookingDate))
     .limit(Math.floor(limit * UNCATEGORIZED_SAMPLE_SHARE));
 
   const categorized = await analysisQuery()
     .where(
       and(
+        eq(bankAccounts.organizationId, organizationId),
         isNotNull(transactions.categoryId),
         gte(transactions.bookingDate, since),
       ),
@@ -145,7 +153,7 @@ function formatExistingTree(tree: CategoryTreeNode[]): string {
 // L'arborescence réelle est passée au LLM pour deux raisons distinctes : lui
 // faire réutiliser les noms existants au lieu d'en inventer des variantes
 // (« Transports » à côté d'un « Transport » existant, qui devient une seconde
-// parente en base — `categories.name` est unique mais sensible à la casse et
+// parente en base — `categories.name` est unique dans l'espace mais sensible à la casse et
 // aux accents, donc rien ne l'empêche), et lui faire garder la couleur déjà
 // choisie pour une parente existante.
 //
@@ -204,7 +212,8 @@ export function sanitizeSuggestionColors(
   }));
 }
 
-export async function analyzeAndSuggest(
+// Non exportée : `generateSuggestions` est la seule entrée de l'analyse.
+async function analyzeAndSuggest(
   txns: TxnForAnalysis[],
   tree: CategoryTreeNode[],
 ): Promise<CategorySuggestion[]> {
@@ -224,4 +233,33 @@ export async function analyzeAndSuggest(
     );
   }
   return sanitizeSuggestionColors(response.parsed_output.categories);
+}
+
+export interface SuggestionsRun {
+  suggestions: CategorySuggestion[];
+  // L'échantillon analysé repart avec la proposition : c'est lui qui permet à
+  // l'UI de résoudre les `txnIds` en transactions (compteurs, aperçu) sans
+  // re-interroger le serveur.
+  sample: TxnForAnalysis[];
+}
+
+/**
+ * Analyse complète : échantillon + arborescence réelle → proposition.
+ *
+ * **N'écrit rien, et ne retient rien.** Le résultat vit en mémoire du
+ * navigateur, chez le client qui l'a demandé : un rechargement le perd, et
+ * relancer l'analyse coûte un appel LLM, pas une incohérence. C'est ce qui
+ * dispense le serveur d'un état par espace — état qui, gardé ici, porterait
+ * l'échantillon de transactions d'un foyer dans la mémoire du process.
+ */
+export async function generateSuggestions(
+  organizationId: string,
+): Promise<SuggestionsRun> {
+  // L'arborescence réelle part avec l'échantillon : sans elle, le LLM invente
+  // des variantes des noms existants (voir buildAnalysisPrompt).
+  const [sample, tree] = await Promise.all([
+    sampleTransactions(organizationId),
+    listCategoryTree(organizationId),
+  ]);
+  return { suggestions: await analyzeAndSuggest(sample, tree), sample };
 }

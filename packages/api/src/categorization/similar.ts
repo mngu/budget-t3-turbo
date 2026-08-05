@@ -3,7 +3,7 @@
 import type { Transaction } from "@budget/db/schema";
 import { and, desc, eq, isNotNull, ne, sql } from "@budget/db";
 import { db } from "@budget/db/client";
-import { categories, transactions } from "@budget/db/schema";
+import { bankAccounts, categories, transactions } from "@budget/db/schema";
 
 import type { TxnForLlm } from "./prompt";
 
@@ -82,7 +82,9 @@ export function selectDiscriminativeBankCodes(
 
 // Une seule requête par run de catégorisation (et non par transaction) :
 // la pureté ne dépend pas de la transaction qu'on cherche à classer.
-export async function loadDiscriminativeBankCodes(): Promise<Set<string>> {
+export async function loadDiscriminativeBankCodes(
+  organizationId: string,
+): Promise<Set<string>> {
   const rows = await db
     .select({
       bankCode: transactions.bankCode,
@@ -91,7 +93,15 @@ export async function loadDiscriminativeBankCodes(): Promise<Set<string>> {
     })
     .from(transactions)
     .innerJoin(categories, eq(transactions.categoryId, categories.id))
-    .where(isNotNull(transactions.bankCode))
+    // Le périmètre du few-shot est l'espace : un exemple venu d'un autre foyer
+    // serait à la fois une fuite et un mauvais indice.
+    .innerJoin(bankAccounts, eq(transactions.accountId, bankAccounts.id))
+    .where(
+      and(
+        eq(bankAccounts.organizationId, organizationId),
+        isNotNull(transactions.bankCode),
+      ),
+    )
     .groupBy(
       transactions.bankCode,
       sql`coalesce(${categories.parentId}, ${categories.id})`,
@@ -122,23 +132,30 @@ const manualFirst = desc(
 );
 
 async function byCounterparty(
+  organizationId: string,
   txn: TxnForLlm,
   limit: number,
 ): Promise<SimilarTxn[]> {
   if (!txn.counterparty) return [];
-  return db
-    .select(similarColumns)
-    .from(transactions)
-    .innerJoin(categories, eq(transactions.categoryId, categories.id))
-    .where(
-      and(
-        eq(transactions.counterparty, txn.counterparty),
-        isNotNull(transactions.categoryId),
-        ne(transactions.id, txn.id),
-      ),
-    )
-    .orderBy(manualFirst, desc(transactions.bookingDate))
-    .limit(limit);
+  return (
+    db
+      .select(similarColumns)
+      .from(transactions)
+      .innerJoin(categories, eq(transactions.categoryId, categories.id))
+      // Le périmètre du few-shot est l'espace : un exemple venu d'un autre foyer
+      // serait à la fois une fuite et un mauvais indice.
+      .innerJoin(bankAccounts, eq(transactions.accountId, bankAccounts.id))
+      .where(
+        and(
+          eq(bankAccounts.organizationId, organizationId),
+          eq(transactions.counterparty, txn.counterparty),
+          isNotNull(transactions.categoryId),
+          ne(transactions.id, txn.id),
+        ),
+      )
+      .orderBy(manualFirst, desc(transactions.bookingDate))
+      .limit(limit)
+  );
 }
 
 // La similarité est le critère principal, la priorité manuelle ne départage
@@ -149,27 +166,34 @@ async function byCounterparty(
 // par similarité. L'intention d'origine — préférer un exemple validé par un
 // humain — est conservée, mais entre candidats comparablement similaires.
 async function byDescriptionTrigram(
+  organizationId: string,
   txn: TxnForLlm,
   limit: number,
 ): Promise<SimilarTxn[]> {
   const similarity = sql<number>`similarity(${transactions.description}, ${txn.description})`;
-  return db
-    .select(similarColumns)
-    .from(transactions)
-    .innerJoin(categories, eq(transactions.categoryId, categories.id))
-    .where(
-      and(
-        isNotNull(transactions.categoryId),
-        ne(transactions.id, txn.id),
-        sql`${similarity} > ${TRIGRAM_THRESHOLD}`,
-      ),
-    )
-    .orderBy(
-      desc(sql`round(${similarity}::numeric, 1)`),
-      manualFirst,
-      desc(similarity),
-    )
-    .limit(limit);
+  return (
+    db
+      .select(similarColumns)
+      .from(transactions)
+      .innerJoin(categories, eq(transactions.categoryId, categories.id))
+      // Le périmètre du few-shot est l'espace : un exemple venu d'un autre foyer
+      // serait à la fois une fuite et un mauvais indice.
+      .innerJoin(bankAccounts, eq(transactions.accountId, bankAccounts.id))
+      .where(
+        and(
+          eq(bankAccounts.organizationId, organizationId),
+          isNotNull(transactions.categoryId),
+          ne(transactions.id, txn.id),
+          sql`${similarity} > ${TRIGRAM_THRESHOLD}`,
+        ),
+      )
+      .orderBy(
+        desc(sql`round(${similarity}::numeric, 1)`),
+        manualFirst,
+        desc(similarity),
+      )
+      .limit(limit)
+  );
 }
 
 // Le MCC (merchant category code) est une nature de commerce, donc un indice
@@ -177,45 +201,62 @@ async function byDescriptionTrigram(
 // Banking ne le renseigne pour aucune des trois banques du projet (la clé est
 // présente dans `raw` mais toujours nulle), ce tier ne remonte donc jamais rien
 // aujourd'hui. Conservé pour l'ajout éventuel d'un établissement qui l'expose.
-async function byMcc(txn: TxnForLlm, limit: number): Promise<SimilarTxn[]> {
+async function byMcc(
+  organizationId: string,
+  txn: TxnForLlm,
+  limit: number,
+): Promise<SimilarTxn[]> {
   if (!txn.mcc) return [];
-  return db
-    .select(similarColumns)
-    .from(transactions)
-    .innerJoin(categories, eq(transactions.categoryId, categories.id))
-    .where(
-      and(
-        isNotNull(transactions.categoryId),
-        ne(transactions.id, txn.id),
-        eq(transactions.mcc, txn.mcc),
-      ),
-    )
-    .orderBy(manualFirst, desc(transactions.bookingDate))
-    .limit(limit);
+  return (
+    db
+      .select(similarColumns)
+      .from(transactions)
+      .innerJoin(categories, eq(transactions.categoryId, categories.id))
+      // Le périmètre du few-shot est l'espace : un exemple venu d'un autre foyer
+      // serait à la fois une fuite et un mauvais indice.
+      .innerJoin(bankAccounts, eq(transactions.accountId, bankAccounts.id))
+      .where(
+        and(
+          eq(bankAccounts.organizationId, organizationId),
+          isNotNull(transactions.categoryId),
+          ne(transactions.id, txn.id),
+          eq(transactions.mcc, txn.mcc),
+        ),
+      )
+      .orderBy(manualFirst, desc(transactions.bookingDate))
+      .limit(limit)
+  );
 }
 
 // Dernier recours, et uniquement pour les codes dont la pureté a été vérifiée
 // (voir selectDiscriminativeBankCodes) : sur un code fourre-tout, ce tier
 // fabrique des exemples qui contredisent la transaction à classer.
 async function byBankCode(
+  organizationId: string,
   txn: TxnForLlm,
   limit: number,
   discriminativeBankCodes: Set<string>,
 ): Promise<SimilarTxn[]> {
   if (!txn.bankCode || !discriminativeBankCodes.has(txn.bankCode)) return [];
-  return db
-    .select(similarColumns)
-    .from(transactions)
-    .innerJoin(categories, eq(transactions.categoryId, categories.id))
-    .where(
-      and(
-        isNotNull(transactions.categoryId),
-        ne(transactions.id, txn.id),
-        eq(transactions.bankCode, txn.bankCode),
-      ),
-    )
-    .orderBy(manualFirst, desc(transactions.bookingDate))
-    .limit(limit);
+  return (
+    db
+      .select(similarColumns)
+      .from(transactions)
+      .innerJoin(categories, eq(transactions.categoryId, categories.id))
+      // Le périmètre du few-shot est l'espace : un exemple venu d'un autre foyer
+      // serait à la fois une fuite et un mauvais indice.
+      .innerJoin(bankAccounts, eq(transactions.accountId, bankAccounts.id))
+      .where(
+        and(
+          eq(bankAccounts.organizationId, organizationId),
+          isNotNull(transactions.categoryId),
+          ne(transactions.id, txn.id),
+          eq(transactions.bankCode, txn.bankCode),
+        ),
+      )
+      .orderBy(manualFirst, desc(transactions.bookingDate))
+      .limit(limit)
+  );
 }
 
 // Fusionne les candidats des différents niveaux de similarité (contrepartie
@@ -245,15 +286,16 @@ export function mergeSimilarCandidates(
 // explicitement évite une requête de pureté par transaction, et un appelant qui
 // l'omettrait n'obtiendrait jamais d'exemples issus d'un code fourre-tout.
 export async function findSimilar(
+  organizationId: string,
   txn: TxnForLlm,
   discriminativeBankCodes = new Set<string>(),
   limit = SIMILAR_LIMIT,
 ): Promise<SimilarTxn[]> {
   const [exact, trigram, mcc, bankCode] = await Promise.all([
-    byCounterparty(txn, limit),
-    byDescriptionTrigram(txn, limit),
-    byMcc(txn, limit),
-    byBankCode(txn, limit, discriminativeBankCodes),
+    byCounterparty(organizationId, txn, limit),
+    byDescriptionTrigram(organizationId, txn, limit),
+    byMcc(organizationId, txn, limit),
+    byBankCode(organizationId, txn, limit, discriminativeBankCodes),
   ]);
   return mergeSimilarCandidates([exact, trigram, mcc, bankCode], limit);
 }

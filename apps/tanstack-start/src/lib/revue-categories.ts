@@ -46,8 +46,8 @@ export interface RevueCategory {
  * c'est ce qui les empêche de se contredire.
  *
  * Un nom de catégorie ne peut désigner qu'une parente *ou* une enfant
- * (`categories.name` est unique sur toute la table), l'ordre des deux
- * recherches est donc indifférent.
+ * (`categories.name` est unique dans l'espace, et les données reçues n'en
+ * couvrent jamais qu'un), l'ordre des deux recherches est donc indifférent.
  */
 export function focusedCategory(
   categories: RevueCategory[],

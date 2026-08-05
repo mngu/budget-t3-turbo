@@ -21,6 +21,7 @@ import {
   listCategories,
   listCategoryTree,
 } from "../categories/queries";
+import { generateSuggestions } from "../categories/suggestions/analyze";
 import {
   acceptSuggestion,
   applySuggestions,
@@ -30,115 +31,135 @@ import {
   categorySuggestionChildSchema,
   categorySuggestionSchema,
 } from "../categories/suggestions/schema";
-import {
-  generateSuggestions,
-  getSuggestionsStatus,
-} from "../categories/suggestions/state";
 import { categorizeUncategorized } from "../categorization/run";
-import { protectedProcedure } from "../trpc";
+import { orgProcedure } from "../trpc";
 
 const categoryId = z.number().int().positive();
 
 export const categoriesRouter = {
   // Sans input : liste plate complète (rétrocompatible avec les appels existants).
   // Avec input.parentId : filtre sur ce parent (null = catégories racines).
-  list: protectedProcedure
+  list: orgProcedure
     .input(z.object({ parentId: categoryId.nullable() }).optional())
-    .query(({ input }) => listCategories(input?.parentId)),
+    .query(({ ctx, input }) =>
+      listCategories(ctx.organizationId, input?.parentId),
+    ),
 
-  tree: protectedProcedure.query(() => listCategoryTree()),
+  tree: orgProcedure.query(({ ctx }) => listCategoryTree(ctx.organizationId)),
 
-  overview: protectedProcedure.query(() => categoriesOverview()),
+  overview: orgProcedure.query(({ ctx }) =>
+    categoriesOverview(ctx.organizationId),
+  ),
 
   // Catégorise les transactions sans catégorie avec les catégories déjà
   // existantes (pas de proposition de nouvelle arborescence, voir
   // suggestions.generate pour ça).
-  categorize: protectedProcedure.mutation(() => categorizeUncategorized()),
+  categorize: orgProcedure.mutation(({ ctx }) =>
+    categorizeUncategorized(ctx.organizationId),
+  ),
 
-  create: protectedProcedure
+  create: orgProcedure
     .input(
       z.object({ name: z.string().min(1), parentId: categoryId.nullable() }),
     )
-    .mutation(({ input }) => createCategory(input.name, input.parentId)),
+    .mutation(({ ctx, input }) =>
+      createCategory(ctx.organizationId, input.name, input.parentId),
+    ),
 
-  rename: protectedProcedure
+  rename: orgProcedure
     .input(z.object({ id: categoryId, name: z.string().min(1) }))
-    .mutation(({ input }) => renameCategory(input.id, input.name)),
+    .mutation(({ ctx, input }) =>
+      renameCategory(ctx.organizationId, input.id, input.name),
+    ),
 
   // La palette fermée est contrainte ici, à l'entrée ; la règle « seule une
   // catégorie parente a une couleur propre » vit dans updateCategoryColor.
-  updateColor: protectedProcedure
+  updateColor: orgProcedure
     .input(
       z.object({
         id: categoryId,
         color: z.enum(CATEGORY_COLOR_HEXES as [string, ...string[]]),
       }),
     )
-    .mutation(({ input }) => updateCategoryColor(input.id, input.color)),
+    .mutation(({ ctx, input }) =>
+      updateCategoryColor(ctx.organizationId, input.id, input.color),
+    ),
 
   // Même forme que updateColor : jeu fermé contraint à l'entrée, règle
   // « seule une parente a une icône » dans updateCategoryIcon. `null` =
   // retour à l'état sans icône.
-  updateIcon: protectedProcedure
+  updateIcon: orgProcedure
     .input(
       z.object({
         id: categoryId,
         icon: z.enum(CATEGORY_ICON_NAMES as [string, ...string[]]).nullable(),
       }),
     )
-    .mutation(({ input }) => updateCategoryIcon(input.id, input.icon)),
+    .mutation(({ ctx, input }) =>
+      updateCategoryIcon(ctx.organizationId, input.id, input.icon),
+    ),
 
-  remove: protectedProcedure
+  remove: orgProcedure
     .input(z.object({ id: categoryId }))
-    .mutation(({ input }) => removeCategory(input.id)),
+    .mutation(({ ctx, input }) => removeCategory(ctx.organizationId, input.id)),
 
   // Onglet « Budgets » de /categories. Un budget est un montant mensuel posé
   // sur une catégorie, sans dimension de mois : `set` écrase, il n'y a rien à
   // versionner. `plan` porte aussi les compteurs d'en-tête — ils dépendent du
   // découpage en postes (voir budgetSlots), qui n'a qu'une seule définition.
   budgets: {
-    plan: protectedProcedure.query(() => budgetPlan()),
+    plan: orgProcedure.query(({ ctx }) => budgetPlan(ctx.organizationId)),
 
     // Borne haute alignée sur celle du champ de saisie (5 chiffres).
-    set: protectedProcedure
+    set: orgProcedure
       .input(
         z.object({
           categoryId,
           amount: z.number().int().min(0).max(99999).nullable(),
         }),
       )
-      .mutation(({ input }) =>
-        setCategoryBudget(input.categoryId, input.amount),
+      .mutation(({ ctx, input }) =>
+        setCategoryBudget(ctx.organizationId, input.categoryId, input.amount),
       ),
 
-    setDetailed: protectedProcedure
+    setDetailed: orgProcedure
       .input(z.object({ categoryId, detailed: z.boolean() }))
-      .mutation(({ input }) =>
-        setCategoryDetailed(input.categoryId, input.detailed),
+      .mutation(({ ctx, input }) =>
+        setCategoryDetailed(
+          ctx.organizationId,
+          input.categoryId,
+          input.detailed,
+        ),
       ),
 
-    clear: protectedProcedure.mutation(() => clearCategoryBudgets()),
+    clear: orgProcedure.mutation(({ ctx }) =>
+      clearCategoryBudgets(ctx.organizationId),
+    ),
   },
 
   suggestions: {
-    // Lance l'analyse LLM sur un échantillon de transactions récentes.
-    generate: protectedProcedure.mutation(() => generateSuggestions()),
-
-    // Existence/âge de la dernière analyse + nombre de transactions arrivées depuis.
-    status: protectedProcedure.query(() => getSuggestionsStatus()),
+    // Lance l'analyse LLM sur un échantillon de transactions récentes et
+    // renvoie la proposition. **Le serveur n'en garde rien** : elle vit en
+    // mémoire du navigateur qui l'a demandée, et se reperd à chaque
+    // rechargement — relancer coûte un appel LLM, jamais une incohérence.
+    generate: orgProcedure.mutation(({ ctx }) =>
+      generateSuggestions(ctx.organizationId),
+    ),
 
     // Aperçu en lecture seule de ce que ferait le mode "replace" : quelles
     // catégories existantes seraient supprimées vs conservées (corrections
     // manuelles). Utilisé par la dialog de confirmation côté UI.
-    previewReplace: protectedProcedure
+    previewReplace: orgProcedure
       .input(z.object({ suggestions: z.array(categorySuggestionSchema) }))
-      .query(({ input }) => previewReplace(input.suggestions)),
+      .query(({ ctx, input }) =>
+        previewReplace(ctx.organizationId, input.suggestions),
+      ),
 
     // Accepte une proposition isolée — c'est ce que fait le bouton
     // « Ajouter » d'une ligne proposée sur /categories. À ne pas remplacer par
     // un `apply` sur un tableau à un élément : voir le commentaire
     // d'acceptSuggestion, l'apply relance une passe LLM sur toute la base.
-    accept: protectedProcedure
+    accept: orgProcedure
       .input(
         z.object({
           parent: categorySuggestionSchema.shape.parent,
@@ -146,20 +167,27 @@ export const categoriesRouter = {
           child: categorySuggestionChildSchema,
         }),
       )
-      .mutation(({ input }) =>
-        acceptSuggestion(input.parent, input.parentColor, input.child),
+      .mutation(({ ctx, input }) =>
+        acceptSuggestion(
+          ctx.organizationId,
+          input.parent,
+          input.parentColor,
+          input.child,
+        ),
       ),
 
     // Crée les catégories/sous-catégories validées et relance la
     // catégorisation. mode "merge" (défaut) additif, "replace" fait de la
     // sélection cochée la nouvelle vérité (voir applySuggestions).
-    apply: protectedProcedure
+    apply: orgProcedure
       .input(
         z.object({
           suggestions: z.array(categorySuggestionSchema),
           mode: z.enum(["merge", "replace"]).default("merge"),
         }),
       )
-      .mutation(({ input }) => applySuggestions(input.suggestions, input.mode)),
+      .mutation(({ ctx, input }) =>
+        applySuggestions(ctx.organizationId, input.suggestions, input.mode),
+      ),
   },
 } satisfies TRPCRouterRecord;

@@ -7,6 +7,7 @@ import { categories, transactions } from "@budget/db/schema";
 import type { ExistingCategoryForReplace, ReplacePlan } from "./replace-plan";
 import type { CategorySuggestion } from "./schema";
 import { categorizeUncategorized } from "../../categorization/run";
+import { ownedByOrganization } from "../../transactions/queries";
 import { computeReplacePlan, flattenProposedNames } from "./replace-plan";
 
 type DbOrTx = typeof db | Parameters<Parameters<typeof db.transaction>[0]>[0];
@@ -23,6 +24,7 @@ type DbOrTx = typeof db | Parameters<Parameters<typeof db.transaction>[0]>[0];
 // mode "replace", mise à jour si elle diffère.
 async function upsertCategory(
   tx: DbOrTx,
+  organizationId: string,
   name: string,
   parentId: number | null,
   reparentIfExists: boolean,
@@ -30,8 +32,18 @@ async function upsertCategory(
 ): Promise<number> {
   const [inserted] = await tx
     .insert(categories)
-    .values({ name, parentId, ...(color !== undefined ? { color } : {}) })
-    .onConflictDoNothing({ target: categories.name })
+    .values({
+      organizationId,
+      name,
+      parentId,
+      ...(color !== undefined ? { color } : {}),
+    })
+    // Cible composite depuis que le nom n'est unique que dans l'espace : sur
+    // `categories.name` seul, l'insertion ne verrait aucun conflit et une
+    // seconde « Alimentation » naîtrait dans le même foyer.
+    .onConflictDoNothing({
+      target: [categories.organizationId, categories.name],
+    })
     .returning({ id: categories.id });
   if (inserted) return inserted.id;
 
@@ -42,7 +54,12 @@ async function upsertCategory(
       color: categories.color,
     })
     .from(categories)
-    .where(eq(categories.name, name));
+    .where(
+      and(
+        eq(categories.organizationId, organizationId),
+        eq(categories.name, name),
+      ),
+    );
   if (!existing) {
     throw new Error(`Impossible de créer la catégorie « ${name} ».`);
   }
@@ -67,6 +84,7 @@ async function upsertCategory(
 // d'application (applySuggestions, via `tx`).
 async function fetchExistingWithManualCounts(
   tx: DbOrTx,
+  organizationId: string,
 ): Promise<ExistingCategoryForReplace[]> {
   return tx
     .select({
@@ -80,6 +98,7 @@ async function fetchExistingWithManualCounts(
     })
     .from(categories)
     .leftJoin(transactions, eq(transactions.categoryId, categories.id))
+    .where(eq(categories.organizationId, organizationId))
     .groupBy(categories.id);
 }
 
@@ -122,9 +141,10 @@ async function deleteCategoriesInPlan(
 // Aperçu en lecture seule de ce que ferait le mode "replace", pour la dialog
 // de confirmation côté UI — n'écrit rien en base.
 export async function previewReplace(
+  organizationId: string,
   suggestions: CategorySuggestion[],
 ): Promise<ReplacePlan> {
-  const existing = await fetchExistingWithManualCounts(db);
+  const existing = await fetchExistingWithManualCounts(db, organizationId);
   return computeReplacePlan(existing, flattenProposedNames(suggestions));
 }
 
@@ -159,17 +179,37 @@ export interface AcceptSuggestionResult {
 // `IS NULL`), ni remis à zéro par un `applySuggestions` ultérieur, qui ne vise
 // que 'llm'.
 export async function acceptSuggestion(
+  organizationId: string,
   parent: string,
   parentColor: string,
   child: { name: string; txnIds: number[] },
 ): Promise<AcceptSuggestionResult> {
   return db.transaction(async (tx) => {
-    const before = await tx.select({ id: categories.id }).from(categories);
+    const before = await tx
+      .select({ id: categories.id })
+      .from(categories)
+      .where(eq(categories.organizationId, organizationId));
     const beforeIds = new Set(before.map((c) => c.id));
 
-    const parentId = await upsertCategory(tx, parent, null, false, parentColor);
-    const childId = await upsertCategory(tx, child.name, parentId, false);
+    const parentId = await upsertCategory(
+      tx,
+      organizationId,
+      parent,
+      null,
+      false,
+      parentColor,
+    );
+    const childId = await upsertCategory(
+      tx,
+      organizationId,
+      child.name,
+      parentId,
+      false,
+    );
 
+    // `txnIds` vient de la proposition, donc du client : le périmètre de
+    // l'espace s'ajoute au garde `IS NULL`, sinon une liste forgée rangerait
+    // les transactions d'un autre foyer dans cette sous-catégorie.
     const categorized =
       child.txnIds.length === 0
         ? []
@@ -180,6 +220,7 @@ export async function acceptSuggestion(
               and(
                 inArray(transactions.id, child.txnIds),
                 isNull(transactions.categoryId),
+                ownedByOrganization(organizationId),
               ),
             )
             .returning({ id: transactions.id });
@@ -210,13 +251,17 @@ export interface ApplySuggestionsResult {
 // computeReplacePlan) contiennent une transaction catégorisée manuellement,
 // jamais perdue dans aucun des deux modes.
 export async function applySuggestions(
+  organizationId: string,
   suggestions: CategorySuggestion[],
   mode: ApplyMode = "merge",
 ): Promise<ApplySuggestionsResult> {
   const result = await db.transaction(async (tx) => {
     const proposedNames = flattenProposedNames(suggestions);
 
-    const before = await tx.select({ id: categories.id }).from(categories);
+    const before = await tx
+      .select({ id: categories.id })
+      .from(categories)
+      .where(eq(categories.organizationId, organizationId));
     const beforeIds = new Set(before.map((c) => c.id));
 
     let categoriesDeleted = 0;
@@ -225,25 +270,35 @@ export async function applySuggestions(
     for (const { parent, parentColor, enfants } of suggestions) {
       const parentId = await upsertCategory(
         tx,
+        organizationId,
         parent,
         null,
         mode === "replace",
         parentColor,
       );
       for (const enfant of enfants) {
-        await upsertCategory(tx, enfant.name, parentId, mode === "replace");
+        await upsertCategory(
+          tx,
+          organizationId,
+          enfant.name,
+          parentId,
+          mode === "replace",
+        );
       }
     }
 
     if (mode === "replace") {
-      const existing = await fetchExistingWithManualCounts(tx);
+      const existing = await fetchExistingWithManualCounts(tx, organizationId);
       const plan = computeReplacePlan(existing, proposedNames);
       categoriesKept = plan.namesKept.length;
       categoriesDeleted = plan.idsToDelete.length;
       await deleteCategoriesInPlan(tx, existing, plan);
     }
 
-    const after = await tx.select({ id: categories.id }).from(categories);
+    const after = await tx
+      .select({ id: categories.id })
+      .from(categories)
+      .where(eq(categories.organizationId, organizationId));
     const categoriesCreated = after.filter((c) => !beforeIds.has(c.id)).length;
     const totalUpserts = suggestions.reduce(
       (n, s) => n + 1 + s.enfants.length,
@@ -253,7 +308,12 @@ export async function applySuggestions(
     await tx
       .update(transactions)
       .set({ categoryId: null, categorySource: null })
-      .where(eq(transactions.categorySource, "llm"));
+      .where(
+        and(
+          eq(transactions.categorySource, "llm"),
+          ownedByOrganization(organizationId),
+        ),
+      );
 
     return {
       categoriesCreated,
@@ -264,7 +324,7 @@ export async function applySuggestions(
   });
 
   try {
-    await categorizeUncategorized();
+    await categorizeUncategorized(organizationId);
   } catch (err) {
     console.error(
       "⚠️  Re-catégorisation après application des suggestions échouée :",

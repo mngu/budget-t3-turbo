@@ -21,6 +21,9 @@ const runImportMock = vi.mocked(importTransactions);
 const runCategorizeMock = vi.mocked(categorizeUncategorized);
 const detectTransfersMock = vi.mocked(detectInternalTransfers);
 
+const ORG = "org-1";
+const OTHER_ORG = "org-2";
+
 beforeEach(() => {
   vi.clearAllMocks();
   detectTransfersMock.mockResolvedValue({ pairs: 0, updated: 0 });
@@ -32,7 +35,7 @@ describe("performSync", () => {
     runImportMock.mockResolvedValue(false);
     runCategorizeMock.mockResolvedValue({ categorized: 0, remaining: 0 });
 
-    await performSync();
+    await performSync(ORG);
 
     expect(syncMock).toHaveBeenCalledTimes(1);
     expect(runImportMock).toHaveBeenCalledTimes(1);
@@ -48,9 +51,9 @@ describe("performSync", () => {
       "Psu-Ip-Address": "203.0.113.7",
       "Psu-User-Agent": "Firefox",
     };
-    await performSync(psuHeaders);
+    await performSync(ORG, psuHeaders);
 
-    expect(syncMock).toHaveBeenCalledWith(psuHeaders);
+    expect(syncMock).toHaveBeenCalledWith(ORG, psuHeaders);
   });
 
   it("remonte les banques expirées et celles limitées en accès", async () => {
@@ -61,7 +64,7 @@ describe("performSync", () => {
     runImportMock.mockResolvedValue(false);
     runCategorizeMock.mockResolvedValue({ categorized: 0, remaining: 0 });
 
-    await expect(performSync()).resolves.toEqual({
+    await expect(performSync(ORG)).resolves.toEqual({
       expired: ["Revolut"],
       rateLimited: ["Société Générale"],
     });
@@ -78,8 +81,8 @@ describe("performSync", () => {
       }),
     );
 
-    const first = performSync();
-    await expect(performSync()).rejects.toThrow(
+    const first = performSync(ORG);
+    await expect(performSync(ORG)).rejects.toThrow(
       "Une synchronisation est déjà en cours.",
     );
 
@@ -89,14 +92,41 @@ describe("performSync", () => {
     await first;
   });
 
+  it("ne bloque pas un autre espace pendant une synchronisation", async () => {
+    // Le verrou protège les lignes d'un espace ; deux espaces écrivent dans des
+    // lignes disjointes. Un verrou global ferait attendre un foyer pour un
+    // autre, avec un message qu'il n'a pas provoqué.
+    let resolveFirst!: (value: {
+      expired: string[];
+      rateLimited: string[];
+    }) => void;
+    syncMock.mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveFirst = resolve;
+      }),
+    );
+    syncMock.mockResolvedValue({ expired: [], rateLimited: [] });
+    runImportMock.mockResolvedValue(false);
+    runCategorizeMock.mockResolvedValue({ categorized: 0, remaining: 0 });
+
+    const first = performSync(ORG);
+    await expect(performSync(OTHER_ORG)).resolves.toEqual({
+      expired: [],
+      rateLimited: [],
+    });
+
+    resolveFirst({ expired: [], rateLimited: [] });
+    await first;
+  });
+
   it("relâche le verrou après un échec, pour permettre un nouvel essai", async () => {
     syncMock.mockRejectedValueOnce(new Error("boom"));
-    await expect(performSync()).rejects.toThrow("boom");
+    await expect(performSync(ORG)).rejects.toThrow("boom");
 
     syncMock.mockResolvedValue({ expired: [], rateLimited: [] });
     runImportMock.mockResolvedValue(false);
     runCategorizeMock.mockResolvedValue({ categorized: 0, remaining: 0 });
-    await expect(performSync()).resolves.toEqual({
+    await expect(performSync(ORG)).resolves.toEqual({
       expired: [],
       rateLimited: [],
     });
@@ -106,7 +136,7 @@ describe("performSync", () => {
     syncMock.mockResolvedValue({ expired: [], rateLimited: [] });
     runImportMock.mockResolvedValue(true);
 
-    await expect(performSync()).rejects.toThrow("Échec de l'import");
+    await expect(performSync(ORG)).rejects.toThrow("Échec de l'import");
     expect(runCategorizeMock).not.toHaveBeenCalled();
     expect(detectTransfersMock).not.toHaveBeenCalled();
   });
@@ -116,7 +146,7 @@ describe("performSync", () => {
     runImportMock.mockResolvedValue(false);
     runCategorizeMock.mockResolvedValue({ categorized: 0, remaining: 0 });
 
-    await performSync();
+    await performSync(ORG);
 
     expect(detectTransfersMock).toHaveBeenCalledTimes(1);
     expect(detectTransfersMock.mock.invocationCallOrder[0]).toBeGreaterThan(
@@ -135,7 +165,7 @@ describe("performSync", () => {
     runCategorizeMock.mockResolvedValue({ categorized: 0, remaining: 0 });
     detectTransfersMock.mockRejectedValue(new Error("boom appariement"));
 
-    await expect(performSync()).resolves.toEqual({
+    await expect(performSync(ORG)).resolves.toEqual({
       expired: [],
       rateLimited: [],
     });
@@ -147,7 +177,7 @@ describe("performSync", () => {
     runImportMock.mockResolvedValue(false);
     runCategorizeMock.mockRejectedValue(new Error("boom catégorisation"));
 
-    await expect(performSync()).resolves.toEqual({
+    await expect(performSync(ORG)).resolves.toEqual({
       expired: [],
       rateLimited: [],
     });
@@ -159,7 +189,7 @@ describe("performImport", () => {
     runImportMock.mockResolvedValue(false);
     runCategorizeMock.mockResolvedValue({ categorized: 3, remaining: 1 });
 
-    await expect(performImport()).resolves.toEqual({
+    await expect(performImport(ORG)).resolves.toEqual({
       categorized: 3,
       remaining: 1,
     });
@@ -171,7 +201,7 @@ describe("performImport", () => {
   it("lève une erreur explicite si l'import échoue, sans appeler categorize", async () => {
     runImportMock.mockResolvedValue(true);
 
-    await expect(performImport()).rejects.toThrow("Échec de l'import");
+    await expect(performImport(ORG)).rejects.toThrow("Échec de l'import");
     expect(runCategorizeMock).not.toHaveBeenCalled();
   });
 
@@ -179,7 +209,7 @@ describe("performImport", () => {
     runImportMock.mockResolvedValue(false);
     runCategorizeMock.mockRejectedValue(new Error("boom catégorisation"));
 
-    await expect(performImport()).resolves.toBeNull();
+    await expect(performImport(ORG)).resolves.toBeNull();
   });
 
   it("partage le verrou avec performSync", async () => {
@@ -193,8 +223,8 @@ describe("performImport", () => {
       }),
     );
 
-    const running = performSync();
-    await expect(performImport()).rejects.toThrow(
+    const running = performSync(ORG);
+    await expect(performImport(ORG)).rejects.toThrow(
       "Une synchronisation est déjà en cours.",
     );
 

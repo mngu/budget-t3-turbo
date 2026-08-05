@@ -14,8 +14,8 @@ import {
 } from "@budget/db";
 import { db } from "@budget/db/client";
 import {
-  accounts,
   authRequests,
+  bankAccounts,
   bankConnections,
   transactions,
 } from "@budget/db/schema";
@@ -37,7 +37,7 @@ export interface AspspOption {
 
 // Les noms d'ASPSP d'Enable Banking sont sans accent (« Caisse d'Epargne Ile De
 // France », « Societe Generale ») alors que tout le reste de l'app les écrit
-// accentués — à commencer par `accounts.bank_name`, d'où part le lien
+// accentués — à commencer par `bankAccounts.bank_name`, d'où part le lien
 // « Connecter … » des comptes orphelins. Comparer sans accent des deux côtés.
 function fold(s: string): string {
   return s
@@ -71,6 +71,8 @@ export interface StartAuthInput {
 }
 
 export async function startAuth(
+  organizationId: string,
+  userId: string,
   input: StartAuthInput,
 ): Promise<{ url: string }> {
   const settings = await requireSettings();
@@ -102,8 +104,13 @@ export async function startAuth(
     }),
   });
 
+  // L'espace voyage dans la demande et non dans la session : au retour de la
+  // banque, le callback n'a que le `state`, et l'espace actif peut avoir changé
+  // entre-temps (autre onglet, autre appareil).
   await db.insert(authRequests).values({
     state,
+    organizationId,
+    createdByUserId: userId,
     aspspName: input.name,
     aspspCountry: input.country,
     connectionId: input.connectionId ?? null,
@@ -121,6 +128,8 @@ export async function completeAuth(
   code: string,
   state: string,
 ): Promise<CompleteAuthResult> {
+  // Pas de paramètre d'espace : il vient de la demande consommée ci-dessous,
+  // seule source fiable ici.
   // Consommation atomique du state : un delete...returning échoue à la seconde
   // tentative (replay, double effet React) sans fenêtre de course.
   const [request] = await db
@@ -158,11 +167,18 @@ export async function completeAuth(
         status: "active",
         logoUrl: logo,
       })
-      .where(eq(bankConnections.id, connectionId));
+      .where(
+        and(
+          eq(bankConnections.id, connectionId),
+          eq(bankConnections.organizationId, request.organizationId),
+        ),
+      );
   } else {
     const [row] = await db
       .insert(bankConnections)
       .values({
+        organizationId: request.organizationId,
+        createdByUserId: request.createdByUserId,
         sessionId: session.session_id,
         aspspName: request.aspspName,
         aspspCountry: request.aspspCountry,
@@ -175,20 +191,29 @@ export async function completeAuth(
   }
 
   const discovered = parseSessionAccounts(session.accounts);
+  // Rapprochement dans le seul espace de la demande : le même compte joint
+  // connecté par deux membres d'un couple, chacun chez lui, donne deux comptes
+  // — un rapprochement global les fusionnerait en volant la ligne à l'autre.
   const existing = await db
-    .select({ id: accounts.id, uid: accounts.uid, iban: accounts.iban })
-    .from(accounts);
+    .select({
+      id: bankAccounts.id,
+      uid: bankAccounts.uid,
+      iban: bankAccounts.iban,
+    })
+    .from(bankAccounts)
+    .where(eq(bankAccounts.organizationId, request.organizationId));
   const { updates, creates } = reconcileAccounts(existing, discovered);
 
   for (const u of updates) {
     await db
-      .update(accounts)
+      .update(bankAccounts)
       .set({ uid: u.uid, connectionId })
-      .where(eq(accounts.id, u.id));
+      .where(eq(bankAccounts.id, u.id));
   }
   if (creates.length > 0) {
-    await db.insert(accounts).values(
+    await db.insert(bankAccounts).values(
       creates.map((c) => ({
+        organizationId: request.organizationId,
         uid: c.uid,
         iban: c.iban,
         bankName: request.aspspName,
@@ -258,7 +283,9 @@ export interface ConnectionSummary {
   accounts: AccountSummary[];
 }
 
-export async function listConnections(): Promise<ConnectionSummary[]> {
+export async function listConnections(
+  organizationId: string,
+): Promise<ConnectionSummary[]> {
   // Bascule paresseuse : les connexions actives dont la validité est passée
   // deviennent expired (pas de tâche planifiée nécessaire).
   await db
@@ -266,19 +293,23 @@ export async function listConnections(): Promise<ConnectionSummary[]> {
     .set({ status: "expired" })
     .where(
       and(
+        eq(bankConnections.organizationId, organizationId),
         eq(bankConnections.status, "active"),
         lt(bankConnections.validUntil, new Date()),
       ),
     );
 
-  const connections = await db.select().from(bankConnections);
+  const connections = await db
+    .select()
+    .from(bankConnections)
+    .where(eq(bankConnections.organizationId, organizationId));
   const ids = connections.map((c) => c.id);
   const accountRows =
     ids.length > 0
       ? await db
           .select()
-          .from(accounts)
-          .where(inArray(accounts.connectionId, ids))
+          .from(bankAccounts)
+          .where(inArray(bankAccounts.connectionId, ids))
       : [];
 
   const stats = await accountStats(accountRows.map((a) => a.id));
@@ -315,35 +346,48 @@ export interface OrphanBankGroup {
 }
 
 /**
- * Comptes sans connexion (`accounts.connection_id IS NULL`) : historiques d'avant
+ * Comptes sans connexion (`bankAccounts.connection_id IS NULL`) : historiques d'avant
  * le wizard, ou dont la connexion n'a jamais été rétablie. Ils portent des
  * transactions mais plus aucune autorisation — regroupés par banque, c'est le
  * nom qu'il faut reconnecter.
  */
-export async function listOrphanAccounts(): Promise<OrphanBankGroup[]> {
+export async function listOrphanAccounts(
+  organizationId: string,
+): Promise<OrphanBankGroup[]> {
   const rows = await db
     .select({
-      bankName: accounts.bankName,
+      bankName: bankAccounts.bankName,
       // countDistinct : la jointure sur les transactions duplique la ligne compte.
-      accountCount: countDistinct(accounts.id),
+      accountCount: countDistinct(bankAccounts.id),
       transactionCount: count(transactions.id),
     })
-    .from(accounts)
-    .leftJoin(transactions, eq(transactions.accountId, accounts.id))
-    .where(isNull(accounts.connectionId))
-    .groupBy(accounts.bankName)
-    .orderBy(accounts.bankName);
+    .from(bankAccounts)
+    .leftJoin(transactions, eq(transactions.accountId, bankAccounts.id))
+    .where(
+      and(
+        eq(bankAccounts.organizationId, organizationId),
+        isNull(bankAccounts.connectionId),
+      ),
+    )
+    .groupBy(bankAccounts.bankName)
+    .orderBy(bankAccounts.bankName);
 
   return rows;
 }
 
 export async function getConnectionAccounts(
+  organizationId: string,
   connectionId: number,
 ): Promise<AccountSummary[]> {
   const rows = await db
     .select()
-    .from(accounts)
-    .where(eq(accounts.connectionId, connectionId));
+    .from(bankAccounts)
+    .where(
+      and(
+        eq(bankAccounts.organizationId, organizationId),
+        eq(bankAccounts.connectionId, connectionId),
+      ),
+    );
   const stats = await accountStats(rows.map((a) => a.id));
 
   return rows.map((a) => ({
@@ -362,20 +406,38 @@ export interface AccountUpdate {
   enabled: boolean;
 }
 
-export async function updateAccounts(updates: AccountUpdate[]): Promise<void> {
+export async function updateAccounts(
+  organizationId: string,
+  updates: AccountUpdate[],
+): Promise<void> {
   for (const u of updates) {
     await db
-      .update(accounts)
+      .update(bankAccounts)
       .set({ displayName: u.displayName || null, enabled: u.enabled })
-      .where(eq(accounts.id, u.id));
+      .where(
+        and(
+          eq(bankAccounts.id, u.id),
+          eq(bankAccounts.organizationId, organizationId),
+        ),
+      );
   }
 }
 
-export async function revokeConnection(connectionId: number): Promise<void> {
+export async function revokeConnection(
+  organizationId: string,
+  connectionId: number,
+): Promise<void> {
+  // Révoquer coupe une autorisation bancaire réelle : la vérification d'espace
+  // est ici la garde qui compte, l'id venant du client.
   const [conn] = await db
     .select()
     .from(bankConnections)
-    .where(eq(bankConnections.id, connectionId));
+    .where(
+      and(
+        eq(bankConnections.id, connectionId),
+        eq(bankConnections.organizationId, organizationId),
+      ),
+    );
   if (!conn) throw new Error("Connexion introuvable.");
 
   const settings = await requireSettings();
@@ -393,5 +455,10 @@ export async function revokeConnection(connectionId: number): Promise<void> {
   await db
     .update(bankConnections)
     .set({ status: "revoked" })
-    .where(eq(bankConnections.id, connectionId));
+    .where(
+      and(
+        eq(bankConnections.id, connectionId),
+        eq(bankConnections.organizationId, organizationId),
+      ),
+    );
 }

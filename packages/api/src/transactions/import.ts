@@ -1,27 +1,36 @@
 // Import idempotent des JSON Enable Banking (data/) vers PostgreSQL.
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { sql } from "@budget/db";
+import { eq, sql } from "@budget/db";
 import { db } from "@budget/db/client";
-import { accounts, transactions } from "@budget/db/schema";
+import { bankAccounts, transactions } from "@budget/db/schema";
 
 import type { EbTransaction } from "./normalize";
-import { DATA_DIR } from "../lib/data-dir";
+import { orgDataDir } from "../lib/data-dir";
 import { normalizeTransaction } from "./normalize";
-
-const DATA = DATA_DIR;
 
 // Retourne true si au moins un fichier n'a pas pu être traité (l'import des
 // autres se poursuit) — l'appelant décide quoi en faire.
-export async function importTransactions(): Promise<boolean> {
+//
+// Le périmètre est double et les deux moitiés doivent s'accorder : les fichiers
+// du répertoire de l'espace, et les comptes de l'espace. Élargir l'un sans
+// l'autre ne ferait que des « compte inconnu en base » silencieux.
+export async function importTransactions(
+  organizationId: string,
+): Promise<boolean> {
+  const DATA = orgDataDir(organizationId);
+
   // 1. Comptes connus (créés par le wizard de connexion, ou import historique)
   const dbAccounts = await db
-    .select({ id: accounts.id, uid: accounts.uid })
-    .from(accounts);
+    .select({ id: bankAccounts.id, uid: bankAccounts.uid })
+    .from(bankAccounts)
+    .where(eq(bankAccounts.organizationId, organizationId));
   const uidToAccountId = new Map(dbAccounts.map((a) => [a.uid, a.id]));
 
-  // 2. Transactions
+  // 2. Transactions. Le répertoire n'existe pas tant que l'espace n'a jamais
+  // synchronisé : rien à importer, ce n'est pas une erreur.
+  if (!existsSync(DATA)) return false;
   const txnFiles = readdirSync(DATA).filter(
     (f) => f.startsWith("transactions-") && f.endsWith(".json"),
   );

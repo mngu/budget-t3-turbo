@@ -5,9 +5,9 @@ import { resolve } from "node:path";
 
 import { and, eq } from "@budget/db";
 import { db } from "@budget/db/client";
-import { accounts, bankConnections } from "@budget/db/schema";
+import { bankAccounts, bankConnections } from "@budget/db/schema";
 
-import { DATA_DIR } from "../lib/data-dir";
+import { orgDataDir } from "../lib/data-dir";
 import { appJwt, ebApi, EbApiError, requireSettings } from "./client";
 
 const SYNC_DAYS = 90;
@@ -22,6 +22,7 @@ export interface SyncOutcome {
 // échappe au plafond PSD2 des accès non-assistés (~4/jour par banque). Le CLI/cron
 // n'en envoie pas (accès en arrière-plan assumé).
 export async function syncBanks(
+  organizationId: string,
   psuHeaders: Record<string, string> = {},
 ): Promise<SyncOutcome> {
   const settings = await requireSettings();
@@ -29,23 +30,31 @@ export async function syncBanks(
   const dateFrom = new Date(Date.now() - SYNC_DAYS * 24 * 3600 * 1000)
     .toISOString()
     .slice(0, 10);
-  const dataDir = DATA_DIR;
+  const dataDir = orgDataDir(organizationId);
   mkdirSync(dataDir, { recursive: true });
 
   const connections = await db
     .select()
     .from(bankConnections)
-    .where(eq(bankConnections.status, "active"));
+    .where(
+      and(
+        eq(bankConnections.organizationId, organizationId),
+        eq(bankConnections.status, "active"),
+      ),
+    );
 
   const expired: string[] = [];
   const rateLimited: string[] = [];
 
   for (const conn of connections) {
     const enabledAccounts = await db
-      .select({ uid: accounts.uid })
-      .from(accounts)
+      .select({ uid: bankAccounts.uid })
+      .from(bankAccounts)
       .where(
-        and(eq(accounts.connectionId, conn.id), eq(accounts.enabled, true)),
+        and(
+          eq(bankAccounts.connectionId, conn.id),
+          eq(bankAccounts.enabled, true),
+        ),
       );
 
     console.log(`🏦 ${conn.aspspName} (transactions depuis ${dateFrom})`);

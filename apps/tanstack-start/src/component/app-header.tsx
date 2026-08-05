@@ -13,6 +13,7 @@ import {
   SettingsIcon,
   SunIcon,
   TagsIcon,
+  UsersIcon,
 } from "lucide-react";
 
 import type { TransactionsSearch } from "@budget/shared";
@@ -272,6 +273,8 @@ function SettingsMenu({ page }: { page?: HeaderPage }) {
           })}
         </div>
 
+        <SpacePicker />
+
         <div className="bg-border mx-2.5 my-1.5 h-px" />
 
         <button
@@ -286,6 +289,62 @@ function SettingsMenu({ page }: { page?: HeaderPage }) {
         </button>
       </PopoverContent>
     </Popover>
+  );
+}
+
+/**
+ * Bascule d'espace — un espace personnel, ou un foyer partagé.
+ *
+ * Ne s'affiche qu'à partir de deux espaces : tant qu'il n'y en a qu'un, la
+ * liste ne proposerait que l'endroit où l'on est déjà. Ce composant vit sous
+ * `PopoverContent`, qui ne se monte qu'à l'ouverture — ses requêtes ne partent
+ * donc pas au rendu de chaque page.
+ *
+ * Le changement d'espace **recharge le document**. Le périmètre ne vit pas dans
+ * l'URL mais dans la session : sans rechargement, react-query servirait les
+ * transactions déjà en cache pour les mêmes clés, c'est-à-dire celles de
+ * l'espace qu'on vient de quitter. Même geste qu'à la connexion et à la
+ * déconnexion, pour la même raison.
+ */
+function SpacePicker() {
+  const { data: spaces } = authClient.useListOrganizations();
+  const { data: active } = authClient.useActiveOrganization();
+
+  if (!spaces || spaces.length < 2) return null;
+
+  const select = async (organizationId: string) => {
+    if (organizationId === active?.id) return;
+    await authClient.organization.setActive({ organizationId });
+    window.location.reload();
+  };
+
+  return (
+    <>
+      <div className="bg-border mx-2.5 my-1.5 h-px" />
+      <div className="label-caps px-2.5 pt-0.5 pb-1.5">Espace</div>
+      {spaces.map((space) => (
+        <button
+          key={space.id}
+          type="button"
+          onClick={() => void select(space.id)}
+          aria-current={space.id === active?.id ? "true" : undefined}
+          className={cn(
+            "hover:bg-accent flex w-full items-center gap-2.5 rounded-[7px] px-2.5 py-1.5 text-left text-[12.5px]",
+            space.id === active?.id && "bg-surface-2 font-semibold",
+          )}
+        >
+          <span
+            className={cn(
+              "flex",
+              space.id === active?.id ? "text-primary" : "text-subtle",
+            )}
+          >
+            <UsersIcon className="size-3.5" />
+          </span>
+          {space.name}
+        </button>
+      ))}
+    </>
   );
 }
 

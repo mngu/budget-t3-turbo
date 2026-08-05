@@ -8,3 +8,16 @@ export const DATA_DIR = resolve(
   "../../../..",
   "data",
 );
+
+/**
+ * Les JSON d'un espace, dans un sous-répertoire à lui.
+ *
+ * Cloisonnement de l'import, et pas seulement rangement : `importTransactions`
+ * lit *tout* ce qu'il trouve dans le répertoire qu'on lui donne. À plat, un
+ * import déclenché par un espace avalerait les fichiers fraîchement
+ * synchronisés d'un autre — et le verrou par espace, qui promet que deux
+ * espaces ne se marchent pas dessus, deviendrait un mensonge.
+ */
+export function orgDataDir(organizationId: string): string {
+  return resolve(DATA_DIR, organizationId);
+}

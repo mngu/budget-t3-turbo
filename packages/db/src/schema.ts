@@ -13,7 +13,21 @@ import {
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 
+import { organization, user } from "./auth-schema";
+
+// L'« espace » : un utilisateur seul ou un foyer. Tout ce qui suit lui
+// appartient, sauf `app_settings` — voir le commentaire de cette table.
+// Colonne plutôt que schéma Postgres par espace : le cloisonnement se fait dans
+// le `WHERE`, au point de passage unique de chaque domaine.
+const organizationId = () =>
+  text("organization_id")
+    .notNull()
+    .references(() => organization.id, { onDelete: "cascade" });
+
 // Configuration Enable Banking (ligne unique, id=1) — alimentée par l'onboarding.
+// **Hors espace, volontairement** : c'est l'application Enable Banking de
+// l'installation (une par déploiement), pas une par foyer. Sa mutation est
+// réservée aux admins (`adminProcedure`, packages/api/src/trpc.ts).
 export const appSettings = pgTable("app_settings", {
   id: integer("id").primaryKey().default(1),
   applicationId: text("application_id").notNull(),
@@ -27,6 +41,11 @@ export const appSettings = pgTable("app_settings", {
 // Une session PSD2 par banque — remplace data/session-*.json.
 export const bankConnections = pgTable("bank_connections", {
   id: serial("id").primaryKey(),
+  organizationId: organizationId(),
+  // Le consentement PSD2 appartient à la personne qui s'est authentifiée à la
+  // banque : sur un espace partagé, c'est elle — et elle seule — qui pourra le
+  // renouveler dans ~180 jours.
+  createdByUserId: text("created_by_user_id").references(() => user.id),
   sessionId: text("session_id").notNull().unique(),
   aspspName: text("aspsp_name").notNull(),
   aspspCountry: text("aspsp_country").notNull(),
@@ -44,6 +63,11 @@ export const bankConnections = pgTable("bank_connections", {
 // connectionId renseigné = renouvellement d'une connexion existante.
 export const authRequests = pgTable("auth_requests", {
   state: text("state").primaryKey(),
+  // C'est cette ligne qui décide dans quel espace atterrit la connexion créée
+  // au retour de la banque : le callback OAuth n'a pas d'autre contexte que le
+  // `state`, et l'espace actif de la session peut avoir changé entre-temps.
+  organizationId: organizationId(),
+  createdByUserId: text("created_by_user_id").references(() => user.id),
   aspspName: text("aspsp_name").notNull(),
   aspspCountry: text("aspsp_country").notNull(),
   connectionId: integer("connection_id").references(() => bankConnections.id),
@@ -52,36 +76,65 @@ export const authRequests = pgTable("auth_requests", {
     .defaultNow(),
 });
 
-export const accounts = pgTable("accounts", {
-  id: serial("id").primaryKey(),
-  uid: text("uid").notNull().unique(),
-  bankName: text("bank_name").notNull(),
-  // L'uid Enable Banking peut changer à la ré-authentification (~180 j) ;
-  // l'IBAN sert de pivot de continuité le moment venu.
-  iban: text("iban"),
-  // Connexion Enable Banking d'origine (null pour les comptes historiques pré-wizard).
-  connectionId: integer("connection_id").references(() => bankConnections.id),
-  // Nom d'affichage choisi par l'utilisateur ; bank_name garde le nom ASPSP.
-  displayName: text("display_name"),
-  enabled: boolean("enabled").notNull().default(true),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-});
+// Compte bancaire suivi. `bank_accounts` et non `accounts` : better-auth a déjà
+// une table `account` (les identifiants de connexion d'un utilisateur), et les
+// deux se ressemblaient assez pour qu'on lise l'une en croyant l'autre.
+export const bankAccounts = pgTable(
+  "bank_accounts",
+  {
+    id: serial("id").primaryKey(),
+    // C'est ce compte qui porte l'espace de ses transactions : elles n'ont pas
+    // de colonne à elles, leur espace se lit par cette jointure. Une seule
+    // vérité, qui ne peut pas diverger du compte.
+    organizationId: organizationId(),
+    uid: text("uid").notNull(),
+    bankName: text("bank_name").notNull(),
+    // L'uid Enable Banking peut changer à la ré-authentification (~180 j) ;
+    // l'IBAN sert de pivot de continuité le moment venu.
+    iban: text("iban"),
+    // Connexion Enable Banking d'origine (null pour les comptes historiques pré-wizard).
+    connectionId: integer("connection_id").references(() => bankConnections.id),
+    // Nom d'affichage choisi par l'utilisateur ; bank_name garde le nom ASPSP.
+    displayName: text("display_name"),
+    enabled: boolean("enabled").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    // Unicité *par espace* et non globale : deux membres d'un couple qui
+    // connectent chacun le même compte joint dans leur propre espace peuvent
+    // se voir attribuer le même uid par Enable Banking — une unicité globale
+    // ferait échouer la connexion du second sans rien expliquer.
+    uniqueIndex("bank_accounts_org_uid_uq").on(t.organizationId, t.uid),
+  ],
+);
 
-export const categories = pgTable("categories", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull().unique(),
-  color: text("color"),
-  // Nom Lucide en kebab-case, membre de CATEGORY_ICON_NAMES (@budget/shared).
-  // Comme `color`, ne concerne que les catégories parentes : une
-  // sous-catégorie se lit dans la famille de son parent, sans identité propre.
-  icon: text("icon"),
-  // NULL = catégorie parente ; sinon sous-catégorie. Les deux niveaux sont
-  // assignables à une transaction ; choisir un parent dans le filtre de liste
-  // inclut aussi ses sous-catégories (voir transactionsFilterQuery).
-  parentId: integer("parent_id").references((): AnyPgColumn => categories.id),
-});
+export const categories = pgTable(
+  "categories",
+  {
+    id: serial("id").primaryKey(),
+    organizationId: organizationId(),
+    name: text("name").notNull(),
+    color: text("color"),
+    // Nom Lucide en kebab-case, membre de CATEGORY_ICON_NAMES (@budget/shared).
+    // Comme `color`, ne concerne que les catégories parentes : une
+    // sous-catégorie se lit dans la famille de son parent, sans identité propre.
+    icon: text("icon"),
+    // NULL = catégorie parente ; sinon sous-catégorie. Les deux niveaux sont
+    // assignables à une transaction ; choisir un parent dans le filtre de liste
+    // inclut aussi ses sous-catégories (voir transactionsFilterQuery).
+    parentId: integer("parent_id").references((): AnyPgColumn => categories.id),
+  },
+  (t) => [
+    // Le nom est unique *dans l'espace*, plus sur toute la table. Deux espaces
+    // ont chacun leur « Alimentation » sans se voir. Tout ce qui résout une
+    // catégorie par son nom (`upsertCategory`, `setTransactionCategory`, le
+    // filtre `category` de l'URL) doit donc porter l'espace, sans quoi la
+    // résolution devient ambiguë.
+    uniqueIndex("categories_org_name_uq").on(t.organizationId, t.name),
+  ],
+);
 
 // Budget mensuel d'une catégorie (onglet « Budgets » de /categories). Une ligne
 // par catégorie budgétée, sans dimension de mois : un budget se reconduit tel
@@ -108,7 +161,7 @@ export const transactions = pgTable(
     id: serial("id").primaryKey(),
     accountId: integer("account_id")
       .notNull()
-      .references(() => accounts.id),
+      .references(() => bankAccounts.id),
     entryReference: text("entry_reference").notNull(),
     amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
     currency: text("currency").notNull(),
@@ -156,7 +209,7 @@ export const transactions = pgTable(
   ],
 );
 
-export type NewAccount = typeof accounts.$inferInsert;
+export type NewBankAccount = typeof bankAccounts.$inferInsert;
 export type NewTransaction = typeof transactions.$inferInsert;
 export type NewCategory = typeof categories.$inferInsert;
 export type AppSettingsRow = typeof appSettings.$inferSelect;

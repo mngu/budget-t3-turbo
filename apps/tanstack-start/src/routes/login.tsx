@@ -36,7 +36,11 @@ function LoginPage() {
     else finish();
   };
 
-  // Mono-utilisateur : la création de compte sert uniquement au premier lancement.
+  // L'inscription se fait sur invitation, ou pour amorcer une installation
+  // vide : le serveur refuse tout le reste (voir le hook `user.create.before`
+  // de @budget/auth). Le bouton reste donc affiché — c'est la seule voie du
+  // premier compte — mais il ne promet plus rien, et le message d'erreur du
+  // serveur explique le refus le cas échéant.
   const signUp = async () => {
     setPending(true);
     const { error } = await authClient.signUp.email({
@@ -86,6 +90,9 @@ function LoginPage() {
           >
             Créer le compte
           </Button>
+          <p className="text-muted-foreground text-center text-xs">
+            La création de compte est réservée aux personnes invitées.
+          </p>
         </CardContent>
       </Card>
     </main>

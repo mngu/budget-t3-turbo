@@ -17,10 +17,10 @@ import {
   transactionsByCategory,
   transactionTotals,
 } from "../transactions/queries";
-import { protectedProcedure } from "../trpc";
+import { orgProcedure } from "../trpc";
 
 export const transactionsRouter = {
-  list: protectedProcedure
+  list: orgProcedure
     // `limit` n'est pas dans le schéma partagé : ce n'est pas un filtre, il ne
     // va pas dans l'URL et l'app mobile n'en a pas l'usage.
     .input(
@@ -28,40 +28,50 @@ export const transactionsRouter = {
         limit: z.number().int().min(1).max(200).optional(),
       }),
     )
-    .query(({ input }) => listTransactions(input, input.limit)),
+    .query(({ ctx, input }) =>
+      listTransactions(ctx.organizationId, input, input.limit),
+    ),
 
-  byCategory: protectedProcedure
+  byCategory: orgProcedure
     .input(transactionsSearchSchema)
-    .query(({ input }) => transactionsByCategory(input)),
+    .query(({ ctx, input }) =>
+      transactionsByCategory(ctx.organizationId, input),
+    ),
 
-  totals: protectedProcedure
+  totals: orgProcedure
     .input(transactionsSearchSchema)
-    .query(({ input }) => transactionTotals(input)),
+    .query(({ ctx, input }) => transactionTotals(ctx.organizationId, input)),
 
-  banks: protectedProcedure.query(() => listBankLabels()),
+  banks: orgProcedure.query(({ ctx }) => listBankLabels(ctx.organizationId)),
 
-  bankCounts: protectedProcedure
+  bankCounts: orgProcedure
     .input(transactionsSearchSchema)
-    .query(({ input }) => bankCounts(input)),
+    .query(({ ctx, input }) => bankCounts(ctx.organizationId, input)),
 
-  history: protectedProcedure
+  history: orgProcedure
     .input(transactionsSearchSchema)
-    .query(({ input }) => monthlyHistory(input)),
+    .query(({ ctx, input }) => monthlyHistory(ctx.organizationId, input)),
 
-  review: protectedProcedure
+  review: orgProcedure
     .input(transactionsSearchSchema)
-    .query(({ input }) => reviewQueue(input)),
+    .query(({ ctx, input }) => reviewQueue(ctx.organizationId, input)),
 
-  updateCategory: protectedProcedure
+  updateCategory: orgProcedure
     .input(z.object({ id: z.number().int().positive(), category: z.string() }))
-    .mutation(({ input }) => setTransactionCategory(input.id, input.category)),
+    .mutation(({ ctx, input }) =>
+      setTransactionCategory(ctx.organizationId, input.id, input.category),
+    ),
 
   // « Ce n'est pas un virement interne » : casse la paire et la marque `manual`,
   // hors de portée de la détection — sans quoi la passe suivante la reformerait.
-  unlinkTransfer: protectedProcedure
+  unlinkTransfer: orgProcedure
     .input(z.object({ id: z.number().int().positive() }))
-    .mutation(({ input }) => unlinkInternalTransfer(input.id)),
+    .mutation(({ ctx, input }) =>
+      unlinkInternalTransfer(ctx.organizationId, input.id),
+    ),
 
   // Relance l'appariement seul, sans import ni appel bancaire. Idempotent.
-  detectTransfers: protectedProcedure.mutation(() => detectInternalTransfers()),
+  detectTransfers: orgProcedure.mutation(({ ctx }) =>
+    detectInternalTransfers(ctx.organizationId),
+  ),
 } satisfies TRPCRouterRecord;

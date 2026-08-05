@@ -8,7 +8,7 @@ import type {
  * Une branche proposée par l'analyse et pas encore présente en base : la
  * « ligne proposée » posée dans la liste des catégories, sous la parente
  * concernée. Aucune persistance derrière — l'état du run vit en mémoire côté
- * serveur (voir suggestions/state.ts) et l'acceptation est une mutation par
+ * navigateur (voir `SuggestionsRun`, index.tsx) et l'acceptation est une mutation par
  * branche (`categories.suggestions.accept`).
  */
 export interface GhostBranch {
@@ -58,7 +58,7 @@ const norm = (name: string) =>
  * qui manque. Deux filtres, dans cet ordre :
  *
  *  - une catégorie dont le nom existe **déjà quelque part** dans l'arbre n'est
- *    jamais une proposition. `categories.name` est unique en base : la
+ *    jamais une proposition. `categories.name` est unique dans l'espace : la
  *    recréer échouerait, et une analyse re-propose massivement l'existant
  *    (c'est même son rôle, le prompt part des catégories réelles) ;
  *  - une branche dont tous les `txnIds` ont déjà été rangés depuis l'analyse

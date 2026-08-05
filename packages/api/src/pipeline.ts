@@ -8,14 +8,25 @@ import { detectInternalTransfers } from "./transactions/internal-transfers";
 
 // Un seul verrou pour tout ce qui alimente `transactions` : un import ne doit
 // pas s'intercaler dans une synchronisation en cours (et réciproquement).
-const withSyncLock = <T>(run: () => Promise<T>) =>
-  withSingleFlight("sync", "Une synchronisation est déjà en cours.", run);
+//
+// Par espace : deux foyers écrivent dans des lignes disjointes, un verrou global
+// ferait attendre l'un pour l'autre avec un message qu'il n'a pas provoqué.
+// Ce que la clé promet n'est vrai que parce que tout ce qu'elle protège est lui
+// aussi scopé — `importTransactions` lit le seul répertoire de l'espace.
+const withSyncLock = <T>(organizationId: string, run: () => Promise<T>) =>
+  withSingleFlight(
+    `sync:${organizationId}`,
+    "Une synchronisation est déjà en cours.",
+    run,
+  );
 
 // Import des data/*.json présents, appariement des virements internes, puis
 // catégorisation. Les deux dernières étapes sont best-effort : leur échec ne
 // doit jamais invalider un import réussi.
-async function importAndCategorize(): Promise<CategorizeResult | null> {
-  const hadImportError = await importTransactions();
+async function importAndCategorize(
+  organizationId: string,
+): Promise<CategorizeResult | null> {
+  const hadImportError = await importTransactions(organizationId);
   if (hadImportError) {
     throw new Error("Échec de l'import (voir les logs serveur).");
   }
@@ -25,14 +36,14 @@ async function importAndCategorize(): Promise<CategorizeResult | null> {
   // n'apparier que les nouveautés comparerait un mois propre à des mois passés
   // gonflés. Idempotente, elle ne coûte qu'une lecture de la table.
   try {
-    const { pairs } = await detectInternalTransfers();
+    const { pairs } = await detectInternalTransfers(organizationId);
     console.log(`🔁 ${pairs} virement(s) interne(s) apparié(s).`);
   } catch (err) {
     console.error("⚠️  Détection des virements internes échouée :", err);
   }
 
   try {
-    return await categorizeUncategorized();
+    return await categorizeUncategorized(organizationId);
   } catch (err) {
     console.error("⚠️  Catégorisation échouée après l'import :", err);
     return null;
@@ -40,11 +51,12 @@ async function importAndCategorize(): Promise<CategorizeResult | null> {
 }
 
 export async function performSync(
+  organizationId: string,
   psuHeaders: Record<string, string> = {},
 ): Promise<SyncOutcome> {
-  return withSyncLock(async () => {
-    const outcome = await syncBanks(psuHeaders);
-    await importAndCategorize();
+  return withSyncLock(organizationId, async () => {
+    const outcome = await syncBanks(organizationId, psuHeaders);
+    await importAndCategorize(organizationId);
     return outcome;
   });
 }
@@ -52,6 +64,10 @@ export async function performSync(
 // Rejoue l'import des data/*.json déjà présents sans toucher aux sessions
 // bancaires — donc sans déclencher de SCA. Remplace l'ancien `pnpm run import`.
 // Retourne null si la catégorisation a échoué (l'import, lui, a réussi).
-export async function performImport(): Promise<CategorizeResult | null> {
-  return withSyncLock(importAndCategorize);
+export async function performImport(
+  organizationId: string,
+): Promise<CategorizeResult | null> {
+  return withSyncLock(organizationId, () =>
+    importAndCategorize(organizationId),
+  );
 }
