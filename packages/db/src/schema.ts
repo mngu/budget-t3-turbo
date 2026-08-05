@@ -83,6 +83,25 @@ export const categories = pgTable("categories", {
   parentId: integer("parent_id").references((): AnyPgColumn => categories.id),
 });
 
+// Budget mensuel d'une catégorie (onglet « Budgets » de /categories). Une ligne
+// par catégorie budgétée, sans dimension de mois : un budget se reconduit tel
+// quel chaque mois et le non consommé n'est pas reporté.
+//
+// `amount` nul avec `detailed` vrai est l'état normal d'une parente qui vient
+// de passer en « Détaillé » : ce sont alors ses sous-catégories qui portent les
+// montants, et la parente n'affiche que leur somme. Les montants des
+// sous-catégories d'une parente repassée en « Global » sont conservés — ils ne
+// comptent plus nulle part, mais un aller-retour ne les perd pas.
+export const categoryBudgets = pgTable("category_budgets", {
+  // Cascade plutôt qu'un nettoyage dans `removeCategory` : c'est la seule
+  // manière que la ligne ne survive pas à une suppression faite ailleurs.
+  categoryId: integer("category_id")
+    .primaryKey()
+    .references(() => categories.id, { onDelete: "cascade" }),
+  amount: numeric("amount", { precision: 12, scale: 2 }),
+  detailed: boolean("detailed").notNull().default(false),
+});
+
 export const transactions = pgTable(
   "transactions",
   {

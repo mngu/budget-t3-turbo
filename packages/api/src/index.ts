@@ -45,6 +45,10 @@ export type {
   CategoryTreeNode,
 } from "./categories/queries";
 export type {
+  CategoryBudgetPlan,
+  CategoryBudgetRow,
+} from "./categories/budgets";
+export type {
   CategorySuggestion,
   CategorySuggestionChild,
 } from "./categories/suggestions/schema";

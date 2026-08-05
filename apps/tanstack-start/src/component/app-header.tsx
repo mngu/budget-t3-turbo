@@ -8,6 +8,7 @@ import {
   LandmarkIcon,
   MonitorIcon,
   MoonIcon,
+  PiggyBankIcon,
   SettingsIcon,
   SunIcon,
   TagsIcon,
@@ -30,7 +31,18 @@ import { useRevueSearch } from "~/lib/use-revue-search";
  * n'ont pas d'icône, la rangée étant réduite à deux entrées — allumer celle de
  * la revue y ferait promettre « vous êtes ici » à un lien qui emmène ailleurs.
  */
-export type HeaderPage = "revue" | "transactions" | "categories" | "banques";
+export type HeaderPage =
+  | "revue"
+  | "transactions"
+  | "categories"
+  | "budgets"
+  | "banques";
+
+const SETTINGS_TITLES: Partial<Record<HeaderPage, string>> = {
+  categories: "Catégories",
+  budgets: "Budgets",
+  banques: "Banques",
+};
 
 /**
  * En-tête unique de l'application — portage de `AppHeader.dc.html` (Claude
@@ -38,7 +50,8 @@ export type HeaderPage = "revue" | "transactions" | "categories" | "banques";
  *
  * Il remplace les *deux* barres précédentes : celle de la revue et celle des
  * réglages (`SettingsHeader`, supprimée). C'est le sens de la maquette, qui
- * traite `categories` et `banques` comme deux valeurs de son `page` : la rangée
+ * traite `categories` et `banques` comme deux valeurs de son `page` (`budgets`
+ * s'y est ajoutée depuis, d'où `SETTINGS_TITLES` plutôt qu'un ternaire) : la rangée
  * de marque et d'utilitaires ne bouge plus d'un écran à l'autre, seul le milieu
  * change — période et comptes sur la revue, intitulé « Réglages › … » ailleurs.
  *
@@ -49,7 +62,8 @@ export type HeaderPage = "revue" | "transactions" | "categories" | "banques";
  * et `Transactions.dc.html` ne le pose pas non plus.
  */
 export function AppHeader({ page }: { page?: HeaderPage }) {
-  const isSettings = page === "categories" || page === "banques";
+  const settingsTitle = page ? SETTINGS_TITLES[page] : undefined;
+  const isSettings = settingsTitle !== undefined;
 
   // Appelé inconditionnellement (règle des hooks) mais lu seulement hors des
   // écrans de réglages : là-bas, `useSearch({ strict: false })` renvoie la
@@ -97,7 +111,7 @@ export function AppHeader({ page }: { page?: HeaderPage }) {
         <div className="border-border ml-1.5 flex items-baseline gap-2.5 border-l pl-4">
           <span className="label-caps">Réglages</span>
           <span className="text-[13px] font-semibold tracking-[-0.01em]">
-            {page === "banques" ? "Banques" : "Catégories"}
+            {settingsTitle}
           </span>
         </div>
       )}
@@ -172,7 +186,7 @@ const THEME_OPTIONS: {
 function SettingsMenu({ page }: { page?: HeaderPage }) {
   const [open, setOpen] = useState(false);
   const { themeMode, setTheme } = useTheme();
-  const isSettings = page === "categories" || page === "banques";
+  const isSettings = page !== undefined && page in SETTINGS_TITLES;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -203,6 +217,14 @@ function SettingsMenu({ page }: { page?: HeaderPage }) {
           onNavigate={() => setOpen(false)}
         >
           <TagsIcon className="size-3.5" />
+        </SettingsLink>
+        <SettingsLink
+          to="/budgets"
+          label="Budgets"
+          active={page === "budgets"}
+          onNavigate={() => setOpen(false)}
+        >
+          <PiggyBankIcon className="size-3.5" />
         </SettingsLink>
         <SettingsLink
           to="/banques"
@@ -250,7 +272,7 @@ function SettingsLink({
   onNavigate,
   children,
 }: {
-  to: "/categories" | "/banques";
+  to: "/categories" | "/budgets" | "/banques";
   label: string;
   active: boolean;
   onNavigate: () => void;

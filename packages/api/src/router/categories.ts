@@ -4,6 +4,12 @@ import { z } from "zod/v4";
 import { CATEGORY_COLOR_HEXES, CATEGORY_ICON_NAMES } from "@budget/shared";
 
 import {
+  budgetPlan,
+  clearCategoryBudgets,
+  setCategoryBudget,
+  setCategoryDetailed,
+} from "../categories/budgets";
+import {
   createCategory,
   removeCategory,
   renameCategory,
@@ -85,6 +91,34 @@ export const categoriesRouter = {
   remove: protectedProcedure
     .input(z.object({ id: categoryId }))
     .mutation(({ input }) => removeCategory(input.id)),
+
+  // Onglet « Budgets » de /categories. Un budget est un montant mensuel posé
+  // sur une catégorie, sans dimension de mois : `set` écrase, il n'y a rien à
+  // versionner. `plan` porte aussi les compteurs d'en-tête — ils dépendent du
+  // découpage en postes (voir budgetSlots), qui n'a qu'une seule définition.
+  budgets: {
+    plan: protectedProcedure.query(() => budgetPlan()),
+
+    // Borne haute alignée sur celle du champ de saisie (5 chiffres).
+    set: protectedProcedure
+      .input(
+        z.object({
+          categoryId,
+          amount: z.number().int().min(0).max(99999).nullable(),
+        }),
+      )
+      .mutation(({ input }) =>
+        setCategoryBudget(input.categoryId, input.amount),
+      ),
+
+    setDetailed: protectedProcedure
+      .input(z.object({ categoryId, detailed: z.boolean() }))
+      .mutation(({ input }) =>
+        setCategoryDetailed(input.categoryId, input.detailed),
+      ),
+
+    clear: protectedProcedure.mutation(() => clearCategoryBudgets()),
+  },
 
   suggestions: {
     // Lance l'analyse LLM sur un échantillon de transactions récentes.

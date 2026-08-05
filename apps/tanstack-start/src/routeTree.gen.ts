@@ -14,6 +14,7 @@ import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as AuthedCallbackRouteImport } from './routes/_authed/callback'
 import { Route as AuthedRevueRouteImport } from './routes/_authed/_revue'
 import { Route as AuthedCategoriesIndexRouteImport } from './routes/_authed/categories/index'
+import { Route as AuthedBudgetsIndexRouteImport } from './routes/_authed/budgets/index'
 import { Route as AuthedBanquesIndexRouteImport } from './routes/_authed/banques/index'
 import { Route as AuthedRevueIndexRouteImport } from './routes/_authed/_revue/index'
 import { Route as ApiTrpcSplatRouteImport } from './routes/api/trpc.$'
@@ -42,6 +43,11 @@ const AuthedRevueRoute = AuthedRevueRouteImport.update({
 const AuthedCategoriesIndexRoute = AuthedCategoriesIndexRouteImport.update({
   id: '/categories/',
   path: '/categories/',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedBudgetsIndexRoute = AuthedBudgetsIndexRouteImport.update({
+  id: '/budgets/',
+  path: '/budgets/',
   getParentRoute: () => AuthedRoute,
 } as any)
 const AuthedBanquesIndexRoute = AuthedBanquesIndexRouteImport.update({
@@ -84,6 +90,7 @@ export interface FileRoutesByFullPath {
   '/api/trpc/$': typeof ApiTrpcSplatRoute
   '/': typeof AuthedRevueIndexRoute
   '/banques': typeof AuthedBanquesIndexRoute
+  '/budgets': typeof AuthedBudgetsIndexRoute
   '/categories': typeof AuthedCategoriesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -95,6 +102,7 @@ export interface FileRoutesByTo {
   '/api/trpc/$': typeof ApiTrpcSplatRoute
   '/': typeof AuthedRevueIndexRoute
   '/banques': typeof AuthedBanquesIndexRoute
+  '/budgets': typeof AuthedBudgetsIndexRoute
   '/categories': typeof AuthedCategoriesIndexRoute
 }
 export interface FileRoutesById {
@@ -109,6 +117,7 @@ export interface FileRoutesById {
   '/api/trpc/$': typeof ApiTrpcSplatRoute
   '/_authed/_revue/': typeof AuthedRevueIndexRoute
   '/_authed/banques/': typeof AuthedBanquesIndexRoute
+  '/_authed/budgets/': typeof AuthedBudgetsIndexRoute
   '/_authed/categories/': typeof AuthedCategoriesIndexRoute
 }
 export interface FileRouteTypes {
@@ -122,6 +131,7 @@ export interface FileRouteTypes {
     | '/api/trpc/$'
     | '/'
     | '/banques'
+    | '/budgets'
     | '/categories'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -133,6 +143,7 @@ export interface FileRouteTypes {
     | '/api/trpc/$'
     | '/'
     | '/banques'
+    | '/budgets'
     | '/categories'
   id:
     | '__root__'
@@ -146,6 +157,7 @@ export interface FileRouteTypes {
     | '/api/trpc/$'
     | '/_authed/_revue/'
     | '/_authed/banques/'
+    | '/_authed/budgets/'
     | '/_authed/categories/'
   fileRoutesById: FileRoutesById
 }
@@ -191,6 +203,13 @@ declare module '@tanstack/react-router' {
       path: '/categories'
       fullPath: '/categories'
       preLoaderRoute: typeof AuthedCategoriesIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/budgets/': {
+      id: '/_authed/budgets/'
+      path: '/budgets'
+      fullPath: '/budgets'
+      preLoaderRoute: typeof AuthedBudgetsIndexRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/_authed/banques/': {
@@ -257,6 +276,7 @@ interface AuthedRouteChildren {
   AuthedCallbackRoute: typeof AuthedCallbackRoute
   AuthedBanquesAjouterRoute: typeof AuthedBanquesAjouterRoute
   AuthedBanquesIndexRoute: typeof AuthedBanquesIndexRoute
+  AuthedBudgetsIndexRoute: typeof AuthedBudgetsIndexRoute
   AuthedCategoriesIndexRoute: typeof AuthedCategoriesIndexRoute
 }
 
@@ -265,6 +285,7 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedCallbackRoute: AuthedCallbackRoute,
   AuthedBanquesAjouterRoute: AuthedBanquesAjouterRoute,
   AuthedBanquesIndexRoute: AuthedBanquesIndexRoute,
+  AuthedBudgetsIndexRoute: AuthedBudgetsIndexRoute,
   AuthedCategoriesIndexRoute: AuthedCategoriesIndexRoute,
 }
 
