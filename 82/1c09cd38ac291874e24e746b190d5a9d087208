@@ -1,0 +1,63 @@
+CLAUDE.md
+  s_2ad214ef5115df::t_0c97c8278d4415 51,75-78
+  s_2ad214ef5115df::t_ed445710e26025 60,68,74,79
+  s_2ad214ef5115df::t_fc473a27e78564 61,69
+  s_2ad214ef5115df::t_1335759a894061 73
+apps/tanstack-start/src/routes/_authed/_revue/-components/category-ring.tsx
+  s_2ad214ef5115df::t_629173764aefd6 222
+  s_2ad214ef5115df::t_0f5c84e86be440 135-142
+  s_2ad214ef5115df::t_d37acafc33ebf9 151-171
+  s_2ad214ef5115df::t_bf0ff48cbfb489 241,251-256,322,332-333,349,357
+  s_2ad214ef5115df::t_3928d9e23dbc53 3,8,10
+  s_2ad214ef5115df::t_55219d56079311 6-7
+  s_2ad214ef5115df::t_b50bcd402317f3 73-74,82-89
+  s_2ad214ef5115df::t_da87f2691c1115 189-193,195-212
+  s_2ad214ef5115df::t_0a3e1eacd2b7be 34-38
+  s_2ad214ef5115df::t_7d356418eff41c 123-130
+  s_2ad214ef5115df::t_c3ad0fce76010c 143
+  s_2ad214ef5115df::t_404d14a7cd9eec 235-237
+  s_2ad214ef5115df::t_2fcb6298092898 303-319,342,347-348,350-353,360-384
+apps/tanstack-start/src/routes/_authed/_revue/-components/breakdown-list.tsx
+  s_2ad214ef5115df::t_fc473a27e78564 7,55-56
+  s_2ad214ef5115df::t_ed445710e26025 88
+  s_2ad214ef5115df::t_826563dd324299 128
+apps/tanstack-start/src/routes/_authed/_revue/index.tsx
+  s_2ad214ef5115df::t_ed445710e26025 3,41
+apps/tanstack-start/src/routes/_authed/_revue/-components/revue-panel.tsx
+  s_2ad214ef5115df::t_ed445710e26025 4-6,10-14,16,18,21,24-34,36-38,44,57-59,71-77,89-101,115,139-143,150-154,156-162,166,168,170-172,176,182-258,262-267,269-294,296-298
+  s_2ad214ef5115df::t_fc473a27e78564 9,49,61,155
+apps/tanstack-start/src/lib/revue-categories.ts
+  s_2ad214ef5115df::t_fc473a27e78564 11,53
+  s_2ad214ef5115df::t_158ddde4fd6ca4 1-10,12-35,37-52,54-62
+  s_2ad214ef5115df::t_ed445710e26025 36
+apps/tanstack-start/src/routes/_authed/_revue.tsx
+  s_2ad214ef5115df::t_826563dd324299 21
+  s_2ad214ef5115df::t_ed445710e26025 47
+  s_2ad214ef5115df::t_6604a8d2dc4470 227-231
+  s_2ad214ef5115df::t_fc473a27e78564 11,137
+apps/tanstack-start/src/routes/_authed/_revue/-components/use-drill.ts
+  s_2ad214ef5115df::t_b0b764ad0c4b52 113-114
+  s_2ad214ef5115df::t_d1a5377f1fc783 1-18,26-53,60-64,76,79,83-86,89-112,115-118
+  s_2ad214ef5115df::t_162e9518c454cd 19-25
+  s_2ad214ef5115df::t_360348d87b2280 57-59,65-69,78,80-82,87-88
+  s_2ad214ef5115df::t_93c7c19a930ddf 70-75,77
+  s_2ad214ef5115df::t_9af21e5186c9a9 54-56
+apps/tanstack-start/src/routes/_authed/_revue/transactions.tsx
+  s_2ad214ef5115df::t_ed445710e26025 22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "821c09cd38ac291874e24e746b190d5a9d087208",
+  "prompts": {},
+  "sessions": {
+    "s_2ad214ef5115df": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6780cd61-8290-4fb9-ad89-4b4ad449ab0e",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
