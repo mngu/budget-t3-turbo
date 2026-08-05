@@ -1,0 +1,27 @@
+apps/tanstack-start/src/routes/_authed/_revue/-components/category-ring.tsx
+  s_1a428616b29ffb::t_afb319dcaff0d0 120-126
+  h_baa52ab231f280 153,252
+  s_1a428616b29ffb::t_72e90de86ce52d 250-251
+  s_1a428616b29ffb::t_7165dd7d3a34f2 146-152
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "cb8bf03922b12f6488a9434d127e3c1edbf67edf",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_1a428616b29ffb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c8210e9e-ba65-4c87-bd6d-4c2a229ca706",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
