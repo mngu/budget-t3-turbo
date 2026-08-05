@@ -7,8 +7,8 @@ import {
 
 import { transactionsSearchSchema } from "@budget/shared";
 
-import type { EpureeCategory } from "./_revue/-components/epuree-panel";
 import type { HeaderPage } from "~/component/app-header";
+import type { RevueCategory } from "~/lib/revue-categories";
 import { AppHeader } from "~/component/app-header";
 import { useCategoryColor } from "~/lib/category-color";
 import { euro } from "~/lib/format";
@@ -18,6 +18,7 @@ import {
   referenceAverage,
   totalsByMonth,
 } from "~/lib/history";
+import { focusedCategory } from "~/lib/revue-categories";
 import {
   defaultToCurrentMonth,
   reviewScope,
@@ -43,7 +44,7 @@ import { CategoryIcon } from "./categories/-components/category-icon";
  *
  * La **colonne des postes**, elle, est montée par chaque écran : sur `/` un clic
  * sur une de ses lignes fait descendre l'anneau, geste qu'elle ne pourrait pas
- * commander d'ici (voir `EpureePanel`). Le layout lui fournit ses données —
+ * commander d'ici (voir `RevuePanel`). Le layout lui fournit ses données —
  * `categories` — et rien d'autre.
  *
  * Le périmètre est `wholePeriod` : `category`, `aClasser` et la recherche en
@@ -133,7 +134,7 @@ export const Route = createFileRoute("/_authed/_revue")({
     // L'arborescence des postes est construite ici, dans le loader, plutôt que
     // dans le composant : `/` en a besoin pour l'anneau et le layout pour la
     // colonne, et un enfant ne peut lire que les *données* de son parent.
-    const categories: EpureeCategory[] = [...expenses]
+    const categories: RevueCategory[] = [...expenses]
       .sort((a, b) => b.total - a.total)
       .map((item) => {
         // `transactions.byCategory` regroupe les transactions sans catégorie sous
@@ -223,15 +224,11 @@ function RevueLayout() {
 
   // Le poste ouvert est une fonction pure du search param : filtrer une parente
   // l'ouvre, filtrer une de ses sous-catégories ouvre la parente. C'est ce qui
-  // dispense le bandeau et la colonne de tout état partagé avec l'écran courant —
-  // l'anneau garde pour lui seul le *niveau* qu'il affiche (voir `EpureePanel`).
-  const parent =
-    (search.category === undefined
-      ? null
-      : (categories.find((c) => c.filter === search.category) ??
-        categories.find((c) =>
-          c.subs.some((s) => s.filter === search.category),
-        ))) ?? null;
+  // dispense le bandeau de tout état partagé avec l'écran courant — et c'est
+  // *la même* expression qui donne à l'anneau le niveau qu'il affiche, d'où la
+  // fonction partagée plutôt qu'une seconde copie : les deux ne peuvent pas
+  // nommer deux postes différents.
+  const parent = focusedCategory(categories, search.category);
 
   return (
     // text-[13px] : la base typographique de la maquette. Les tailles fines

@@ -1,6 +1,6 @@
 import { createFileRoute, useLoaderData } from "@tanstack/react-router";
 
-import { EpureePanel } from "./-components/epuree-panel";
+import { RevuePanel } from "./-components/revue-panel";
 
 /**
  * Revue du mois — portage de la maquette « Revue du mois épurée » (Claude
@@ -38,5 +38,5 @@ function RevueDuMois() {
   // la même répartition, elle n'a pas à être chargée deux fois.
   const { categories, expenses } = useLoaderData({ from: "/_authed/_revue" });
 
-  return <EpureePanel categories={categories} expenses={expenses} />;
+  return <RevuePanel categories={categories} expenses={expenses} />;
 }

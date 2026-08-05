@@ -19,7 +19,7 @@ import { TransactionsTable } from "./-components/transactions-table";
  *
  * La colonne est montée ici et non par le layout : sur `/` un clic sur une de
  * ses lignes commande le niveau de l'anneau, donc un état de l'écran (voir
- * `EpureePanel`). Ici il n'a rien à commander d'autre que le filtre.
+ * `RevuePanel`). Ici il n'a rien à commander d'autre que le filtre.
  */
 export const Route = createFileRoute("/_authed/_revue/transactions")({
   loaderDeps: ({ search }) => search,

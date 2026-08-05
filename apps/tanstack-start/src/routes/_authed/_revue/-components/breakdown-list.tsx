@@ -4,7 +4,7 @@ import { TriangleAlertIcon } from "lucide-react";
 
 import { cn } from "@budget/ui";
 
-import type { EpureeCategory } from "./epuree-panel";
+import type { RevueCategory } from "~/lib/revue-categories";
 import { shadeCategoryColor } from "~/lib/category-color";
 import { euro } from "~/lib/format";
 import { CategoryIcon } from "../../categories/-components/category-icon";
@@ -52,8 +52,8 @@ const breakdownScale = (rows: BreakdownItem[]) =>
  * fait *descendre* l'anneau, sur `/transactions` il pose le filtre de catégorie.
  */
 export function breakdownRows(
-  categories: EpureeCategory[],
-  parent: EpureeCategory | null,
+  categories: RevueCategory[],
+  parent: RevueCategory | null,
   resolveColor: (color: string) => string,
 ): BreakdownItem[] {
   if (!parent)
@@ -85,7 +85,7 @@ export function breakdownRows(
  * Montée par chaque écran et non par le layout `_revue` : sur `/`, cliquer une
  * ligne fait descendre l'anneau dans ses sous-catégories, et le niveau de
  * l'anneau est un état de l'écran. Le composant qui commande ce niveau doit donc
- * porter le gestionnaire de la ligne (voir `EpureePanel`).
+ * porter le gestionnaire de la ligne (voir `RevuePanel`).
  *
  * Masquée sous `lg` : elle ne peut pas s'empiler sous l'écran courant, la table
  * y prendrait toute la hauteur. L'anneau, lui, se lit seul — son centre affiche
@@ -125,7 +125,7 @@ export function BreakdownList({
         BREAKDOWN_WIDTH,
       )}
     >
-      <div className="flex min-h-0 flex-1 flex-col gap-px overflow-y-auto pr-0.5 [scrollbar-color:var(--border-strong)_transparent] [scrollbar-width:thin]">
+      <div className="flex min-h-0 flex-1 [scrollbar-width:thin] [scrollbar-color:var(--border-strong)_transparent] flex-col gap-px overflow-y-auto pr-0.5">
         {/* Clé de **position** et non de nom : c'est ce qui fait exister la
             transition de la barre. Keyée par nom, chaque changement de niveau ou
             de période démonte toutes les lignes et les remonte à leur largeur
