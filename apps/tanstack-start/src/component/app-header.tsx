@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
   ArrowLeftRightIcon,
   ChartPieIcon,
   LandmarkIcon,
+  LogOutIcon,
   MonitorIcon,
   MoonIcon,
   PiggyBankIcon,
@@ -20,6 +21,7 @@ import { cn } from "@budget/ui";
 import { Popover, PopoverContent, PopoverTrigger } from "@budget/ui/popover";
 import { useTheme } from "@budget/ui/theme";
 
+import { authClient } from "~/auth/client";
 import { BankPicker } from "~/component/bank-picker";
 import { PeriodPicker } from "~/component/period-picker";
 import { SEARCH_DEFAULTS } from "~/lib/transactions-search";
@@ -186,7 +188,16 @@ const THEME_OPTIONS: {
 function SettingsMenu({ page }: { page?: HeaderPage }) {
   const [open, setOpen] = useState(false);
   const { themeMode, setTheme } = useTheme();
+  const navigate = useNavigate();
   const isSettings = page !== undefined && page in SETTINGS_TITLES;
+
+  // `reloadDocument` comme à la connexion (`/login`) : la session est lue dans
+  // le `beforeLoad` de `_authed` via le client tRPC, un rechargement complet est
+  // le seul moyen sûr de repartir sans aucun cache de l'utilisateur sortant.
+  const signOut = async () => {
+    await authClient.signOut();
+    await navigate({ to: "/login", reloadDocument: true });
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -260,6 +271,19 @@ function SettingsMenu({ page }: { page?: HeaderPage }) {
             );
           })}
         </div>
+
+        <div className="bg-border mx-2.5 my-1.5 h-px" />
+
+        <button
+          type="button"
+          onClick={() => void signOut()}
+          className="hover:bg-accent flex w-full items-center gap-2.5 rounded-[7px] px-2.5 py-1.5 text-[12.5px]"
+        >
+          <span className="text-subtle flex">
+            <LogOutIcon className="size-3.5" />
+          </span>
+          Se déconnecter
+        </button>
       </PopoverContent>
     </Popover>
   );
