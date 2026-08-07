@@ -1,15 +1,19 @@
 "use client";
 
-import { Link } from "@tanstack/react-router";
 import { TriangleAlertIcon } from "lucide-react";
 
+
+
 import { cn } from "@budget/ui";
+
+
 
 import type { RevueCategory } from "~/lib/revue-categories";
 import { shadeCategoryColor } from "~/lib/category-color";
 import { euro } from "~/lib/format";
 import { CategoryIcon } from "../../categories/-components/category-icon";
-import { BUDGET_HATCH, budgetCaption, BudgetGauge } from "./budget-gauge";
+import { budgetCaption, BudgetGauge } from "./budget-gauge";
+
 
 export interface BreakdownItem {
   name: string;
@@ -125,8 +129,6 @@ export function breakdownRows(
 export function BreakdownList({
   rows,
   fold = false,
-  meta,
-  footer,
 }: {
   rows: BreakdownItem[];
   /**
@@ -138,15 +140,6 @@ export function BreakdownList({
    * dernière de la liste par construction, derrière un « + 1 autres ».
    */
   fold?: boolean;
-  /** Intitulé de tête : ce que les jauges de la colonne comparent. */
-  meta?: string;
-  /**
-   * Pied de colonne : combien de postes sont budgétés, un lien vers l'écran qui
-   * les pose, et la légende des hachures. Rendu **ici** et non à côté de la
-   * colonne : celle-ci est masquée sous `lg`, un pied posé en frère resterait
-   * seul à l'écran, sous rien.
-   */
-  footer?: { count: string; uncovered?: string };
 }) {
   const shown = fold ? rows.slice(0, MAX_ROWS) : rows;
   const rest = fold ? rows.slice(MAX_ROWS) : [];
@@ -154,11 +147,6 @@ export function BreakdownList({
   // L'échelle porte sur **toutes** les lignes, repliées comprises : sinon la
   // barre du « + N autres » dépasserait celle du plus gros poste affiché.
   const max = breakdownScale(rows);
-  // Une seule jauge fait basculer toute la colonne : lignes plus hautes et piste
-  // plus épaisse. Deux gabarits mêlés donneraient une liste en dents de scie, et
-  // les hachures d'un segment hors budget sont illisibles sur les 3 px de la
-  // barre ordinaire.
-  const gauged = rows.some((row) => row.budget);
   // La colonne de reste, elle, ne s'ouvre que s'il y a un reste à écrire :
   // aucune ligne budgétée, aucun « reste 45 € », 74 px de vide en moins.
   const captioned = rows.some((row) => row.budget?.amount != null);
@@ -170,7 +158,7 @@ export function BreakdownList({
         BREAKDOWN_WIDTH,
       )}
     >
-      <div className="flex min-h-0 flex-1 [scrollbar-width:thin] [scrollbar-color:var(--border-strong)_transparent] flex-col gap-px overflow-y-auto pr-0.5">
+      <div className="flex min-h-0 flex-1 [scrollbar-width:thin] [scrollbar-color:var(--border-strong)_transparent] flex-col overflow-y-auto">
         {/* Clé de **position** et non de nom : c'est ce qui fait exister la
             transition de la barre. Keyée par nom, chaque changement de niveau ou
             de période démonte toutes les lignes et les remonte à leur largeur
@@ -179,13 +167,7 @@ export function BreakdownList({
             à la nouvelle, comme le `sc-for` de la maquette. Sans danger ici : la
             ligne n'a ni état local ni champ de saisie. */}
         {shown.map((row, index) => (
-          <BreakdownRow
-            key={index}
-            row={row}
-            max={max}
-            gauged={gauged}
-            captioned={captioned}
-          />
+          <BreakdownRow key={index} row={row} max={max} captioned={captioned} />
         ))}
         {rest.length > 0 && (
           <BreakdownRow
@@ -195,34 +177,10 @@ export function BreakdownList({
               color: "var(--border-strong)",
             }}
             max={max}
-            gauged={gauged}
             captioned={captioned}
           />
         )}
       </div>
-
-      {footer && (
-        <div className="border-border mt-[9px] flex flex-none flex-col gap-[5px] border-t pt-[9px] pr-[9px] pl-2">
-          <div className="text-subtle flex items-baseline justify-between gap-2.5 text-[11px]">
-            <span>{footer.count}</span>
-            <Link
-              to="/budgets"
-              className="text-primary flex-none text-[11px] font-[550] whitespace-nowrap hover:underline"
-            >
-              Budgets
-            </Link>
-          </div>
-          {footer.uncovered && (
-            <div className="text-subtle flex items-center gap-[7px] text-[10.5px]">
-              <span
-                className="h-[5px] w-[18px] flex-none rounded-full"
-                style={{ background: BUDGET_HATCH }}
-              />
-              <span>{footer.uncovered}</span>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }
@@ -248,13 +206,10 @@ const ICON_SLOT =
 function BreakdownRow({
   row,
   max,
-  gauged,
   captioned,
 }: {
   row: BreakdownItem;
   max: number;
-  /** La colonne parle budget : gabarit haut et piste épaisse sur toutes les lignes. */
-  gauged: boolean;
   /** Au moins une ligne a un budget chiffré : la colonne de reste est ouverte. */
   captioned: boolean;
 }) {
@@ -282,8 +237,7 @@ function BreakdownRow({
       disabled={!row.onSelect}
       onClick={row.onSelect}
       className={cn(
-        "enabled:hover:bg-accent flex flex-none flex-col justify-center gap-1.5 rounded-lg text-left transition-colors duration-[130ms] motion-reduce:transition-none",
-        gauged ? "h-[44px]" : "h-[37px]",
+        "enabled:hover:bg-accent flex p-2 flex-none flex-col justify-center gap-1.5 rounded-lg text-left transition-colors motion-reduce:transition-none",
       )}
     >
       <div className="flex items-baseline gap-2">
@@ -319,10 +273,7 @@ function BreakdownRow({
             d'en haut et d'en bas, il ne peut donc pas vivre dedans (elle
             découpe). Elle est plate quand la colonne ne parle pas budget. */}
         <div
-          className={cn(
-            "relative flex min-w-0 flex-1 items-center",
-            gauged ? "h-[11px]" : "h-[3px]",
-          )}
+          className={cn("h-[11px] items-center relative flex min-w-0 flex-1")}
         >
           {row.budget ? (
             <BudgetGauge
@@ -338,8 +289,7 @@ function BreakdownRow({
           ) : (
             <div
               className={cn(
-                "bg-border-strong/60 absolute inset-x-0 overflow-hidden rounded-full",
-                gauged ? "h-[7px]" : "h-full",
+                "bg-border-strong/60 absolute inset-x-0 h-[7px] overflow-hidden rounded-full",
               )}
             >
               <span

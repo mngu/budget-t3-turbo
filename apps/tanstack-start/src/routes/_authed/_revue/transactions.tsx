@@ -36,10 +36,10 @@ export const Route = createFileRoute("/_authed/_revue/transactions")({
     ]);
     return { ...result, flagged: review.map((item) => item.id) };
   },
-  component: ToutesLesTransactions,
+  component: AllTransactions,
 });
 
-function ToutesLesTransactions() {
+function AllTransactions() {
   const { rows, total, flagged } = Route.useLoaderData();
   const search = Route.useSearch();
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));

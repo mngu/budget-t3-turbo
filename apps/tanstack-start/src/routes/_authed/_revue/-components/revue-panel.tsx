@@ -207,32 +207,6 @@ export function RevuePanel({
     },
   );
 
-  // En tête de la colonne, ce que ses jauges comparent — et donc, implicitement,
-  // si la parente ouverte est détaillée ou globale : ce sont les deux seules
-  // façons de budgéter un poste, et elles ne se lisent pas pareil.
-  const meta =
-    budgets.off || !selected
-      ? undefined
-      : budgetedSubs > 0
-        ? `${budgetedSubs} poste${budgetedSubs > 1 ? "s" : ""} de budget`
-        : selected.budget !== null
-          ? `Budget global · ${euro0.format(selected.budget)}`
-          : undefined;
-
-  // Le pied ne vaut qu'au niveau des parents : descendu dans un poste, les
-  // compteurs de l'espace entier ne décrivent plus ce qu'on regarde.
-  const footer = selected
-    ? undefined
-    : budgets.off
-      ? { count: "Budgets non comparés sur cette vue" }
-      : {
-          count: `${budgets.budgeted} poste${budgets.budgeted > 1 ? "s" : ""} budgété${budgets.budgeted > 1 ? "s" : ""} sur ${budgets.slots}`,
-          uncovered:
-            budgets.uncovered > 0
-              ? `${euro0.format(budgets.uncovered)} de dépense hors budget`
-              : undefined,
-        };
-
   return (
     // Fragment, comme `/transactions` : la colonne des postes est une **sœur**
     // de la colonne [fil d'ariane + anneau] et non sa cadette. Le fil d'ariane
@@ -357,8 +331,6 @@ export function RevuePanel({
       <BreakdownList
         rows={rows}
         fold={selected !== null}
-        meta={meta}
-        footer={footer}
       />
     </>
   );
