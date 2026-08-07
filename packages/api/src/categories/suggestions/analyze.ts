@@ -36,8 +36,8 @@ export interface TxnForAnalysis {
   parentCategory: string | null;
 }
 
-export const SAMPLE_LIMIT = 500;
-export const SAMPLE_WINDOW_MONTHS = 6;
+const SAMPLE_LIMIT = 500;
+const SAMPLE_WINDOW_MONTHS = 6;
 
 // Date ISO (YYYY-MM-DD) de début de fenêtre d'échantillonnage.
 export function sampleWindowStart(
@@ -55,7 +55,7 @@ export function sampleWindowStart(
 // les orphelines, il proposerait un arbre ne couvrant qu'elles et "replace"
 // supprimerait tout le reste — computeReplacePlan ne protège que les
 // corrections manuelles. Le contexte déjà catégorisé doit rester majoritaire.
-export const UNCATEGORIZED_SAMPLE_SHARE = 0.3;
+const UNCATEGORIZED_SAMPLE_SHARE = 0.3;
 
 // Deux alias sur `categories` : la catégorie portée par la transaction, et sa
 // parente (l'arborescence n'a que 2 niveaux, un seul niveau de remontée suffit).

@@ -15,7 +15,6 @@ import {
   reviewQueue,
   setTransactionCategory,
   transactionsByCategory,
-  transactionTotals,
 } from "../transactions/queries";
 import { orgProcedure } from "../trpc";
 
@@ -37,10 +36,6 @@ export const transactionsRouter = {
     .query(({ ctx, input }) =>
       transactionsByCategory(ctx.organizationId, input),
     ),
-
-  totals: orgProcedure
-    .input(transactionsSearchSchema)
-    .query(({ ctx, input }) => transactionTotals(ctx.organizationId, input)),
 
   banks: orgProcedure.query(({ ctx }) => listBankLabels(ctx.organizationId)),
 

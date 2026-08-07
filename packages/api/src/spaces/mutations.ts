@@ -17,7 +17,7 @@ import { sendInvitationEmail } from "../lib/email";
 import { hasRole, membershipGuards } from "./queries";
 
 /** Durée de vie d'un lien d'invitation. Annoncée à l'écran, à garder alignée. */
-export const INVITATION_DAYS = 7;
+const INVITATION_DAYS = 7;
 
 const expiry = () => new Date(Date.now() + INVITATION_DAYS * 24 * 3600 * 1000);
 

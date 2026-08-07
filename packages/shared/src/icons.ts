@@ -33,7 +33,7 @@ const group = (
 
 // 6 familles de 9 icônes. Le découpage thématique n'est qu'un ordre
 // d'affichage : la recherche traverse tous les groupes.
-export const CATEGORY_ICON_GROUPS: readonly CategoryIconGroup[] = [
+const CATEGORY_ICON_GROUPS: readonly CategoryIconGroup[] = [
   group("Alimentation", [
     ["shopping-cart", "courses supermarché caddie"],
     ["utensils", "restaurant resto couverts repas"],

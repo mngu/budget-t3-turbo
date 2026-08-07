@@ -22,10 +22,6 @@ export const categorySuggestionSchema = z.object({
   enfants: z.array(categorySuggestionChildSchema).min(1),
 });
 
-export const categorySuggestionsSchema = z.object({
-  categories: z.array(categorySuggestionSchema).min(1),
-});
-
 // Schéma permissif utilisé uniquement pour parser la sortie brute du LLM
 // (zodOutputFormat) : `parentColor` n'est pas contraint à l'énumération ici,
 // pour ne jamais faire planter le parsing structured-output de toute
@@ -46,5 +42,4 @@ export type CategorySuggestionChild = z.infer<
   typeof categorySuggestionChildSchema
 >;
 export type CategorySuggestion = z.infer<typeof categorySuggestionSchema>;
-export type CategorySuggestions = z.infer<typeof categorySuggestionsSchema>;
 export type RawCategorySuggestion = z.infer<typeof rawCategorySuggestionSchema>;

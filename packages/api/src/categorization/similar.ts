@@ -17,7 +17,7 @@ export interface SimilarTxn {
   categorySource: Transaction["categorySource"];
 }
 
-export const SIMILAR_LIMIT = 5;
+const SIMILAR_LIMIT = 5;
 // Seuil pg_trgm en dessous duquel deux descriptions ne sont pas jugées similaires.
 //
 // Calibration : sur les données réelles, deux transactions au hasard partagent
@@ -48,8 +48,8 @@ const TRIGRAM_THRESHOLD = 0.5;
 // continuait donc à montrer un exemple « Loyer » à un virement entrant. Sur un
 // échantillon de 5, une proportion de 80 % ne veut rien dire ; il faut à la
 // fois assez d'observations et une quasi-unanimité.
-export const BANK_CODE_MIN_SAMPLES = 10;
-export const BANK_CODE_MIN_DOMINANCE = 0.9;
+const BANK_CODE_MIN_SAMPLES = 10;
+const BANK_CODE_MIN_DOMINANCE = 0.9;
 
 export interface BankCodeParentCount {
   bankCode: string;

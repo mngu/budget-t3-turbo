@@ -20,7 +20,7 @@ This is a pnpm + Turborepo monorepo (migrated from the single-package `budget-tr
     - **Une paire n'est neutralisée que si ses deux jambes sont dans les comptes sélectionnés** (`twinWithinScope`, `transactions/queries.ts`). Seul `bank` est ré-appliqué à la jumelle : les paires vont jusqu'à 3 jours d'écart, donc à cheval sur deux mois — mettre les dates dans le périmètre déplacerait l'artefact sur la frontière de mois au lieu de le supprimer. La propriété que cette règle garantit : le solde affiché égale la variation réelle des comptes affichés, quelle que soit la sélection.
     - Tous les agrégats les écartent **en dur**, sans consulter le param `internes` (qui ne gouverne que le relevé) — sauf `bankCounts`, qui compte des lignes et annonce ce que la table affichera une fois le compte coché : son périmètre est « tous les comptes » alors que le clic va le restreindre, l'exclusion y ferait annoncer 2 pour une table de 3 lignes.
   - `categorization/` — `prompt.ts`, `results.ts`, `similar.ts`, `run.ts`.
-  - `categories/` — `queries.ts`, `mutations.ts`, `suggestions/{analyze,apply,state,schema,replace-plan}.ts`.
+  - `categories/` — `queries.ts`, `mutations.ts`, `budgets.ts`, `suggestions/{analyze,apply,schema,replace-plan}.ts`.
   - `pipeline.ts` — `performSync` / `performImport`, cross-domaine. `lib/` ne garde que le transverse (`data-dir.ts`, `single-flight.ts`).
 
   Le sens des dépendances est `router/` → domaines → `lib/`, jamais l'inverse : c'est l'inversion `src/lib/` → `scripts/` qui avait imposé les suffixes `-core`, tous supprimés. Les services importent `db` directement (même singleton que `ctx.db`, voir `trpc.ts`). `lib/single-flight.ts` sérialise les opérations longues : clé `sync` (sync + import) et clé `categorize`, partagée entre la catégorisation déclenchée par le pipeline et celle déclenchée depuis l'UI.
@@ -91,13 +91,11 @@ This is a pnpm + Turborepo monorepo (migrated from the single-package `budget-tr
     - Dans la colonne des postes, ce segment se dessine **hachuré** et non en barre pleine, avec un triangle d'alerte (`aClasser` sur `BreakdownItem`, repris de `Transactions.dc.html`) : c'est un reste à ranger, pas une sous-catégorie de plus. Le traitement est posé par `breakdownRows`, donc identique sur `/` et `/transactions` — `Revue du mois.dc.html` ne l'a pas, c'est une extension délibérée.
     - **Le dessin d'une ligne de la colonne vient d'un composant partagé de la maquette** (`Breakdown.dc.html`, importé par `Revue du mois.dc.html` _et_ `Transactions.dc.html`) : c'est ce qui fait de l'unique `BreakdownRow` du code la bonne forme, et non une commodité. Refonte du 2026-08-04 : la barre a quitté le **fond** de la ligne (teinte à 42 % derrière le texte) pour une rangée à elle, 3 px sous l'intitulé, **pleinement saturée** sur une piste `border-strong/60` — la maquette le motive par la lisibilité de l'intitulé. Deux conséquences : plus rien n'est en position absolue dans la ligne, et le survol prend `--accent` (le rôle _fond de survol_) et non `--surface2`. La barre glisse d'une largeur à l'autre (260 ms), et **deux détails conditionnent l'existence même de cette transition** — sans eux le CSS est bien posé mais ne se déclenche jamais, React remontant chaque ligne à sa largeur finale : la clé est la **position** dans la liste et non le nom (il change à chaque niveau), et la ligne est **toujours un `<button>`**, `disabled` quand elle ne se creuse pas, jamais un `<div>` selon le cas (React ne réutilise pas un nœud dont le type d'élément change, et descendre dans un poste fait justement passer toutes les lignes en lecture seule). La largeur de la colonne est passée à **254 px**, à tenir alignée avec celle de `KpiFocus` (voir `rdStackPx === listPx` plus haut).
     - La liste des catégories de la revue (aujourd'hui `breakdown-list.tsx`) est triée par montant décroissant, sans contrôle : le tri « Écart vs moy. » / « À classer » et son search param `catSort` ont été retirés le 2026-07-28 (avec `categoryAverages`, son seul consommateur). Ne pas les remettre sans demande explicite.
-- `apps/expo` — app mobile (login, transactions + filtres, KPIs, banques) en gluestack-ui v5 + nativewind. **Développement en suspens** (décision du 2026-07-23) : l'objectif est une vraie app universelle web+native, ce que gluestack ne permet pas correctement aujourd'hui — ne pas y ajouter de features sans que ce soit explicitement demandé.
+### App mobile — supprimée le 2026-08-07
 
-### Notes app mobile (pour la reprise éventuelle)
+`apps/expo` (gluestack-ui v5 + nativewind) était **en suspens depuis le 2026-07-23** : l'objectif restait une vraie app universelle web+native, ce que gluestack ne permet pas correctement. Deux semaines plus tard elle n'avait toujours pas repris, et 5 600 lignes gelées plus 52 dépendances pesaient sur chaque `pnpm install`, chaque `turbo run` et chaque relecture — elle a été supprimée, avec `tooling/tailwind` dont elle était le seul consommateur. `git log` la rend : partir de là plutôt que de la réécrire, mais **sans reprendre gluestack**, qui est la raison du gel.
 
-- Tester sur téléphone : `pnpm -F @budget/expo dev` (Metro port 8081, mode LAN) + web app sur 3000 — le serveur Vite doit écouter en LAN (`host: true` dans `vite.config.ts`, déjà en place) pour que le téléphone atteigne l'API. Sur émulateur : ouvrir `exp://10.0.2.2:8081`.
-- CORS + `trustedOrigins` better-auth sont ouverts à `localhost:*` en dev uniquement (`apps/tanstack-start/src/lib/cors.ts`, `src/auth/server.ts`) pour le mode web d'Expo.
-- `tooling/tailwind/theme.css` n'est consommé que par `apps/expo`. Ne jamais y remettre d'auto-références type tweakcn (`--shadow-sm: var(--shadow-sm)`) : inertes sur le web, elles font crasher nativewind à l'exécution (« Maximum call stack size exceeded ») — voir le commentaire dans le fichier. Après modification de ce fichier, relancer Metro avec `--clear`.
+Deux traces subsistent volontairement, sans consommateur aujourd'hui : le CORS + `trustedOrigins` better-auth ouverts à `localhost:*` en dev (`apps/tanstack-start/src/lib/cors.ts`, `src/auth/server.ts`) et le `host: true` du `vite.config.ts`, qui laissaient le téléphone atteindre l'API en LAN. Inoffensifs en dev, et exactement ce qu'il faudrait remettre.
 
 Pipeline métier inchangé : connexions bancaires configurées dans l'app (`/banques` : onboarding Enable Banking, wizard d'ajout, callback OAuth sur `/callback`, sessions stockées en DB) → sync → `data/<orgId>/*.json` (racine du monorepo, un répertoire par espace) → import (`packages/api/src/transactions/import.ts`) → PostgreSQL → tRPC (`@budget/api` routers) → table des transactions (`apps/tanstack-start`).
 
@@ -194,3 +192,13 @@ This was a deliberate decision after research, not an assumption — do not reve
 ## Conventions
 
 - Keep user-facing strings (UI text, report text, category names) in French.
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues on `mngu/budget-t3-turbo`, via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Single-context — one `CONTEXT.md` + `docs/adr/` at the root; the packages are layers of one domain, not separate contexts. See `docs/agents/domain.md`.

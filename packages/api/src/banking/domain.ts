@@ -2,7 +2,7 @@
 import { createSign } from "node:crypto";
 
 export const CONSENT_DAYS = 180;
-export const CONSENT_WARNING_DAYS = 30;
+const CONSENT_WARNING_DAYS = 30;
 
 // JWT RS256 signé avec la clé privée de l'application (sans dépendance, via node:crypto).
 export function makeJwt(

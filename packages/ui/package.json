@@ -4,23 +4,15 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./badge": "./src/badge.tsx",
     "./button": "./src/button.tsx",
-    "./button-group": "./src/button-group.tsx",
     "./calendar": "./src/calendar.tsx",
     "./card": "./src/card.tsx",
-    "./checkbox": "./src/checkbox.tsx",
     "./dialog": "./src/dialog.tsx",
     "./field": "./src/field.tsx",
     "./input": "./src/input.tsx",
-    "./label": "./src/label.tsx",
     "./popover": "./src/popover.tsx",
-    "./select": "./src/select.tsx",
-    "./separator": "./src/separator.tsx",
-    "./table": "./src/table.tsx",
     "./theme": "./src/theme.tsx",
-    "./toast": "./src/toast.tsx",
-    "./tooltip": "./src/tooltip.tsx"
+    "./toast": "./src/toast.tsx"
   },
   "license": "MIT",
   "scripts": {

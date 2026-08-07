@@ -32,7 +32,7 @@ const NOT_CONFIGURED: SetupStatus = {
 let statusCache: { at: number; status: SetupStatus } | null = null;
 const STATUS_TTL_MS = 3600 * 1000;
 
-export function invalidateSetupStatus(): void {
+function invalidateSetupStatus(): void {
   statusCache = null;
 }
 

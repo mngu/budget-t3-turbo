@@ -1,3 +1,5 @@
+import { format, parseISO, subMonths } from "date-fns";
+
 import type { MonthlyCategoryTotal } from "@budget/api";
 
 // Fenêtre de la moyenne de référence (« vs moy. 3 mois »).
@@ -14,14 +16,17 @@ const PARTIAL_MONTH_RATIO = 0.4;
 const monthKey = (iso: string) => iso.slice(0, 7);
 
 // Les N clés `YYYY-MM` finissant au mois de `iso`, dans l'ordre chronologique.
+//
+// L'ancre est le *mois* de `iso`, pris sur la chaîne (`monthKey`) et non sur un
+// `Date` : `iso` peut porter une heure UTC (`new Date().toISOString()`), et la
+// convertir en heure locale ferait basculer de mois le premier jour à minuit
+// passé dans les fuseaux négatifs. Ancré au 1er du mois, le pas de `subMonths`
+// ne peut plus dériver.
 function monthsEndingAt(iso: string, count: number): string[] {
-  const [year, month] = monthKey(iso).split("-").map(Number);
-  const keys: string[] = [];
-  for (let i = count - 1; i >= 0; i--) {
-    const d = new Date(Date.UTC(year ?? 0, (month ?? 1) - 1 - i, 1));
-    keys.push(d.toISOString().slice(0, 7));
-  }
-  return keys;
+  const end = parseISO(`${monthKey(iso)}-01`);
+  return Array.from({ length: count }, (_, i) =>
+    format(subMonths(end, count - 1 - i), "yyyy-MM"),
+  );
 }
 
 function median(values: number[]): number {

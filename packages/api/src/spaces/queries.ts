@@ -1,7 +1,7 @@
 // Lectures de l'écran « Espaces » : mes espaces, leurs membres, leurs
 // invitations. Un espace est une `organization` (plugin better-auth) ; voir
 // CLAUDE.md, section « Espaces ».
-import { and, count, eq, gt, inArray, isNull, or, sql } from "@budget/db";
+import { and, count, eq, inArray, isNull, or, sql } from "@budget/db";
 import { db } from "@budget/db/client";
 import {
   bankAccounts,
@@ -328,20 +328,6 @@ export async function membershipGuards(
     spaceCount: mine?.n ?? 0,
     isLastOwner: owners.length === 1 && owners[0]?.userId === userId,
   };
-}
-
-/** Invitations encore valides pour cette adresse — sert au filtrage d'inscription. */
-export function pendingInvitationFor(email: string) {
-  return db
-    .select({ id: invitation.id })
-    .from(invitation)
-    .where(
-      and(
-        eq(invitation.email, email),
-        eq(invitation.status, "pending"),
-        gt(invitation.expiresAt, sql`now()`),
-      ),
-    );
 }
 
 /** Vrai si l'utilisateur est membre de l'espace, avec le rôle demandé si fourni. */

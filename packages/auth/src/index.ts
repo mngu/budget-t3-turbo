@@ -1,6 +1,5 @@
 import { randomUUID } from "node:crypto";
 import type { BetterAuthOptions, BetterAuthPlugin } from "better-auth";
-import { expo } from "@better-auth/expo";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { APIError } from "better-auth/api";
@@ -135,7 +134,6 @@ export function initAuth<
       },
     },
     plugins: [
-      expo(),
       organization({
         schema: {
           organization: {
@@ -155,7 +153,7 @@ export function initAuth<
       }),
       ...(options.extraPlugins ?? []),
     ],
-    trustedOrigins: ["expo://", ...(options.trustedOrigins ?? [])],
+    trustedOrigins: options.trustedOrigins ?? [],
     onAPIError: {
       onError(error, ctx) {
         console.error("BETTER AUTH API ERROR", error, ctx);
