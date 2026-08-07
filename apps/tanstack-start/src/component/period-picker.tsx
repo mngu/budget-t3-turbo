@@ -77,9 +77,12 @@ function buildPresets(anchor: Date): Preset[] {
 }
 
 /**
- * Sélecteur de période de l'en-tête : `‹ Juillet 2026 ▾ ›`, sans coque ni fond —
- * les flèches sautent de mois en mois, l'intitulé ouvre un panneau à deux
- * colonnes (raccourcis, calendrier).
+ * Sélecteur de période de l'en-tête : `Juillet 2026 ▾  [‹|›]`. L'intitulé ouvre
+ * un panneau à deux colonnes (raccourcis, calendrier) et les deux flèches, qui
+ * sautent de mois en mois, sont **groupées à sa droite** dans une coque à bord.
+ * Elles l'encadraient sans coque jusqu'à la révision de maquette du 2026-08-07 :
+ * un pas d'un mois est un seul contrôle à deux sens, pas deux boutons posés de
+ * part et d'autre d'un troisième qui, lui, ouvre un panneau.
  *
  * La plage n'est écrite dans l'URL qu'au **second** clic du calendrier, jamais
  * au premier : la borne de début vit dans `draft` en attendant sa fin. Pousser
@@ -111,12 +114,6 @@ export function PeriodPicker() {
 
   return (
     <div className="ml-auto flex items-center gap-1">
-      <StepButton
-        label="Période précédente"
-        onClick={() => shiftMonth(-1)}
-        glyph="‹"
-      />
-
       <Popover
         open={open}
         onOpenChange={(next) => {
@@ -131,11 +128,11 @@ export function PeriodPicker() {
             <button
               type="button"
               title="Choisir une période"
-              className="num hover:text-foreground flex h-[22px] items-center gap-1.5 font-medium tracking-[-0.01em]"
+              className="num hover:text-foreground flex h-[22px] items-center gap-1.5 pr-0.5 font-medium tracking-[-0.01em] whitespace-nowrap"
               {...props}
             >
               {periodLabel(from, to)}
-              <span className="text-subtle text-[9px]">▾</span>
+              <span className="text-subtle flex-none text-[9px]">▾</span>
             </button>
           )}
         />
@@ -211,11 +208,19 @@ export function PeriodPicker() {
         </PopoverContent>
       </Popover>
 
-      <StepButton
-        label="Période suivante"
-        onClick={() => shiftMonth(1)}
-        glyph="›"
-      />
+      <div className="border-border bg-card ml-1.5 flex items-center gap-px rounded-[8px] border p-px">
+        <StepButton
+          label="Période précédente"
+          onClick={() => shiftMonth(-1)}
+          glyph="‹"
+        />
+        <span className="bg-border h-3 w-px" />
+        <StepButton
+          label="Période suivante"
+          onClick={() => shiftMonth(1)}
+          glyph="›"
+        />
+      </div>
     </div>
   );
 }
@@ -235,7 +240,7 @@ function StepButton({
       title={label}
       aria-label={label}
       onClick={onClick}
-      className="text-subtle hover:text-foreground flex h-[22px] w-5 items-center justify-center text-sm"
+      className="text-subtle hover:bg-accent hover:text-foreground flex h-5 w-[22px] items-center justify-center rounded-[6px] text-sm"
     >
       {glyph}
     </button>

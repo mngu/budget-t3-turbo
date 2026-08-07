@@ -127,7 +127,6 @@ export function KpiBand({
  * monte est toujours une mauvaise nouvelle.
  */
 export function KpiFocus({
-  label,
   delta,
   budget,
   children,
@@ -159,11 +158,10 @@ export function KpiFocus({
     // c'est un alignement, pas une coïncidence — d'où la reprise à l'identique
     // du `BREAKDOWN_WIDTH` de `breakdown-list.tsx`.
     <div className="flex w-[254px] max-w-full flex-none flex-col items-end">
-      <div className="label-caps self-start whitespace-nowrap">{label}</div>
       <div className="mt-0.5 flex h-[33px] w-full min-w-0 items-center justify-between gap-3.5">
         {children}
       </div>
-      <div className="mt-1.5 flex min-h-[19px] items-center justify-end gap-2.5 whitespace-nowrap">
+      <div className="flex min-h-[19px] items-center justify-end gap-2.5 whitespace-nowrap">
         {delta ? (
           <>
             <DeltaPill delta={delta} worseWhenUp />

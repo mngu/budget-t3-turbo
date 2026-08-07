@@ -170,11 +170,6 @@ export function BreakdownList({
         BREAKDOWN_WIDTH,
       )}
     >
-      {meta && (
-        <div className="text-subtle flex-none pr-[9px] pb-2 pl-2 text-[11px] tracking-[0.08em] uppercase">
-          {meta}
-        </div>
-      )}
       <div className="flex min-h-0 flex-1 [scrollbar-width:thin] [scrollbar-color:var(--border-strong)_transparent] flex-col gap-px overflow-y-auto pr-0.5">
         {/* Clé de **position** et non de nom : c'est ce qui fait exister la
             transition de la barre. Keyée par nom, chaque changement de niveau ou
@@ -287,7 +282,7 @@ function BreakdownRow({
       disabled={!row.onSelect}
       onClick={row.onSelect}
       className={cn(
-        "enabled:hover:bg-accent flex flex-none flex-col justify-center gap-1.5 rounded-lg pr-[9px] pl-2 text-left transition-colors duration-[130ms] motion-reduce:transition-none",
+        "enabled:hover:bg-accent flex flex-none flex-col justify-center gap-1.5 rounded-lg text-left transition-colors duration-[130ms] motion-reduce:transition-none",
         gauged ? "h-[44px]" : "h-[37px]",
       )}
     >
