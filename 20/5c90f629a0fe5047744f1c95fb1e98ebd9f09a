@@ -1,0 +1,17 @@
+apps/tanstack-start/src/routes/_authed/_revue/transactions.tsx
+  h_baa52ab231f280 39,42
+apps/tanstack-start/src/routes/_authed/_revue/-components/breakdown-list.tsx
+  h_baa52ab231f280 5-6,9-10,16,161,240,276,292
+  h_baa52ab231f280 15,170
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "205c90f629a0fe5047744f1c95fb1e98ebd9f09a",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
