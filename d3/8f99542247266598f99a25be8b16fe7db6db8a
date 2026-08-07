@@ -1,0 +1,96 @@
+apps/tanstack-start/src/routes/_authed/_revue/-components/breakdown-list.tsx
+  s_269db7f9875948::t_e80ace4b60e950 323-361,363-364,369-374
+  s_269db7f9875948::t_c9c1e00d945801 204
+  s_269db7f9875948::t_5b910d9b280faa 365-367
+  s_269db7f9875948::t_397c602ad13558 257,261,263-264,266-276
+  s_269db7f9875948::t_202b5c7293e126 141-149,161,173-177
+  s_269db7f9875948::t_183b87df303ece 187-193
+  s_269db7f9875948::t_c8a5dfcc9a52ef 34-45,47
+  s_269db7f9875948::t_ab7c1f72d3323a 253-256,258-260,262,265
+  s_269db7f9875948::t_287dd15b9094df 33,46
+  s_269db7f9875948::t_a3584414df2d59 12
+  s_269db7f9875948::t_d48b0726cdf9b9 61-70,72
+  s_269db7f9875948::t_41ffbdf46a9d47 322,362,368,375-385
+  s_269db7f9875948::t_c4ff55e6532d54 3
+  s_269db7f9875948::t_d3279707081e75 120-123,128-129
+  s_269db7f9875948::t_8a8db511746717 203,208-230
+  s_269db7f9875948::t_7d867a9f10c201 157-160,162-164
+  s_269db7f9875948::t_ac32b0999b917f 289-292
+apps/tanstack-start/src/lib/revue-budgets.ts
+  s_269db7f9875948::t_ceaaa233353888 1-117,121-165,167-177,181-190,192-206
+  s_269db7f9875948::t_63a244957bccf6 166
+  s_269db7f9875948::t_a7a223ed2b3a70 191
+  s_269db7f9875948::t_a3584414df2d59 118-120,178-180
+apps/tanstack-start/src/routes/_authed/_revue/-components/revue-panel.tsx
+  s_269db7f9875948::t_ead4b86868bdb7 174-188,193-195
+  s_269db7f9875948::t_b1872c6af337a0 368-371,373-374,376-378,380-400
+  s_269db7f9875948::t_c26e218a2fe145 47,52-57
+  s_269db7f9875948::t_93b448774b33f6 191-192,196,200,203,210-234
+  s_269db7f9875948::t_19d8a167e16066 357-362,366-367,372,375,379
+  s_269db7f9875948::t_56993b059c0834 9
+  s_269db7f9875948::t_d08da6fe72e27f 235
+apps/tanstack-start/src/routes/_authed/_revue/-components/kpi-band.tsx
+  s_269db7f9875948::t_a3584414df2d59 9
+  s_269db7f9875948::t_c3cbaba99490eb 132,137-149,152-155
+  s_269db7f9875948::t_2b268801434bb6 32
+  s_269db7f9875948::t_036874bc09c7a2 6,8
+  s_269db7f9875948::t_849e296dc51638 46-53
+  s_269db7f9875948::t_70c38e4baf5910 178-207
+  s_269db7f9875948::t_b03d3ba7f3f466 269-307,309-320
+  s_269db7f9875948::t_a398a0f731fadb 308
+  s_269db7f9875948::t_b99bf4194aab85 113
+  s_269db7f9875948::t_a5a26c18fb5040 268
+apps/tanstack-start/src/routes/_authed/_revue/index.tsx
+  s_269db7f9875948::t_4db551fe32d73e 39-41,43,45
+  s_269db7f9875948::t_a3584414df2d59 44
+apps/tanstack-start/src/routes/_authed/_revue/-components/budget-gauge.tsx
+  s_269db7f9875948::t_5b910d9b280faa 83-86
+  s_269db7f9875948::t_10112bcb85e44c 6,8-10,12,14-30,43-45,47,53-54,60-61,72-76,79-80,95,97
+  s_269db7f9875948::t_9564e2246ed477 13,31,37,48,62,77,81,88-89,98
+  s_269db7f9875948::t_4e3c800bc1055d 1-5,7,11,32-36,38-42,46,49-52,63-71,78,82,87,90-94,96,99-129
+  s_269db7f9875948::t_8b53cee27d8995 55-59
+docs/superpowers/specs/2026-08-06-budgets-revue-brief-claude-design.md
+  s_5a94a208d93d93::t_419914ea0d82a4 1-210
+apps/tanstack-start/src/lib/revue-categories.ts
+  s_269db7f9875948::t_784756dec76a30 37-39,41-46,48-58
+apps/tanstack-start/src/routes/_authed/_revue.tsx
+  s_269db7f9875948::t_ac9e121307235d 180-186,189
+  s_269db7f9875948::t_56b6fa31f93b8c 95-99
+  s_269db7f9875948::t_8514adc89ca3c5 143
+  s_269db7f9875948::t_7574696c4060fc 72
+  s_269db7f9875948::t_90e0408ebcac9f 21
+  s_269db7f9875948::t_59db587f637a71 234
+  s_269db7f9875948::t_5bc757cef66b63 166,168-171
+  s_269db7f9875948::t_14976329c15774 278-282
+  s_269db7f9875948::t_bb62f8029a9ceb 290-302
+CLAUDE.md
+  s_269db7f9875948::t_c227f4a3dfc11b 45,51-52
+  s_269db7f9875948::t_7f149152971776 46-50
+  s_269db7f9875948::t_4cb4e6252d7487 53-54
+AGENTS.md
+  s_5a94a208d93d93::t_765a507b0dfb7d 1-187
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "d38f99542247266598f99a25be8b16fe7db6db8a",
+  "prompts": {},
+  "sessions": {
+    "s_269db7f9875948": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d66ddb86-2196-4008-b346-5b1867863d32",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    },
+    "s_5a94a208d93d93": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8821243e-5855-4346-815c-32bbb6ea129a",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
