@@ -50,9 +50,9 @@ export function RevuePanel({
   /** Postes de sortie, du plus gros au plus petit. */
   categories: RevueCategory[];
   /**
-   * Comparaison au budget, telle que le loader du layout l'a tranchée. La
-   * colonne des postes en tire ses jauges et son pied ; le bandeau, monté par le
-   * layout, en tire sa rangée « Budget ».
+   * Comparaison au budget, telle que le loader du layout l'a tranchée : passée
+   * telle quelle à `breakdownRows`, qui en tire les jauges de la colonne. Le
+   * bandeau, monté par le layout, en tire sa rangée « Budget ».
    */
   budgets: RevueBudgets;
   /** Total des sorties de la période, dénominateur de la part affichée au centre. */
@@ -168,39 +168,20 @@ export function RevuePanel({
     drill(category.filter, () => setSearch({ category: category.filter }));
   };
 
-  // Les lignes de la colonne. Au niveau des parents chacune est une porte
-  // d'entrée vers ses enfants ; une fois descendu, elles sont en lecture seule —
-  // c'est l'anneau qui surligne une sous-catégorie.
-  // Une parente est « détaillée » quand ce sont ses sous-catégories qui portent
-  // les montants. Rien à demander au serveur : si l'une d'elles a un budget,
-  // c'est qu'elle l'est — et sinon elle se lit comme globale, exactement comme
-  // `budgetSlots` en décide côté base.
-  const budgetedSubs = selected
-    ? selected.subs.filter((sub) => sub.budget !== null).length
-    : 0;
-
-  // La jauge est posée ici et non dans `breakdownRows`, comme le geste : celle-ci
-  // reste la forme pure de la ligne, partagée avec `/transactions`, qui ne
-  // compare rien et garde donc la barre de répartition.
-  //
-  // **Toutes** les lignes de la revue en reçoivent une, même sans budget et même
-  // quand la comparaison est écartée : sans ça la colonne changerait de gabarit
-  // le jour où le premier budget est saisi.
-  const rows = breakdownRows(categories, selected, resolveColor).map(
+  // Les lignes de la colonne, jauges comprises. Au niveau des parents chacune
+  // est une porte d'entrée vers ses enfants ; une fois descendu, elles sont en
+  // lecture seule — c'est l'anneau qui surligne une sous-catégorie.
+  const rows = breakdownRows(categories, selected, resolveColor, budgets).map(
     (row, index) => {
-      // Les lignes suivent l'ordre de `selected.subs` / `categories` : l'index
-      // désigne le même poste des deux côtés.
-      const budget = selected
-        ? subGauge(selected.subs[index], budgets.off !== null, budgetedSubs > 0)
-        : categoryGauge(categories[index], budgets.off !== null);
-      if (selected) return { ...row, budget };
+      if (selected) return row;
+      // Les lignes suivent l'ordre de `categories` : l'index désigne le même
+      // poste des deux côtés.
       const category = categories[index];
       // Sans sous-catégorie, la ligne n'est pas une porte : elle reste
       // désactivée plutôt que d'ouvrir sur le vide (voir `selected`).
-      if (!category?.subs.length) return { ...row, budget };
+      if (!category?.subs.length) return row;
       return {
         ...row,
-        budget,
         title: `Voir la répartition de « ${row.name} »`,
         onSelect: () => descend(category),
       };
@@ -328,45 +309,7 @@ export function RevuePanel({
         </div>
       </div>
 
-      <BreakdownList
-        rows={rows}
-        fold={selected !== null}
-      />
+      <BreakdownList rows={rows} fold={selected !== null} />
     </>
   );
 }
-
-/**
- * Jauge d'un poste. Son budget global couvre tout ce qu'il porte ; celui d'une
- * parente détaillée s'arrête à ses sous-catégories budgétées, et le reliquat
- * « à classer » part en hachures. Sans budget — ou comparaison écartée — la
- * dépense se peint entière : la ligne garde sa jauge et son gabarit.
- */
-const categoryGauge = (category: RevueCategory | undefined, off: boolean) =>
-  category === undefined
-    ? undefined
-    : off || category.budget === null
-      ? { amount: null, covered: category.total }
-      : { amount: category.budget, covered: category.covered };
-
-/**
- * Jauge d'une sous-catégorie : elle porte son budget seule, rien n'en déborde.
- *
- * Le segment « à classer » d'une parente **détaillée** est le seul cas où rien
- * n'est couvert : c'est de la dépense qu'aucun budget ne peut atteindre, et elle
- * se peint donc tout en hachures. Sous une parente globale, au contraire, il
- * fait partie de ce que le budget de la parente couvre — la ligne se lit alors
- * comme n'importe quelle autre.
- */
-const subGauge = (
-  sub: RevueCategory["subs"][number] | undefined,
-  off: boolean,
-  detailed: boolean,
-) => {
-  if (sub === undefined) return undefined;
-  if (sub.filter === null && detailed && !off)
-    return { amount: null, covered: 0 };
-  return off || sub.budget === null
-    ? { amount: null, covered: sub.total }
-    : { amount: sub.budget, covered: sub.total };
-};

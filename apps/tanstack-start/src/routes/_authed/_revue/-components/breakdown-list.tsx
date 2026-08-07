@@ -2,18 +2,14 @@
 
 import { TriangleAlertIcon } from "lucide-react";
 
-
-
 import { cn } from "@budget/ui";
 
-
-
+import type { RevueBudgets } from "~/lib/revue-budgets";
 import type { RevueCategory } from "~/lib/revue-categories";
 import { shadeCategoryColor } from "~/lib/category-color";
 import { euro } from "~/lib/format";
 import { CategoryIcon } from "../../categories/-components/category-icon";
 import { budgetCaption, BudgetGauge } from "./budget-gauge";
-
 
 export interface BreakdownItem {
   name: string;
@@ -36,10 +32,10 @@ export interface BreakdownItem {
   aClasser?: boolean;
   /**
    * Vocabulaire du budget sur cette ligne. **Présent, même à `amount: null`** :
-   * la ligne se dessine en jauge plutôt qu'en barre. C'est la revue qui le pose
-   * sur *toutes* ses lignes, budget ou pas — sinon la colonne changerait de
-   * gabarit le jour où le premier budget est saisi. `/transactions`, qui ne
-   * compare rien, ne le pose sur aucune et garde la barre.
+   * la ligne se dessine en jauge plutôt qu'en barre. `breakdownRows` le pose sur
+   * *toutes* les lignes, budget ou pas — sinon la colonne changerait de gabarit
+   * le jour où le premier budget est saisi. Optionnel malgré tout : la ligne
+   * fabriquée du « + N autres » n'en a pas, elle n'agrège aucun poste réel.
    *
    * `amount: null` = rien ne budgète cette ligne (ou la revue ne compare pas) :
    * la jauge peint la seule dépense, dans la teinte du poste.
@@ -77,23 +73,40 @@ const breakdownScale = (rows: BreakdownItem[]) =>
 
 /**
  * Les lignes du niveau affiché : les postes parents, ou les sous-catégories du
- * poste ouvert. Fonction pure, sans geste attaché — chaque écran décore ensuite
- * ce que le clic doit faire, et les deux ne font pas la même chose : sur `/` il
- * fait *descendre* l'anneau, sur `/transactions` il pose le filtre de catégorie.
+ * poste ouvert, jauge de budget comprise. Fonction pure, sans **geste** attaché —
+ * chaque écran décore ensuite ce que le clic doit faire, et les deux ne font pas
+ * la même chose : sur `/` il fait *descendre* l'anneau, sur `/transactions` il
+ * pose le filtre de catégorie.
+ *
+ * La jauge, elle, est ici et non dans les écrans : les deux colonnes comparent
+ * au budget depuis le 2026-08-07 et ne peuvent pas en décider différemment.
  */
 export function breakdownRows(
   categories: RevueCategory[],
   parent: RevueCategory | null,
   resolveColor: (color: string) => string,
+  /**
+   * La comparaison telle que le loader du layout l'a tranchée. Passée entière et
+   * non réduite à un booléen : `off !== null` est silencieusement inversible aux
+   * deux appels, et l'inverser fait disparaître toutes les jauges sans erreur.
+   */
+  budgets: RevueBudgets,
 ): BreakdownItem[] {
+  const off = budgets.off !== null;
   if (!parent)
     return categories.map((category) => ({
       name: category.name,
       total: category.total,
       color: resolveColor(category.color),
       icon: category.icon,
+      budget: categoryGauge(category, off),
     }));
 
+  // Une parente est « détaillée » quand ce sont ses sous-catégories qui portent
+  // les montants. Rien à demander au serveur : si l'une d'elles a un budget,
+  // c'est qu'elle l'est — et sinon elle se lit comme globale, exactement comme
+  // `budgetSlots` en décide côté base.
+  const detailed = parent.subs.some((sub) => sub.budget !== null);
   // Une sous-catégorie n'a pas de couleur propre : c'est un palier de la teinte
   // de son parent, du plus dense au plus proche de la surface.
   const base = resolveColor(parent.color);
@@ -104,8 +117,41 @@ export function breakdownRows(
     // `filter: null` est la marque du segment fabriqué par `byCategory` — le
     // reliquat porté par la parente, qu'aucune ligne de `categories` ne décrit.
     aClasser: sub.filter === null,
+    budget: subGauge(sub, off, detailed),
   }));
 }
+
+/**
+ * Jauge d'un poste. Son budget global couvre tout ce qu'il porte ; celui d'une
+ * parente détaillée s'arrête à ses sous-catégories budgétées, et le reliquat
+ * « à classer » part en hachures. Sans budget — ou comparaison écartée — la
+ * dépense se peint entière : la ligne garde sa jauge et son gabarit.
+ */
+const categoryGauge = (category: RevueCategory, off: boolean) =>
+  off || category.budget === null
+    ? { amount: null, covered: category.total }
+    : { amount: category.budget, covered: category.covered };
+
+/**
+ * Jauge d'une sous-catégorie : elle porte son budget seule, rien n'en déborde.
+ *
+ * Le segment « à classer » d'une parente **détaillée** est le seul cas où rien
+ * n'est couvert : c'est de la dépense qu'aucun budget ne peut atteindre, et elle
+ * se peint donc tout en hachures. Sous une parente globale, au contraire, il
+ * fait partie de ce que le budget de la parente couvre — la ligne se lit alors
+ * comme n'importe quelle autre.
+ */
+const subGauge = (
+  sub: RevueCategory["subs"][number],
+  off: boolean,
+  detailed: boolean,
+) => {
+  if (sub.filter === null && detailed && !off)
+    return { amount: null, covered: 0 };
+  return off || sub.budget === null
+    ? { amount: null, covered: sub.total }
+    : { amount: sub.budget, covered: sub.total };
+};
 
 /**
  * Les postes du niveau affiché, du plus élevé au plus faible, chacun sous sa
@@ -237,7 +283,7 @@ function BreakdownRow({
       disabled={!row.onSelect}
       onClick={row.onSelect}
       className={cn(
-        "enabled:hover:bg-accent flex p-2 flex-none flex-col justify-center gap-1.5 rounded-lg text-left transition-colors motion-reduce:transition-none",
+        "enabled:hover:bg-accent flex flex-none flex-col justify-center gap-1.5 rounded-lg p-2 text-left transition-colors motion-reduce:transition-none",
       )}
     >
       <div className="flex items-baseline gap-2">
@@ -273,7 +319,7 @@ function BreakdownRow({
             d'en haut et d'en bas, il ne peut donc pas vivre dedans (elle
             découpe). Elle est plate quand la colonne ne parle pas budget. */}
         <div
-          className={cn("h-[11px] items-center relative flex min-w-0 flex-1")}
+          className={cn("relative flex h-[11px] min-w-0 flex-1 items-center")}
         >
           {row.budget ? (
             <BudgetGauge

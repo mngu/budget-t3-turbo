@@ -45,8 +45,9 @@ function AllTransactions() {
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   // Les postes viennent du loader du layout : la colonne et le bandeau lisent la
-  // même répartition, elle n'a pas à être chargée deux fois.
-  const { categories } = useLoaderData({ from: "/_authed/_revue" });
+  // même répartition, elle n'a pas à être chargée deux fois. `budgets` porte la
+  // comparaison au budget, tranchée là-haut pour les deux écrans à la fois.
+  const { categories, budgets } = useLoaderData({ from: "/_authed/_revue" });
   const { setSearch } = useRevueSearch();
   const resolveColor = useCategoryColor();
   // Même règle que sur `/` : filtrer une parente replie la colonne sur ses
@@ -58,17 +59,20 @@ function AllTransactions() {
         categories.find((c) =>
           c.subs.some((s) => s.filter === search.category),
         ))) ?? null;
-  const breakdown = breakdownRows(categories, parent, resolveColor).map(
-    (row, index) => {
-      if (parent) return row;
-      const category = categories[index];
-      return {
-        ...row,
-        title: `N'afficher que « ${row.name} »`,
-        onSelect: () => setSearch({ category: category?.filter }),
-      };
-    },
-  );
+  const breakdown = breakdownRows(
+    categories,
+    parent,
+    resolveColor,
+    budgets,
+  ).map((row, index) => {
+    if (parent) return row;
+    const category = categories[index];
+    return {
+      ...row,
+      title: `N'afficher que « ${row.name} »`,
+      onSelect: () => setSearch({ category: category?.filter }),
+    };
+  });
 
   return (
     <>
