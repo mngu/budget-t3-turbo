@@ -34,9 +34,28 @@ export interface RevueCategory {
    *
    * Vide = le poste n'a rien au niveau du dessous : l'anneau n'y descend pas
    * (voir `RevuePanel`).
+   *
+   * `budget` n'est renseigné que sur les sous-catégories d'une parente
+   * *détaillée* : ailleurs c'est la parente qui porte le montant.
    */
-  subs: { name: string; total: number; filter: string | null }[];
+  subs: {
+    name: string;
+    total: number;
+    filter: string | null;
+    budget: number | null;
+  }[];
   delta: Delta | null;
+  /**
+   * Budget du poste pour la période (mensuel × mois couverts), `null` s'il n'en
+   * a pas ou si la revue ne compare pas (voir `attachBudgets`).
+   */
+  budget: number | null;
+  /**
+   * Part de la dépense du poste qu'un budget couvre : tout le poste s'il est
+   * global, ses seules sous-catégories budgétées s'il est détaillé. La
+   * différence avec `total` est la dépense hors budget, hachurée dans la jauge.
+   */
+  covered: number;
 }
 
 /**

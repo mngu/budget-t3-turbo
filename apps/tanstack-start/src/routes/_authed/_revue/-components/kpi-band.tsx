@@ -3,7 +3,10 @@ import { TrendingDownIcon, TrendingUpIcon } from "lucide-react";
 import { cn } from "@budget/ui";
 
 import type { Delta } from "~/lib/history";
+import type { RevueBudgets } from "~/lib/revue-budgets";
 import { euro0, signedEuro0 } from "~/lib/format";
+import { BUDGETS_OFF_MESSAGES } from "~/lib/revue-budgets";
+import { budgetCaption, BudgetGauge } from "./budget-gauge";
 
 /**
  * Bandeau de tête — portage de `KpiBand.dc.html` (projet Claude Design
@@ -26,6 +29,7 @@ export function KpiBand({
   balance,
   balanceDelta,
   flow,
+  budget,
 }: {
   label: string;
   /** Solde de la période ou de la sélection, signé. */
@@ -39,6 +43,14 @@ export function KpiBand({
    * doit pas pouvoir se dissocier.
    */
   flow?: { revenues: Flow; expenses: Flow };
+  /**
+   * Troisième rangée : la dépense de la période contre l'enveloppe mensuelle de
+   * `/budgets`. Une comparaison écartée ne fait pas disparaître la rangée — elle
+   * y met sa raison en clair, sans quoi l'écran laisserait croire qu'aucun
+   * budget n'existe (voir `BUDGETS_OFF_MESSAGES`). Rangée du bloc de flux et non
+   * du solde : elle en partage la grille, ses trois colonnes doivent s'aligner.
+   */
+  budget?: RevueBudgets;
 }) {
   // La plus grosse des deux barres fait toute la largeur, l'autre s'y rapporte :
   // c'est un comparateur des deux flux entre eux, pas une part d'un tout.
@@ -98,6 +110,7 @@ export function KpiBand({
             worseWhenUp
             className="border-border border-t"
           />
+          {budget && <BudgetRow budget={budget} />}
         </div>
       )}
     </div>
@@ -116,12 +129,30 @@ export function KpiBand({
 export function KpiFocus({
   label,
   delta,
+  budget,
   children,
 }: {
   label: string;
   delta: Delta | null;
+  /**
+   * Comparaison au budget du poste ouvert. **Absent** = la revue ne compare pas
+   * du tout (la raison est déjà dite dans le bandeau, la répéter ici serait du
+   * bruit) ; `amount: null` = c'est ce poste-là qui n'a pas de budget, et
+   * l'écran le dit — un blanc se lirait comme un budget à zéro.
+   */
+  budget?: {
+    amount: number | null;
+    covered: number;
+    uncovered: number;
+    /** Teinte du poste : sa jauge appartient à la même famille que son arc. */
+    fill: string;
+  };
   children: React.ReactNode;
 }) {
+  const caption =
+    budget?.amount == null
+      ? null
+      : budgetCaption(budget.covered, budget.amount);
   return (
     // Largeur de la colonne de droite. La maquette la calcule, mais avec la
     // *même* expression que la colonne des postes (`rdStackPx === listPx`) :
@@ -144,6 +175,36 @@ export function KpiFocus({
           </span>
         )}
       </div>
+
+      {budget &&
+        (budget.amount === null || caption === null ? (
+          <div className="text-subtle mt-2.5 w-full text-right text-[11px]">
+            Pas de budget sur ce poste
+          </div>
+        ) : (
+          <div className="mt-2.5 flex w-full flex-col gap-[5px]">
+            <BudgetGauge
+              covered={budget.covered}
+              budget={budget.amount}
+              uncovered={budget.uncovered}
+              fill={budget.fill}
+            />
+            <div className="num flex items-baseline justify-between gap-2.5 text-[10.5px]">
+              <span className="text-subtle">
+                Budget {euro0.format(budget.amount)}
+              </span>
+              <span
+                className={cn(
+                  caption.over
+                    ? "text-bad font-semibold"
+                    : "text-subtle font-medium",
+                )}
+              >
+                {caption.text}
+              </span>
+            </div>
+          </div>
+        ))}
     </div>
   );
 }
@@ -200,6 +261,59 @@ function FlowRow({
         worseWhenUp={worseWhenUp}
         className="min-w-26 text-[10.5px] font-semibold max-xl:hidden"
       />
+    </div>
+  );
+}
+
+/**
+ * La rangée « Budget » du bandeau. Elle reprend au pixel près les largeurs de
+ * `FlowRow` — les trois barres du bandeau alignent leurs deux extrémités, une
+ * largeur qui dérive ici les décale toutes.
+ *
+ * Le libellé et la jauge sont le seul contenu garanti : le chiffre de droite
+ * (« reste 45 € ») se retire sous `xl` comme les mentions « vs moy. » des deux
+ * rangées de flux, faute de quoi la jauge serait plus courte que les barres au
+ * -dessus d'elle. Le segment rouge du dépassement, lui, ne se cache jamais.
+ */
+function BudgetRow({ budget }: { budget: RevueBudgets }) {
+  if (budget.off !== null) {
+    return (
+      <div className="border-border flex min-h-[33px] items-center gap-[11px] border-t">
+        <span className="label-caps w-[58px] flex-none">Budget</span>
+        <span className="text-subtle min-w-0 flex-1 py-2 text-[11px]">
+          {BUDGETS_OFF_MESSAGES[budget.off]}
+        </span>
+      </div>
+    );
+  }
+
+  const caption = budgetCaption(budget.covered, budget.total);
+  return (
+    <div className="border-border flex h-[33px] items-center gap-[11px] border-t">
+      <span className="label-caps w-[58px] flex-none">Budget</span>
+      <BudgetGauge
+        covered={budget.covered}
+        budget={budget.total}
+        uncovered={budget.uncovered}
+        // Teinte neutre : l'enveloppe du mois n'appartient à aucun poste, et
+        // la peindre en vert ou en rouge trancherait à la place du lecteur.
+        fill="color-mix(in oklab, var(--muted-foreground) 62%, transparent)"
+        className="h-[9px] min-w-10 flex-1"
+      />
+      <span className="num text-muted-foreground min-w-28 flex-none text-right text-[19px] font-medium tracking-[-0.02em]">
+        {euro0.format(budget.total)}
+      </span>
+      {/* Colonne vide de la pastille : un budget n'a pas d'écart à une moyenne,
+          mais la retirer décalerait le chiffre de droite d'une rangée à l'autre. */}
+      <span className="w-[68px] flex-none" />
+      <span
+        className={cn(
+          "num min-w-26 flex-none text-right text-[10.5px] max-xl:hidden",
+          caption.over ? "text-bad font-semibold" : "text-subtle font-medium",
+        )}
+      >
+        {caption.text}
+      </span>
     </div>
   );
 }

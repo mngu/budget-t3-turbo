@@ -36,7 +36,11 @@ export const Route = createFileRoute("/_authed/_revue/")({
 function RevueDuMois() {
   // Les agrégats sont ceux du layout : l'anneau et la colonne des postes lisent
   // la même répartition, elle n'a pas à être chargée deux fois.
-  const { categories, expenses } = useLoaderData({ from: "/_authed/_revue" });
+  const { categories, budgets, expenses } = useLoaderData({
+    from: "/_authed/_revue",
+  });
 
-  return <RevuePanel categories={categories} expenses={expenses} />;
+  return (
+    <RevuePanel categories={categories} budgets={budgets} expenses={expenses} />
+  );
 }

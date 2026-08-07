@@ -1,5 +1,6 @@
 "use client";
 
+import { Link } from "@tanstack/react-router";
 import { TriangleAlertIcon } from "lucide-react";
 
 import { cn } from "@budget/ui";
@@ -8,6 +9,7 @@ import type { RevueCategory } from "~/lib/revue-categories";
 import { shadeCategoryColor } from "~/lib/category-color";
 import { euro } from "~/lib/format";
 import { CategoryIcon } from "../../categories/-components/category-icon";
+import { BUDGET_HATCH, budgetCaption, BudgetGauge } from "./budget-gauge";
 
 export interface BreakdownItem {
   name: string;
@@ -28,6 +30,21 @@ export interface BreakdownItem {
    * reste à ranger, pas une sous-catégorie de plus.
    */
   aClasser?: boolean;
+  /**
+   * Vocabulaire du budget sur cette ligne. **Présent, même à `amount: null`** :
+   * la ligne se dessine en jauge plutôt qu'en barre. C'est la revue qui le pose
+   * sur *toutes* ses lignes, budget ou pas — sinon la colonne changerait de
+   * gabarit le jour où le premier budget est saisi. `/transactions`, qui ne
+   * compare rien, ne le pose sur aucune et garde la barre.
+   *
+   * `amount: null` = rien ne budgète cette ligne (ou la revue ne compare pas) :
+   * la jauge peint la seule dépense, dans la teinte du poste.
+   *
+   * `covered` = la part de `total` qu'un budget couvre. Le reste est hachuré —
+   * d'où `covered: 0` sur le segment « à classer » d'une parente détaillée, que
+   * rien ne peut budgéter.
+   */
+  budget?: { amount: number | null; covered: number };
   /** Absent = ligne de lecture seule (les sous-catégories ne se creusent pas). */
   onSelect?: () => void;
   /** Infobulle : ce que fera le clic. */
@@ -41,9 +58,18 @@ const BREAKDOWN_WIDTH = "w-[254px]";
 // deviennent illisibles et la colonne déborde.
 const MAX_ROWS = 13;
 
-/** Le plus gros poste donne l'échelle des barres ; `1` évite la division par zéro. */
+/**
+ * L'échelle de **toutes** les lignes de la colonne : le plus grand entre la plus
+ * grosse dépense et le plus gros budget. Les budgets en font partie, sinon un
+ * poste dépassant son budget serait le seul à déborder de la piste ; et surtout
+ * l'échelle est unique, jauges et barres ordinaires confondues — une jauge calée
+ * sur son propre budget peindrait un poste à 10 € aussi long qu'un poste à
+ * 1 700 €, et la colonne ne se lirait plus de haut en bas.
+ *
+ * `1` évite la division par zéro.
+ */
 const breakdownScale = (rows: BreakdownItem[]) =>
-  Math.max(...rows.map((r) => r.total), 1);
+  Math.max(...rows.map((r) => Math.max(r.total, r.budget?.amount ?? 0)), 1);
 
 /**
  * Les lignes du niveau affiché : les postes parents, ou les sous-catégories du
@@ -91,14 +117,16 @@ export function breakdownRows(
  * y prendrait toute la hauteur. L'anneau, lui, se lit seul — son centre affiche
  * déjà le poste survolé et sa part.
  *
- * Sans intitulé : la maquette calcule toujours son « du plus élevé au plus
- * faible » / « N sous-catégories » mais le masque (`listMetaDisplay: 'none'`) —
- * le décompte des sous-catégories a migré en tête de la colonne de droite du
- * bandeau, au-dessus du poste ouvert.
+ * Le décompte des sous-catégories n'y figure pas : la maquette le calcule mais
+ * le masque (`listMetaDisplay: 'none'`), il a migré en tête de la colonne de
+ * droite du bandeau. Le `meta` ci-dessous est l'*autre* intitulé, celui de
+ * `Breakdown.dc.html`, qui ne parle que de budget.
  */
 export function BreakdownList({
   rows,
   fold = false,
+  meta,
+  footer,
 }: {
   rows: BreakdownItem[];
   /**
@@ -110,6 +138,15 @@ export function BreakdownList({
    * dernière de la liste par construction, derrière un « + 1 autres ».
    */
   fold?: boolean;
+  /** Intitulé de tête : ce que les jauges de la colonne comparent. */
+  meta?: string;
+  /**
+   * Pied de colonne : combien de postes sont budgétés, un lien vers l'écran qui
+   * les pose, et la légende des hachures. Rendu **ici** et non à côté de la
+   * colonne : celle-ci est masquée sous `lg`, un pied posé en frère resterait
+   * seul à l'écran, sous rien.
+   */
+  footer?: { count: string; uncovered?: string };
 }) {
   const shown = fold ? rows.slice(0, MAX_ROWS) : rows;
   const rest = fold ? rows.slice(MAX_ROWS) : [];
@@ -117,6 +154,14 @@ export function BreakdownList({
   // L'échelle porte sur **toutes** les lignes, repliées comprises : sinon la
   // barre du « + N autres » dépasserait celle du plus gros poste affiché.
   const max = breakdownScale(rows);
+  // Une seule jauge fait basculer toute la colonne : lignes plus hautes et piste
+  // plus épaisse. Deux gabarits mêlés donneraient une liste en dents de scie, et
+  // les hachures d'un segment hors budget sont illisibles sur les 3 px de la
+  // barre ordinaire.
+  const gauged = rows.some((row) => row.budget);
+  // La colonne de reste, elle, ne s'ouvre que s'il y a un reste à écrire :
+  // aucune ligne budgétée, aucun « reste 45 € », 74 px de vide en moins.
+  const captioned = rows.some((row) => row.budget?.amount != null);
 
   return (
     <div
@@ -125,6 +170,11 @@ export function BreakdownList({
         BREAKDOWN_WIDTH,
       )}
     >
+      {meta && (
+        <div className="text-subtle flex-none pr-[9px] pb-2 pl-2 text-[11px] tracking-[0.08em] uppercase">
+          {meta}
+        </div>
+      )}
       <div className="flex min-h-0 flex-1 [scrollbar-width:thin] [scrollbar-color:var(--border-strong)_transparent] flex-col gap-px overflow-y-auto pr-0.5">
         {/* Clé de **position** et non de nom : c'est ce qui fait exister la
             transition de la barre. Keyée par nom, chaque changement de niveau ou
@@ -134,7 +184,13 @@ export function BreakdownList({
             à la nouvelle, comme le `sc-for` de la maquette. Sans danger ici : la
             ligne n'a ni état local ni champ de saisie. */}
         {shown.map((row, index) => (
-          <BreakdownRow key={index} row={row} max={max} />
+          <BreakdownRow
+            key={index}
+            row={row}
+            max={max}
+            gauged={gauged}
+            captioned={captioned}
+          />
         ))}
         {rest.length > 0 && (
           <BreakdownRow
@@ -144,9 +200,34 @@ export function BreakdownList({
               color: "var(--border-strong)",
             }}
             max={max}
+            gauged={gauged}
+            captioned={captioned}
           />
         )}
       </div>
+
+      {footer && (
+        <div className="border-border mt-[9px] flex flex-none flex-col gap-[5px] border-t pt-[9px] pr-[9px] pl-2">
+          <div className="text-subtle flex items-baseline justify-between gap-2.5 text-[11px]">
+            <span>{footer.count}</span>
+            <Link
+              to="/budgets"
+              className="text-primary flex-none text-[11px] font-[550] whitespace-nowrap hover:underline"
+            >
+              Budgets
+            </Link>
+          </div>
+          {footer.uncovered && (
+            <div className="text-subtle flex items-center gap-[7px] text-[10.5px]">
+              <span
+                className="h-[5px] w-[18px] flex-none rounded-full"
+                style={{ background: BUDGET_HATCH }}
+              />
+              <span>{footer.uncovered}</span>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -169,7 +250,30 @@ const ICON_SLOT =
  * translucide derrière le texte : c'est le changement du 2026-08-04, motivé
  * dans la maquette par la lisibilité de l'intitulé.
  */
-function BreakdownRow({ row, max }: { row: BreakdownItem; max: number }) {
+function BreakdownRow({
+  row,
+  max,
+  gauged,
+  captioned,
+}: {
+  row: BreakdownItem;
+  max: number;
+  /** La colonne parle budget : gabarit haut et piste épaisse sur toutes les lignes. */
+  gauged: boolean;
+  /** Au moins une ligne a un budget chiffré : la colonne de reste est ouverte. */
+  captioned: boolean;
+}) {
+  const caption =
+    row.budget?.amount == null
+      ? null
+      : budgetCaption(row.budget.covered, row.budget.amount);
+  // La barre « à classer » garde sa trame dans la teinte du poste — c'est le
+  // segment que la parente porte encore en propre. Quand un budget est en jeu
+  // elle n'a plus de segment consommé du tout (`covered: 0`) et ce sont les
+  // hachures grises du hors-budget qui prennent toute la longueur.
+  const fill = row.aClasser
+    ? `repeating-linear-gradient(90deg, ${row.color} 0 3px, transparent 3px 6px)`
+    : row.color;
   return (
     // **Toujours un `<button>`**, désactivé quand la ligne ne se creuse pas, et
     // jamais un `<div>` selon le cas : React ne réutilise pas un nœud dont le
@@ -182,7 +286,10 @@ function BreakdownRow({ row, max }: { row: BreakdownItem; max: number }) {
       title={row.title}
       disabled={!row.onSelect}
       onClick={row.onSelect}
-      className="enabled:hover:bg-accent flex h-[37px] flex-none flex-col justify-center gap-1.5 rounded-lg pr-[9px] pl-2 text-left transition-colors duration-[130ms] motion-reduce:transition-none"
+      className={cn(
+        "enabled:hover:bg-accent flex flex-none flex-col justify-center gap-1.5 rounded-lg pr-[9px] pl-2 text-left transition-colors duration-[130ms] motion-reduce:transition-none",
+        gauged ? "h-[44px]" : "h-[37px]",
+      )}
     >
       <div className="flex items-baseline gap-2">
         {row.aClasser ? (
@@ -212,19 +319,70 @@ function BreakdownRow({ row, max }: { row: BreakdownItem; max: number }) {
           {euro.format(row.total)}
         </span>
       </div>
-      <div className="bg-border-strong/60 h-[3px] overflow-hidden rounded-full">
-        {/* Le segment « à classer » ne se peint pas plein : sa barre est hachurée
-            (`barBorder` dans la maquette), pour qu'il ne se lise pas comme une
-            sous-catégorie de plus. */}
-        <span
-          className="block h-full min-w-[3px] rounded-full transition-[width] duration-[260ms] ease-[cubic-bezier(0.2,0.7,0.2,1)] motion-reduce:transition-none"
-          style={{
-            width: `${((row.total / max) * 100).toFixed(2)}%`,
-            background: row.aClasser
-              ? `repeating-linear-gradient(90deg, ${row.color} 0 3px, transparent 3px 6px)`
-              : row.color,
-          }}
-        />
+      <div className="flex items-center gap-2">
+        {/* Boîte de 11 px : la piste en fait 7 et le repère de budget la déborde
+            d'en haut et d'en bas, il ne peut donc pas vivre dedans (elle
+            découpe). Elle est plate quand la colonne ne parle pas budget. */}
+        <div
+          className={cn(
+            "relative flex min-w-0 flex-1 items-center",
+            gauged ? "h-[11px]" : "h-[3px]",
+          )}
+        >
+          {row.budget ? (
+            <BudgetGauge
+              covered={row.budget.covered}
+              budget={row.budget.amount}
+              uncovered={row.total - row.budget.covered}
+              // L'échelle de la colonne, jamais celle de la ligne : c'est toute
+              // la raison d'être du prop (voir `breakdownScale`).
+              scale={max}
+              fill={fill}
+              className="absolute inset-x-0"
+            />
+          ) : (
+            <div
+              className={cn(
+                "bg-border-strong/60 absolute inset-x-0 overflow-hidden rounded-full",
+                gauged ? "h-[7px]" : "h-full",
+              )}
+            >
+              <span
+                className="block h-full min-w-[3px] rounded-full transition-[width] duration-[260ms] ease-[cubic-bezier(0.2,0.7,0.2,1)] motion-reduce:transition-none"
+                style={{
+                  width: `${((row.total / max) * 100).toFixed(2)}%`,
+                  background: fill,
+                }}
+              />
+            </div>
+          )}
+          {/* Le budget : sur l'axe partagé de la colonne il n'est plus le bord
+              droit de la piste, plus rien ne dirait où il se trouve. */}
+          {row.budget?.amount != null && (
+            <span
+              title="Budget"
+              className="bg-foreground absolute inset-y-0 w-[1.5px] rounded-[1px] opacity-55 transition-[left] duration-[460ms] ease-[cubic-bezier(0.2,0.7,0.2,1)] motion-reduce:transition-none"
+              style={{
+                left: `${((row.budget.amount / max) * 100).toFixed(2)}%`,
+              }}
+            />
+          )}
+        </div>
+        {/* Colonne de reste : ouverte dès qu'une ligne a un budget chiffré, vide
+            sur celles qui n'en ont pas — sinon leur jauge irait jusqu'au bord et
+            les lignes ne s'aligneraient plus entre elles. */}
+        {captioned && (
+          <span
+            className={cn(
+              "num w-[74px] flex-none overflow-hidden text-right text-[10px] tracking-[-0.01em] whitespace-nowrap",
+              caption?.over
+                ? "text-bad font-semibold"
+                : "text-subtle font-medium",
+            )}
+          >
+            {caption?.text}
+          </span>
+        )}
       </div>
     </button>
   );

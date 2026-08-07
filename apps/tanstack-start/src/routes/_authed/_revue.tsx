@@ -18,6 +18,7 @@ import {
   referenceAverage,
   totalsByMonth,
 } from "~/lib/history";
+import { attachBudgets } from "~/lib/revue-budgets";
 import { focusedCategory } from "~/lib/revue-categories";
 import {
   defaultToCurrentMonth,
@@ -68,7 +69,7 @@ export const Route = createFileRoute("/_authed/_revue")({
   loaderDeps: ({ search }) => search,
   loader: async ({ deps, context }) => {
     const period = wholePeriod(deps);
-    const [expenses, revenues, history, tree] = await Promise.all([
+    const [expenses, revenues, history, tree, plan] = await Promise.all([
       // `direction: "debit"` forcé, comme la maquette : sans lui un seul mois de
       // salaires écrase l'échelle et tous les postes de dépense s'affaissent à un
       // moignon indistinct (mesuré : `Revenus` à 4 000 € contre 99 € pour le plus
@@ -91,6 +92,11 @@ export const Route = createFileRoute("/_authed/_revue")({
       // n'alimentent que le cache react-query dont se servent l'en-tête (badge
       // « À revoir », sélecteur de comptes) et les routes filles.
       context.trpcClient.categories.tree.query(),
+      // Les budgets mensuels de `/budgets`, que la revue compare désormais à la
+      // dépense de la période (maquette du 2026-08-06). Sans dimension de
+      // période côté serveur : c'est `attachBudgets` qui les multiplie par le
+      // nombre de mois affichés, ou écarte la comparaison.
+      context.trpcClient.categories.budgets.plan.query(),
       context.queryClient.fetchQuery({
         ...context.trpc.transactions.review.queryOptions(reviewScope(deps)),
         staleTime: 0,
@@ -134,7 +140,7 @@ export const Route = createFileRoute("/_authed/_revue")({
     // L'arborescence des postes est construite ici, dans le loader, plutôt que
     // dans le composant : `/` en a besoin pour l'anneau et le layout pour la
     // colonne, et un enfant ne peut lire que les *données* de son parent.
-    const categories: RevueCategory[] = [...expenses]
+    const base: RevueCategory[] = [...expenses]
       .sort((a, b) => b.total - a.total)
       .map((item) => {
         // `transactions.byCategory` regroupe les transactions sans catégorie sous
@@ -157,7 +163,12 @@ export const Route = createFileRoute("/_authed/_revue")({
             // porté par la parente) : son libellé ne correspond à aucune ligne de
             // `categories`, aucun filtre ne peut le désigner.
             filter: b.unallocated ? null : b.category,
+            budget: null,
           })),
+          // Posés par `attachBudgets` juste après : la comparaison au budget
+          // dépend de la période et des comptes, pas de la répartition.
+          budget: null,
+          covered: 0,
           // Une catégorie absente de toute la fenêtre de référence a bien une
           // moyenne de zéro : c'est un poste neuf, pas une donnée manquante.
           delta: averageByCategory
@@ -166,8 +177,16 @@ export const Route = createFileRoute("/_authed/_revue")({
         };
       });
 
+    const { categories, budgets } = attachBudgets(base, {
+      tree,
+      plan,
+      expenses: expensesTotal,
+      search: deps,
+    });
+
     return {
       categories,
+      budgets,
       expenses: expensesTotal,
       balance,
       revenuesDelta: deltaTo(revenuesTotal, revenuesAverage),
@@ -212,6 +231,7 @@ function RevueLayout() {
 
   const {
     categories,
+    budgets,
     revenues,
     expenses,
     balance,
@@ -255,6 +275,11 @@ function RevueLayout() {
                 revenues: { amount: revenues, delta: revenuesDelta },
                 expenses: { amount: expenses, delta: expensesDelta },
               }}
+              // Troisième rangée du bandeau depuis la maquette du 2026-08-06 :
+              // la dépense du mois contre l'enveloppe de `/budgets`. Elle
+              // apparaît donc aussi sur `/transactions`, qui monte le même
+              // bandeau — c'est ce que fait `Transactions.dc.html`.
+              budget={budgets}
             />
           </div>
 
@@ -262,6 +287,19 @@ function RevueLayout() {
             <KpiFocus
               label={`${parent.subs.length} sous-catégorie${parent.subs.length > 1 ? "s" : ""}`}
               delta={parent.delta}
+              // Absent quand la revue ne compare pas ; `amount: null` quand
+              // c'est ce poste-là qui n'a pas de budget — l'écran le dit plutôt
+              // que de laisser un vide sous les autres.
+              budget={
+                budgets.off
+                  ? undefined
+                  : {
+                      amount: parent.budget,
+                      covered: parent.covered,
+                      uncovered: parent.total - parent.covered,
+                      fill: resolveColor(parent.color),
+                    }
+              }
             >
               <span className="flex min-w-0 flex-1 items-center gap-2">
                 <span
