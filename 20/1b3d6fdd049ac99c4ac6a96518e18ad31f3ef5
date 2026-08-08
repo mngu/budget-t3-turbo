@@ -1,0 +1,88 @@
+apps/tanstack-start/src/routes/_authed/categories/-components/suggestions-panel.tsx
+  s_7d1c2df886a769::t_d618407945daea 117,119,144-146,148-149,151-152
+  s_7d1c2df886a769::t_3dac370f3c2cc8 5-6
+apps/tanstack-start/src/routes/_authed/banques/-components/sync-status.tsx
+  s_7d1c2df886a769::t_f6028d8351fd51 69-70,72
+  s_7d1c2df886a769::t_de5789f0ce1f16 8
+apps/tanstack-start/src/routes/_authed/espaces/-components/space-card.tsx
+  s_7d1c2df886a769::t_315b992695aafb 351-352,356
+  s_7d1c2df886a769::t_1d7a7371bb47f9 342-343,455-456,460
+  s_7d1c2df886a769::t_63aaaaadd29e98 349
+  s_7d1c2df886a769::t_8a698df798824a 29
+  s_7d1c2df886a769::t_30dfa34638cd7e 137,139,208-211,219,274-276,282,285-287,291
+  s_7d1c2df886a769::t_c868c7c5981ab2 479-482,485-486
+  s_7d1c2df886a769::t_ddcb7ba8c3157a 22-28
+  s_7d1c2df886a769::t_ff7fa38b479c75 393-394,396-401,404-414,416-433,435-440
+apps/tanstack-start/src/routes/_authed/banques/-components/connection-card.tsx
+  s_7d1c2df886a769::t_80e3755d542a61 93,95
+  s_7d1c2df886a769::t_259c420aec0710 7
+apps/tanstack-start/src/routes/_authed/espaces/index.tsx
+  s_7d1c2df886a769::t_fa2ddf16b06bfc 304,306,343-344,349-350,354-355,385-386,392
+  s_7d1c2df886a769::t_c5961e4a3a4556 22
+apps/tanstack-start/src/routes/_authed/banques/ajouter.tsx
+  s_7d1c2df886a769::t_63aaaaadd29e98 9,304
+  s_7d1c2df886a769::t_f6028d8351fd51 187-189,194,197,330,332
+  s_7d1c2df886a769::t_9ef2c96bcc6b86 8
+apps/tanstack-start/src/routes/_authed/budgets/index.tsx
+  s_7d1c2df886a769::t_3dac370f3c2cc8 5
+  s_7d1c2df886a769::t_0fc53bdbe63977 89-91,100,114-117,121
+apps/tanstack-start/src/routes/_authed/categories/index.tsx
+  s_7d1c2df886a769::t_5efda2ddedde08 261-265
+  s_7d1c2df886a769::t_4b6a776a5fff5b 331-332
+  s_7d1c2df886a769::t_2c2600ca8fb86c 246-247,257,270-271,286,288,330,338
+  s_7d1c2df886a769::t_792df22f179329 12
+apps/tanstack-start/src/routes/_authed/banques/-components/onboarding.tsx
+  s_7d1c2df886a769::t_80e3755d542a61 185-186,188,190,192
+  s_7d1c2df886a769::t_da4ecc9737f189 10-11,118-120,126-129,134-141,150
+  s_7d1c2df886a769::t_3ed9a51ca1a109 9
+apps/tanstack-start/src/routes/invitation.$invitationId.tsx
+  s_7d1c2df886a769::t_f49429534bcee0 354,356,359,361,363,365
+  s_7d1c2df886a769::t_df836b98143774 15-16,248-252,254-257
+  s_7d1c2df886a769::t_71e17703c3f033 14
+apps/tanstack-start/src/routes/_authed/banques/index.tsx
+  s_7d1c2df886a769::t_a1d58e7a0c5e6b 79-81,124-126
+  s_7d1c2df886a769::t_f90efb02d8d97d 6,78,84,122-123,129
+apps/tanstack-start/src/routes/_authed/espaces/-components/space-dialog.tsx
+  s_7d1c2df886a769::t_8a698df798824a 8-9
+  s_7d1c2df886a769::t_da4ecc9737f189 162-165
+  s_7d1c2df886a769::t_9cf9ff3bff07d4 47-57,181,183,185-187,189,191,193
+  s_7d1c2df886a769::t_99a1c057574c59 171-172
+  s_7d1c2df886a769::t_ec3bc48d5b95b4 6
+apps/tanstack-start/src/routes/_authed/banques/-components/revoke-dialog.tsx
+  s_7d1c2df886a769::t_36d0f2b971a7c5 82-85,89-92,94,96,98
+  s_7d1c2df886a769::t_0329a741672c18 6
+apps/tanstack-start/src/routes/_authed/categories/-components/category-overview-tree.tsx
+  s_7d1c2df886a769::t_16c05bbfe18515 19-26
+  s_7d1c2df886a769::t_87732447a9a32b 346-353,355-362,364-366,368-370,372-376,385-386,388,390-392
+  s_7d1c2df886a769::t_366e39561f3f20 133,135-136,138
+apps/tanstack-start/src/routes/login.tsx
+  s_7d1c2df886a769::t_7793640b04a5a1 136-137
+  s_7d1c2df886a769::t_5efda2ddedde08 82-87
+  s_7d1c2df886a769::t_2c3aa0c0af3f6a 143
+  s_7d1c2df886a769::t_cc7650f62c6463 8-9,106-109,115,117
+  s_7d1c2df886a769::t_8bee4310c5b335 7
+apps/tanstack-start/src/routes/_authed/categories/-components/category-delete-dialog.tsx
+  s_7d1c2df886a769::t_baff4b5bf684a0 102-105,109-112,114,116,118
+  s_7d1c2df886a769::t_2d3df33bbec970 5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "201b3d6fdd049ac99c4ac6a96518e18ad31f3ef5",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_7d1c2df886a769": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "36d1dd7a-2017-42dc-9c54-00b7a527b50d",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
