@@ -62,9 +62,11 @@ export function RevuePanel({
   const { search, setSearch } = useRevueSearch();
 
   const [hover, setHover] = useState<number | null>(null);
-  // Le forage : replier l'anneau, changer de niveau, le déplier. Il guette
-  // `search.category` parce que c'est *lui* qui porte le niveau — voir `useDrill`.
-  const { phase, dir, drill } = useDrill(search.category);
+  // Le forage : replier l'anneau, changer de niveau, le déplier. Il guette la
+  // search entière parce que le niveau tient au poste ouvert **et** à la
+  // période — un changement de mois joue donc la même animation qu'un clic sur
+  // un poste, c'est la seule de l'anneau. Voir `useDrill`.
+  const { phase, dir, drill } = useDrill(search);
   // Le segment « À classer » n'a pas de filtre qui le désigne (voir
   // `RevueCategory.subs`) : son surlignage est le seul qui reste local.
   const [aClasserSel, setAClasserSel] = useState(false);
