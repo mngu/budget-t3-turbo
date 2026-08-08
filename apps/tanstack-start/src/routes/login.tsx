@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { CircleAlertIcon, Loader2Icon, MailCheckIcon } from "lucide-react";
+import { CircleAlertIcon, MailCheckIcon } from "lucide-react";
 import { z } from "zod/v4";
 
 import { cn } from "@budget/ui";
+import { Alert, AlertDescription, AlertTitle } from "@budget/ui/alert";
 import { Button } from "@budget/ui/button";
 import { Field, FieldLabel } from "@budget/ui/field";
 import { Input } from "@budget/ui/input";
+import { Spinner } from "@budget/ui/spinner";
 
 import { authClient } from "~/auth/client";
 import { GradientWavesBg } from "~/component/gradient-waves-bg";
@@ -117,24 +119,25 @@ function LoginPage() {
             </Field>
 
             {error && (
-              <div className="bg-bad-soft text-bad flex items-start gap-[7px] rounded-[9px] px-[11px] py-[9px] text-[11.5px] leading-[1.45]">
-                <CircleAlertIcon className="mt-px size-3.5 flex-none" />
-                <span>{error}</span>
-              </div>
+              <Alert variant="destructive">
+                <CircleAlertIcon />
+                <AlertTitle>{error}</AlertTitle>
+              </Alert>
             )}
 
             {sent && (
-              <div className="bg-accent-soft text-primary flex items-start gap-[7px] rounded-[9px] px-[11px] py-[9px] text-[11.5px] leading-[1.45]">
-                <MailCheckIcon className="mt-px size-3.5 flex-none" />
-                <span>
-                  Un lien de connexion est parti à {email}. Ouvrez-le dans les
-                  15 minutes — il vous connectera directement.
-                </span>
-              </div>
+              <Alert variant="ok">
+                <MailCheckIcon />
+                <AlertTitle>Lien envoyé à {email}</AlertTitle>
+                <AlertDescription>
+                  Ouvrez-le dans les 15 minutes — il vous connectera
+                  directement.
+                </AlertDescription>
+              </Alert>
             )}
 
             <Button type="submit" disabled={incomplete} className="mt-0.5">
-              {pending && <Loader2Icon className="animate-spin" />}
+              {pending && <Spinner />}
               {pending
                 ? "Envoi…"
                 : sent

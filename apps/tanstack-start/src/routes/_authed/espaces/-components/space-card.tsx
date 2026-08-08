@@ -19,6 +19,7 @@ import type {
   SpaceRole,
 } from "@budget/api";
 import { cn } from "@budget/ui";
+import { Badge } from "@budget/ui/badge";
 import { Button } from "@budget/ui/button";
 import {
   DropdownMenu,
@@ -27,15 +28,19 @@ import {
   DropdownMenuTrigger,
 } from "@budget/ui/dropdown-menu";
 import { Input } from "@budget/ui/input";
+import { ToggleGroup, ToggleGroupItem } from "@budget/ui/toggle-group";
 
 import { dateFr } from "../-lib/format";
 
-/** Teintes de la pastille de statut d'une invitation. */
-const STATUS_STYLE: Record<SpaceInvitation["status"], string> = {
-  pending: "bg-warn-soft text-warn",
-  accepted: "bg-ok-soft text-ok",
-  expired: "bg-bad-soft text-bad",
-  canceled: "bg-surface-2 text-subtle",
+/** Variante de `Badge` portant le statut d'une invitation. */
+const STATUS_VARIANT: Record<
+  SpaceInvitation["status"],
+  "warn" | "ok" | "destructive" | "secondary"
+> = {
+  pending: "warn",
+  accepted: "ok",
+  expired: "destructive",
+  canceled: "secondary",
 };
 
 const STATUS_LABEL: Record<SpaceInvitation["status"], string> = {
@@ -107,19 +112,9 @@ export function SpaceCard({
             <span className="text-sm font-semibold tracking-[-0.015em]">
               {space.name}
             </span>
-            {space.isActive && (
-              <Pill className="bg-accent-soft text-primary font-semibold">
-                Espace actif
-              </Pill>
-            )}
-            <Pill className="border-border text-muted-foreground border font-medium">
-              {owner ? "Propriétaire" : "Membre"}
-            </Pill>
-            {!shared && (
-              <Pill className="bg-surface-2 text-subtle font-medium">
-                Personnel
-              </Pill>
-            )}
+            {space.isActive && <Badge>Espace actif</Badge>}
+            <Badge variant="outline">{owner ? "Propriétaire" : "Membre"}</Badge>
+            {!shared && <Badge variant="secondary">Personnel</Badge>}
           </div>
           <div className="text-subtle mt-[3px] text-[11.5px]">
             {shared
@@ -182,9 +177,9 @@ export function SpaceCard({
                     {member.name}
                   </span>
                   {member.isMe && (
-                    <Pill className="bg-surface-2 text-subtle flex-none font-medium">
+                    <Badge variant="secondary" className="flex-none">
                       vous
-                    </Pill>
+                    </Badge>
                   )}
                 </div>
                 <div className="text-subtle truncate text-[11.5px]">
@@ -245,14 +240,12 @@ export function SpaceCard({
                       invitée par {invitation.invitedBy}
                     </div>
                   </div>
-                  <Pill
-                    className={cn(
-                      "w-max font-semibold",
-                      STATUS_STYLE[invitation.status],
-                    )}
+                  <Badge
+                    variant={STATUS_VARIANT[invitation.status]}
+                    className="w-max"
                   >
                     {STATUS_LABEL[invitation.status]}
-                  </Pill>
+                  </Badge>
                   <span
                     className={cn(
                       "num text-[11.5px]",
@@ -459,23 +452,21 @@ function InviteForm({
         placeholder="adresse email"
         className="min-w-[220px] flex-1"
       />
-      <div className="bg-surface-2 border-border flex flex-none rounded-[9px] border p-0.5">
-        {(["member", "owner"] as const).map((role) => (
-          <button
-            key={role}
-            type="button"
-            onClick={() => onChange({ ...value, role })}
-            className={cn(
-              "h-[25px] rounded-[7px] border px-3 text-[11.5px]",
-              value.role === role
-                ? "bg-card border-border font-semibold"
-                : "text-muted-foreground border-transparent",
-            )}
-          >
-            {role === "member" ? "Membre" : "Propriétaire"}
-          </button>
-        ))}
-      </div>
+      {/* `outline` + `spacing={0}` : le segmenté de la maquette. Sans eux, la
+          variante par défaut est sans bordure et son état actif (`bg-muted`)
+          ne se distingue pas du fond de la carte. */}
+      <ToggleGroup
+        variant="outline"
+        spacing={0}
+        value={[value.role]}
+        onValueChange={([role]) =>
+          role && onChange({ ...value, role: role as SpaceRole })
+        }
+        className="flex-none"
+      >
+        <ToggleGroupItem value="member">Membre</ToggleGroupItem>
+        <ToggleGroupItem value="owner">Propriétaire</ToggleGroupItem>
+      </ToggleGroup>
       <Button
         variant="outline"
         size="sm"
@@ -529,24 +520,5 @@ function SectionLabel({
       <span className="label-caps">{label}</span>
       <span className="text-subtle text-[11.5px]">{note}</span>
     </div>
-  );
-}
-
-function Pill({
-  className,
-  children,
-}: {
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <span
-      className={cn(
-        "flex h-[19px] items-center rounded-full px-2 text-[10.5px]",
-        className,
-      )}
-    >
-      {children}
-    </span>
   );
 }

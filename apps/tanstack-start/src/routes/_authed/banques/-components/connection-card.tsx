@@ -1,12 +1,13 @@
 "use client";
 
-import { Loader2Icon } from "lucide-react";
-
 import type { AccountSummary, ConnectionSummary } from "@budget/api";
 import { cn } from "@budget/ui";
+import { Badge } from "@budget/ui/badge";
 import { Button } from "@budget/ui/button";
+import { Progress } from "@budget/ui/progress";
+import { Spinner } from "@budget/ui/spinner";
 
-import { CONSENT_TONE, consentView } from "../-lib/consent";
+import { CONSENT_TONE, consentView, TONE_VARIANT } from "../-lib/consent";
 import { useRenewConnection } from "../-lib/use-renew";
 import { BankLogo } from "./bank-logo";
 
@@ -46,48 +47,36 @@ export function ConnectionCard({
           </div>
 
           <div className="mt-1.5 flex flex-wrap items-center gap-2.5">
-            <span
-              className={cn(
-                "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-px text-[11.5px] font-semibold whitespace-nowrap",
-                tone.text,
-                tone.bg,
-                tone.border,
-              )}
-            >
+            <Badge variant={TONE_VARIANT[view.tone]}>
               <span className={cn("size-1.5 rounded-full", tone.fill)} />
               {view.badge}
-            </span>
+            </Badge>
             <span className="text-subtle text-[11.5px]">{view.meta}</span>
           </div>
 
           {view.pct > 0 && (
-            <div className="bg-track mt-2.5 h-1 max-w-[280px] overflow-hidden rounded-full">
-              <div
-                className={cn("h-full", tone.fill)}
-                style={{ width: `${view.pct}%` }}
-              />
-            </div>
+            <Progress
+              value={view.pct}
+              variant={TONE_VARIANT[view.tone]}
+              aria-label="Validité du consentement"
+              className="mt-2.5 max-w-[280px]"
+            />
           )}
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            type="button"
+          {/* Une connexion critique appelle un renouvellement : c'est la
+              variante pleine qui le dit, la teinte du ton restant portée par la
+              pastille de statut au-dessus. */}
+          <Button
+            variant={view.critical ? "default" : "outline"}
+            size="sm"
             disabled={busy}
             onClick={() => void renew(connection)}
-            className={cn(
-              "flex h-[30px] items-center gap-1.5 rounded-[9px] border px-3.5 text-xs whitespace-nowrap disabled:opacity-60",
-              view.critical
-                ? cn(
-                    "text-primary-foreground border-transparent font-semibold",
-                    tone.fill,
-                  )
-                : "border-border-strong hover:bg-accent font-medium",
-            )}
           >
-            {busy && <Loader2Icon className="size-3.5 animate-spin" />}
+            {busy && <Spinner />}
             {view.critical ? "Réautoriser" : "Renouveler"}
-          </button>
+          </Button>
 
           {connection.status !== "revoked" && (
             <Button variant="outline" size="sm" onClick={onRevoke}>

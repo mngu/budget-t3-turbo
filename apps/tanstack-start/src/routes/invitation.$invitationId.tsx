@@ -3,7 +3,6 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   CircleCheckIcon,
   ClockAlertIcon,
-  Loader2Icon,
   MailCheckIcon,
   UserIcon,
   UserPlusIcon,
@@ -14,6 +13,7 @@ import { cn } from "@budget/ui";
 import { Button } from "@budget/ui/button";
 import { Field, FieldLabel } from "@budget/ui/field";
 import { Input } from "@budget/ui/input";
+import { Spinner } from "@budget/ui/spinner";
 import { toast } from "@budget/ui/toast";
 
 import { authClient } from "~/auth/client";
@@ -360,7 +360,7 @@ function Shell({
                 disabled={primary.disabled ?? pending}
                 onClick={primary.onClick}
               >
-                {pending && <Loader2Icon className="animate-spin" />}
+                {pending && <Spinner />}
                 {primary.label}
               </Button>
             )}

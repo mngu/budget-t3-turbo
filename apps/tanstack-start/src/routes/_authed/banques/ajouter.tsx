@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ExternalLinkIcon, Loader2Icon, RefreshCwIcon } from "lucide-react";
+import { ExternalLinkIcon, RefreshCwIcon } from "lucide-react";
 import { z } from "zod/v4";
 
 import type { AccountSummary, AspspOption } from "@budget/api";
 import { cn } from "@budget/ui";
 import { Button } from "@budget/ui/button";
 import { Input } from "@budget/ui/input";
+import { Spinner } from "@budget/ui/spinner";
 import { toast } from "@budget/ui/toast";
 
 import { AppHeader } from "~/component/app-header";
@@ -190,9 +191,7 @@ function StepBanque() {
                   disabled={connecting !== null}
                   onClick={() => connect(aspsp)}
                 >
-                  {connecting === key && (
-                    <Loader2Icon className="animate-spin" />
-                  )}
+                  {connecting === key && <Spinner />}
                   Connecter
                 </Button>
               </div>

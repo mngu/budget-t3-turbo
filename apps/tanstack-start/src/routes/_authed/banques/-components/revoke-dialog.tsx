@@ -1,17 +1,29 @@
 "use client";
 
-import { Loader2Icon, TriangleAlertIcon } from "lucide-react";
+import { TriangleAlertIcon } from "lucide-react";
 
 import type { ConnectionSummary } from "@budget/api";
-import { Button } from "@budget/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@budget/ui/dialog";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@budget/ui/alert-dialog";
+import { Spinner } from "@budget/ui/spinner";
 
+/**
+ * Confirmation de révocation — un `AlertDialog` et non un `Dialog` : le geste
+ * est irréversible côté banque, le composant pose le rôle `alertdialog`, retient
+ * le focus sur l'annulation et ignore le clic à côté.
+ *
+ * Chiffres d'abord, phrase ensuite : ce qui décide, c'est le nombre de comptes
+ * qui cessent d'être synchronisés — et le fait que rien n'est supprimé.
+ */
 export function RevokeDialog({
   connection,
   revoking,
@@ -23,8 +35,6 @@ export function RevokeDialog({
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
 }) {
-  // Chiffres d'abord, phrase ensuite : ce qui décide, c'est le nombre de comptes
-  // qui cessent d'être synchronisés — et le fait que rien n'est supprimé.
   const facts = connection
     ? [
         {
@@ -41,63 +51,52 @@ export function RevokeDialog({
     : [];
 
   return (
-    <Dialog open={connection !== null} onOpenChange={onOpenChange}>
-      <DialogContent className="border-bad max-w-[470px] gap-0 overflow-hidden p-0">
-        <DialogHeader className="bg-bad-soft border-bad flex-row items-center gap-2.5 border-b px-3.5 py-3">
-          <TriangleAlertIcon className="text-bad size-4 flex-none" />
-          <DialogTitle className="text-[13px] font-semibold">
+    <AlertDialog open={connection !== null} onOpenChange={onOpenChange}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogMedia>
+            <TriangleAlertIcon className="text-destructive size-4" />
+          </AlertDialogMedia>
+          <AlertDialogTitle>
             Révoquer « {connection?.aspspName} » ?
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="px-3.5 py-3.5">
-          <DialogDescription className="text-muted-foreground text-[12.5px] text-pretty">
-            L'autorisation est annulée immédiatement chez votre banque. La
-            synchronisation s'arrête ; il faudra repasser par une
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            L&apos;autorisation est annulée immédiatement chez votre banque. La
+            synchronisation s&apos;arrête ; il faudra repasser par une
             authentification forte pour la rétablir.
-          </DialogDescription>
-          <div className="mt-3 flex flex-col gap-2">
-            {facts.map((fact) => (
-              <div
-                key={fact.label}
-                className="grid grid-cols-[56px_minmax(0,1fr)] items-baseline gap-2.5"
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+
+        <div className="flex flex-col gap-2">
+          {facts.map((fact) => (
+            <div
+              key={fact.label}
+              className="grid grid-cols-[56px_minmax(0,1fr)] items-baseline gap-2.5"
+            >
+              <span
+                className={`num text-right text-sm font-medium ${fact.tone}`}
               >
-                <span
-                  className={`num text-right text-sm font-medium ${fact.tone}`}
-                >
-                  {fact.n}
-                </span>
-                <span className="text-muted-foreground text-xs">
-                  {fact.label}
-                </span>
-              </div>
-            ))}
-          </div>
+                {fact.n}
+              </span>
+              <span className="text-muted-foreground text-xs">
+                {fact.label}
+              </span>
+            </div>
+          ))}
         </div>
 
-        <div className="bg-sunken flex items-center gap-2.5 border-t px-3.5 py-3">
-          <span className="text-subtle text-[11px]">
-            Les transactions déjà importées sont conservées.
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            className="ml-auto"
-            onClick={() => onOpenChange(false)}
-          >
-            Annuler
-          </Button>
-          <Button
+        <AlertDialogFooter>
+          <AlertDialogCancel>Annuler</AlertDialogCancel>
+          <AlertDialogAction
             variant="destructive"
-            size="sm"
             disabled={revoking}
             onClick={onConfirm}
           >
-            {revoking && <Loader2Icon className="animate-spin" />}
+            {revoking && <Spinner />}
             Révoquer
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

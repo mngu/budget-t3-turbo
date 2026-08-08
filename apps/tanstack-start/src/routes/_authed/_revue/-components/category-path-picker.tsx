@@ -1,13 +1,20 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { FilterIcon } from "lucide-react";
 
 import type { CategoryTreeNode } from "@budget/api";
 import { FALLBACK_CATEGORY_COLOR } from "@budget/shared";
-import { cn } from "@budget/ui";
-import { Dialog, DialogContent, DialogTitle } from "@budget/ui/dialog";
-import { Input } from "@budget/ui/input";
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from "@budget/ui/command";
 
 import { shadeCategoryColor, useCategoryColor } from "~/lib/category-color";
 import { useTRPC } from "~/lib/trpc";
@@ -103,118 +110,98 @@ export function CategoryPathPicker({
   onFilter?: (category: string) => void;
 }) {
   const paths = useCategoryPaths();
-  const [query, setQuery] = useState("");
 
-  const needle = query.trim().toLowerCase();
-  const shown = needle
-    ? paths.filter((p) =>
-        `${p.parent} › ${p.sub}`.toLowerCase().includes(needle),
-      )
-    : paths;
+  // Les chemins arrivent à plat mais viennent déjà groupés par parente
+  // (`flattenTree` émet la parente puis ses enfants) : il suffit de recoller les
+  // suites, sans trier ni indexer.
+  const groups = paths.reduce<
+    { parent: CategoryPath; items: CategoryPath[] }[]
+  >((acc, path) => {
+    const last = acc.at(-1);
+    if (last && last.parent.parent === path.parent) last.items.push(path);
+    else acc.push({ parent: path, items: [path] });
+    return acc;
+  }, []);
 
   return (
-    <Dialog
+    <CommandDialog
       open={open}
-      onOpenChange={(next) => {
-        if (!next) setQuery("");
-        onOpenChange(next);
-      }}
+      onOpenChange={onOpenChange}
+      title={title}
+      description={subtitle ?? "Choisissez la catégorie à appliquer."}
+      showCloseButton
+      className="w-[480px]"
     >
-      <DialogContent
-        className="top-[92px] flex max-h-[530px] w-[480px] max-w-[calc(100vw-2rem)] translate-y-0 flex-col gap-0 overflow-hidden rounded-[14px] p-0"
-        // La liste est le contenu : elle scrolle, l'en-tête et le pied restent.
-        variant="modal"
-      >
-        <div className="border-border flex-none border-b p-3.5 pr-10">
-          <DialogTitle className="label-caps text-[11px] font-normal">
-            {title}
-          </DialogTitle>
-          {subtitle && (
-            <div className="num mt-1 truncate text-[12.5px]">{subtitle}</div>
-          )}
-          <Input
-            autoFocus
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={`Filtrer parmi ${paths.length} catégories…`}
-            className="bg-background mt-2 h-[30px] rounded-lg text-[12.5px]"
-          />
+      {subtitle && (
+        <div className="border-border num truncate border-b px-3 py-2 text-[12.5px]">
+          {subtitle}
         </div>
+      )}
 
-        <div className="min-h-0 flex-1 overflow-y-auto p-1.5">
-          {shown.map((path) => {
-            const active = path.name === current;
-            return (
-              <button
-                key={`${path.parent}/${path.name}`}
-                type="button"
-                onClick={() => {
+      {/* Le champ, le filtrage flou et l'état vide viennent avec `Command` :
+          l'état `query` et le `.filter()` maison ont disparu avec eux. */}
+      <CommandInput placeholder={`Filtrer parmi ${paths.length} catégories…`} />
+      <CommandList>
+        <CommandEmpty>Aucune catégorie ne correspond.</CommandEmpty>
+
+        {groups.map(({ parent, items }) => (
+          <CommandGroup
+            key={parent.parent}
+            heading={
+              <span className="flex items-center gap-1.5">
+                <span style={{ color: parent.parentColor }}>
+                  <CategoryIcon
+                    name={parent.parentIcon}
+                    className="size-[13px]"
+                  />
+                </span>
+                {parent.parent}
+              </span>
+            }
+          >
+            {items.map((path) => (
+              <CommandItem
+                key={path.name}
+                // Le chemin entier est la valeur cherchée : taper le nom d'une
+                // parente remonte donc toutes ses sous-catégories.
+                value={`${path.parent} › ${path.sub}`}
+                // La coche de `CommandItem` marque la catégorie actuelle. Un
+                // fond aurait été ambigu : `data-selected` est déjà le surlignage
+                // du clavier.
+                data-checked={path.name === current}
+                onSelect={() => {
                   onPick(path.name);
-                  setQuery("");
                   onOpenChange(false);
                 }}
-                className={cn(
-                  "hover:bg-accent grid w-full grid-cols-[14px_148px_minmax(0,1fr)_18px] items-center gap-2.5 rounded-lg px-2 py-1 text-left",
-                  active && "bg-accent-soft",
-                )}
               >
                 <span
-                  className="size-2.5 rounded-[2px]"
+                  className="size-2.5 flex-none rounded-[2px]"
                   style={{ background: path.color }}
                 />
-                <span className="text-muted-foreground flex min-w-0 items-center gap-1.5 text-[11.5px]">
-                  <span
-                    className="flex flex-none"
-                    style={{ color: path.parentColor }}
-                  >
-                    <CategoryIcon
-                      name={path.parentIcon}
-                      className="size-[13px]"
-                    />
-                  </span>
-                  <span className="truncate">{path.parent}</span>
-                </span>
-                <span
-                  className={`truncate text-[12.5px] ${active ? "font-semibold" : ""}`}
-                >
-                  {path.sub}
-                </span>
-                <span className="text-primary text-[11px]">
-                  {active ? "✓" : ""}
-                </span>
-              </button>
-            );
-          })}
-          {shown.length === 0 && (
-            <p className="text-subtle p-4 text-center text-[11.5px]">
-              Aucune catégorie ne correspond.
-            </p>
-          )}
-        </div>
+                {path.sub}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        ))}
 
-        <div className="border-border text-subtle flex flex-none items-center gap-3 border-t px-3.5 py-2 text-[11px]">
-          {filterOn && onFilter && (
-            <button
-              type="button"
-              className="text-muted-foreground hover:text-foreground text-[11.5px]"
-              onClick={() => {
-                onFilter(filterOn);
-                setQuery("");
-                onOpenChange(false);
-              }}
-            >
-              Filtrer sur {filterOn}
-            </button>
-          )}
-          <button
-            type="button"
-            className="text-primary ml-auto text-[11.5px]"
-            onClick={() => onOpenChange(false)}
-          >
-            Fermer
-          </button>
-        </div>
-      </DialogContent>
-    </Dialog>
+        {filterOn && onFilter && (
+          <>
+            <CommandSeparator />
+            <CommandGroup>
+              <CommandItem
+                value={`Filtrer sur ${filterOn}`}
+                onSelect={() => {
+                  onFilter(filterOn);
+                  onOpenChange(false);
+                }}
+              >
+                <FilterIcon />
+                Filtrer sur {filterOn}
+              </CommandItem>
+            </CommandGroup>
+          </>
+        )}
+      </CommandList>
+    </CommandDialog>
   );
 }

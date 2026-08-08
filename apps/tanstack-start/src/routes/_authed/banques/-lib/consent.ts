@@ -14,6 +14,17 @@ export type ConsentTone = "ok" | "warn" | "bad";
 
 /** Tailwind ne génère que les classes écrites en toutes lettres : les rôles de
  *  couleur de la maquette se traduisent par une table, pas par interpolation. */
+/**
+ * Variante de `Badge` / `Alert` correspondant à chaque ton. `bad` passe par
+ * `destructive` : `--destructive` a exactement la valeur de `--bad`.
+ */
+export const TONE_VARIANT: Record<ConsentTone, "ok" | "warn" | "destructive"> =
+  {
+    ok: "ok",
+    warn: "warn",
+    bad: "destructive",
+  };
+
 export const CONSENT_TONE: Record<
   ConsentTone,
   { text: string; bg: string; border: string; fill: string }

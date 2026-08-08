@@ -4,16 +4,27 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./alert": "./src/alert.tsx",
+    "./alert-dialog": "./src/alert-dialog.tsx",
+    "./badge": "./src/badge.tsx",
     "./button": "./src/button.tsx",
     "./calendar": "./src/calendar.tsx",
     "./card": "./src/card.tsx",
+    "./command": "./src/command.tsx",
     "./dialog": "./src/dialog.tsx",
     "./dropdown-menu": "./src/dropdown-menu.tsx",
+    "./empty": "./src/empty.tsx",
     "./field": "./src/field.tsx",
     "./input": "./src/input.tsx",
+    "./input-group": "./src/input-group.tsx",
     "./popover": "./src/popover.tsx",
+    "./progress": "./src/progress.tsx",
+    "./spinner": "./src/spinner.tsx",
+    "./textarea": "./src/textarea.tsx",
     "./theme": "./src/theme.tsx",
-    "./toast": "./src/toast.tsx"
+    "./toast": "./src/toast.tsx",
+    "./toggle": "./src/toggle.tsx",
+    "./toggle-group": "./src/toggle-group.tsx"
   },
   "license": "MIT",
   "scripts": {
@@ -26,6 +37,7 @@
   "dependencies": {
     "@base-ui/react": "^1.6.0",
     "class-variance-authority": "^0.7.1",
+    "cmdk": "^1.1.1",
     "lucide-react": "^1.24.0",
     "react-day-picker": "^10.0.1",
     "sonner": "^2.0.7",

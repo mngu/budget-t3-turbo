@@ -6,7 +6,16 @@ import { ArrowLeftRightIcon, SearchIcon, TagIcon } from "lucide-react";
 
 import type { TransactionsSearch } from "@budget/shared";
 import { cn } from "@budget/ui";
-import { Dialog, DialogContent, DialogTitle } from "@budget/ui/dialog";
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandShortcut,
+} from "@budget/ui/command";
+import { ToggleGroup, ToggleGroupItem } from "@budget/ui/toggle-group";
 
 import { SearchInput } from "~/component/search-input";
 import { softCategoryColor, useCategoryColor } from "~/lib/category-color";
@@ -19,10 +28,13 @@ import { CategoryIcon } from "../../categories/-components/category-icon";
 
 // Au pluriel, comme les deux totaux qui les surplombent sur `/transactions` :
 // le bouton nomme un ensemble de lignes, pas le sens d'une transaction.
+//
+// `ToggleGroup` ne manipule que des chaînes : « Tous » y est la valeur
+// `"tous"`, traduite en `direction: undefined` à l'aller comme au retour.
 const SENSES = [
-  { value: undefined, label: "Tous" },
-  { value: "debit" as const, label: "Débits" },
-  { value: "credit" as const, label: "Crédits" },
+  { value: "tous", label: "Tous" },
+  { value: "debit", label: "Débits" },
+  { value: "credit", label: "Crédits" },
 ];
 
 // Les trois états des virements entre comptes suivis. « Seulement » est le
@@ -136,25 +148,27 @@ export function RefineBar({
 
       {sens && (
         <>
-          {/* Trois boutons autonomes, pas des pastilles dans une coque : seul
-              l'actif prend un bord et le fond de carte. */}
-          <div className="flex flex-none items-center gap-0.5">
+          {/* Sélection unique : `multiple` vaut `false` par défaut. Décocher
+              l'actif rend un tableau vide, qui retombe sur « Tous » — c'est
+              exactement ce que veut dire « plus aucun sens choisi ». */}
+          <ToggleGroup
+            size="sm"
+            aria-label="Sens des transactions"
+            className="flex-none"
+            value={[search.direction ?? "tous"]}
+            onValueChange={([value]) =>
+              setSearch({
+                direction:
+                  value === "debit" || value === "credit" ? value : undefined,
+              })
+            }
+          >
             {SENSES.map((item) => (
-              <button
-                key={item.label}
-                type="button"
-                onClick={() => setSearch({ direction: item.value })}
-                className={cn(
-                  "flex h-[26px] items-center rounded-[7px] border px-2.5 text-xs",
-                  search.direction === item.value
-                    ? "border-border bg-card text-foreground font-semibold"
-                    : "text-muted-foreground border-transparent",
-                )}
-              >
+              <ToggleGroupItem key={item.value} value={item.value}>
                 {item.label}
-              </button>
+              </ToggleGroupItem>
             ))}
-          </div>
+          </ToggleGroup>
           <Divider />
         </>
       )}
@@ -248,24 +262,31 @@ export function RefineBar({
             <ArrowLeftRightIcon className="size-[13px]" />
             Internes
           </span>
-          <div className="flex flex-none items-center gap-0.5">
+          <ToggleGroup
+            size="sm"
+            aria-label="Virements internes"
+            className="flex-none"
+            value={[search.internes]}
+            onValueChange={([value]) =>
+              setSearch({
+                // Pas de cast : au décochage `value` est bien `undefined`, et
+                // c'est la table qui dit ce qui est une valeur légitime.
+                internes:
+                  INTERNES.find((i) => i.value === value)?.value ?? "toutes",
+                page: 1,
+              })
+            }
+          >
             {INTERNES.map((item) => (
-              <button
+              <ToggleGroupItem
                 key={item.value}
-                type="button"
+                value={item.value}
                 title={item.title}
-                onClick={() => setSearch({ internes: item.value, page: 1 })}
-                className={cn(
-                  "flex h-[26px] items-center rounded-[7px] border px-2.5 text-xs",
-                  search.internes === item.value
-                    ? "border-border bg-card text-foreground font-semibold"
-                    : "text-muted-foreground border-transparent",
-                )}
               >
                 {item.label}
-              </button>
+              </ToggleGroupItem>
             ))}
-          </div>
+          </ToggleGroup>
         </>
       )}
 
@@ -336,36 +357,37 @@ function CategoryFilterDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="top-[92px] flex max-h-[480px] w-[340px] max-w-[calc(100vw-2rem)] translate-y-0 flex-col gap-0 overflow-hidden rounded-[14px] p-0">
-        <DialogTitle className="label-caps border-border flex-none border-b p-3.5 pr-10 text-[11px] font-normal">
-          Filtrer par catégorie
-        </DialogTitle>
-        <div className="min-h-0 flex-1 overflow-y-auto p-1.5">
-          <button
-            type="button"
-            onClick={() => pick(undefined)}
-            className="hover:bg-accent text-muted-foreground w-full rounded-lg px-2.5 py-1 text-left text-[12.5px]"
+    // `CommandDialog` plutôt qu'une liste dans un `Dialog` : la recherche vient
+    // avec, et elle manquait — l'arborescence compte 14 parentes.
+    <CommandDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Filtrer par catégorie"
+      description="Choisissez la catégorie à isoler dans le relevé."
+    >
+      <CommandInput placeholder="Chercher une catégorie…" />
+      <CommandList>
+        <CommandEmpty>Aucune catégorie de ce nom.</CommandEmpty>
+        <CommandGroup>
+          <CommandItem
+            value="Toutes les catégories"
+            onSelect={() => pick(undefined)}
           >
             Toutes les catégories
-          </button>
+          </CommandItem>
           {data?.map((item) => (
-            <button
+            <CommandItem
               key={item.category || "sans-categorie"}
-              type="button"
-              onClick={() =>
+              value={item.category || "Sans catégorie"}
+              onSelect={() =>
                 pick(item.category === "" ? "none" : item.category)
               }
-              className={cn(
-                "hover:bg-accent grid w-full grid-cols-[22px_minmax(0,1fr)_78px] items-center gap-2.5 rounded-lg px-2.5 py-1 text-left",
-                search.category === item.category && "bg-accent-soft",
-              )}
             >
               {/* Pastille d'icône de la maquette : la teinte de la famille en
                   fond très pâle, l'icône pleine par-dessus. Le mélange vise
                   `--card`, donc il s'inverse tout seul en thème sombre. */}
               <span
-                className="flex size-[22px] items-center justify-center rounded-[7px]"
+                className="flex size-[22px] flex-none items-center justify-center rounded-[7px]"
                 style={{
                   background: softCategoryColor(resolveColor(item.color)),
                   color: resolveColor(item.color),
@@ -378,19 +400,19 @@ function CategoryFilterDialog({
               </span>
               <span
                 className={cn(
-                  "truncate text-[12.5px]",
+                  "truncate",
                   search.category === item.category && "font-semibold",
                 )}
               >
                 {item.category || "Sans catégorie"}
               </span>
-              <span className="num text-subtle text-right text-[11px]">
+              <CommandShortcut className="num">
                 {euro.format(item.total)}
-              </span>
-            </button>
+              </CommandShortcut>
+            </CommandItem>
           ))}
-        </div>
-      </DialogContent>
-    </Dialog>
+        </CommandGroup>
+      </CommandList>
+    </CommandDialog>
   );
 }

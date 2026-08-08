@@ -1,12 +1,11 @@
 "use client";
 
-import { Loader2Icon } from "lucide-react";
-
 import { cn } from "@budget/ui";
 import { Button } from "@budget/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@budget/ui/dialog";
 import { Field, FieldDescription, FieldLabel } from "@budget/ui/field";
 import { Input } from "@budget/ui/input";
+import { Spinner } from "@budget/ui/spinner";
 
 /**
  * Le dialogue **unique** de l'écran Espaces : dix gestes (créer, partager,
@@ -188,7 +187,7 @@ export function SpaceDialog({
             disabled={spec.disabled ?? busy}
             onClick={onConfirm}
           >
-            {busy && <Loader2Icon className="animate-spin" />}
+            {busy && <Spinner />}
             {spec.cta}
           </Button>
         </div>

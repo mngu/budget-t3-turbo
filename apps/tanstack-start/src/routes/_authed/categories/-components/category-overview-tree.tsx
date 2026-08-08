@@ -8,6 +8,7 @@ import {
   ListIcon,
   PaletteIcon,
   PlusIcon,
+  TagsIcon,
   Trash2Icon,
   TriangleAlertIcon,
   XIcon,
@@ -24,6 +25,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@budget/ui/dropdown-menu";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@budget/ui/empty";
 
 import type { GhostBranch } from "../-lib/suggestions";
 import {
@@ -120,24 +129,27 @@ export function CategoryOverviewTree({
 
   if (tree.length === 0 && proposedParents.length === 0) {
     return (
-      <div className="bg-card rounded-[14px] border px-5 py-11 text-center">
-        <div className="text-[13px] font-medium">
-          Aucune catégorie pour le moment
-        </div>
-        <p className="text-muted-foreground mx-auto mt-1.5 max-w-[420px] text-xs text-pretty">
-          Créez une première catégorie à la main, ou laissez une analyse en
-          proposer à partir de vos {uncategorizedCount} transactions sans
-          catégorie.
-        </p>
-        <div className="mt-4 flex justify-center gap-2">
+      <Empty className="bg-card rounded-[14px] border">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <TagsIcon />
+          </EmptyMedia>
+          <EmptyTitle>Aucune catégorie pour le moment</EmptyTitle>
+          <EmptyDescription>
+            Créez une première catégorie à la main, ou laissez une analyse en
+            proposer à partir de vos {uncategorizedCount} transactions sans
+            catégorie.
+          </EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent>
           <Button variant="outline" size="sm" onClick={actions.onAddParent}>
             Créer une catégorie
           </Button>
           <Button size="sm" onClick={onAnalyze}>
             Analyser mes transactions
           </Button>
-        </div>
-      </div>
+        </EmptyContent>
+      </Empty>
     );
   }
 

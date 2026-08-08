@@ -1,15 +1,11 @@
 import { useState } from "react";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import {
-  CircleCheckIcon,
-  Loader2Icon,
-  SparklesIcon,
-  TriangleAlertIcon,
-} from "lucide-react";
+import { CircleCheckIcon, SparklesIcon, TriangleAlertIcon } from "lucide-react";
 
 import type { CategoryOverviewNode, SuggestionsRun } from "@budget/api";
 import { CATEGORY_COLOR_PALETTE } from "@budget/shared";
 import { Button } from "@budget/ui/button";
+import { Spinner } from "@budget/ui/spinner";
 import { toast } from "@budget/ui/toast";
 
 import type { DeleteTarget } from "./-components/category-delete-dialog";
@@ -263,9 +259,7 @@ function CategoriesPage() {
                     onClick={categorize}
                     disabled={categorizing}
                   >
-                    {categorizing && (
-                      <Loader2Icon className="size-3.5 animate-spin" />
-                    )}
+                    {categorizing && <Spinner />}
                     Catégoriser
                   </Button>
                   <Button onClick={generate}>Lancer l&apos;analyse</Button>

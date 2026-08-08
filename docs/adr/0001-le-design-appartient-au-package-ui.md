@@ -43,6 +43,11 @@ d'`AppHeader` :
 - Un défaut de la sortie de `shadcn add` qui ne convient pas se corrige **dans
   le composant**, et se commente sur place pour qu'une régénération ne l'efface
   pas par distraction.
+- **Le vocabulaire d'états de l'app est à trois couleurs** — `ok`, `warn`, `bad`
+  — là où le registre n'en connaît qu'une (`destructive`). Un composant qui
+  affiche un état reçoit donc les variantes `ok` et `warn` ; `bad` n'en a pas
+  besoin, `--destructive` a exactement la valeur de `--bad`. C'est une variante
+  du composant, jamais une teinte passée à l'appel.
 - Les écrans gardent leurs propres classes pour ce qui leur appartient en
   propre : leur **mise en page** (grilles, gouttières, largeurs) et les
   composants nés de la maquette et d'elle seule (`BudgetGauge`, `BreakdownRow`,
