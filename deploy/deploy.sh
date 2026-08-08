@@ -14,6 +14,10 @@
 #                                           # (private_key_pem est en clair en
 #                                           # base), coût = une reconnexion
 #   ANTHROPIC_API_KEY=<clé>
+#   RESEND_API_KEY=<clé>                    # OBLIGATOIRES : la connexion se
+#   EMAIL_FROM=budget@<domaine vérifié>     # fait uniquement par lien email,
+#                                           # sans eux personne ne peut entrer
+#                                           # (l'envoi lève au lieu de mentir)
 #
 # Reprise de la base locale, une seule fois, après le premier `up`. pg_dump vient
 # du conteneur et non du Mac : un pg_dump local plus ancien refuse un serveur 17.

@@ -16,6 +16,10 @@ services:
       POSTGRES_URL: postgres://budget:${POSTGRES_PASSWORD}@db:5432/budget_t3
       AUTH_SECRET: ${AUTH_SECRET}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      # Obligatoires : la connexion se fait uniquement par lien email, il n'y
+      # a pas de mot de passe. Sans eux, l'envoi lève et personne n'entre.
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      EMAIL_FROM: ${EMAIL_FROM}
     volumes:
       # JSON Enable Banking : les perdre impose une re-synchro, donc une SCA.
       - budget-data:/data

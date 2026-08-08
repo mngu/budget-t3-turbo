@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { CircleAlertIcon, EyeIcon, EyeOffIcon, Loader2Icon } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import { CircleAlertIcon, Loader2Icon, MailCheckIcon } from "lucide-react";
 import { z } from "zod/v4";
 
 import { cn } from "@budget/ui";
@@ -11,12 +11,15 @@ import { GradientWavesBg } from "~/component/gradient-waves-bg";
 /**
  * Portage de `Connexion.dc.html` (Claude Design, projet « Revue du mois »).
  *
- * Trois éléments de la maquette n'ont aucune source et ne sont pas portés, même
- * règle que pour `Banques.dc.html` : le lien « Oublié ? » (aucune procédure de
- * réinitialisation), le bouton « Recevoir un lien de connexion » et son état
- * « Vérifiez vos e-mails » (better-auth n'a pas le plugin magic-link ici), et
- * le décompte « il vous reste 4 tentatives » (rien ne compte les essais). Le
- * séparateur « ou » disparaît avec le bouton qu'il coiffait.
+ * **Le lien de connexion est la seule voie d'entrée** : ni mot de passe, ni
+ * inscription séparée — une adresse inconnue reçoit un lien qui crée le compte
+ * (plugin `magicLink`, `@budget/auth`). L'écran s'est donc réduit à un champ.
+ *
+ * De la maquette, restent non portés le lien « Oublié ? » (il n'y a plus rien à
+ * oublier), le décompte « il vous reste 4 tentatives » (rien ne compte les
+ * essais côté app — la limite est celle du plugin, 5 par minute, invisible
+ * d'ici), et le séparateur « ou » qui coiffait le second chemin de connexion,
+ * lequel est devenu le seul.
  *
  * Le panneau « États de la maquette » est un dispositif de maquette : le thème
  * vient de `ThemeProvider`, l'état vient du formulaire.
@@ -35,49 +38,30 @@ const RISE =
   "animate-in fade-in fill-mode-both ease-[cubic-bezier(0.2,0.7,0.2,1)]";
 
 function LoginPage() {
-  const navigate = useNavigate();
   const { redirect } = Route.useSearch();
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [visible, setVisible] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sent, setSent] = useState(false);
 
-  // L'espace actif vit dans la session, pas dans l'URL : un `navigate` client
-  // servirait le cache react-query d'avant la connexion.
-  const finish = () => {
-    void navigate({ to: redirect ?? "/", reloadDocument: true });
-  };
-
-  const signIn = async (e: React.FormEvent) => {
+  // Le lien reçu par email ramène sur `redirect` : c'est une navigation de
+  // document complète, donc le rechargement que `reloadDocument` assurait
+  // autrefois — l'espace actif vit dans la session, react-query servirait
+  // sinon le cache d'avant la connexion.
+  const requestLink = async (e: React.FormEvent) => {
     e.preventDefault();
     setPending(true);
     setError(null);
-    const { error } = await authClient.signIn.email({ email, password });
-    setPending(false);
-    if (error) setError(error.message ?? "Connexion impossible");
-    else finish();
-  };
-
-  // L'inscription se fait sur invitation (écran `/invitation/$invitationId`),
-  // ou pour amorcer une installation vide : le serveur refuse tout le reste
-  // (hook `user.create.before` de @budget/auth). C'est la seule voie du premier
-  // compte, d'où ce lien discret — et le refus du serveur s'affiche en clair
-  // dans le bandeau d'erreur le cas échéant.
-  const signUp = async () => {
-    setPending(true);
-    setError(null);
-    const { error } = await authClient.signUp.email({
+    const { error } = await authClient.signIn.magicLink({
       email,
-      password,
-      name: email.split("@")[0] ?? email,
+      callbackURL: redirect ?? "/",
     });
     setPending(false);
-    if (error) setError(error.message ?? "Création de compte impossible");
-    else finish();
+    if (error) setError(error.message ?? "Envoi impossible");
+    else setSent(true);
   };
 
-  const incomplete = pending || !email || !password;
+  const incomplete = pending || !email;
 
   return (
     <main className="relative flex h-dvh overflow-hidden">
@@ -103,18 +87,15 @@ function LoginPage() {
         </div>
 
         <form
-          onSubmit={signIn}
+          onSubmit={requestLink}
           className={cn(
             RISE,
             "slide-in-from-bottom-[10px] border-border bg-card/82 w-[372px] max-w-full rounded-[14px] border px-5 pt-5 pb-4 shadow-[0_24px_48px_-22px_oklch(0.15_0.02_265/0.35)] backdrop-blur-[14px] backdrop-saturate-130 delay-[60ms] duration-[560ms] dark:shadow-[0_24px_48px_-22px_oklch(0_0_0/0.6)]",
           )}
         >
           <h1 className="text-[19px] font-semibold tracking-[-0.025em]">
-            Content de vous revoir
+            Connexion
           </h1>
-          <p className="text-subtle mt-0.5 mb-4 text-[12.5px] text-pretty">
-            Connectez-vous pour retrouver la revue du mois de votre espace.
-          </p>
 
           <div className="flex flex-col gap-2">
             <label className="flex flex-col gap-1">
@@ -127,44 +108,11 @@ function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="vous@exemple.fr"
                 autoComplete="email"
-                className={cn(FIELD, "border-border-strong")}
+                className={cn(
+                  FIELD,
+                  error ? "border-bad" : "border-border-strong",
+                )}
               />
-            </label>
-
-            <label className="flex flex-col gap-1">
-              <span className="text-muted-foreground text-[11px] font-medium">
-                Mot de passe
-              </span>
-              <span className="relative flex items-center">
-                <input
-                  type={visible ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  autoComplete="current-password"
-                  className={cn(
-                    FIELD,
-                    "w-full pr-9",
-                    error ? "border-bad" : "border-border-strong",
-                  )}
-                />
-                <button
-                  type="button"
-                  onClick={() => setVisible((v) => !v)}
-                  title={
-                    visible
-                      ? "Masquer le mot de passe"
-                      : "Afficher le mot de passe"
-                  }
-                  className="text-subtle hover:bg-accent hover:text-foreground absolute right-1 flex size-7 items-center justify-center rounded-[7px]"
-                >
-                  {visible ? (
-                    <EyeOffIcon className="size-[15px]" />
-                  ) : (
-                    <EyeIcon className="size-[15px]" />
-                  )}
-                </button>
-              </span>
             </label>
 
             {error && (
@@ -174,38 +122,30 @@ function LoginPage() {
               </div>
             )}
 
+            {sent && (
+              <div className="bg-accent-soft text-primary flex items-start gap-[7px] rounded-[9px] px-[11px] py-[9px] text-[11.5px] leading-[1.45]">
+                <MailCheckIcon className="mt-px size-3.5 flex-none" />
+                <span>
+                  Un lien de connexion est parti à {email}. Ouvrez-le dans les
+                  15 minutes — il vous connectera directement.
+                </span>
+              </div>
+            )}
+
             <button
               type="submit"
               disabled={incomplete}
               className="bg-primary text-primary-foreground mt-0.5 flex h-[34px] items-center justify-center gap-2 rounded-[9px] text-[13px] font-semibold tracking-[-0.01em] transition-[opacity,transform] duration-[130ms] hover:opacity-92 active:scale-[0.988] disabled:opacity-60"
             >
               {pending && <Loader2Icon className="size-3.5 animate-spin" />}
-              {pending ? "Connexion…" : "Se connecter"}
+              {pending
+                ? "Envoi…"
+                : sent
+                  ? "Renvoyer le lien"
+                  : "Recevoir mon lien de connexion"}
             </button>
           </div>
         </form>
-
-        {/* Pastille de verre, et non du texte nu : la houle est vive juste sous
-            la carte, la mention a besoin de son propre fond pour rester
-            lisible. La maquette ne la pose que sur ce fond-là. */}
-        <p
-          className={cn(
-            RISE,
-            "slide-in-from-bottom-[10px] text-muted-foreground bg-card/74 mt-3 w-[372px] max-w-full rounded-[11px] px-[11px] py-1.5 text-center text-[11.5px] text-pretty backdrop-blur-[12px] backdrop-saturate-120 delay-[120ms] duration-[600ms]",
-          )}
-        >
-          Pas encore de compte ? L'inscription se fait avec un lien
-          d'invitation — ou{" "}
-          <button
-            type="button"
-            onClick={() => void signUp()}
-            disabled={incomplete}
-            className="text-primary hover:underline disabled:opacity-60 disabled:hover:no-underline"
-          >
-            créez le premier compte
-          </button>{" "}
-          pour amorcer l'installation.
-        </p>
       </div>
     </main>
   );

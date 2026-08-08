@@ -1,7 +1,7 @@
 // Lectures de l'écran « Espaces » : mes espaces, leurs membres, leurs
 // invitations. Un espace est une `organization` (plugin better-auth) ; voir
 // CLAUDE.md, section « Espaces ».
-import { and, count, eq, inArray, isNull, or, sql } from "@budget/db";
+import { and, count, eq, gt, inArray, isNull, or, sql } from "@budget/db";
 import { db } from "@budget/db/client";
 import {
   bankAccounts,
@@ -237,6 +237,57 @@ export async function listSpaces(
       })),
     };
   });
+}
+
+export interface IncomingInvitation {
+  id: string;
+  spaceName: string;
+  invitedBy: string;
+  role: SpaceRole;
+  expiresAt: string;
+}
+
+/**
+ * Les invitations qui m'attendent, vues depuis mon compte. L'inscription étant
+ * ouverte, on peut très bien avoir créé son compte sans jamais cliquer le lien
+ * reçu par email : sans cette liste, ce lien serait la seule porte d'entrée
+ * d'un espace partagé, et un email perdu enfermerait la personne dans son
+ * espace personnel.
+ *
+ * Les périmées sont écartées ici plutôt que rendues avec un statut : la table
+ * les laisse à « pending » (voir `invitationStatus`), et une invitation qui ne
+ * peut plus être acceptée n'a rien à faire dans une liste de gestes à faire.
+ */
+export async function listIncomingInvitations(
+  email: string,
+): Promise<IncomingInvitation[]> {
+  const rows = await db
+    .select({
+      id: invitation.id,
+      spaceName: organization.name,
+      invitedBy: user.name,
+      role: invitation.role,
+      expiresAt: invitation.expiresAt,
+    })
+    .from(invitation)
+    .innerJoin(organization, eq(organization.id, invitation.organizationId))
+    .innerJoin(user, eq(user.id, invitation.inviterId))
+    .where(
+      and(
+        eq(invitation.email, email.toLowerCase()),
+        eq(invitation.status, "pending"),
+        gt(invitation.expiresAt, sql`now()`),
+      ),
+    )
+    .orderBy(invitation.createdAt);
+
+  return rows.map((r) => ({
+    id: r.id,
+    spaceName: r.spaceName,
+    invitedBy: r.invitedBy,
+    role: asRole(r.role ?? "member"),
+    expiresAt: r.expiresAt.toISOString(),
+  }));
 }
 
 export interface InvitationDetail {

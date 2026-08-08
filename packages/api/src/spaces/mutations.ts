@@ -8,12 +8,12 @@
 // better-auth est `setActive`, qui touche la session — donc côté client.
 import { randomUUID } from "node:crypto";
 
+import { sendInvitationEmail } from "@budget/auth";
 import { and, eq, gt, ne, sql } from "@budget/db";
 import { db } from "@budget/db/client";
 import { invitation, member, organization, user } from "@budget/db/schema";
 
 import type { SpaceRole } from "./queries";
-import { sendInvitationEmail } from "../lib/email";
 import { hasRole, membershipGuards } from "./queries";
 
 /** Durée de vie d'un lien d'invitation. Annoncée à l'écran, à garder alignée. */

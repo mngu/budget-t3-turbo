@@ -2,17 +2,16 @@ import { randomUUID } from "node:crypto";
 import type { BetterAuthOptions, BetterAuthPlugin } from "better-auth";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { APIError } from "better-auth/api";
-import { organization } from "better-auth/plugins";
+import { magicLink, organization } from "better-auth/plugins";
 
-import { and, eq } from "@budget/db";
+import { eq } from "@budget/db";
 import { db } from "@budget/db/client";
-import {
-  invitation,
-  member,
-  organization as orgTable,
-  user,
-} from "@budget/db/schema";
+import { member, organization as orgTable } from "@budget/db/schema";
+
+import { sendMagicLinkEmail } from "./email";
+
+/** Validité d'un lien de connexion. Annoncée dans l'email, à garder alignée. */
+const MAGIC_LINK_MINUTES = 15;
 
 /**
  * L'« espace » de l'app (un utilisateur seul, ou un foyer) est une organization
@@ -68,9 +67,9 @@ export function initAuth<
     }),
     baseURL: options.baseUrl,
     secret: options.secret,
-    emailAndPassword: {
-      enabled: true,
-    },
+    // Pas de `emailAndPassword` : la seule voie d'entrée est le lien de
+    // connexion, plus bas. Les mots de passe des comptes créés avant sont
+    // restés en base (table `account`) et n'ont plus aucun appelant.
     user: {
       additionalFields: {
         // Configuration Enable Banking = celle de l'installation : seul un
@@ -86,32 +85,9 @@ export function initAuth<
     databaseHooks: {
       user: {
         create: {
-          before: async (newUser) => {
-            // Inscription sur invitation. L'exception d'amorçage est la seule
-            // porte ouverte : sur une base vide, personne ne peut inviter.
-            const [existing] = await db
-              .select({ id: user.id })
-              .from(user)
-              .limit(1);
-            if (!existing) return;
-
-            const [invite] = await db
-              .select({ id: invitation.id })
-              .from(invitation)
-              .where(
-                and(
-                  eq(invitation.email, newUser.email),
-                  eq(invitation.status, "pending"),
-                ),
-              )
-              .limit(1);
-            if (!invite) {
-              throw new APIError("FORBIDDEN", {
-                message:
-                  "Les inscriptions se font sur invitation. Demandez un lien d'invitation.",
-              });
-            }
-          },
+          // Inscription ouverte : n'importe qui peut créer un compte, et
+          // repart avec son seul espace personnel. Une invitation ne donne
+          // plus le droit d'exister, seulement l'adhésion à un espace partagé.
           after: createPersonalOrganization,
         },
       },
@@ -134,6 +110,23 @@ export function initAuth<
       },
     },
     plugins: [
+      // Connexion par lien, et rien d'autre. Le lien fait trois choses d'un
+      // coup : il connecte, il inscrit si l'adresse est inconnue
+      // (`disableSignUp` laissé à false — c'est l'inscription ouverte), et il
+      // prouve l'adresse. Cette troisième est ce qui remplace la vérification
+      // d'email supprimée avec les mots de passe : sans elle, `spaces.incoming`
+      // montrerait les invitations d'une adresse qu'il suffirait de déclarer.
+      magicLink({
+        // 5 minutes par défaut, trop court pour un aller-retour par email
+        // ouvert sur un téléphone.
+        expiresIn: MAGIC_LINK_MINUTES * 60,
+        sendMagicLink: ({ email, url }) =>
+          sendMagicLinkEmail({
+            to: email,
+            url,
+            minutes: MAGIC_LINK_MINUTES,
+          }),
+      }),
       organization({
         schema: {
           organization: {
@@ -163,6 +156,8 @@ export function initAuth<
 
   return betterAuth(config);
 }
+
+export { sendInvitationEmail } from "./email";
 
 export type Auth = ReturnType<typeof initAuth>;
 export type Session = Auth["$Infer"]["Session"];

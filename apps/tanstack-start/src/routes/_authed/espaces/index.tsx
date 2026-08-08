@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import type {
+  IncomingInvitation,
   Space,
   SpaceInvitation,
   SpaceMember,
@@ -28,7 +29,13 @@ import { SpaceCard } from "./-components/space-card";
 import { SpaceDialog } from "./-components/space-dialog";
 
 export const Route = createFileRoute("/_authed/espaces/")({
-  loader: ({ context }) => context.trpcClient.spaces.list.query(),
+  loader: async ({ context }) => {
+    const [spaces, incoming] = await Promise.all([
+      context.trpcClient.spaces.list.query(),
+      context.trpcClient.spaces.incoming.query(),
+    ]);
+    return { spaces, incoming };
+  },
   component: EspacesPage,
 });
 
@@ -53,7 +60,7 @@ const CREATE_EMPTY = "vide";
 const CREATE_CONVERT = "convertir";
 
 function EspacesPage() {
-  const spaces = Route.useLoaderData();
+  const { spaces, incoming } = Route.useLoaderData();
   const router = useRouter();
   const trpcClient = useTRPCClient();
 
@@ -234,6 +241,32 @@ function EspacesPage() {
     }
   };
 
+  // Répondre à une invitation reçue. Pas de dialogue de confirmation, même
+  // pour le refus : le lien devient inerte mais l'espace peut ré-inviter la
+  // même adresse (une invitation refusée n'est plus « pending »).
+  const respond = async (invitation: IncomingInvitation, accept: boolean) => {
+    setBusy(true);
+    try {
+      await (accept
+        ? trpcClient.spaces.acceptInvitation.mutate({
+            invitationId: invitation.id,
+          })
+        : trpcClient.spaces.declineInvitation.mutate({
+            invitationId: invitation.id,
+          }));
+      toast.success(
+        accept
+          ? `Vous avez rejoint ${invitation.spaceName} — basculez dessus pour le voir.`
+          : "Invitation refusée.",
+      );
+      await router.invalidate();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Échec de la réponse.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const resend = async (invitation: SpaceInvitation) => {
     try {
       await trpcClient.spaces.resendInvitation.mutate({
@@ -281,6 +314,56 @@ function EspacesPage() {
             transactions ; deux espaces ne voient rien l'un de l'autre. Partager
             un compte, c'est ajouter un membre à l'espace qui le contient.
           </p>
+
+          {incoming.length > 0 && (
+            <div className="mt-5 flex flex-col gap-3">
+              {incoming.map((invitation) => (
+                <div
+                  key={invitation.id}
+                  className="border-border-strong bg-accent-soft flex flex-wrap items-center gap-4 rounded-[14px] border px-5 py-4"
+                >
+                  <span className="bg-card border-border-strong text-primary flex size-8 flex-none items-center justify-center rounded-[10px] border">
+                    <MailIcon className="size-4" />
+                  </span>
+                  <div className="min-w-[280px] flex-1">
+                    <div className="text-[13.5px] font-semibold tracking-[-0.015em]">
+                      {invitation.invitedBy} vous invite dans{" "}
+                      {invitation.spaceName}
+                    </div>
+                    <div className="text-muted-foreground mt-1 max-w-[660px] text-xs text-pretty">
+                      En acceptant, vous verrez tous les comptes, toutes les
+                      catégories et tout l'historique de cet espace, comme{" "}
+                      {invitation.role === "owner" ? "propriétaire" : "membre"}.
+                      Valable jusqu'au{" "}
+                      {new Date(invitation.expiresAt).toLocaleDateString(
+                        "fr-FR",
+                        { day: "numeric", month: "long" },
+                      )}
+                      .
+                    </div>
+                  </div>
+                  <div className="flex flex-none items-center gap-2">
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => void respond(invitation, false)}
+                      className="border-border-strong flex h-[33px] items-center justify-center rounded-[9px] border px-3.5 text-[12.5px] font-medium disabled:opacity-60"
+                    >
+                      Refuser
+                    </button>
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => void respond(invitation, true)}
+                      className="bg-primary text-primary-foreground flex h-[33px] items-center justify-center rounded-[9px] px-4 text-[12.5px] font-semibold whitespace-nowrap disabled:opacity-60"
+                    >
+                      Rejoindre l'espace
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
           {soloBanner && (
             <div className="border-border-strong bg-surface-2 mt-5 flex flex-wrap items-center gap-4 rounded-[14px] border px-5 py-4">

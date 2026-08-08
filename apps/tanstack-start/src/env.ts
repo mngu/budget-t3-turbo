@@ -18,11 +18,8 @@ export const env = createEnv({
    */
   server: {
     POSTGRES_URL: z.url(),
-    // Origine publique du déploiement. Sur Vercel elle se déduit des variables
-    // de la plateforme ; sur un VPS rien ne la donne, et sans elle better-auth
-    // et le client tRPC SSR retombent sur http://localhost:3000 (cookies posés
-    // sur la mauvaise origine, appels SSR vers le vide).
-    SITE_URL: z.url().optional(),
+    // `SITE_URL` vient d'`authEnv()` : les emails envoyés depuis @budget/auth
+    // en ont besoin, et deux déclarations pourraient diverger.
   },
 
   /**
@@ -36,6 +33,8 @@ export const env = createEnv({
    * Destructure all variables from `process.env` to make sure they aren't tree-shaken away.
    */
   runtimeEnv: process.env,
+  // Voir `authEnv()` : une clé présente mais vide vaut absente.
+  emptyStringAsUndefined: true,
   skipValidation:
     !!process.env.CI || process.env.npm_lifecycle_event === "lint",
 });

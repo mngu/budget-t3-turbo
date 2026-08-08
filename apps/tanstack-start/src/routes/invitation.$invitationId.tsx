@@ -4,6 +4,7 @@ import {
   CircleCheckIcon,
   ClockAlertIcon,
   Loader2Icon,
+  MailCheckIcon,
   UserIcon,
   UserPlusIcon,
   UsersIcon,
@@ -17,12 +18,13 @@ import { useTRPCClient } from "~/lib/trpc";
 
 /**
  * Écran d'acceptation d'une invitation — **hors du layout `_authed`** : l'invité
- * n'a pas forcément de compte, et l'inscription n'étant ouverte que sur
- * invitation, c'est ici qu'elle se fait.
+ * n'a pas forcément de compte, et c'est ici qu'il peut le créer avec l'adresse
+ * invitée — l'inscription est ouverte par ailleurs (`/login`), mais ce chemin
+ * enchaîne directement sur l'adhésion à l'espace.
  *
- * Quatre états, qui viennent tous du statut de l'invitation croisé avec la
- * session : à accepter (connecté), à créer un compte (déconnecté), lien expiré,
- * lien déjà utilisé.
+ * Cinq états, qui viennent tous du statut de l'invitation croisé avec la
+ * session : à accepter (connecté), à demander un lien de connexion
+ * (déconnecté), lien envoyé, invitation expirée, invitation déjà utilisée.
  */
 export const Route = createFileRoute("/invitation/$invitationId")({
   loader: async ({ context, params }) => {
@@ -44,8 +46,8 @@ function InvitationPage() {
   const trpcClient = useTRPCClient();
 
   const [name, setName] = useState("");
-  const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
+  const [sent, setSent] = useState(false);
 
   if (!invitation) {
     return (
@@ -76,20 +78,24 @@ function InvitationPage() {
     }
   };
 
-  const signUpAndJoin = async () => {
+  // Un lien de connexion à l'adresse invitée : il crée le compte s'il n'existe
+  // pas, et le `callbackURL` ramène ici une fois ouvert — l'écran bascule alors
+  // sur l'état « connecté », avec son bouton Rejoindre. On ne peut pas
+  // court-circuiter avec le lien d'invitation déjà en main : c'est l'adresse
+  // qu'il faut prouver, et lui ne prouve que la possession de ce lien-ci.
+  const requestLink = async () => {
     setPending(true);
-    const { error } = await authClient.signUp.email({
+    const { error } = await authClient.signIn.magicLink({
       email: invitation.email,
-      password,
       // Le nom est facultatif : l'adresse invitée fournit un repli lisible.
+      // Il n'est retenu qu'à la création du compte — les autres membres de
+      // l'espace le verront dans la liste.
       name: name.trim() || (invitation.email.split("@")[0] ?? invitation.email),
+      callbackURL: `/invitation/${invitationId}`,
     });
-    if (error) {
-      toast.error(error.message ?? "Création de compte impossible");
-      setPending(false);
-      return;
-    }
-    await join();
+    setPending(false);
+    if (error) toast.error(error.message ?? "Envoi du lien impossible");
+    else setSent(true);
   };
 
   if (invitation.status === "expired") {
@@ -128,6 +134,19 @@ function InvitationPage() {
           label: "Se connecter",
           onClick: () => void navigate({ to: "/login" }),
         }}
+      />
+    );
+  }
+
+  if (sent) {
+    return (
+      <Shell
+        icon={<MailCheckIcon className="size-[17px]" />}
+        tone="primary"
+        title="Ouvrez le lien de connexion"
+        body={`Un lien vient de partir à ${invitation.email}. Ouvrez-le dans les 15 minutes : il vous connectera et vous ramènera ici pour rejoindre ${invitation.spaceName}.`}
+        note="C'est aussi ce lien qui crée votre compte — il n'y a pas de mot de passe."
+        footnote="L'invitation reste valable 7 jours."
       />
     );
   }
@@ -172,7 +191,7 @@ function InvitationPage() {
       body={
         signedInAsInvited
           ? "En acceptant, vous verrez les comptes bancaires, les catégories et les transactions de cet espace, exactement comme les autres membres."
-          : `${invitation.invitedBy} vous invite. Il vous faut un compte pour accéder à l'espace — l'inscription se fait ici, avec l'adresse invitée.`
+          : `${invitation.invitedBy} vous invite. Il vous faut un compte pour accéder à l'espace — il se crée ici, avec l'adresse invitée.`
       }
       stats={
         signedInAsInvited
@@ -195,9 +214,8 @@ function InvitationPage() {
       primary={{
         label: signedInAsInvited
           ? "Rejoindre l'espace"
-          : "Créer mon compte et rejoindre",
-        onClick: () => void (signedInAsInvited ? join() : signUpAndJoin()),
-        disabled: !signedInAsInvited && password.length < 8,
+          : "Recevoir mon lien de connexion",
+        onClick: () => void (signedInAsInvited ? join() : requestLink()),
       }}
       secondary={
         signedInAsInvited
@@ -238,19 +256,9 @@ function InvitationPage() {
               className="border-border-strong bg-background focus:border-primary h-[33px] w-full rounded-[9px] border px-3 text-[12.5px] outline-none"
             />
           </Field>
-          <Field label="Mot de passe">
-            <input
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              type="password"
-              placeholder="au moins 8 caractères"
-              autoComplete="new-password"
-              className="border-border-strong bg-background focus:border-primary h-[33px] w-full rounded-[9px] border px-3 text-[12.5px] outline-none"
-            />
-          </Field>
           <div className="text-subtle text-[11.5px] text-pretty">
-            L'inscription n'est ouverte que sur invitation : ce formulaire crée
-            votre compte et vous ajoute à l'espace.
+            Pas de mot de passe : un lien de connexion part à cette adresse, et
+            c'est lui qui crée votre compte.
           </div>
         </div>
       )}

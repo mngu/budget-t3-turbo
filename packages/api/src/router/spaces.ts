@@ -14,7 +14,11 @@ import {
   resendInvitation,
   shareSpace,
 } from "../spaces/mutations";
-import { getInvitation, listSpaces } from "../spaces/queries";
+import {
+  getInvitation,
+  listIncomingInvitations,
+  listSpaces,
+} from "../spaces/queries";
 import { protectedProcedure, publicProcedure } from "../trpc";
 
 const spaceId = z.string().min(1);
@@ -34,6 +38,13 @@ export const spacesRouter = {
       ctx.session.user.id,
       ctx.session.session.activeOrganizationId ?? null,
     ),
+  ),
+
+  // Les invitations qui m'attendent. Scopée par l'email de la session et non
+  // par un input : c'est le même critère que celui qu'`acceptInvitation`
+  // revérifie de son côté.
+  incoming: protectedProcedure.query(({ ctx }) =>
+    listIncomingInvitations(ctx.session.user.email),
   ),
 
   create: protectedProcedure
