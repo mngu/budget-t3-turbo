@@ -19,6 +19,7 @@ import type {
   SpaceMember,
   SpaceRole,
 } from "@budget/api";
+import { Button } from "@budget/ui/button";
 import { toast } from "@budget/ui/toast";
 
 import type { SpaceDialogSpec } from "./-components/space-dialog";
@@ -300,13 +301,9 @@ function EspacesPage() {
                   label={members > 1 ? "Membres" : "Membre"}
                 />
               </div>
-              <button
-                type="button"
-                onClick={() => open({ kind: "create" }, "")}
-                className="bg-primary text-primary-foreground flex h-8 items-center justify-center rounded-[9px] px-3.5 text-xs font-semibold whitespace-nowrap"
-              >
+              <Button onClick={() => open({ kind: "create" }, "")}>
                 Créer un espace partagé
-              </button>
+              </Button>
             </div>
           </div>
           <p className="text-muted-foreground mt-2 max-w-[640px] text-[12.5px] text-pretty">
@@ -343,22 +340,19 @@ function EspacesPage() {
                     </div>
                   </div>
                   <div className="flex flex-none items-center gap-2">
-                    <button
-                      type="button"
+                    <Button
+                      variant="outline"
                       disabled={busy}
                       onClick={() => void respond(invitation, false)}
-                      className="border-border-strong flex h-[33px] items-center justify-center rounded-[9px] border px-3.5 text-[12.5px] font-medium disabled:opacity-60"
                     >
                       Refuser
-                    </button>
-                    <button
-                      type="button"
+                    </Button>
+                    <Button
                       disabled={busy}
                       onClick={() => void respond(invitation, true)}
-                      className="bg-primary text-primary-foreground flex h-[33px] items-center justify-center rounded-[9px] px-4 text-[12.5px] font-semibold whitespace-nowrap disabled:opacity-60"
                     >
-                      Rejoindre l'espace
-                    </button>
+                      Rejoindre l&apos;espace
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -388,15 +382,14 @@ function EspacesPage() {
                   démarre vide.
                 </div>
               </div>
-              <button
-                type="button"
+              <Button
+                className="flex-none"
                 onClick={() =>
                   open({ kind: "share", space: soloBanner }, soloBanner.name)
                 }
-                className="bg-primary text-primary-foreground flex h-[33px] flex-none items-center justify-center rounded-[9px] px-4 text-[12.5px] font-semibold whitespace-nowrap"
               >
                 Partager cet espace
-              </button>
+              </Button>
             </div>
           )}
 

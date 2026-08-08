@@ -2,6 +2,7 @@
 
 import { Loader2Icon, TriangleAlertIcon } from "lucide-react";
 
+import { Button } from "@budget/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -98,22 +99,23 @@ export function CategoryDeleteDialog({
             Les transactions ne sont pas supprimées, elles redeviennent sans
             catégorie.
           </span>
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="sm"
+            className="ml-auto"
             onClick={() => onOpenChange(false)}
-            className="text-muted-foreground hover:bg-accent hover:text-foreground ml-auto h-[30px] rounded-[9px] border px-3 text-xs"
           >
             Annuler
-          </button>
-          <button
-            type="button"
-            onClick={onConfirm}
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
             disabled={deleting}
-            className="bg-bad text-primary-foreground flex h-[30px] items-center gap-1.5 rounded-[9px] px-3.5 text-xs font-semibold disabled:opacity-60"
+            onClick={onConfirm}
           >
-            {deleting && <Loader2Icon className="size-3.5 animate-spin" />}
+            {deleting && <Loader2Icon className="animate-spin" />}
             Supprimer
-          </button>
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

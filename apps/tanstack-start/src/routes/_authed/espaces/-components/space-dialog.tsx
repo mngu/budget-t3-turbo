@@ -3,7 +3,10 @@
 import { Loader2Icon } from "lucide-react";
 
 import { cn } from "@budget/ui";
+import { Button } from "@budget/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@budget/ui/dialog";
+import { Field, FieldDescription, FieldLabel } from "@budget/ui/field";
+import { Input } from "@budget/ui/input";
 
 /**
  * Le dialogue **unique** de l'écran Espaces : dix gestes (créer, partager,
@@ -41,10 +44,17 @@ export interface SpaceDialogSpec {
   disabled?: boolean;
 }
 
-const TONE = {
-  primary: { chip: "bg-accent-soft text-primary", cta: "bg-primary" },
-  warn: { chip: "bg-warn-soft text-warn", cta: "bg-warn" },
-  bad: { chip: "bg-bad-soft text-bad", cta: "bg-bad" },
+// La sévérité tient dans la pastille du dialogue ; le bouton, lui, prend une
+// *variante* du composant plutôt qu'une teinte écrite ici. « warn » n'en a pas
+// (l'action est irréversible sans être destructrice) et retombe sur la variante
+// par défaut — voir `docs/adr/0001-le-design-appartient-au-package-ui.md`.
+const TONE: Record<
+  "primary" | "warn" | "bad",
+  { chip: string; cta: "default" | "destructive" }
+> = {
+  primary: { chip: "bg-accent-soft text-primary", cta: "default" },
+  warn: { chip: "bg-warn-soft text-warn", cta: "default" },
+  bad: { chip: "bg-bad-soft text-bad", cta: "destructive" },
 };
 
 export function SpaceDialog({
@@ -149,21 +159,17 @@ export function SpaceDialog({
           )}
 
           {spec.input && (
-            <div className="mt-3.5 flex flex-col">
-              <div className="label-caps mb-1.5">{spec.input.label}</div>
-              <input
+            <Field className="mt-3.5">
+              <FieldLabel htmlFor="space-name">{spec.input.label}</FieldLabel>
+              <Input
+                id="space-name"
                 autoFocus
                 value={spec.input.value}
                 onChange={(e) => spec.onInput?.(e.target.value)}
                 placeholder={spec.input.placeholder}
-                className="border-border-strong bg-background focus:border-primary h-[33px] w-full rounded-[9px] border px-3 text-[12.5px] outline-none"
               />
-              {spec.hint && (
-                <div className="text-subtle mt-1.5 text-[11.5px] text-pretty">
-                  {spec.hint}
-                </div>
-              )}
-            </div>
+              {spec.hint && <FieldDescription>{spec.hint}</FieldDescription>}
+            </Field>
           )}
         </div>
 
@@ -172,26 +178,19 @@ export function SpaceDialog({
             {spec.footnote}
           </span>
           {spec.cancel && (
-            <button
-              type="button"
-              onClick={onClose}
-              className="text-muted-foreground hover:bg-accent hover:text-foreground flex h-8 flex-none items-center justify-center rounded-[9px] px-3 text-xs font-medium"
-            >
+            <Button variant="ghost" className="flex-none" onClick={onClose}>
               {spec.cancel}
-            </button>
+            </Button>
           )}
-          <button
-            type="button"
-            onClick={onConfirm}
+          <Button
+            variant={tone.cta}
+            className="flex-none"
             disabled={spec.disabled ?? busy}
-            className={cn(
-              "text-primary-foreground flex h-8 flex-none items-center justify-center gap-2 rounded-[9px] px-4 text-[12.5px] font-semibold whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-45",
-              tone.cta,
-            )}
+            onClick={onConfirm}
           >
-            {busy && <Loader2Icon className="size-3.5 animate-spin" />}
+            {busy && <Loader2Icon className="animate-spin" />}
             {spec.cta}
-          </button>
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

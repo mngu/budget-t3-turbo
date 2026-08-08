@@ -2,6 +2,7 @@ import { useState } from "react";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { CircleCheckIcon } from "lucide-react";
 
+import { Button } from "@budget/ui/button";
 import { toast } from "@budget/ui/toast";
 
 import { AppHeader } from "~/component/app-header";
@@ -85,18 +86,18 @@ function BudgetsPage() {
                   postes budgétés.
                 </p>
               </div>
-              <button
-                type="button"
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() =>
                   void run(
                     () => trpcClient.categories.budgets.clear.mutate(),
                     "Échec de la remise à zéro.",
                   )
                 }
-                className="border-border-strong text-muted-foreground hover:bg-accent hover:text-foreground h-[31px] rounded-[9px] border px-3 text-xs whitespace-nowrap"
               >
                 Tout vider
-              </button>
+              </Button>
             </section>
           )}
 
@@ -110,13 +111,14 @@ function BudgetsPage() {
                 : "un budget se pose sur une catégorie ; « détailler » le répartit sur ses sous-catégories"}
             </span>
             {tree.length > 0 && (
-              <button
-                type="button"
+              <Button
+                variant="outline"
+                size="xs"
+                className="ml-auto"
                 onClick={() => setExpandAll((v) => (v === true ? false : true))}
-                className="border-border text-muted-foreground hover:bg-accent hover:text-foreground ml-auto rounded-lg border px-2.5 py-1 text-[11.5px]"
               >
                 Tout replier / déplier
-              </button>
+              </Button>
             )}
           </div>
 

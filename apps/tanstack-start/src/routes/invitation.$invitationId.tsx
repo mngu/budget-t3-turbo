@@ -11,6 +11,9 @@ import {
 } from "lucide-react";
 
 import { cn } from "@budget/ui";
+import { Button } from "@budget/ui/button";
+import { Field, FieldLabel } from "@budget/ui/field";
+import { Input } from "@budget/ui/input";
 import { toast } from "@budget/ui/toast";
 
 import { authClient } from "~/auth/client";
@@ -242,18 +245,20 @@ function InvitationPage() {
         </div>
       ) : (
         <div className="border-border flex flex-col gap-3 border-b px-5 py-4">
-          <Field label="Adresse email">
-            <div className="border-border bg-surface-2 text-muted-foreground flex h-[33px] items-center rounded-[9px] border px-3 text-[12.5px]">
-              {invitation.email}
-            </div>
+          <Field>
+            <FieldLabel>Adresse email</FieldLabel>
+            {/* L'adresse ne se choisit pas : l'invitation ne vaut que pour
+                elle. Un `Input` désactivé plutôt qu'un encadré fait main. */}
+            <Input value={invitation.email} readOnly disabled />
           </Field>
-          <Field label="Votre nom">
-            <input
+          <Field>
+            <FieldLabel htmlFor="name">Votre nom</FieldLabel>
+            <Input
+              id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Julie Rossi"
               autoComplete="name"
-              className="border-border-strong bg-background focus:border-primary h-[33px] w-full rounded-[9px] border px-3 text-[12.5px] outline-none"
             />
           </Field>
           <div className="text-subtle text-[11.5px] text-pretty">
@@ -346,24 +351,18 @@ function Shell({
               {note}
             </span>
             {secondary && (
-              <button
-                type="button"
-                onClick={secondary.onClick}
-                className="text-muted-foreground hover:bg-accent hover:text-foreground flex h-8 flex-none items-center justify-center rounded-[9px] px-3 text-xs font-medium whitespace-nowrap"
-              >
+              <Button variant="ghost" onClick={secondary.onClick}>
                 {secondary.label}
-              </button>
+              </Button>
             )}
             {primary && (
-              <button
-                type="button"
-                onClick={primary.onClick}
+              <Button
                 disabled={primary.disabled ?? pending}
-                className="bg-primary text-primary-foreground flex h-8 flex-none items-center justify-center gap-2 rounded-[9px] px-4 text-[12.5px] font-semibold whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-45"
+                onClick={primary.onClick}
               >
-                {pending && <Loader2Icon className="size-3.5 animate-spin" />}
+                {pending && <Loader2Icon className="animate-spin" />}
                 {primary.label}
-              </button>
+              </Button>
             )}
           </div>
         </div>
@@ -373,20 +372,5 @@ function Shell({
         </div>
       </div>
     </main>
-  );
-}
-
-function Field({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <div className="label-caps mb-1.5">{label}</div>
-      {children}
-    </div>
   );
 }

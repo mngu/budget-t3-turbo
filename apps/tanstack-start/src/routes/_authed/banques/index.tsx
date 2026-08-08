@@ -3,6 +3,7 @@ import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { UnlinkIcon } from "lucide-react";
 
 import type { ConnectionSummary } from "@budget/api";
+import { Button } from "@budget/ui/button";
 import { toast } from "@budget/ui/toast";
 
 import { AppHeader } from "~/component/app-header";
@@ -74,13 +75,13 @@ function BanquesPage() {
                 lastImportedAt={lastImportedAt}
               />
               {setup.configured && (
-                <Link
-                  to="/banques/ajouter"
-                  search={{ step: "banque" }}
-                  className="bg-primary text-primary-foreground flex h-8 items-center rounded-[9px] px-3.5 text-xs font-semibold whitespace-nowrap"
+                <Button
+                  render={
+                    <Link to="/banques/ajouter" search={{ step: "banque" }} />
+                  }
                 >
                   Ajouter une banque
-                </Link>
+                </Button>
               )}
             </div>
           </div>
@@ -118,13 +119,14 @@ function BanquesPage() {
                     vous serez redirigé vers elle pour autoriser l'accès, puis
                     ramené ici.
                   </p>
-                  <Link
-                    to="/banques/ajouter"
-                    search={{ step: "banque" }}
-                    className="bg-primary text-primary-foreground mt-4 inline-flex h-8 items-center rounded-[9px] px-3.5 text-[12.5px] font-semibold"
+                  <Button
+                    className="mt-4"
+                    render={
+                      <Link to="/banques/ajouter" search={{ step: "banque" }} />
+                    }
                   >
                     Ajouter une banque
-                  </Link>
+                  </Button>
                 </div>
               )}
             </div>

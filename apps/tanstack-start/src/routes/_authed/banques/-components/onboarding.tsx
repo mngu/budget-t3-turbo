@@ -6,6 +6,9 @@ import { KeyRoundIcon, Loader2Icon } from "lucide-react";
 
 import type { SetupStatus } from "@budget/api";
 import { cn } from "@budget/ui";
+import { Button } from "@budget/ui/button";
+import { Field, FieldDescription, FieldLabel } from "@budget/ui/field";
+import { Input } from "@budget/ui/input";
 import { toast } from "@budget/ui/toast";
 
 import { useTRPCClient } from "~/lib/trpc";
@@ -112,38 +115,30 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
       </ol>
 
       <div className="flex flex-col gap-3.5 px-5 pt-3.5 pb-4.5">
-        <div>
-          <label htmlFor="application-id" className="label-caps mb-1.5 block">
-            Application ID
-          </label>
-          <input
+        <Field>
+          <FieldLabel htmlFor="application-id">Application ID</FieldLabel>
+          <Input
             id="application-id"
             value={applicationId}
             onChange={(e) => setApplicationId(e.target.value)}
             placeholder="00000000-0000-0000-0000-000000000000"
-            className={FIELD}
           />
-        </div>
-        <div>
-          <label htmlFor="redirect-url" className="label-caps mb-1.5 block">
-            URL de redirection
-          </label>
-          <input
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="redirect-url">URL de redirection</FieldLabel>
+          <Input
             id="redirect-url"
             value={redirectUrl}
             onChange={(e) => setRedirectUrl(e.target.value)}
-            className={FIELD}
           />
-        </div>
-        <div>
-          <div className="mb-1.5 flex items-baseline gap-2.5">
-            <label htmlFor="private-key" className="label-caps">
-              Clé privée
-            </label>
-            <span className="text-subtle text-[11px]">
-              fichier .pem téléchargé sur enablebanking.com
-            </span>
-          </div>
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="private-key">Clé privée</FieldLabel>
+          <FieldDescription>
+            fichier .pem téléchargé sur enablebanking.com
+          </FieldDescription>
+          {/* Pas de composant `textarea` dans le package : le seul de l'app,
+              il garde son gabarit et emprunte celui de `Input`. */}
           <textarea
             id="private-key"
             value={privateKeyPem}
@@ -152,7 +147,7 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
             placeholder="-----BEGIN PRIVATE KEY-----"
             className={cn(FIELD, "h-auto resize-y py-2.5 leading-normal")}
           />
-        </div>
+        </Field>
       </div>
 
       <div className="bg-surface-2 border-t px-5 py-3.5">
@@ -187,15 +182,14 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
         <span className="text-subtle min-w-0 flex-1 text-[11.5px]">
           Rien n'est envoyé à votre banque à cette étape.
         </span>
-        <button
-          type="button"
-          onClick={submit}
+        <Button
+          className="flex-none"
           disabled={saving || !applicationId || !privateKeyPem}
-          className="bg-primary text-primary-foreground flex h-8 flex-none items-center gap-1.5 rounded-[9px] px-3.5 text-[12.5px] font-semibold whitespace-nowrap disabled:opacity-60"
+          onClick={submit}
         >
-          {saving && <Loader2Icon className="size-3.5 animate-spin" />}
+          {saving && <Loader2Icon className="animate-spin" />}
           Valider la configuration
-        </button>
+        </Button>
       </div>
     </section>
   );

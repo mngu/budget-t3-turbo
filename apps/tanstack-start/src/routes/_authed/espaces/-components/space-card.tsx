@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   EllipsisIcon,
   KeyRoundIcon,
@@ -20,7 +19,14 @@ import type {
   SpaceRole,
 } from "@budget/api";
 import { cn } from "@budget/ui";
-import { Popover, PopoverContent, PopoverTrigger } from "@budget/ui/popover";
+import { Button } from "@budget/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@budget/ui/dropdown-menu";
+import { Input } from "@budget/ui/input";
 
 import { dateFr } from "../-lib/format";
 
@@ -128,13 +134,9 @@ export function SpaceCard({
 
         <div className="flex items-center gap-2.5">
           {!space.isActive && (
-            <button
-              type="button"
-              onClick={actions.onSwitch}
-              className="border-border-strong hover:bg-accent flex h-[31px] items-center justify-center rounded-[9px] border px-3.5 text-xs font-medium whitespace-nowrap"
-            >
+            <Button variant="outline" size="sm" onClick={actions.onSwitch}>
               Basculer ici
-            </button>
+            </Button>
           )}
           <SpaceMenu space={space} actions={actions} />
         </div>
@@ -203,17 +205,18 @@ export function SpaceCard({
               {/* Se retirer soi-même, c'est « Quitter » : même ligne, autre
                   procédure — l'une part du propriétaire, l'autre de soi. */}
               {(member.isMe || owner) && (
-                <button
-                  type="button"
+                <Button
+                  variant="link"
+                  size="xs"
+                  className="justify-self-end"
                   onClick={() =>
                     member.isMe
                       ? actions.onLeave()
                       : actions.onRemoveMember(member)
                   }
-                  className="text-muted-foreground hover:text-bad justify-self-end text-xs"
                 >
                   {member.isMe ? "Quitter" : "Retirer"}
-                </button>
+                </Button>
               )}
             </div>
           ))}
@@ -268,24 +271,24 @@ export function SpaceCard({
                     {owner &&
                       (invitation.status === "pending" ||
                         invitation.status === "expired") && (
-                        <button
-                          type="button"
+                        <Button
+                          variant="link"
+                          size="xs"
                           onClick={() => actions.onResendInvitation(invitation)}
-                          className="text-primary text-xs whitespace-nowrap"
                         >
                           {invitation.status === "expired"
                             ? "Renvoyer une invitation"
                             : "Renvoyer"}
-                        </button>
+                        </Button>
                       )}
                     {owner && invitation.status === "pending" && (
-                      <button
-                        type="button"
+                      <Button
+                        variant="link"
+                        size="xs"
                         onClick={() => actions.onCancelInvitation(invitation)}
-                        className="text-muted-foreground hover:text-bad text-xs whitespace-nowrap"
                       >
                         Annuler
-                      </button>
+                      </Button>
                     )}
                   </div>
                 </div>
@@ -336,21 +339,21 @@ export function SpaceCard({
           </span>
           {owner && (
             <div className="flex flex-wrap items-center justify-center gap-2.5">
-              <input
+              <Input
+                type="email"
                 value={invite.email}
                 onChange={(e) =>
                   onInviteChange({ ...invite, email: e.target.value })
                 }
                 placeholder="adresse email"
-                className="border-border-strong bg-background focus:border-primary h-[31px] w-[250px] rounded-[9px] border px-3 text-[12.5px] outline-none"
+                className="w-[250px]"
               />
-              <button
-                type="button"
+              <Button
+                size="sm"
                 onClick={() => actions.onInvite(invite.email, invite.role)}
-                className="bg-primary text-primary-foreground flex h-[31px] items-center justify-center rounded-[9px] px-3.5 text-xs font-semibold whitespace-nowrap"
               >
                 Inviter
-              </button>
+              </Button>
             </div>
           )}
         </div>
@@ -385,78 +388,56 @@ function SpaceMenu({
   space: Space;
   actions: SpaceCardActions;
 }) {
-  const [open, setOpen] = useState(false);
   const owner = space.role === "owner";
-  const close = (run: () => void) => () => {
-    setOpen(false);
-    run();
-  };
 
-  const items = [
-    owner && {
-      key: "rename",
-      label: "Renommer l'espace",
-      icon: <PencilIcon className="size-3.5" />,
-      onSelect: close(actions.onRename),
-    },
-    owner &&
-      space.isPersonal && {
-        key: "share",
-        label: "Passer en espace partagé",
-        icon: <UsersIcon className="size-3.5" />,
-        onSelect: close(actions.onShare),
-      },
-    !space.isPersonal && {
-      key: "leave",
-      label: "Quitter l'espace",
-      icon: <LogOutIcon className="size-3.5" />,
-      onSelect: close(actions.onLeave),
-    },
-    owner && {
-      key: "delete",
-      label: "Supprimer l'espace",
-      icon: <Trash2Icon className="size-3.5" />,
-      danger: !space.isPersonal,
-      onSelect: close(actions.onDelete),
-    },
-  ].filter((item) => item !== false);
-
+  // Une entrée referme le menu d'elle-même : le `close()` qui enveloppait
+  // chaque action a disparu avec l'état local d'ouverture.
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger
-        render={(props) => (
-          <button
-            type="button"
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon-sm"
             title="Actions"
             aria-label={`Actions sur l'espace ${space.name}`}
-            className="text-subtle hover:bg-accent hover:text-foreground flex size-7 items-center justify-center rounded-lg"
-            {...props}
-          >
-            <EllipsisIcon className="size-4" />
-          </button>
+          />
+        }
+      >
+        <EllipsisIcon />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        {owner && (
+          <DropdownMenuItem onClick={actions.onRename}>
+            <PencilIcon />
+            Renommer l&apos;espace
+          </DropdownMenuItem>
         )}
-      />
-      <PopoverContent align="end" className="w-[226px] gap-0 p-1.5">
-        {items.map((item) => (
-          <button
-            key={item.key}
-            type="button"
-            onClick={item.onSelect}
-            className={cn(
-              "hover:bg-accent flex w-full items-center gap-2.5 rounded-[7px] px-2.5 py-1.5 text-[12.5px]",
-              item.danger ? "text-bad" : "text-foreground",
-            )}
+        {owner && space.isPersonal && (
+          <DropdownMenuItem onClick={actions.onShare}>
+            <UsersIcon />
+            Passer en espace partagé
+          </DropdownMenuItem>
+        )}
+        {!space.isPersonal && (
+          <DropdownMenuItem onClick={actions.onLeave}>
+            <LogOutIcon />
+            Quitter l&apos;espace
+          </DropdownMenuItem>
+        )}
+        {owner && (
+          // L'espace personnel ne se supprime pas : l'entrée ouvre le dialogue
+          // qui l'explique, elle n'annonce donc pas une destruction.
+          <DropdownMenuItem
+            variant={space.isPersonal ? "default" : "destructive"}
+            onClick={actions.onDelete}
           >
-            <span
-              className={cn("flex", item.danger ? "text-bad" : "text-subtle")}
-            >
-              {item.icon}
-            </span>
-            {item.label}
-          </button>
-        ))}
-      </PopoverContent>
-    </Popover>
+            <Trash2Icon />
+            Supprimer l&apos;espace
+          </DropdownMenuItem>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -471,11 +452,12 @@ function InviteForm({
 }) {
   return (
     <div className="border-border bg-surface-2 flex flex-wrap items-center gap-2.5 border-t px-4 py-3">
-      <input
+      <Input
+        type="email"
         value={value.email}
         onChange={(e) => onChange({ ...value, email: e.target.value })}
         placeholder="adresse email"
-        className="border-border-strong bg-background focus:border-primary h-[31px] min-w-[220px] flex-1 rounded-[9px] border px-3 text-[12.5px] outline-none"
+        className="min-w-[220px] flex-1"
       />
       <div className="bg-surface-2 border-border flex flex-none rounded-[9px] border p-0.5">
         {(["member", "owner"] as const).map((role) => (
@@ -494,13 +476,14 @@ function InviteForm({
           </button>
         ))}
       </div>
-      <button
-        type="button"
+      <Button
+        variant="outline"
+        size="sm"
+        className="flex-none"
         onClick={onSubmit}
-        className="border-border-strong hover:bg-accent flex h-[31px] flex-none items-center justify-center rounded-[9px] border px-3.5 text-xs font-semibold whitespace-nowrap"
       >
-        Envoyer l'invitation
-      </button>
+        Envoyer l&apos;invitation
+      </Button>
       <span className="text-subtle flex-none text-[11.5px] whitespace-nowrap">
         le lien vaut 7 jours
       </span>

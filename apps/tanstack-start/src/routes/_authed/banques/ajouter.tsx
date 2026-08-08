@@ -5,6 +5,8 @@ import { z } from "zod/v4";
 
 import type { AccountSummary, AspspOption } from "@budget/api";
 import { cn } from "@budget/ui";
+import { Button } from "@budget/ui/button";
+import { Input } from "@budget/ui/input";
 import { toast } from "@budget/ui/toast";
 
 import { AppHeader } from "~/component/app-header";
@@ -182,17 +184,17 @@ function StepBanque() {
                   </div>
                   <div className="text-subtle text-[11px]">{aspsp.country}</div>
                 </div>
-                <button
-                  type="button"
+                <Button
+                  variant="outline"
+                  size="sm"
                   disabled={connecting !== null}
                   onClick={() => connect(aspsp)}
-                  className="border-border-strong hover:border-primary hover:bg-accent-soft hover:text-primary flex h-[29px] items-center gap-1.5 rounded-lg border px-3.5 text-xs font-medium whitespace-nowrap disabled:opacity-60"
                 >
                   {connecting === key && (
-                    <Loader2Icon className="size-3.5 animate-spin" />
+                    <Loader2Icon className="animate-spin" />
                   )}
                   Connecter
-                </button>
+                </Button>
               </div>
             );
           })}
@@ -299,18 +301,12 @@ function StepComptes() {
               {account.enabled ? "✓" : ""}
             </button>
 
-            <input
+            <Input
               value={account.displayName ?? ""}
               placeholder="Nom du compte (ex : Compte courant)"
               onChange={(e) =>
                 setRow(account.id, { displayName: e.target.value || null })
               }
-              className={cn(
-                "focus:border-primary h-[30px] w-full rounded-lg border px-2.5 text-[12.5px] outline-none",
-                account.enabled
-                  ? "border-input bg-background"
-                  : "border-border text-subtle bg-transparent",
-              )}
             />
 
             <span
@@ -331,13 +327,9 @@ function StepComptes() {
           {rows.length} · les comptes décochés restent visibles mais ne sont pas
           importés
         </span>
-        <button
-          type="button"
-          onClick={save}
-          className="bg-primary text-primary-foreground h-8 flex-none rounded-[9px] px-3.5 text-[12.5px] font-semibold whitespace-nowrap"
-        >
+        <Button className="flex-none" onClick={save}>
           Enregistrer et synchroniser
-        </button>
+        </Button>
       </div>
     </div>
   );

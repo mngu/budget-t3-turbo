@@ -4,6 +4,7 @@ import { Loader2Icon } from "lucide-react";
 
 import type { AccountSummary, ConnectionSummary } from "@budget/api";
 import { cn } from "@budget/ui";
+import { Button } from "@budget/ui/button";
 
 import { CONSENT_TONE, consentView } from "../-lib/consent";
 import { useRenewConnection } from "../-lib/use-renew";
@@ -89,13 +90,9 @@ export function ConnectionCard({
           </button>
 
           {connection.status !== "revoked" && (
-            <button
-              type="button"
-              onClick={onRevoke}
-              className="text-muted-foreground hover:bg-bad-soft hover:border-bad hover:text-bad h-[30px] rounded-[9px] border px-3 text-xs whitespace-nowrap"
-            >
+            <Button variant="outline" size="sm" onClick={onRevoke}>
               Révoquer
-            </button>
+            </Button>
           )}
         </div>
       </div>

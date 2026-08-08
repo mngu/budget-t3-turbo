@@ -1,6 +1,5 @@
 "use client";
 
-import type { LucideIcon } from "lucide-react";
 import { useState } from "react";
 import {
   ChevronDownIcon,
@@ -17,7 +16,14 @@ import {
 import type { CategoryOverviewNode } from "@budget/api";
 import { FALLBACK_CATEGORY_COLOR } from "@budget/shared";
 import { cn } from "@budget/ui";
-import { Popover, PopoverContent, PopoverTrigger } from "@budget/ui/popover";
+import { Button } from "@budget/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@budget/ui/dropdown-menu";
 
 import type { GhostBranch } from "../-lib/suggestions";
 import {
@@ -124,20 +130,12 @@ export function CategoryOverviewTree({
           catégorie.
         </p>
         <div className="mt-4 flex justify-center gap-2">
-          <button
-            type="button"
-            onClick={actions.onAddParent}
-            className="border-border-strong hover:bg-accent h-[31px] rounded-[9px] border px-3 text-xs font-medium"
-          >
+          <Button variant="outline" size="sm" onClick={actions.onAddParent}>
             Créer une catégorie
-          </button>
-          <button
-            type="button"
-            onClick={onAnalyze}
-            className="bg-primary text-primary-foreground h-[31px] rounded-[9px] px-3.5 text-xs font-semibold"
-          >
+          </Button>
+          <Button size="sm" onClick={onAnalyze}>
             Analyser mes transactions
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -232,8 +230,6 @@ function ParentRow({
   onToggle: () => void;
 } & Omit<CategoryOverviewTreeActions, "onAddParent">) {
   const resolve = useCategoryColor();
-  const [menuOpen, setMenuOpen] = useState(false);
-
   const color = parent.color ?? FALLBACK_CATEGORY_COLOR;
   const hasIdentity = parent.color !== null || parent.icon !== null;
   const collapsible = parent.children.length > 0 || ghosts.length > 0;
@@ -347,53 +343,37 @@ function ParentRow({
           title="Voir les transactions directes"
         />
 
-        <Popover open={menuOpen} onOpenChange={setMenuOpen}>
-          <PopoverTrigger
-            render={(props) => (
-              <button
-                {...props}
-                type="button"
+        {/* Une entrée referme le menu d'elle-même : plus de `setMenuOpen(false)`
+            en tête de chaque action. */}
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon-sm"
                 aria-label={`Actions sur ${parent.name}`}
-                className="text-subtle hover:bg-accent hover:text-foreground flex size-[26px] items-center justify-center rounded-[7px]"
-              >
-                <EllipsisIcon className="size-3.5" />
-              </button>
-            )}
-          />
-          <PopoverContent align="end" className="w-[236px] p-1">
-            <MenuItem
-              icon={PlusIcon}
-              onClick={() => {
-                setMenuOpen(false);
-                onAddChild(parent.id);
-              }}
-            >
+              />
+            }
+          >
+            <EllipsisIcon />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => onAddChild(parent.id)}>
+              <PlusIcon />
               Ajouter une sous-catégorie
-            </MenuItem>
-            <MenuItem
-              icon={PaletteIcon}
-              onClick={() => {
-                setMenuOpen(false);
-                onOpenIdentity(parent);
-              }}
-            >
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onOpenIdentity(parent)}>
+              <PaletteIcon />
               Couleur et icône
-            </MenuItem>
-            <MenuItem
-              icon={ListIcon}
-              onClick={() => {
-                setMenuOpen(false);
-                previewParent();
-              }}
-            >
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={previewParent}>
+              <ListIcon />
               Voir les transactions
-            </MenuItem>
-            <div className="bg-border my-1 h-px" />
-            <MenuItem
-              icon={Trash2Icon}
-              destructive
-              onClick={() => {
-                setMenuOpen(false);
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() =>
                 onDelete({
                   id: parent.id,
                   name: parent.name,
@@ -402,13 +382,14 @@ function ParentRow({
                   childNames: parent.children.map(
                     (c) => `${c.name} · ${c.transactionCount}`,
                   ),
-                });
-              }}
+                })
+              }
             >
+              <Trash2Icon />
               Supprimer la catégorie
-            </MenuItem>
-          </PopoverContent>
-        </Popover>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {expanded && (
@@ -696,32 +677,6 @@ function CountButton({
       )}
     >
       {count} txns
-    </button>
-  );
-}
-
-function MenuItem({
-  icon: Icon,
-  children,
-  onClick,
-  destructive,
-}: {
-  icon: LucideIcon;
-  children: React.ReactNode;
-  onClick: () => void;
-  destructive?: boolean;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-xs",
-        destructive ? "text-bad hover:bg-bad-soft" : "hover:bg-accent",
-      )}
-    >
-      <Icon className="size-3.5 flex-none" />
-      {children}
     </button>
   );
 }

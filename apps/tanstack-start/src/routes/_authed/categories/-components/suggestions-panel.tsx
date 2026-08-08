@@ -2,6 +2,8 @@
 
 import { SparklesIcon, XIcon } from "lucide-react";
 
+import { Button } from "@budget/ui/button";
+
 const dateTimeFr = new Intl.DateTimeFormat("fr-FR", {
   dateStyle: "long",
   timeStyle: "short",
@@ -112,13 +114,9 @@ export function SuggestionsReviewPanel({
             </>
           )}
         </p>
-        <button
-          type="button"
-          onClick={onClose}
-          className="bg-primary text-primary-foreground ml-auto h-[31px] rounded-[9px] px-3.5 text-xs font-semibold whitespace-nowrap"
-        >
+        <Button size="sm" className="ml-auto" onClick={onClose}>
           Voir dans ma liste ↓
-        </button>
+        </Button>
       </div>
     </PanelShell>
   );
@@ -143,14 +141,15 @@ function PanelShell({
         {tagline && (
           <span className="text-subtle text-[11.5px]">{tagline}</span>
         )}
-        <button
-          type="button"
-          onClick={onClose}
+        <Button
+          variant="ghost"
+          size="icon-xs"
           aria-label="Fermer"
-          className="text-subtle hover:bg-accent hover:text-foreground ml-auto flex size-[26px] items-center justify-center rounded-[7px]"
+          className="ml-auto"
+          onClick={onClose}
         >
-          <XIcon className="size-3.5" />
-        </button>
+          <XIcon />
+        </Button>
       </div>
       {children}
     </section>

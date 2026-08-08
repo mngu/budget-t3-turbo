@@ -4,6 +4,9 @@ import { CircleAlertIcon, Loader2Icon, MailCheckIcon } from "lucide-react";
 import { z } from "zod/v4";
 
 import { cn } from "@budget/ui";
+import { Button } from "@budget/ui/button";
+import { Field, FieldLabel } from "@budget/ui/field";
+import { Input } from "@budget/ui/input";
 
 import { authClient } from "~/auth/client";
 import { GradientWavesBg } from "~/component/gradient-waves-bg";
@@ -30,9 +33,6 @@ export const Route = createFileRoute("/login")({
   }),
   component: LoginPage,
 });
-
-const FIELD =
-  "h-[34px] rounded-[9px] border bg-card px-[11px] text-[13px] outline-none transition-[border-color,box-shadow] duration-[130ms] focus:border-primary focus:ring-[3px] focus:ring-accent-soft";
 
 const RISE =
   "animate-in fade-in fill-mode-both ease-[cubic-bezier(0.2,0.7,0.2,1)]";
@@ -79,7 +79,12 @@ function LoginPage() {
       </div>
 
       <div className="relative z-1 flex flex-1 flex-col items-center justify-center p-6">
-        <div className={cn(RISE, "slide-in-from-bottom-[10px] mb-5 flex items-center gap-2 duration-500")}>
+        <div
+          className={cn(
+            RISE,
+            "slide-in-from-bottom-[10px] mb-5 flex items-center gap-2 duration-500",
+          )}
+        >
           <div className="bg-primary size-[13px] rounded-[3px]" />
           <span className="text-[19px] font-semibold tracking-[-0.02em]">
             Budget
@@ -98,22 +103,18 @@ function LoginPage() {
           </h1>
 
           <div className="flex flex-col gap-2">
-            <label className="flex flex-col gap-1">
-              <span className="text-muted-foreground text-[11px] font-medium">
-                Adresse e-mail
-              </span>
-              <input
+            <Field>
+              <FieldLabel htmlFor="email">Adresse e-mail</FieldLabel>
+              <Input
+                id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="vous@exemple.fr"
                 autoComplete="email"
-                className={cn(
-                  FIELD,
-                  error ? "border-bad" : "border-border-strong",
-                )}
+                aria-invalid={error !== null}
               />
-            </label>
+            </Field>
 
             {error && (
               <div className="bg-bad-soft text-bad flex items-start gap-[7px] rounded-[9px] px-[11px] py-[9px] text-[11.5px] leading-[1.45]">
@@ -132,18 +133,14 @@ function LoginPage() {
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={incomplete}
-              className="bg-primary text-primary-foreground mt-0.5 flex h-[34px] items-center justify-center gap-2 rounded-[9px] text-[13px] font-semibold tracking-[-0.01em] transition-[opacity,transform] duration-[130ms] hover:opacity-92 active:scale-[0.988] disabled:opacity-60"
-            >
-              {pending && <Loader2Icon className="size-3.5 animate-spin" />}
+            <Button type="submit" disabled={incomplete} className="mt-0.5">
+              {pending && <Loader2Icon className="animate-spin" />}
               {pending
                 ? "Envoi…"
                 : sent
                   ? "Renvoyer le lien"
                   : "Recevoir mon lien de connexion"}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

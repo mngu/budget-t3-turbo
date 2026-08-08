@@ -9,6 +9,7 @@ import {
 
 import type { CategoryOverviewNode, SuggestionsRun } from "@budget/api";
 import { CATEGORY_COLOR_PALETTE } from "@budget/shared";
+import { Button } from "@budget/ui/button";
 import { toast } from "@budget/ui/toast";
 
 import type { DeleteTarget } from "./-components/category-delete-dialog";
@@ -242,7 +243,8 @@ function CategoriesPage() {
                   </p>
                 </div>
                 <div className="flex items-center gap-2.5">
-                  <SecondaryButton
+                  <Button
+                    variant="outline"
                     onClick={() =>
                       openUncategorizedPreview(
                         trpcClient,
@@ -252,23 +254,21 @@ function CategoriesPage() {
                     }
                   >
                     Voir les {uncategorizedCount}
-                  </SecondaryButton>
+                  </Button>
                   {/* Absent de la maquette, qui ne connaît que l'analyse :
                       classer avec les catégories existantes reste l'étape la
                       moins chère, et c'est elle qui dit si l'arbre suffit. */}
-                  <SecondaryButton onClick={categorize} disabled={categorizing}>
+                  <Button
+                    variant="outline"
+                    onClick={categorize}
+                    disabled={categorizing}
+                  >
                     {categorizing && (
                       <Loader2Icon className="size-3.5 animate-spin" />
                     )}
                     Catégoriser
-                  </SecondaryButton>
-                  <button
-                    type="button"
-                    onClick={generate}
-                    className="bg-primary text-primary-foreground h-[34px] rounded-[9px] px-4 text-[12.5px] font-semibold whitespace-nowrap"
-                  >
-                    Lancer l'analyse
-                  </button>
+                  </Button>
+                  <Button onClick={generate}>Lancer l&apos;analyse</Button>
                 </div>
               </section>
             ) : (
@@ -283,9 +283,9 @@ function CategoriesPage() {
                     que celles que vous avez.
                   </p>
                 </div>
-                <SecondaryButton onClick={generate}>
+                <Button variant="outline" onClick={generate}>
                   Chercher des catégories
-                </SecondaryButton>
+                </Button>
               </section>
             ))}
 
@@ -327,14 +327,15 @@ function CategoriesPage() {
                 </span>
               )}
               {tree.length > 0 && (
-                <SecondaryButton
+                <Button
+                  variant="outline"
+                  size="xs"
                   onClick={() =>
                     setExpandAll((v) => (v === true ? false : true))
                   }
-                  className="h-auto py-1"
                 >
                   Tout replier / déplier
-                </SecondaryButton>
+                </Button>
               )}
             </div>
           </div>
@@ -566,28 +567,5 @@ function Stat({
       </div>
       <div className="label-caps mt-0.5">{label}</div>
     </div>
-  );
-}
-
-function SecondaryButton({
-  children,
-  onClick,
-  disabled,
-  className,
-}: {
-  children: React.ReactNode;
-  onClick: () => void;
-  disabled?: boolean;
-  className?: string;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className={`border-border-strong bg-card text-muted-foreground hover:text-foreground hover:border-primary flex h-[34px] items-center gap-1.5 rounded-[9px] border px-3 text-xs whitespace-nowrap disabled:opacity-60 ${className ?? ""}`}
-    >
-      {children}
-    </button>
   );
 }

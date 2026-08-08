@@ -5,6 +5,7 @@ import { useRouter } from "@tanstack/react-router";
 import { RefreshCwIcon } from "lucide-react";
 
 import { cn } from "@budget/ui";
+import { Button } from "@budget/ui/button";
 import { toast } from "@budget/ui/toast";
 
 import { dateFr } from "~/lib/format";
@@ -65,20 +66,10 @@ export function SyncStatus({
         <div className="label-caps mt-0.5">{meta}</div>
       </div>
 
-      <button
-        type="button"
-        disabled={state === "running"}
-        onClick={sync}
-        className="border-border-strong hover:bg-accent flex h-8 items-center gap-1.5 rounded-[9px] border px-3 text-xs font-medium whitespace-nowrap disabled:opacity-60"
-      >
-        <RefreshCwIcon
-          className={cn(
-            "text-muted-foreground size-3.5",
-            state === "running" && "animate-spin",
-          )}
-        />
+      <Button variant="outline" disabled={state === "running"} onClick={sync}>
+        <RefreshCwIcon className={cn(state === "running" && "animate-spin")} />
         Synchroniser
-      </button>
+      </Button>
     </div>
   );
 }
