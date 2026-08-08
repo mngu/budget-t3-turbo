@@ -56,7 +56,9 @@
     "AUTH_URL",
     "RESEND_API_KEY",
     "EMAIL_FROM",
-    "PORT"
+    "PORT",
+    "SITE_URL",
+    "DATA_DIR"
   ],
   "globalPassThroughEnv": [
     "NODE_ENV",

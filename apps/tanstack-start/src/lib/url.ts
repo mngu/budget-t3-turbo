@@ -4,6 +4,11 @@ export function getBaseUrl() {
   if (typeof window !== "undefined") {
     return window.location.origin;
   }
+  // Déploiement autonome (VPS) : prioritaire sur les variables Vercel, qui n'y
+  // sont pas posées.
+  if (env.SITE_URL) {
+    return env.SITE_URL;
+  }
   if (env.VERCEL_ENV === "production") {
     return `https://${env.VERCEL_PROJECT_PRODUCTION_URL}`;
   }

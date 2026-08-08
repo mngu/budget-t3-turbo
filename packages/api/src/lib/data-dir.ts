@@ -3,11 +3,13 @@ import { fileURLToPath } from "node:url";
 
 // data/ vit à la racine du monorepo (JSON Enable Banking + credentials EB),
 // quel que soit le cwd (pnpm -F exécute depuis packages/api).
-const DATA_DIR = resolve(
-  dirname(fileURLToPath(import.meta.url)),
-  "../../../..",
-  "data",
-);
+//
+// La remontée est relative à l'emplacement de CE fichier : hors du monorepo
+// (bundle nitro dans une image Docker) elle ne désigne plus la racine mais un
+// répertoire quelconque du bundle. Un déploiement pose donc DATA_DIR.
+const DATA_DIR =
+  process.env.DATA_DIR ??
+  resolve(dirname(fileURLToPath(import.meta.url)), "../../../..", "data");
 
 /**
  * Les JSON d'un espace, dans un sous-répertoire à lui.

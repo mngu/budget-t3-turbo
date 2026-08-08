@@ -18,6 +18,11 @@ export const env = createEnv({
    */
   server: {
     POSTGRES_URL: z.url(),
+    // Origine publique du déploiement. Sur Vercel elle se déduit des variables
+    // de la plateforme ; sur un VPS rien ne la donne, et sans elle better-auth
+    // et le client tRPC SSR retombent sur http://localhost:3000 (cookies posés
+    // sur la mauvaise origine, appels SSR vers le vide).
+    SITE_URL: z.url().optional(),
   },
 
   /**
