@@ -684,7 +684,26 @@ export async function listBankLabels(
   const rows = await db
     .selectDistinct({ bankName: bankLabel })
     .from(bankAccounts)
-    .where(eq(bankAccounts.organizationId, organizationId))
+    .where(
+      and(
+        eq(bankAccounts.organizationId, organizationId),
+        // Un compte décoché au wizard n'est jamais importé : le nommer ici
+        // ajouterait au panneau une ligne à 0 qui ne peut rien filtrer.
+        // Mais s'il a déjà des transactions (décoché *après* un import), son
+        // libellé doit rester : ses lignes pèsent dans les agrégats tant que
+        // `bank` est indéfini, et sans case à cocher elles disparaîtraient au
+        // premier décochage sans que rien ne l'explique.
+        or(
+          eq(bankAccounts.enabled, true),
+          exists(
+            db
+              .select({ one: sql`1` })
+              .from(transactions)
+              .where(eq(transactions.accountId, bankAccounts.id)),
+          ),
+        ),
+      ),
+    )
     .orderBy(asc(bankLabel));
   return rows.map((r) => r.bankName);
 }
