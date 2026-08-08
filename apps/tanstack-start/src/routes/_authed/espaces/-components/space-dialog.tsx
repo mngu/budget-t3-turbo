@@ -2,7 +2,12 @@
 
 import { cn } from "@budget/ui";
 import { Button } from "@budget/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@budget/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogTitle,
+} from "@budget/ui/dialog";
 import { Field, FieldDescription, FieldLabel } from "@budget/ui/field";
 import { Input } from "@budget/ui/input";
 import { Spinner } from "@budget/ui/spinner";
@@ -72,7 +77,10 @@ export function SpaceDialog({
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="border-border-strong max-w-[520px] gap-0 overflow-hidden p-0">
+      <DialogContent
+        padded={false}
+        className="border-border-strong max-w-[520px] overflow-hidden"
+      >
         <div className="px-5 pt-4 pb-4">
           <div className="flex items-center gap-2.5">
             <span
@@ -172,10 +180,8 @@ export function SpaceDialog({
           )}
         </div>
 
-        <div className="border-border bg-surface-2 flex items-center gap-2.5 border-t px-5 py-3">
-          <span className="text-subtle min-w-0 flex-1 text-[11.5px] text-pretty">
-            {spec.footnote}
-          </span>
+        <DialogFooter>
+          <span className="min-w-0 flex-1 text-pretty">{spec.footnote}</span>
           {spec.cancel && (
             <Button variant="ghost" className="flex-none" onClick={onClose}>
               {spec.cancel}
@@ -190,7 +196,7 @@ export function SpaceDialog({
             {busy && <Spinner />}
             {spec.cta}
           </Button>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

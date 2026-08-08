@@ -15,6 +15,7 @@ import {
   CommandList,
   CommandShortcut,
 } from "@budget/ui/command";
+import { InputGroup, InputGroupAddon } from "@budget/ui/input-group";
 import { ToggleGroup, ToggleGroupItem } from "@budget/ui/toggle-group";
 
 import { SearchInput } from "~/component/search-input";
@@ -310,21 +311,17 @@ export function RefineBar({
       )}
 
       {searchField && (
-        <div
-          className={cn(
-            "bg-card ml-auto flex h-[30px] max-w-[420px] min-w-[150px] flex-1 items-center gap-2 rounded-lg border px-2.5",
-            search.q ? "border-primary" : "border-border",
-          )}
-        >
-          <SearchIcon className="text-subtle size-3.5 flex-none" />
+        <InputGroup className="ml-auto max-w-[420px] min-w-[150px] flex-1">
+          <InputGroupAddon>
+            <SearchIcon />
+          </InputGroupAddon>
           <SearchInput
             param="q"
             resetParams={{ page: 1 }}
-            className="h-auto border-0 bg-transparent p-0 text-[12.5px] shadow-none focus-visible:ring-0"
             placeholder="Rechercher un libellé, une catégorie, un montant…"
             aria-label="Recherche"
           />
-        </div>
+        </InputGroup>
       )}
 
       <CategoryFilterDialog open={catOpen} onOpenChange={setCatOpen} />

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useDebounce } from "@uidotdev/usehooks";
 
-import { Input } from "@budget/ui/input";
+import { InputGroupInput } from "@budget/ui/input-group";
 
 export function SearchInput({
   param,
@@ -15,7 +15,7 @@ export function SearchInput({
   param: string;
   delay?: number;
   resetParams?: Record<string, unknown>;
-} & Omit<React.ComponentProps<typeof Input>, "value" | "onChange">) {
+} & Omit<React.ComponentProps<typeof InputGroupInput>, "value" | "onChange">) {
   // Cast needed: eslint's typed-linting disagrees with `tsc` here — removing it breaks
   // `pnpm typecheck` (TS7053, no index signature) since `search[param]` below needs a string index.
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
@@ -50,8 +50,11 @@ export function SearchInput({
     }
   }, [urlValue]);
 
+  // `InputGroupInput` et non `Input` : ce champ est toujours accompagné d'une
+  // icône, donc toujours dans un `InputGroup` — c'est le groupe qui porte la
+  // boîte et le focus, l'input ne doit pas en dessiner une seconde.
   return (
-    <Input
+    <InputGroupInput
       ref={inputRef}
       value={text}
       onChange={(e) => setText(e.target.value)}

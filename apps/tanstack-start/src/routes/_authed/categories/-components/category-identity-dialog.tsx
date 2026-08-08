@@ -13,6 +13,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@budget/ui/dialog";
@@ -80,7 +81,10 @@ export function CategoryIdentityDialog({
         onOpenChange(open);
       }}
     >
-      <DialogContent className="flex max-h-[calc(100vh-7rem)] max-w-[520px] flex-col gap-0 overflow-hidden p-0">
+      <DialogContent
+        padded={false}
+        className="max-h-[calc(100vh-7rem)] max-w-[520px] overflow-hidden"
+      >
         <DialogHeader className="flex-none flex-row items-center gap-3 border-b p-4">
           <span
             className="flex size-[30px] flex-none items-center justify-center rounded-[9px]"
@@ -257,7 +261,7 @@ export function CategoryIdentityDialog({
         </div>
 
         {target?.color && twin && (
-          <div className="bg-sunken text-muted-foreground flex flex-none items-center gap-2 border-t p-3 text-[11px]">
+          <DialogFooter>
             <span
               className="flex size-[26px] flex-none items-center justify-center rounded-lg"
               style={{
@@ -272,7 +276,7 @@ export function CategoryIdentityDialog({
               <span className="text-foreground font-medium">{twin}</span> —
               c'est l'icône qui les distingue.
             </span>
-          </div>
+          </DialogFooter>
         )}
       </DialogContent>
     </Dialog>

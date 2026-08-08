@@ -4,6 +4,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@budget/ui/dialog";
@@ -64,7 +65,8 @@ export function TransactionPreviewDrawer({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         variant="drawer"
-        className="w-[460px] max-w-[92vw] gap-0 p-0"
+        padded={false}
+        className="w-[460px] max-w-[92vw]"
       >
         <DialogHeader className="flex-none border-b px-4 py-3.5">
           <div className="flex items-center gap-2.5 pr-8">
@@ -139,11 +141,7 @@ export function TransactionPreviewDrawer({
           )}
         </div>
 
-        {footer && (
-          <div className="bg-sunken text-subtle flex-none border-t px-4 py-2.5 text-[11.5px]">
-            {footer}
-          </div>
-        )}
+        {footer && <DialogFooter>{footer}</DialogFooter>}
       </DialogContent>
     </Dialog>
   );

@@ -6,7 +6,13 @@ import { ArrowLeftRightIcon } from "lucide-react";
 
 import type { TransactionRow } from "@budget/api";
 import { cn } from "@budget/ui";
-import { Dialog, DialogContent, DialogTitle } from "@budget/ui/dialog";
+import { Button } from "@budget/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogTitle,
+} from "@budget/ui/dialog";
 import { toast } from "@budget/ui/toast";
 
 import { signedEuro } from "~/lib/format";
@@ -85,7 +91,10 @@ function UnlinkDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[380px] max-w-[calc(100vw-2rem)] gap-0 rounded-[14px] p-0">
+      <DialogContent
+        padded={false}
+        className="w-[380px] max-w-[calc(100vw-2rem)] rounded-[14px]"
+      >
         <DialogTitle className="label-caps border-border border-b p-3.5 pr-10 text-[11px] font-normal">
           Virement entre comptes
         </DialogTitle>
@@ -104,23 +113,19 @@ function UnlinkDialog({
             correction est définitive de son point de vue.
           </p>
         </div>
-        <div className="border-border flex justify-end gap-2 border-t p-3">
-          <button
-            type="button"
-            onClick={() => onOpenChange(false)}
-            className="text-muted-foreground hover:bg-accent rounded-lg px-2.5 py-1 text-[12.5px]"
-          >
+        <DialogFooter className="justify-end">
+          <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
             Fermer
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
             disabled={pending}
             onClick={() => void unlink()}
-            className="border-border-strong hover:bg-accent rounded-lg border px-2.5 py-1 text-[12.5px] disabled:opacity-50"
           >
-            Ce n'est pas un virement interne
-          </button>
-        </div>
+            Ce n&apos;est pas un virement interne
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

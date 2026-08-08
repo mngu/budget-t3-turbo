@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ExternalLinkIcon, RefreshCwIcon } from "lucide-react";
+import { ExternalLinkIcon, RefreshCwIcon, SearchIcon } from "lucide-react";
 import { z } from "zod/v4";
 
 import type { AccountSummary, AspspOption } from "@budget/api";
 import { cn } from "@budget/ui";
 import { Button } from "@budget/ui/button";
 import { Input } from "@budget/ui/input";
+import { InputGroup, InputGroupAddon } from "@budget/ui/input-group";
 import { Spinner } from "@budget/ui/spinner";
 import { toast } from "@budget/ui/toast";
 
@@ -151,11 +152,15 @@ function StepBanque() {
     <div className="px-5 pt-4.5 pb-5">
       <h2 className="text-[13.5px] font-semibold">Choisissez votre banque</h2>
 
-      <SearchInput
-        param="q"
-        placeholder="Rechercher une banque (ex : Caisse d'Epargne, Revolut…)"
-        className="mt-3 h-8.5 max-w-[480px] rounded-[9px] text-[12.5px]"
-      />
+      <InputGroup className="mt-3 max-w-[480px]">
+        <InputGroupAddon>
+          <SearchIcon />
+        </InputGroupAddon>
+        <SearchInput
+          param="q"
+          placeholder="Rechercher une banque (ex : Caisse d'Epargne, Revolut…)"
+        />
+      </InputGroup>
 
       {aspsps.length === 0 ? (
         <div className="border-border-strong mt-3.5 rounded-xl border border-dashed px-4.5 py-6 text-center">
