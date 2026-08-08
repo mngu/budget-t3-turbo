@@ -148,7 +148,7 @@ function Row({
         {flagged && (
           <span
             className="bg-bad size-1.5 flex-none rounded-full"
-            title="À revoir — voir l'onglet du même nom"
+            title="À revoir : sans catégorie, à classer, ou d'un sens inattendu pour sa catégorie"
           />
         )}
       </span>

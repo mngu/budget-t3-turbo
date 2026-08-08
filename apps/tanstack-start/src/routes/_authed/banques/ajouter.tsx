@@ -6,6 +6,7 @@ import { z } from "zod/v4";
 import type { AccountSummary, AspspOption } from "@budget/api";
 import { cn } from "@budget/ui";
 import { Button } from "@budget/ui/button";
+import { Checkbox } from "@budget/ui/checkbox";
 import { Input } from "@budget/ui/input";
 import { InputGroup, InputGroupAddon } from "@budget/ui/input-group";
 import { Spinner } from "@budget/ui/spinner";
@@ -289,21 +290,11 @@ function StepComptes() {
             key={account.id}
             className="hover:bg-surface-2 grid grid-cols-[20px_minmax(120px,1fr)_max-content] items-center gap-3 border-b px-3.5 py-2.5 last:border-b-0"
           >
-            <button
-              type="button"
-              role="checkbox"
-              aria-checked={account.enabled}
+            <Checkbox
+              checked={account.enabled}
+              onCheckedChange={(enabled) => setRow(account.id, { enabled })}
               aria-label={`Suivre ${account.displayName ?? account.iban ?? account.uid}`}
-              onClick={() => setRow(account.id, { enabled: !account.enabled })}
-              className={cn(
-                "text-primary-foreground flex size-[17px] items-center justify-center rounded-[5px] border-[1.5px] text-[10px]",
-                account.enabled
-                  ? "border-primary bg-primary"
-                  : "border-border-strong",
-              )}
-            >
-              {account.enabled ? "✓" : ""}
-            </button>
+            />
 
             <Input
               value={account.displayName ?? ""}

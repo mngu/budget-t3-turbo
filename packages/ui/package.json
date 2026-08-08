@@ -10,6 +10,8 @@
     "./button": "./src/button.tsx",
     "./calendar": "./src/calendar.tsx",
     "./card": "./src/card.tsx",
+    "./checkbox": "./src/checkbox.tsx",
+    "./collapsible": "./src/collapsible.tsx",
     "./command": "./src/command.tsx",
     "./dialog": "./src/dialog.tsx",
     "./dropdown-menu": "./src/dropdown-menu.tsx",
@@ -24,6 +26,7 @@
     "./theme": "./src/theme.tsx",
     "./toast": "./src/toast.tsx",
     "./toggle": "./src/toggle.tsx",
+    "./tooltip": "./src/tooltip.tsx",
     "./toggle-group": "./src/toggle-group.tsx"
   },
   "license": "MIT",

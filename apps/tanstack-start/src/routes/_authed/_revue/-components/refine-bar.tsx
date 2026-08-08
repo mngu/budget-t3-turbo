@@ -17,6 +17,7 @@ import {
 } from "@budget/ui/command";
 import { InputGroup, InputGroupAddon } from "@budget/ui/input-group";
 import { ToggleGroup, ToggleGroupItem } from "@budget/ui/toggle-group";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@budget/ui/tooltip";
 
 import { SearchInput } from "~/component/search-input";
 import { softCategoryColor, useCategoryColor } from "~/lib/category-color";
@@ -225,28 +226,37 @@ export function RefineBar({
           {/* La maquette teinte ce bouton en rouge ; il reste `warn` ici, comme
               partout dans la revue où les hachures signalent « à classer » (voir
               CLAUDE.md). Seule la géométrie suit la maquette : h26, rayon 7. */}
-          <button
-            type="button"
-            onClick={() =>
-              setSearch({ aClasser: search.aClasser ? undefined : true })
-            }
-            title="Transactions rattachées à une catégorie parente qui a des sous-catégories"
-            className={cn(
-              "flex h-[26px] flex-none items-center gap-1.5 rounded-[7px] border px-2.5 text-xs font-medium",
-              search.aClasser
-                ? "border-warn bg-warn text-background"
-                : "bg-warn-soft text-warn border-transparent",
-            )}
-          >
-            <span
-              className="h-[7px] w-3.5 rounded-[2px]"
-              style={{
-                background:
-                  "repeating-linear-gradient(115deg,currentColor 0 3px,transparent 3px 7px)",
-              }}
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSearch({ aClasser: search.aClasser ? undefined : true })
+                  }
+                  className={cn(
+                    "flex h-[26px] flex-none items-center gap-1.5 rounded-[7px] border px-2.5 text-xs font-medium",
+                    search.aClasser
+                      ? "border-warn bg-warn text-background"
+                      : "bg-warn-soft text-warn border-transparent",
+                  )}
+                >
+                  <span
+                    className="h-[7px] w-3.5 rounded-[2px]"
+                    style={{
+                      background:
+                        "repeating-linear-gradient(115deg,currentColor 0 3px,transparent 3px 7px)",
+                    }}
+                  />
+                  À classer seulement
+                </button>
+              }
             />
-            À classer seulement
-          </button>
+            <TooltipContent>
+              Transactions rattachées à une catégorie parente qui a des
+              sous-catégories
+            </TooltipContent>
+          </Tooltip>
         </>
       )}
 
@@ -256,13 +266,16 @@ export function RefineBar({
           {/* Trois états plutôt qu'une bascule : « Seulement » n'est pas un
               filtre de confort, c'est l'écran d'audit de la détection — c'est
               là qu'on vérifie une paire et qu'on écarte un faux positif. */}
-          <span
-            className="text-subtle flex flex-none items-center gap-1.5 text-[11px]"
-            title="Virements entre deux comptes suivis : ils sont écartés de tous les totaux, mais restent listés ici"
-          >
-            <ArrowLeftRightIcon className="size-[13px]" />
-            Internes
-          </span>
+          <Tooltip>
+            <TooltipTrigger className="text-subtle flex flex-none items-center gap-1.5 text-[11px]">
+              <ArrowLeftRightIcon className="size-[13px]" />
+              Internes
+            </TooltipTrigger>
+            <TooltipContent className="max-w-[280px]">
+              Virements entre deux comptes suivis : ils sont écartés de tous les
+              totaux, mais restent listés ici
+            </TooltipContent>
+          </Tooltip>
           <ToggleGroup
             size="sm"
             aria-label="Virements internes"
@@ -279,13 +292,12 @@ export function RefineBar({
             }
           >
             {INTERNES.map((item) => (
-              <ToggleGroupItem
-                key={item.value}
-                value={item.value}
-                title={item.title}
-              >
-                {item.label}
-              </ToggleGroupItem>
+              <Tooltip key={item.value}>
+                <TooltipTrigger render={<ToggleGroupItem value={item.value} />}>
+                  {item.label}
+                </TooltipTrigger>
+                <TooltipContent>{item.title}</TooltipContent>
+              </Tooltip>
             ))}
           </ToggleGroup>
         </>

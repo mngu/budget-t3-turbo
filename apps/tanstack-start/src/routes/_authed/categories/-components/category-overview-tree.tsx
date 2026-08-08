@@ -19,6 +19,11 @@ import { FALLBACK_CATEGORY_COLOR } from "@budget/shared";
 import { cn } from "@budget/ui";
 import { Button } from "@budget/ui/button";
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@budget/ui/collapsible";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -257,13 +262,19 @@ function ParentRow({
       icon: parent.icon,
     });
 
+  // Pli contrôlé : l'état vit dans `CategoryOverviewTree`, qui l'arbitre entre
+  // le choix explicite, le signal « tout replier » et l'ouverture *forcée*
+  // d'une parente qui porte une proposition. `Collapsible` apporte le contrat
+  // (`aria-expanded`, `aria-controls`), pas l'état.
   return (
-    <div className="border-b last:border-b-0">
+    <Collapsible
+      open={expanded}
+      onOpenChange={onToggle}
+      render={<div className="border-b last:border-b-0" />}
+    >
       <div className="hover:bg-surface-2 grid min-h-[46px] grid-cols-[20px_30px_minmax(0,1fr)_auto_74px_26px] items-center gap-2 px-3">
-        <button
-          type="button"
-          onClick={onToggle}
-          disabled={forcedOpen}
+        <CollapsibleTrigger
+          disabled={forcedOpen || !collapsible}
           aria-label={expanded ? "Replier" : "Déplier"}
           className={cn(
             "text-subtle hover:bg-accent hover:text-foreground flex size-5 items-center justify-center rounded-md",
@@ -276,7 +287,7 @@ function ParentRow({
           ) : (
             <ChevronRightIcon className="size-2.5" />
           )}
-        </button>
+        </CollapsibleTrigger>
 
         <button
           type="button"
@@ -404,97 +415,95 @@ function ParentRow({
         </DropdownMenu>
       </div>
 
-      {expanded && (
-        <div className="pt-0.5 pb-2">
-          {ghosts.map((ghost) => (
-            <GhostRow
-              key={ghost.key}
-              ghost={ghost}
-              color={resolve(color)}
-              pending={pendingGhosts.has(ghost.key)}
-              onAccept={() => onAcceptGhost(ghost)}
-              onDismiss={() => onDismissGhost(ghost)}
-              onPreview={() => onPreviewGhost(ghost)}
-            />
-          ))}
+      <CollapsibleContent className="pt-0.5 pb-2">
+        {ghosts.map((ghost) => (
+          <GhostRow
+            key={ghost.key}
+            ghost={ghost}
+            color={resolve(color)}
+            pending={pendingGhosts.has(ghost.key)}
+            onAccept={() => onAcceptGhost(ghost)}
+            onDismiss={() => onDismissGhost(ghost)}
+            onPreview={() => onPreviewGhost(ghost)}
+          />
+        ))}
 
-          {parent.children.map((child, i) => {
-            const shade = shadeCategoryColor(
-              resolve(color),
-              i,
-              parent.children.length,
-            );
-            return (
-              <div
-                key={child.id}
-                className="hover:bg-surface-2 grid min-h-9 grid-cols-[61px_8px_minmax(0,1fr)_74px_26px] items-center gap-2 px-3"
+        {parent.children.map((child, i) => {
+          const shade = shadeCategoryColor(
+            resolve(color),
+            i,
+            parent.children.length,
+          );
+          return (
+            <div
+              key={child.id}
+              className="hover:bg-surface-2 grid min-h-9 grid-cols-[61px_8px_minmax(0,1fr)_74px_26px] items-center gap-2 px-3"
+            >
+              <span />
+              <span
+                className="size-[7px] rounded-full"
+                style={{ background: shade }}
+              />
+              <NameInput
+                name={child.name}
+                onRename={(name) => onRename(child.id, name)}
+                className="max-w-[260px] text-[12.5px]"
+              />
+              <CountButton
+                count={child.transactionCount}
+                onClick={() =>
+                  onPreview({
+                    name: child.name,
+                    includesChildren: false,
+                    // Palier de la teinte du parent, et son icône : une
+                    // sous-catégorie n'a ni l'une ni l'autre en propre. Le
+                    // fond reste l'aplat de la parente (voir
+                    // PreviewRequest.soft).
+                    color: shade,
+                    soft,
+                    icon: parent.icon,
+                  })
+                }
+                className="text-[11.5px]"
+              />
+              <button
+                type="button"
+                aria-label={`Supprimer ${child.name}`}
+                title="Supprimer"
+                onClick={() =>
+                  onDelete({
+                    id: child.id,
+                    name: child.name,
+                    transactionCount: child.transactionCount,
+                    childCount: 0,
+                    childNames: [],
+                  })
+                }
+                className="text-subtle hover:bg-bad-soft hover:text-bad flex size-6 items-center justify-center rounded-[7px]"
               >
-                <span />
-                <span
-                  className="size-[7px] rounded-full"
-                  style={{ background: shade }}
-                />
-                <NameInput
-                  name={child.name}
-                  onRename={(name) => onRename(child.id, name)}
-                  className="max-w-[260px] text-[12.5px]"
-                />
-                <CountButton
-                  count={child.transactionCount}
-                  onClick={() =>
-                    onPreview({
-                      name: child.name,
-                      includesChildren: false,
-                      // Palier de la teinte du parent, et son icône : une
-                      // sous-catégorie n'a ni l'une ni l'autre en propre. Le
-                      // fond reste l'aplat de la parente (voir
-                      // PreviewRequest.soft).
-                      color: shade,
-                      soft,
-                      icon: parent.icon,
-                    })
-                  }
-                  className="text-[11.5px]"
-                />
-                <button
-                  type="button"
-                  aria-label={`Supprimer ${child.name}`}
-                  title="Supprimer"
-                  onClick={() =>
-                    onDelete({
-                      id: child.id,
-                      name: child.name,
-                      transactionCount: child.transactionCount,
-                      childCount: 0,
-                      childNames: [],
-                    })
-                  }
-                  className="text-subtle hover:bg-bad-soft hover:text-bad flex size-6 items-center justify-center rounded-[7px]"
-                >
-                  <XIcon className="size-3" />
-                </button>
-              </div>
-            );
-          })}
+                <XIcon className="size-3" />
+              </button>
+            </div>
+          );
+        })}
 
-          {parent.children.length === 0 && (
-            <p className="text-subtle px-3 pt-1.5 pb-1 pl-[72px] text-[11.5px]">
-              Aucune sous-catégorie — ses {parent.directTransactionCount}{" "}
-              transactions sont portées directement par la catégorie.
-            </p>
-          )}
+        {parent.children.length === 0 && (
+          <p className="text-subtle px-3 pt-1.5 pb-1 pl-[72px] text-[11.5px]">
+            Aucune sous-catégorie — ses {parent.directTransactionCount}{" "}
+            transactions sont portées directement par la catégorie.
+          </p>
+        )}
 
-          <button
-            type="button"
-            onClick={() => onAddChild(parent.id)}
-            className="border-border-strong text-muted-foreground hover:bg-accent hover:text-foreground mt-1 ml-[72px] flex items-center gap-2 rounded-lg border border-dashed px-2.5 py-1 text-[11.5px]"
-          >
-            <PlusIcon className="size-3" />
-            Ajouter une sous-catégorie
-          </button>
-        </div>
-      )}
-    </div>
+        <button
+          type="button"
+          onClick={() => onAddChild(parent.id)}
+          className="border-border-strong text-muted-foreground hover:bg-accent hover:text-foreground mt-1 ml-[72px] flex items-center gap-2 rounded-lg border border-dashed px-2.5 py-1 text-[11.5px]"
+        >
+          <PlusIcon className="size-3" />
+          Ajouter une sous-catégorie
+        </button>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
 

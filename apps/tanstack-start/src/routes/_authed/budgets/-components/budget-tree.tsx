@@ -6,6 +6,13 @@ import { ChevronDownIcon, ChevronRightIcon } from "lucide-react";
 import type { CategoryBudgetRow, CategoryTreeNode } from "@budget/api";
 import { FALLBACK_CATEGORY_COLOR } from "@budget/shared";
 import { cn } from "@budget/ui";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@budget/ui/collapsible";
+import { ToggleGroup, ToggleGroupItem } from "@budget/ui/toggle-group";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@budget/ui/tooltip";
 
 import {
   shadeCategoryColor,
@@ -124,12 +131,19 @@ function ParentRow({
   );
   const missing = childAmounts.filter((a) => a === null).length;
 
+  // Le pli est contrôlé : l'état vit dans `BudgetTree` (`folds.overrides` +
+  // le signal « tout replier »). `Collapsible` n'apporte donc pas l'état mais
+  // le contrat — `aria-expanded` et `aria-controls` sur le déclencheur, que le
+  // chevron portait au mieux par un `aria-label`.
   return (
-    <div className="border-b last:border-b-0">
+    <Collapsible
+      open={expanded}
+      onOpenChange={onToggle}
+      render={<div className="border-b last:border-b-0" />}
+    >
       <div className="hover:bg-surface-2 grid min-h-[46px] grid-cols-[20px_30px_minmax(150px,1fr)_auto_224px_148px] items-center gap-2 px-3">
-        <button
-          type="button"
-          onClick={onToggle}
+        <CollapsibleTrigger
+          disabled={parent.children.length === 0}
           aria-label={expanded ? "Replier" : "Déplier"}
           className={cn(
             "text-subtle hover:bg-accent hover:text-foreground flex size-5 items-center justify-center rounded-md",
@@ -141,7 +155,7 @@ function ParentRow({
           ) : (
             <ChevronRightIcon className="size-2.5" />
           )}
-        </button>
+        </CollapsibleTrigger>
 
         <span
           className="flex size-[30px] items-center justify-center rounded-[9px] border border-transparent"
@@ -187,79 +201,92 @@ function ParentRow({
         </div>
 
         {parent.children.length > 0 && (
-          <div className="bg-sunken flex gap-0.5 justify-self-end rounded-lg border p-0.5">
-            <DetailToggle
-              active={!detailed}
-              title="Un seul budget pour toute la catégorie"
-              onClick={() => onSetDetailed(parent.id, false)}
-            >
-              Global
-            </DetailToggle>
-            <DetailToggle
-              active={detailed}
-              accent
-              title="Un budget par sous-catégorie — la catégorie affiche leur somme"
-              onClick={() => onSetDetailed(parent.id, true)}
-            >
-              Détaillé
-            </DetailToggle>
-          </div>
+          // `onValueChange` ne peut pas rendre un tableau vide ici : décocher
+          // l'option active la re-sélectionne, une parente est toujours dans
+          // l'un des deux régimes.
+          <ToggleGroup
+            variant="outline"
+            spacing={0}
+            size="sm"
+            aria-label="Régime de budget"
+            className="justify-self-end"
+            value={[detailed ? "detailed" : "global"]}
+            onValueChange={([value]) =>
+              value && onSetDetailed(parent.id, value === "detailed")
+            }
+          >
+            {/* Ces deux libellés ne se suffisent pas : c'est l'infobulle qui
+                dit ce que « détailler » change. Un `title` natif la ferait
+                attendre une seconde, sans style et jamais au toucher. */}
+            <Tooltip>
+              <TooltipTrigger render={<ToggleGroupItem value="global" />}>
+                Global
+              </TooltipTrigger>
+              <TooltipContent>
+                Un seul budget pour toute la catégorie
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger render={<ToggleGroupItem value="detailed" />}>
+                Détaillé
+              </TooltipTrigger>
+              <TooltipContent>
+                Un budget par sous-catégorie — la catégorie affiche leur somme
+              </TooltipContent>
+            </Tooltip>
+          </ToggleGroup>
         )}
       </div>
 
-      {expanded && (
-        <div className="pt-0.5 pb-2">
-          {parent.children.map((child, i) => {
-            const row = rows.get(child.id);
-            return (
-              <div
-                key={child.id}
-                className="hover:bg-surface-2 grid min-h-11 grid-cols-[61px_8px_minmax(0,1fr)_224px_148px] items-center gap-2 px-3"
-              >
-                <span />
-                <span
-                  className="size-[7px] rounded-full"
-                  style={{
-                    background: shadeCategoryColor(
-                      color,
-                      i,
-                      parent.children.length,
-                    ),
-                  }}
-                />
-                <span className="truncate px-2 text-[12.5px]">
-                  {child.name}
-                </span>
-                <div className="flex items-center justify-end gap-2">
-                  {detailed ? (
-                    <BudgetAmount
-                      row={row}
-                      onSet={(amount) => onSetAmount(child.id, amount)}
-                    />
-                  ) : (
-                    // Parente en budget global : la sous-catégorie n'a rien à
-                    // saisir, mais sa moyenne dit d'où vient la somme.
-                    <span className="num text-subtle text-[11px] whitespace-nowrap">
-                      {row && row.average > 0
-                        ? `moy. ${euro0.format(row.average)}`
-                        : "—"}
-                    </span>
-                  )}
-                </div>
-                <span />
+      <CollapsibleContent className="pt-0.5 pb-2">
+        {parent.children.map((child, i) => {
+          const row = rows.get(child.id);
+          return (
+            <div
+              key={child.id}
+              className="hover:bg-surface-2 grid min-h-11 grid-cols-[61px_8px_minmax(0,1fr)_224px_148px] items-center gap-2 px-3"
+            >
+              <span />
+              <span
+                className="size-[7px] rounded-full"
+                style={{
+                  background: shadeCategoryColor(
+                    color,
+                    i,
+                    parent.children.length,
+                  ),
+                }}
+              />
+              <span className="truncate px-2 text-[12.5px]">{child.name}</span>
+              <div className="flex items-center justify-end gap-2">
+                {detailed ? (
+                  <BudgetAmount
+                    row={row}
+                    onSet={(amount) => onSetAmount(child.id, amount)}
+                  />
+                ) : (
+                  // Parente en budget global : la sous-catégorie n'a rien à
+                  // saisir, mais sa moyenne dit d'où vient la somme.
+                  <span className="num text-subtle text-[11px] whitespace-nowrap">
+                    {row && row.average > 0
+                      ? `moy. ${euro0.format(row.average)}`
+                      : "—"}
+                  </span>
+                )}
               </div>
-            );
-          })}
+              <span />
+            </div>
+          );
+        })}
 
-          {parent.children.length === 0 && (
-            <p className="text-muted-foreground px-3 pt-1.5 pb-1 pl-[72px] text-[11.5px]">
-              Aucune sous-catégorie : le budget se pose directement sur la
-              catégorie.
-            </p>
-          )}
-        </div>
-      )}
-    </div>
+        {parent.children.length === 0 && (
+          <p className="text-muted-foreground px-3 pt-1.5 pb-1 pl-[72px] text-[11.5px]">
+            Aucune sous-catégorie : le budget se pose directement sur la
+            catégorie.
+          </p>
+        )}
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
 
@@ -345,38 +372,5 @@ function AmountInput({
         €
       </span>
     </span>
-  );
-}
-
-function DetailToggle({
-  active,
-  accent,
-  title,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  accent?: boolean;
-  title: string;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      title={title}
-      aria-pressed={active}
-      className={cn(
-        "h-[21px] rounded-md border px-2.5 text-[11px] whitespace-nowrap",
-        active
-          ? "bg-card font-semibold"
-          : "text-muted-foreground border-transparent",
-        active && accent && "border-primary text-primary",
-        active && !accent && "border-border-strong",
-      )}
-    >
-      {children}
-    </button>
   );
 }
