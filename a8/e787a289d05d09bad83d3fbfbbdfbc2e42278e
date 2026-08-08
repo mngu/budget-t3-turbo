@@ -1,0 +1,44 @@
+apps/tanstack-start/src/component/search-input.tsx
+  s_8f999494e2cae9::t_7aa077114a71cd 7,18,53-55,57
+apps/tanstack-start/src/routes/_authed/_revue/-components/transfer-badge.tsx
+  s_8f999494e2cae9::t_184783b86941fe 9-15,94-97,116-117,119-122,126-128
+apps/tanstack-start/src/routes/_authed/_revue/-components/refine-bar.tsx
+  s_8f999494e2cae9::t_7aa077114a71cd 18,314-317,324
+apps/tanstack-start/src/routes/_authed/categories/-components/transaction-preview-drawer.tsx
+  s_8f999494e2cae9::t_184783b86941fe 7,68-69,144
+apps/tanstack-start/src/routes/_authed/banques/ajouter.tsx
+  s_8f999494e2cae9::t_7aa077114a71cd 10,155-163
+  s_8f999494e2cae9::t_d7b2539496e2cd 3
+apps/tanstack-start/src/routes/_authed/categories/-components/category-identity-dialog.tsx
+  s_8f999494e2cae9::t_5d52c85cad3da7 264,279
+  s_8f999494e2cae9::t_efdd52713f0514 84-87
+  s_8f999494e2cae9::t_d7b2539496e2cd 16
+apps/tanstack-start/src/routes/_authed/espaces/-components/space-dialog.tsx
+  s_8f999494e2cae9::t_5d52c85cad3da7 80-83,183-184,199
+  s_8f999494e2cae9::t_2553909c4ffcc3 5-10
+packages/ui/src/dialog.tsx
+  s_8f999494e2cae9::t_014a3b94072d14 44,49-55,69-70,72-73
+  s_8f999494e2cae9::t_4851d9367f7777 100-118
+  s_8f999494e2cae9::t_5540b28ff0262b 148
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "a8e787a289d05d09bad83d3fbfbbdfbc2e42278e",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_8f999494e2cae9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "46475316-ef17-42cf-bf40-111d68c631ba",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
