@@ -1,0 +1,85 @@
+deploy/docker-compose.yml
+  s_c78c67c5ca65a6::t_6b7410349777a3 21-22
+  s_c78c67c5ca65a6::t_ba66c6acda3121 19-20
+apps/tanstack-start/src/routes/login.tsx
+  s_c78c67c5ca65a6::t_d2126bc7d1ae9d 2
+  s_c78c67c5ca65a6::t_5cfe76999b506d 125-128,131-134
+  s_c78c67c5ca65a6::t_4b64cb2cb381f4 45,61
+  s_c78c67c5ca65a6::t_d576c1a5abedd0 3,14-22,47-51,55,57,60,64,90,111-114,129-130,141-145
+  h_baa52ab231f280 97
+apps/tanstack-start/src/routes/invitation.$invitationId.tsx
+  s_c78c67c5ca65a6::t_dc42cd3cebe0eb 94,96
+  s_c78c67c5ca65a6::t_c2f28179697f36 26-27,50,81-86,88,91-92,97-98,141,146-148,194,217-218,260-261
+  s_c78c67c5ca65a6::t_1677d847a1f612 142-145,149-153
+  s_c78c67c5ca65a6::t_e1d37dae6de4d3 7,21-23,25
+packages/auth/env.ts
+  s_c78c67c5ca65a6::t_bcffeacc3cd4ca 12-19
+  s_c78c67c5ca65a6::t_5b9f142494ff50 20-26
+  s_c78c67c5ca65a6::t_be856e4c25ff5f 29-32
+.env.example
+  s_c78c67c5ca65a6::t_ba66c6acda3121 10-14
+  s_c78c67c5ca65a6::t_53ace0da5afc93 18-20
+  s_c78c67c5ca65a6::t_e1324200bb87e8 8-9,15-17
+apps/tanstack-start/src/auth/client.ts
+  s_c78c67c5ca65a6::t_dcacf1c78be86c 1,7-11,13
+packages/api/src/spaces/mutations.ts
+  s_c78c67c5ca65a6::t_0fe822fd1d1fc8 11
+deploy/deploy.sh
+  s_c78c67c5ca65a6::t_ba66c6acda3121 17-20
+packages/auth/src/email.ts
+  s_c78c67c5ca65a6::t_9074afed880251 1-15,26-32,60-66,68,71,75,77,81-83
+  s_c78c67c5ca65a6::t_f2d13b5fa1b042 56
+  s_c78c67c5ca65a6::t_3e7891c61899dd 17-18,54
+  s_c78c67c5ca65a6::t_ffa72da078ebbe 20,23,46,52,57,59,67,69-70,72-74,76,78-80,84-87,89,93,95-96,98,100,103,105,107-109
+  s_c78c67c5ca65a6::t_e980d7c747384a 16,55,58
+CLAUDE.md
+  s_c78c67c5ca65a6::t_2c818437531dbb 116,125
+  s_c78c67c5ca65a6::t_960a8d5f012036 120
+  s_c78c67c5ca65a6::t_07abd90dfee07f 115
+packages/api/src/router/spaces.ts
+  s_c78c67c5ca65a6::t_52d02632380308 17-21
+  s_c78c67c5ca65a6::t_269106f1beb88a 43-49
+apps/tanstack-start/src/env.ts
+  s_c78c67c5ca65a6::t_1e8de7c4d126e2 21-22
+  s_c78c67c5ca65a6::t_be856e4c25ff5f 36-37
+packages/api/src/index.ts
+  s_c78c67c5ca65a6::t_a3d114f688ea7b 57
+packages/api/src/spaces/queries.ts
+  s_c78c67c5ca65a6::t_bc13e0eed086a0 4
+  s_c78c67c5ca65a6::t_a404b1431065ae 242-292
+apps/tanstack-start/src/routes/_authed/espaces/index.tsx
+  s_c78c67c5ca65a6::t_91bd572b32701b 63
+  s_c78c67c5ca65a6::t_6f871f2da9b882 32-38
+  s_c78c67c5ca65a6::t_a83dfe32cfb24e 318-367
+  s_c78c67c5ca65a6::t_a8521fa0dc589e 16
+  s_c78c67c5ca65a6::t_76a65395912bb7 244-269
+packages/auth/src/index.ts
+  s_c78c67c5ca65a6::t_9a602be08235bb 113-129
+  s_c78c67c5ca65a6::t_e425993a83e48c 160-161
+  s_c78c67c5ca65a6::t_2b49de485b0222 88-90
+  s_c78c67c5ca65a6::t_e9e74b8e56463a 5,11-14
+  s_c78c67c5ca65a6::t_e1c4e7749c9d34 7,9
+  s_c78c67c5ca65a6::t_4cd58eb8bda0b0 70-72
+  s_c78c67c5ca65a6::t_a96da9ae122d9a 10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "dea10a94caf2a21021ff3346e42098399c64096c",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_c78c67c5ca65a6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3ab45e20-7fdc-4de0-80d4-7c5cff98b883",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
