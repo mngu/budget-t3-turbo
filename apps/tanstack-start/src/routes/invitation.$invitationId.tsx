@@ -55,7 +55,7 @@ function InvitationPage() {
   if (!invitation) {
     return (
       <Shell
-        icon={<ClockAlertIcon className="size-[17px]" />}
+        icon={<ClockAlertIcon className="size-4" />}
         tone="bad"
         title="Cette invitation est introuvable"
         body="Le lien est incomplet ou l'invitation a été supprimée. Demandez-en un nouveau à la personne qui vous a invité."
@@ -104,7 +104,7 @@ function InvitationPage() {
   if (invitation.status === "expired") {
     return (
       <Shell
-        icon={<ClockAlertIcon className="size-[17px]" />}
+        icon={<ClockAlertIcon className="size-4" />}
         tone="bad"
         title="Cette invitation a expiré"
         body={`Les liens d'invitation valent 7 jours. Demandez à ${invitation.invitedBy} d'en renvoyer un depuis l'écran Espaces — l'adresse invitée reste la même.`}
@@ -122,7 +122,7 @@ function InvitationPage() {
     const used = invitation.status === "accepted";
     return (
       <Shell
-        icon={<CircleCheckIcon className="size-[17px]" />}
+        icon={<CircleCheckIcon className="size-4" />}
         tone={used ? "ok" : "bad"}
         title={
           used ? "Ce lien a déjà été utilisé" : "Cette invitation a été annulée"
@@ -144,7 +144,7 @@ function InvitationPage() {
   if (sent) {
     return (
       <Shell
-        icon={<MailCheckIcon className="size-[17px]" />}
+        icon={<MailCheckIcon className="size-4" />}
         tone="primary"
         title="Ouvrez le lien de connexion"
         body={`Un lien vient de partir à ${invitation.email}. Ouvrez-le dans les 15 minutes : il vous connectera et vous ramènera ici pour rejoindre ${invitation.spaceName}.`}
@@ -161,7 +161,7 @@ function InvitationPage() {
   if (email !== null && !signedInAsInvited) {
     return (
       <Shell
-        icon={<UserIcon className="size-[17px]" />}
+        icon={<UserIcon className="size-4" />}
         tone="bad"
         title="Cette invitation vise une autre adresse"
         body={`Elle a été envoyée à ${invitation.email}, et vous êtes connecté avec ${email}. Déconnectez-vous pour l'accepter avec le bon compte.`}
@@ -180,9 +180,9 @@ function InvitationPage() {
     <Shell
       icon={
         signedInAsInvited ? (
-          <UsersIcon className="size-[17px]" />
+          <UsersIcon className="size-4" />
         ) : (
-          <UserPlusIcon className="size-[17px]" />
+          <UserPlusIcon className="size-4" />
         )
       }
       tone="primary"
@@ -236,7 +236,7 @@ function InvitationPage() {
       {signedInAsInvited ? (
         <div className="border-border flex items-center gap-2.5 border-b px-5 py-3.5">
           <UserIcon className="text-subtle size-3.5 flex-none" />
-          <div className="text-muted-foreground min-w-0 text-[12.5px]">
+          <div className="text-muted-foreground min-w-0 text-control">
             Connecté en tant que{" "}
             <span className="text-foreground font-medium">
               {invitation.email}
@@ -261,7 +261,7 @@ function InvitationPage() {
               autoComplete="name"
             />
           </Field>
-          <div className="text-subtle text-[11.5px] text-pretty">
+          <div className="text-subtle text-control text-pretty">
             Pas de mot de passe : un lien de connexion part à cette adresse, et
             c'est lui qui crée votre compte.
           </div>
@@ -303,29 +303,29 @@ function Shell({
   children?: React.ReactNode;
 }) {
   return (
-    <main className="flex min-h-dvh justify-center px-6 pt-14 pb-20 text-[13px] leading-[1.45]">
-      <div className="w-full max-w-[470px]">
+    <main className="flex min-h-dvh justify-center px-6 pt-14 pb-20 text-body leading-[1.45]">
+      <div className="w-full max-w-118">
         <div className="flex items-center justify-center gap-2.5">
-          <div className="bg-primary size-2.5 rounded-[2px]" />
-          <span className="text-[13.5px] font-semibold tracking-[-0.02em]">
+          <div className="bg-primary size-2.5 rounded-xs" />
+          <span className="text-body font-semibold tracking-[-0.02em]">
             Budget
           </span>
         </div>
 
-        <div className="border-border-strong bg-card mt-5 overflow-hidden rounded-[14px] border">
+        <div className="border-border-strong bg-card mt-5 overflow-hidden rounded-lg border">
           <div className="border-border border-b px-5 pt-5 pb-4">
             <span
               className={cn(
-                "flex size-[34px] items-center justify-center rounded-[11px]",
+                "flex size-9 items-center justify-center rounded-md",
                 TONE[tone],
               )}
             >
               {icon}
             </span>
-            <div className="mt-3 text-base font-semibold tracking-[-0.02em] text-pretty">
+            <div className="mt-3 text-heading text-pretty">
               {title}
             </div>
-            <div className="text-muted-foreground mt-1.5 text-[12.5px] text-pretty">
+            <div className="text-muted-foreground mt-1.5 text-control text-pretty">
               {body}
             </div>
           </div>
@@ -337,7 +337,7 @@ function Shell({
                   key={stat.label}
                   className="border-border border-r px-4 py-2.5 last:border-r-0"
                 >
-                  <div className="num text-sm font-medium">{stat.value}</div>
+                  <div className="num text-body font-medium">{stat.value}</div>
                   <div className="label-caps mt-0.5">{stat.label}</div>
                 </div>
               ))}
@@ -347,7 +347,7 @@ function Shell({
           {children}
 
           <div className="flex items-center gap-3 px-5 py-3.5">
-            <span className="text-subtle min-w-0 flex-1 text-[11.5px] text-pretty">
+            <span className="text-subtle min-w-0 flex-1 text-control text-pretty">
               {note}
             </span>
             {secondary && (
@@ -367,7 +367,7 @@ function Shell({
           </div>
         </div>
 
-        <div className="text-subtle mt-3.5 text-center text-[11.5px] text-pretty">
+        <div className="text-subtle mt-3.5 text-center text-control text-pretty">
           {footnote}
         </div>
       </div>

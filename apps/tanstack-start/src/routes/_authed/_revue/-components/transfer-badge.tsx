@@ -43,7 +43,7 @@ export function TransferBadge({ row }: { row: TransactionRow }) {
             : `Virement vers ${row.transferTwinBank}, hors des comptes affichés — compté dans les totaux`
         }
         className={cn(
-          "flex flex-none items-center gap-0.5 rounded-full border px-1.5 py-px text-[10px] leading-[14px]",
+          "flex flex-none items-center gap-0.5 rounded-full border px-1.5 py-px text-label leading-3.5",
           row.transferInScope
             ? "border-border bg-surface-2 text-subtle"
             : "border-border text-muted-foreground",
@@ -93,22 +93,22 @@ function UnlinkDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         padded={false}
-        className="w-[380px] max-w-[calc(100vw-2rem)] rounded-[14px]"
+        className="w-95 max-w-[calc(100vw-2rem)] rounded-lg"
       >
-        <DialogTitle className="label-caps border-border border-b p-3.5 pr-10 text-[11px] font-normal">
+        <DialogTitle className="label-caps border-border border-b p-3.5 pr-10 text-meta font-normal">
           Virement entre comptes
         </DialogTitle>
-        <div className="p-3.5 text-[12.5px]">
+        <div className="p-3.5 text-control">
           <p className="text-muted-foreground">
             <span className="num">{signedEuro.format(signed)}</span> ·{" "}
             {row.bankName} ⇄ {row.transferTwinBank}
           </p>
-          <p className="text-subtle mt-2 text-[11.5px]">
+          <p className="text-subtle mt-2 text-control">
             {row.transferInScope
               ? "Les deux lignes se compensent : elles sont écartées des totaux, de l'anneau et de la file « À revoir », mais restent dans ce relevé."
               : "L'autre jambe est hors des comptes affichés : cette ligne compte donc normalement dans les totaux du périmètre."}
           </p>
-          <p className="text-subtle mt-2 text-[11.5px]">
+          <p className="text-subtle mt-2 text-control">
             Si ce n'en est pas un, la détection ne le proposera plus — la
             correction est définitive de son point de vue.
           </p>

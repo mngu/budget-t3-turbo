@@ -140,7 +140,7 @@ export function CategoryRing({
     // elle, rien ne se voit tant que la hauteur commande le diamètre (le cas
     // d'une fenêtre large) et l'intitulé de gauche se fait couper dès que c'est
     // la largeur qui commande.
-    <div className="[container-type:size] flex min-h-0 min-w-0 flex-1 items-center justify-center px-[65px]">
+    <div className="[container-type:size] flex min-h-0 min-w-0 flex-1 items-center justify-center px-16">
       <div
         // Taux de mélange du halo, plus soutenu sur fond sombre. Lu par le
         // `filter` de chaque arc, qui ne peut pas porter de variante `dark:` :
@@ -251,7 +251,7 @@ export function CategoryRing({
           {/* La carte s'efface pendant le forage : elle nomme le niveau, elle
               ne peut pas rester lisible pendant qu'il change. */}
           <div
-            className="border-glass-border bg-glass flex max-w-full flex-col items-center rounded-[18px] border px-[19px] pt-[15px] pb-3.5 text-center shadow-[0_1px_2px_oklch(0_0_0/0.05),0_22px_44px_-22px_oklch(0.25_0.03_265/0.4)] backdrop-blur-[14px] backdrop-saturate-[1.3] [transition:opacity_130ms_ease] motion-reduce:transition-none"
+            className="border-glass-border bg-glass flex max-w-full flex-col items-center rounded-xl border px-5 pt-4 pb-3.5 text-center shadow-[0_1px_2px_oklch(0_0_0/0.05),0_22px_44px_-22px_oklch(0.25_0.03_265/0.4)] backdrop-blur-[14px] backdrop-saturate-[1.3] [transition:opacity_130ms_ease] motion-reduce:transition-none"
             style={{ opacity: folded ? 0 : 1 }}
           >
             {center.icon !== null && (
@@ -260,11 +260,11 @@ export function CategoryRing({
               </span>
             )}
             {center.name && (
-              <div className="mb-1 max-w-full truncate text-xs font-semibold tracking-[-0.015em]">
+              <div className="mb-1 max-w-full truncate text-control font-semibold tracking-[-0.015em]">
                 {center.name}
               </div>
             )}
-            <div className="num text-[23px] leading-none font-medium tracking-[-0.03em]">
+            <div className="num text-title leading-none font-medium tracking-[-0.03em]">
               {center.amount}
             </div>
             <div className="label-caps mt-1 whitespace-nowrap">
@@ -281,14 +281,14 @@ export function CategoryRing({
                   event.stopPropagation();
                   center.onBack?.();
                 }}
-                className="border-border-strong bg-card text-muted-foreground hover:border-subtle hover:text-foreground pointer-events-auto mt-[11px] flex h-6 items-center gap-1.5 rounded-full border pr-2.5 pl-2 text-[11.5px] font-semibold whitespace-nowrap"
+                className="border-border-strong bg-card text-muted-foreground hover:border-subtle hover:text-foreground pointer-events-auto mt-3 flex h-6 items-center gap-1.5 rounded-full border pr-2.5 pl-2 text-control font-semibold whitespace-nowrap"
               >
-                <ArrowLeftIcon className="size-[13px]" aria-hidden />
+                <ArrowLeftIcon className="size-3" aria-hidden />
                 Toutes catégories
                 {/* La touche est *aussi* une voie de sortie, mais elle ne
                     s'annonçait nulle part : la maquette la fait dire par le
                     bouton plutôt que d'ajouter une mention à part. */}
-                <kbd className="border-border bg-surface-2 num text-subtle ml-0.5 flex h-4 items-center rounded-[4px] border px-[5px] text-[9.5px] font-medium tracking-[0.02em]">
+                <kbd className="border-border bg-surface-2 num text-subtle ml-0.5 flex h-4 items-center rounded-sm border px-1 text-label font-medium tracking-[0.02em]">
                   Esc
                 </kbd>
               </button>
@@ -346,7 +346,7 @@ function ArcLabel({
       // Même durée que l'arc pour la position, même durée que le survol pour
       // l'estompage : l'étiquette glisse *avec* sa part, elle ne la rattrape pas.
       className={cn(
-        "pointer-events-none absolute flex -translate-y-1/2 items-center gap-[5px] whitespace-nowrap [transition:left_200ms_cubic-bezier(0.22,1,0.36,1),top_200ms_cubic-bezier(0.22,1,0.36,1),opacity_160ms_ease] motion-reduce:transition-none",
+        "pointer-events-none absolute flex -translate-y-1/2 items-center gap-1 whitespace-nowrap [transition:left_200ms_cubic-bezier(0.22,1,0.36,1),top_200ms_cubic-bezier(0.22,1,0.36,1),opacity_160ms_ease] motion-reduce:transition-none",
         right
           ? "translate-x-[2px]"
           : "translate-x-[calc(-100%_-_2px)] flex-row-reverse",
@@ -361,14 +361,14 @@ function ArcLabel({
         <span className="flex flex-none" style={{ color: arc.slice.color }}>
           <CategoryIcon
             name={arc.slice.icon}
-            className={lit ? "size-5" : "size-[17px]"}
+            className={lit ? "size-5" : "size-4"}
           />
         </span>
       )}
       {arc.share > LABEL_MIN_SHARE && (
         <span
           className={cn(
-            "text-[11px] tracking-[-0.01em]",
+            "text-meta tracking-[-0.01em]",
             lit ? "font-[650]" : "font-[550]",
           )}
           // La teinte de l'arc serait illisible en corps 11 : la maquette pose

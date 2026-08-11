@@ -179,7 +179,7 @@ export function RefineBar({
         type="button"
         onClick={() => setCatOpen(true)}
         className={cn(
-          "flex h-[26px] max-w-[250px] flex-none items-center gap-1.5 rounded-[7px] border px-2.5 text-xs",
+          "flex h-7 max-w-62 flex-none items-center gap-1.5 rounded-md border px-2.5 text-control",
           search.category
             ? "border-border-strong bg-card font-semibold"
             : "text-muted-foreground hover:bg-card border-transparent",
@@ -194,10 +194,10 @@ export function RefineBar({
           {search.category ? (
             <CategoryIcon
               name={activeParent?.icon ?? null}
-              className="size-[13px]"
+              className="size-3"
             />
           ) : (
-            <TagIcon className="size-[13px]" />
+            <TagIcon className="size-3" />
           )}
         </span>
         <span className="min-w-0 truncate">
@@ -205,7 +205,7 @@ export function RefineBar({
             ? categoryFilterLabel(search.category)
             : "Toutes catégories"}
         </span>
-        <span className="text-subtle flex-none text-[9px]">▾</span>
+        <span className="text-subtle flex-none text-label">▾</span>
       </button>
 
       {search.category && (
@@ -214,7 +214,7 @@ export function RefineBar({
           title="Retirer le filtre de catégorie"
           aria-label="Retirer le filtre de catégorie"
           onClick={() => setSearch({ category: undefined })}
-          className="text-subtle hover:bg-accent hover:text-foreground flex size-[22px] flex-none items-center justify-center rounded-md text-[11px]"
+          className="text-subtle hover:bg-accent hover:text-foreground flex size-6 flex-none items-center justify-center rounded-md text-meta"
         >
           ✕
         </button>
@@ -235,14 +235,14 @@ export function RefineBar({
                     setSearch({ aClasser: search.aClasser ? undefined : true })
                   }
                   className={cn(
-                    "flex h-[26px] flex-none items-center gap-1.5 rounded-[7px] border px-2.5 text-xs font-medium",
+                    "flex h-7 flex-none items-center gap-1.5 rounded-md border px-2.5 text-control font-medium",
                     search.aClasser
                       ? "border-warn bg-warn text-background"
                       : "bg-warn-soft text-warn border-transparent",
                   )}
                 >
                   <span
-                    className="h-[7px] w-3.5 rounded-[2px]"
+                    className="h-2 w-3.5 rounded-xs"
                     style={{
                       background:
                         "repeating-linear-gradient(115deg,currentColor 0 3px,transparent 3px 7px)",
@@ -267,11 +267,11 @@ export function RefineBar({
               filtre de confort, c'est l'écran d'audit de la détection — c'est
               là qu'on vérifie une paire et qu'on écarte un faux positif. */}
           <Tooltip>
-            <TooltipTrigger className="text-subtle flex flex-none items-center gap-1.5 text-[11px]">
-              <ArrowLeftRightIcon className="size-[13px]" />
+            <TooltipTrigger className="text-subtle flex flex-none items-center gap-1.5 text-meta">
+              <ArrowLeftRightIcon className="size-3" />
               Internes
             </TooltipTrigger>
-            <TooltipContent className="max-w-[280px]">
+            <TooltipContent className="max-w-70">
               Virements entre deux comptes suivis : ils sont écartés de tous les
               totaux, mais restent listés ici
             </TooltipContent>
@@ -307,7 +307,7 @@ export function RefineBar({
         <button
           type="button"
           className={cn(
-            "text-primary text-[11.5px]",
+            "text-primary text-control",
             !right && !searchField && "ml-auto",
           )}
           onClick={() => setSearch(CONTEXT_FILTERS)}
@@ -317,13 +317,13 @@ export function RefineBar({
       )}
 
       {right && (
-        <span className="text-subtle ml-auto text-[11.5px] whitespace-nowrap">
+        <span className="text-subtle ml-auto text-control whitespace-nowrap">
           {right}
         </span>
       )}
 
       {searchField && (
-        <InputGroup className="ml-auto max-w-[420px] min-w-[150px] flex-1">
+        <InputGroup className="ml-auto max-w-105 min-w-38 flex-1">
           <InputGroupAddon>
             <SearchIcon />
           </InputGroupAddon>
@@ -396,7 +396,7 @@ function CategoryFilterDialog({
                   fond très pâle, l'icône pleine par-dessus. Le mélange vise
                   `--card`, donc il s'inverse tout seul en thème sombre. */}
               <span
-                className="flex size-[22px] flex-none items-center justify-center rounded-[7px]"
+                className="flex size-6 flex-none items-center justify-center rounded-md"
                 style={{
                   background: softCategoryColor(resolveColor(item.color)),
                   color: resolveColor(item.color),
@@ -404,7 +404,7 @@ function CategoryFilterDialog({
               >
                 <CategoryIcon
                   name={parents.get(item.category)?.icon ?? null}
-                  className="size-[13px]"
+                  className="size-3"
                 />
               </span>
               <span

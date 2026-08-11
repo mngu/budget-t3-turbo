@@ -198,11 +198,11 @@ export const Route = createFileRoute("/_authed/_revue")({
   errorComponent: ({ error }) => (
     <main className="p-8">
       <p>❌ Impossible de charger la revue du mois.</p>
-      <p className="text-muted-foreground text-sm">
+      <p className="text-muted-foreground text-body">
         Vérifiez que PostgreSQL tourne (docker compose up -d) et que l'import a
         été fait (bouton Synchroniser).
       </p>
-      <pre className="text-subtle mt-4 text-xs">{error.message}</pre>
+      <pre className="text-subtle mt-4 text-control">{error.message}</pre>
     </main>
   ),
   component: RevueLayout,
@@ -251,17 +251,17 @@ function RevueLayout() {
   const parent = focusedCategory(categories, search.category);
 
   return (
-    // text-[13px] : la base typographique de la maquette. Les tailles fines
+    // text-body : la base typographique de la maquette. Les tailles fines
     // (11–12,5 px) sont posées au cas par cas, jamais héritées d'un rem global
     // qui décalerait aussi /banques et /categories.
-    <div className="flex h-dvh flex-col overflow-hidden text-[13px] leading-[1.45]">
+    <div className="flex h-dvh flex-col overflow-hidden text-body leading-[1.45]">
       <AppHeader page={page} />
 
       <div className="flex min-h-0 flex-1 flex-col px-5 pt-4.5 pb-4">
         {/* `flex-wrap` n'est pas dans la maquette, qui ne descend pas sous
             460 px : il évite que la colonne de droite, à largeur fixe, ne pousse
             le solde hors de l'écran sur une fenêtre étroite. */}
-        <div className="flex min-h-[68px] flex-none flex-wrap items-end gap-x-[clamp(11px,1.85vw,25px)] gap-y-3">
+        <div className="flex min-h-17 flex-none flex-wrap items-end gap-x-[clamp(11px,1.85vw,25px)] gap-y-3">
           <div className="min-w-0 flex-1">
             <KpiBand
               label="Solde du mois"
@@ -306,15 +306,15 @@ function RevueLayout() {
                   className="flex flex-none self-center"
                   style={{ color: resolveColor(parent.color) }}
                 >
-                  <CategoryIcon name={parent.icon} className="size-[15px]" />
+                  <CategoryIcon name={parent.icon} className="size-4" />
                 </span>
-                <span className="line-clamp-2 min-w-0 text-sm leading-[1.15] font-semibold tracking-[-0.01em]">
+                <span className="line-clamp-2 min-w-0 text-subheading leading-[1.15]">
                   {parent.name}
                 </span>
               </span>
               {/* Deux décimales, comme les lignes de la colonne : ce chiffre-là
                   est un montant précis, pas un ordre de grandeur. */}
-              <span className="num min-w-24 flex-none text-right text-[19px] font-medium tracking-[-0.02em]">
+              <span className="num min-w-24 flex-none text-right text-amount font-medium tracking-[-0.02em]">
                 {euro.format(parent.total)}
               </span>
             </KpiFocus>

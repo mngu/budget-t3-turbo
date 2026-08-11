@@ -201,10 +201,10 @@ export function RevuePanel({
         {/* Le fil d'ariane nomme le **niveau** que l'anneau affiche, et lui
             seul : mettre un arc en avant ne le déplace pas — c'est une
             position, pas une sélection. */}
-        <div className="flex min-w-0 flex-none items-center gap-[11px]">
+        <div className="flex min-w-0 flex-none items-center gap-3">
           <span
             className={cn(
-              "flex size-[27px] flex-none items-center justify-center rounded-lg",
+              "flex size-7 flex-none items-center justify-center rounded-lg",
               !selected && "bg-sunken text-subtle",
             )}
             style={
@@ -217,15 +217,15 @@ export function RevuePanel({
             }
           >
             {selected ? (
-              <CategoryIcon name={selected.icon} className="size-[15px]" />
+              <CategoryIcon name={selected.icon} className="size-4" />
             ) : (
-              <LayersIcon className="size-[15px]" aria-hidden />
+              <LayersIcon className="size-4" aria-hidden />
             )}
           </span>
-          <span className="min-w-0 truncate text-base font-semibold tracking-[-0.02em]">
+          <span className="min-w-0 truncate text-heading">
             {selected ? selected.name : "Toutes catégories"}
           </span>
-          <span className="text-subtle flex-none text-[11.5px] whitespace-nowrap">
+          <span className="text-subtle flex-none text-control whitespace-nowrap">
             {selected
               ? `${selected.subs.length} sous-catégorie${selected.subs.length > 1 ? "s" : ""} · ${sharePercent(selected.total, expenses)} des sorties`
               : `${categories.length} poste${categories.length > 1 ? "s" : ""} de dépense`}

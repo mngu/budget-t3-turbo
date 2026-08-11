@@ -33,15 +33,15 @@ export function ConnectionCard({
         <BankLogo
           name={connection.aspspName}
           logoUrl={connection.logoUrl}
-          className="size-[38px] text-[13px]"
+          className="size-10 text-body"
         />
 
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2.5">
-            <span className="truncate text-sm font-semibold tracking-[-0.015em]">
+            <span className="truncate text-subheading">
               {connection.aspspName}
             </span>
-            <span className="text-subtle rounded-[5px] border px-1.5 text-[11px]">
+            <span className="text-subtle rounded-sm border px-1.5 text-meta">
               {connection.aspspCountry}
             </span>
           </div>
@@ -51,7 +51,7 @@ export function ConnectionCard({
               <span className={cn("size-1.5 rounded-full", tone.fill)} />
               {view.badge}
             </Badge>
-            <span className="text-subtle text-[11.5px]">{view.meta}</span>
+            <span className="text-subtle text-control">{view.meta}</span>
           </div>
 
           {view.pct > 0 && (
@@ -59,7 +59,7 @@ export function ConnectionCard({
               value={view.pct}
               variant={TONE_VARIANT[view.tone]}
               aria-label="Validité du consentement"
-              className="mt-2.5 max-w-[280px]"
+              className="mt-2.5 max-w-70"
             />
           )}
         </div>
@@ -88,7 +88,7 @@ export function ConnectionCard({
 
       <div className="border-t">
         {connection.accounts.length === 0 ? (
-          <p className="text-subtle px-4.5 py-2.5 text-[11.5px]">
+          <p className="text-subtle px-4.5 py-2.5 text-control">
             Aucun compte rattaché — la prochaine autorisation les découvrira.
           </p>
         ) : (
@@ -117,7 +117,7 @@ function AccountRow({
       <div className="flex min-w-0 flex-wrap items-baseline gap-2.5">
         <span
           className={cn(
-            "text-[12.5px] font-medium",
+            "text-control font-medium",
             account.enabled ? "" : "text-subtle line-through",
           )}
         >
@@ -126,7 +126,7 @@ function AccountRow({
         {account.iban && (
           <span
             className={cn(
-              "text-subtle num text-[11.5px]",
+              "text-subtle num text-meta",
               account.enabled ? "" : "line-through",
             )}
           >
@@ -134,7 +134,7 @@ function AccountRow({
           </span>
         )}
         {!account.enabled && (
-          <span className="text-subtle rounded-[5px] border px-1.5 text-[11px]">
+          <span className="text-subtle rounded-sm border px-1.5 text-meta">
             exclu du suivi
           </span>
         )}
@@ -143,7 +143,7 @@ function AccountRow({
           et pèsent dans le total de l'en-tête. La maquette met « — » parce que
           son compte exclu est vide ; un compte historique décoché en porte des
           centaines, et les cacher ici ferait mentir les deux chiffres. */}
-      <span className="text-subtle num text-[11.5px] whitespace-nowrap">
+      <span className="text-subtle num text-meta whitespace-nowrap">
         {account.transactionCount} transaction
         {account.transactionCount > 1 ? "s" : ""}
       </span>

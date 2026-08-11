@@ -41,13 +41,13 @@ function BudgetsPage() {
   const unbudgeted = budgets.slots - budgets.budgeted;
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden text-[13px] leading-[1.45]">
+    <div className="flex h-dvh flex-col overflow-hidden text-body leading-[1.45]">
       <AppHeader page="budgets" />
 
       <div className="min-h-0 flex-1 overflow-y-auto">
-        <main className="mx-auto max-w-[1010px] px-6 pt-5 pb-12">
+        <main className="mx-auto max-w-250 px-6 pt-5 pb-12">
           <div className="flex min-h-9.5 flex-wrap items-center gap-6">
-            <h1 className="text-2xl font-semibold tracking-tight">Budgets</h1>
+            <h1 className="text-title">Budgets</h1>
             <div className="ml-auto flex items-stretch">
               <Stat
                 value={euro0.format(budgets.total)}
@@ -64,7 +64,7 @@ function BudgetsPage() {
               />
             </div>
           </div>
-          <p className="text-muted-foreground mt-2 max-w-160 text-[12.5px] text-pretty">
+          <p className="text-muted-foreground mt-2 max-w-160 text-control text-pretty">
             Un budget mensuel se pose sur une{" "}
             <span className="text-foreground font-medium">catégorie</span>. Si
             vous voulez être plus précis,{" "}
@@ -77,11 +77,11 @@ function BudgetsPage() {
           {budgets.slots > 0 && unbudgeted === 0 && (
             <section className="bg-card mt-5 flex flex-wrap items-center gap-3.5 rounded-xl border px-4 py-3.5">
               <CircleCheckIcon className="text-ok size-4 flex-none" />
-              <div className="min-w-[260px] flex-1">
-                <h2 className="text-[12.5px] font-medium">
+              <div className="min-w-65 flex-1">
+                <h2 className="text-control font-medium">
                   Tous vos postes ont un budget
                 </h2>
-                <p className="text-subtle mt-0.5 text-[11.5px]">
+                <p className="text-subtle mt-0.5 text-control">
                   {euro0.format(budgets.total)} par mois sur {budgets.slots}{" "}
                   postes budgétés.
                 </p>
@@ -102,10 +102,10 @@ function BudgetsPage() {
           )}
 
           <div className="mt-7 mb-3 flex flex-wrap items-center gap-2.5">
-            <h2 className="text-[15px] font-semibold tracking-[-0.02em]">
+            <h2 className="text-heading">
               Vos catégories
             </h2>
-            <span className="text-subtle text-[11.5px]">
+            <span className="text-subtle text-control">
               {tree.length === 0
                 ? "aucune catégorie pour le moment"
                 : "un budget se pose sur une catégorie ; « détailler » le répartit sur ses sous-catégories"}
@@ -152,7 +152,7 @@ function BudgetsPage() {
               d'août 2026 ») : rien ne le porte en base, un budget est un montant
               mensuel sans date. La note ne dit que ce qui est vrai — d'où vient
               la moyenne, et pourquoi certains postes n'en reçoivent pas. */}
-          <p className="text-subtle mt-3.5 max-w-[820px] text-[11.5px] text-pretty">
+          <p className="text-subtle mt-3.5 max-w-205 text-control text-pretty">
             La moyenne de référence porte sur les 6 derniers mois complets, mois
             en cours exclu, et ne compte que les dépenses. Une catégorie vue
             moins de 4 mois sur 6 ne reçoit pas de proposition : sa moyenne
@@ -179,7 +179,7 @@ function Stat({
   return (
     <div className="border-border border-l px-3 text-right first:border-l-0 first:pl-0 last:pr-0">
       <div
-        className={`num text-[15px] font-medium tracking-[-0.01em] ${warn ? "text-warn" : ""}`}
+        className={`num text-heading font-medium ${warn ? "text-warn" : ""}`}
       >
         {value}
       </div>

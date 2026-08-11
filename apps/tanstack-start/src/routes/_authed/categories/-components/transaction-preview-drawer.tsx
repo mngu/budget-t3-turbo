@@ -66,23 +66,23 @@ export function TransactionPreviewDrawer({
       <DialogContent
         variant="drawer"
         padded={false}
-        className="w-[460px] max-w-[92vw]"
+        className="w-115 max-w-[92vw]"
       >
         <DialogHeader className="flex-none border-b px-4 py-3.5">
           <div className="flex items-center gap-2.5 pr-8">
             {badge && (
               <span
-                className="flex size-[26px] flex-none items-center justify-center rounded-lg"
+                className="flex size-7 flex-none items-center justify-center rounded-lg"
                 style={{ background: badge.soft, color: badge.color }}
               >
                 {badge.icon}
               </span>
             )}
-            <DialogTitle className="min-w-0 truncate text-[13.5px] font-semibold">
+            <DialogTitle className="min-w-0 truncate text-body font-semibold">
               {title}
             </DialogTitle>
           </div>
-          <DialogDescription className="text-muted-foreground mt-1.5 text-[11.5px] text-pretty">
+          <DialogDescription className="text-muted-foreground mt-1.5 text-control text-pretty">
             {description ??
               `${transactions.length} transaction${transactions.length > 1 ? "s" : ""} de l'échantillon analysé.`}
           </DialogDescription>
@@ -90,7 +90,7 @@ export function TransactionPreviewDrawer({
 
         <div className="min-h-0 flex-1 overflow-y-auto">
           {transactions.length === 0 ? (
-            <p className="text-muted-foreground px-4 py-5 text-xs">
+            <p className="text-muted-foreground px-4 py-5 text-control">
               Aucune transaction.
             </p>
           ) : (
@@ -106,17 +106,17 @@ export function TransactionPreviewDrawer({
                   }`}
                 >
                   {withDate && (
-                    <span className="text-subtle text-[11.5px] whitespace-nowrap">
+                    <span className="text-subtle text-control whitespace-nowrap">
                       {txn.bookingDate
                         ? dateFr.format(new Date(txn.bookingDate))
                         : ""}
                     </span>
                   )}
                   <div className="min-w-0">
-                    <div className="num truncate text-xs">
+                    <div className="num truncate text-control">
                       {txn.description}
                     </div>
-                    <div className="text-subtle truncate text-[11px]">
+                    <div className="text-subtle truncate text-meta">
                       {txn.bankName}
                       {" · "}
                       {category ?? "Sans catégorie"}
@@ -127,7 +127,7 @@ export function TransactionPreviewDrawer({
                       crédit indiscernable d'une dépense. C'est la catégorie
                       absente, et elle seule, qui passe la ligne en warn. */}
                   <span
-                    className={`num text-right text-[12.5px] ${
+                    className={`num text-right text-meta ${
                       category === null ? "text-warn" : ""
                     }`}
                   >

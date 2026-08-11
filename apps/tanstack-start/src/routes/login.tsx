@@ -87,8 +87,8 @@ function LoginPage() {
             "slide-in-from-bottom-[10px] mb-5 flex items-center gap-2 duration-500",
           )}
         >
-          <div className="bg-primary size-[13px] rounded-[3px]" />
-          <span className="text-[19px] font-semibold tracking-[-0.02em]">
+          <div className="bg-primary size-3 rounded-xs" />
+          <span className="text-amount font-semibold tracking-[-0.02em]">
             Budget
           </span>
         </div>
@@ -97,10 +97,10 @@ function LoginPage() {
           onSubmit={requestLink}
           className={cn(
             RISE,
-            "slide-in-from-bottom-[10px] border-border bg-card/82 w-[372px] max-w-full rounded-[14px] border px-5 pt-5 pb-4 shadow-[0_24px_48px_-22px_oklch(0.15_0.02_265/0.35)] backdrop-blur-[14px] backdrop-saturate-130 delay-[60ms] duration-[560ms] dark:shadow-[0_24px_48px_-22px_oklch(0_0_0/0.6)]",
+            "slide-in-from-bottom-[10px] border-border bg-card/82 w-93 max-w-full rounded-lg border px-5 pt-5 pb-4 shadow-glass backdrop-blur-[14px] backdrop-saturate-130 delay-[60ms] duration-[560ms]",
           )}
         >
-          <h1 className="text-[19px] font-semibold tracking-[-0.025em]">
+          <h1 className="text-amount font-semibold tracking-[-0.025em]">
             Connexion
           </h1>
 

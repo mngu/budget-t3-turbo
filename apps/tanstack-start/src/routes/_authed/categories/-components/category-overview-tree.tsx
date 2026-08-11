@@ -159,7 +159,7 @@ export function CategoryOverviewTree({
   }
 
   return (
-    <div className="bg-card overflow-hidden rounded-[14px] border">
+    <div className="bg-card overflow-hidden rounded-lg border">
       {tree.map((parent) => {
         const ghosts = ghostsByParentId.get(parent.id) ?? [];
         // L'ordre compte : une proposition force l'ouverture, sinon on suit le
@@ -209,9 +209,9 @@ export function CategoryOverviewTree({
       <button
         type="button"
         onClick={actions.onAddParent}
-        className="text-muted-foreground hover:bg-surface-2 hover:text-foreground flex w-full items-center gap-2.5 px-3 py-2.5 text-xs"
+        className="text-muted-foreground hover:bg-surface-2 hover:text-foreground text-control flex w-full items-center gap-2.5 px-3 py-2.5"
       >
-        <span className="border-border-strong flex size-[30px] items-center justify-center rounded-[9px] border border-dashed">
+        <span className="border-border-strong flex size-8 items-center justify-center rounded-md border border-dashed">
           <PlusIcon className="size-3.5" />
         </span>
         Ajouter une catégorie parente
@@ -272,7 +272,7 @@ function ParentRow({
       onOpenChange={onToggle}
       render={<div className="border-b last:border-b-0" />}
     >
-      <div className="hover:bg-surface-2 grid min-h-[46px] grid-cols-[20px_30px_minmax(0,1fr)_auto_74px_26px] items-center gap-2 px-3">
+      <div className="hover:bg-surface-2 grid min-h-11 grid-cols-[20px_32px_minmax(0,1fr)_auto_76px_28px] items-center gap-2 px-3">
         <CollapsibleTrigger
           disabled={forcedOpen || !collapsible}
           aria-label={expanded ? "Replier" : "Déplier"}
@@ -294,7 +294,7 @@ function ParentRow({
           onClick={() => onOpenIdentity(parent)}
           title="Couleur et icône"
           aria-label={`Couleur et icône de ${parent.name}`}
-          className="relative flex size-[30px] items-center justify-center rounded-[9px] border"
+          className="relative flex size-8 items-center justify-center rounded-md border"
           style={{
             background: softCategoryColor(resolve(color)),
             color: resolve(color),
@@ -303,7 +303,7 @@ function ParentRow({
         >
           <CategoryIcon name={parent.icon} />
           <span
-            className="border-card absolute -right-0.5 -bottom-0.5 size-[9px] rounded-full border-[1.5px]"
+            className="border-card absolute -right-0.5 -bottom-0.5 size-2 rounded-full border-[1.5px]"
             style={{ background: resolve(color) }}
           />
         </button>
@@ -312,7 +312,7 @@ function ParentRow({
           <NameInput
             name={parent.name}
             onRename={(name) => onRename(parent.id, name)}
-            className="max-w-[280px] text-[13px] font-medium"
+            className="text-body max-w-70 font-medium"
           />
           {/* La modale d'identité promet noir sur blanc que « la ligne
               affichera "même teinte que…" » quand on choisit une teinte déjà
@@ -320,13 +320,13 @@ function ParentRow({
               un état normal à 13 teintes pour un nombre illimité de parentes —
               signalée, jamais interdite. */}
           {twin && (
-            <span className="text-warn bg-warn-soft flex items-center gap-1.5 rounded-md px-1.5 py-px text-[11px] whitespace-nowrap">
+            <span className="text-warn bg-warn-soft flex items-center gap-1.5 text-meta rounded-md px-1.5 py-px whitespace-nowrap">
               <TriangleAlertIcon className="size-3 flex-none" />
               même teinte que {twin}
             </span>
           )}
           {!hasIdentity && (
-            <span className="text-subtle border-border-strong rounded-md border border-dashed px-1.5 py-px text-[11px] whitespace-nowrap">
+            <span className="text-subtle border-border-strong text-meta rounded-md border border-dashed px-1.5 py-px whitespace-nowrap">
               sans couleur ni icône
             </span>
           )}
@@ -338,7 +338,7 @@ function ParentRow({
               <span
                 key={child.id}
                 title={`${child.name} · ${child.transactionCount}`}
-                className="size-[7px] rounded-full"
+                className="size-2 rounded-full"
                 style={{
                   background: shadeCategoryColor(
                     resolve(color),
@@ -348,13 +348,13 @@ function ParentRow({
                 }}
               />
             ))}
-          <span className="text-subtle text-[11px] whitespace-nowrap">
+          <span className="text-subtle text-meta whitespace-nowrap">
             {parent.children.length > 0
               ? `${parent.children.length} sous-cat.`
               : "aucune sous-catégorie"}
           </span>
           {ghosts.length > 0 && (
-            <span className="text-primary bg-accent-soft border-primary rounded-full border px-2 text-[11px] font-semibold whitespace-nowrap">
+            <span className="text-primary bg-accent-soft border-primary text-meta rounded-full border px-2 font-semibold whitespace-nowrap">
               {ghosts.length} proposée{ghosts.length > 1 ? "s" : ""}
             </span>
           )}
@@ -441,13 +441,13 @@ function ParentRow({
             >
               <span />
               <span
-                className="size-[7px] rounded-full"
+                className="size-2 rounded-full"
                 style={{ background: shade }}
               />
               <NameInput
                 name={child.name}
                 onRename={(name) => onRename(child.id, name)}
-                className="max-w-[260px] text-[12.5px]"
+                className="text-control max-w-65"
               />
               <CountButton
                 count={child.transactionCount}
@@ -464,7 +464,7 @@ function ParentRow({
                     icon: parent.icon,
                   })
                 }
-                className="text-[11.5px]"
+                className="text-control"
               />
               <button
                 type="button"
@@ -479,7 +479,7 @@ function ParentRow({
                     childNames: [],
                   })
                 }
-                className="text-subtle hover:bg-bad-soft hover:text-bad flex size-6 items-center justify-center rounded-[7px]"
+                className="text-subtle hover:bg-bad-soft hover:text-bad flex size-6 items-center justify-center rounded-md"
               >
                 <XIcon className="size-3" />
               </button>
@@ -488,7 +488,7 @@ function ParentRow({
         })}
 
         {parent.children.length === 0 && (
-          <p className="text-subtle px-3 pt-1.5 pb-1 pl-[72px] text-[11.5px]">
+          <p className="text-subtle text-control px-3 pt-1.5 pb-1 pl-18">
             Aucune sous-catégorie — ses {parent.directTransactionCount}{" "}
             transactions sont portées directement par la catégorie.
           </p>
@@ -497,7 +497,7 @@ function ParentRow({
         <button
           type="button"
           onClick={() => onAddChild(parent.id)}
-          className="border-border-strong text-muted-foreground hover:bg-accent hover:text-foreground mt-1 ml-[72px] flex items-center gap-2 rounded-lg border border-dashed px-2.5 py-1 text-[11.5px]"
+          className="border-border-strong text-muted-foreground hover:bg-accent hover:text-foreground text-control mt-1 ml-18 flex items-center gap-2 rounded-md border border-dashed px-2.5 py-1"
         >
           <PlusIcon className="size-3" />
           Ajouter une sous-catégorie
@@ -534,21 +534,21 @@ function ProposedParentRow({
 
   return (
     <div className="border-b last:border-b-0">
-      <div className="bg-accent-soft grid min-h-[46px] grid-cols-[20px_30px_minmax(0,1fr)_auto] items-center gap-2 px-3 shadow-[inset_2px_0_0_var(--primary)]">
+      <div className="bg-accent-soft grid min-h-11 grid-cols-[20px_32px_minmax(0,1fr)_auto] items-center gap-2 px-3 shadow-[inset_2px_0_0_var(--primary)]">
         <span />
         <span
-          className="flex size-[30px] items-center justify-center rounded-[9px] border border-dashed"
+          className="flex size-8 items-center justify-center rounded-md border border-dashed"
           style={{ color, borderColor: color }}
         >
           <CategoryIcon name={null} />
         </span>
         <div className="flex min-w-0 items-center gap-2.5">
-          <span className="text-[13px] font-medium">{proposed.name}</span>
-          <span className="text-primary text-[10.5px] font-semibold tracking-[0.04em] uppercase">
+          <span className="text-body font-medium">{proposed.name}</span>
+          <span className="label-caps text-primary font-semibold">
             nouvelle catégorie
           </span>
         </div>
-        <span className="text-subtle text-[11px] whitespace-nowrap">
+        <span className="text-subtle text-meta whitespace-nowrap">
           {proposed.branches.length} sous-catégorie
           {proposed.branches.length > 1 ? "s" : ""} proposée
           {proposed.branches.length > 1 ? "s" : ""}
@@ -587,21 +587,21 @@ function GhostRow({
   onPreview: () => void;
 }) {
   return (
-    <div className="bg-accent-soft grid min-h-[38px] grid-cols-[61px_8px_minmax(0,1fr)_auto] items-center gap-2 px-3 shadow-[inset_2px_0_0_var(--primary)]">
+    <div className="bg-accent-soft grid min-h-9 grid-cols-[60px_8px_minmax(0,1fr)_auto] items-center gap-2 px-3 shadow-[inset_2px_0_0_var(--primary)]">
       <span />
       <span
-        className="size-[7px] rounded-full border-[1.5px] border-dashed"
+        className="size-2 rounded-full border-[1.5px] border-dashed"
         style={{ borderColor: color }}
       />
       <div className="flex min-w-0 flex-wrap items-baseline gap-2.5">
-        <span className="text-[12.5px] font-medium">{ghost.name}</span>
-        <span className="text-primary text-[10.5px] font-semibold tracking-[0.04em] uppercase">
+        <span className="text-control font-medium">{ghost.name}</span>
+        <span className="label-caps text-primary font-semibold">
           proposée
         </span>
         <button
           type="button"
           onClick={onPreview}
-          className="text-muted-foreground hover:text-primary text-[11px]"
+          className="text-muted-foreground hover:text-primary text-meta"
         >
           {ghost.txnIds.length} transaction
           {ghost.txnIds.length > 1 ? "s" : ""}
@@ -612,7 +612,7 @@ function GhostRow({
           type="button"
           onClick={onAccept}
           disabled={pending}
-          className="text-primary text-[11.5px] font-semibold disabled:opacity-50"
+          className="text-primary text-control font-semibold disabled:opacity-50"
         >
           {pending ? "Ajout…" : "Ajouter"}
         </button>
@@ -622,7 +622,7 @@ function GhostRow({
           disabled={pending}
           aria-label={`Écarter ${ghost.name}`}
           title="Écarter"
-          className="text-subtle hover:bg-bad-soft hover:text-bad flex size-6 items-center justify-center rounded-[7px] disabled:opacity-50"
+          className="text-subtle hover:bg-bad-soft hover:text-bad flex size-6 items-center justify-center rounded-md disabled:opacity-50"
         >
           <XIcon className="size-3" />
         </button>
@@ -667,7 +667,7 @@ function NameInput({
       }}
       aria-label={`Renommer ${name}`}
       className={cn(
-        "focus:border-primary focus:bg-background hover:border-border w-full min-w-0 rounded-[7px] border border-transparent bg-transparent px-2 py-1 outline-none",
+        "focus:border-primary focus:bg-background hover:border-border w-full min-w-0 rounded-md border border-transparent bg-transparent px-2 py-1 outline-none",
         className,
       )}
     />
@@ -692,7 +692,7 @@ function CountButton({
       title={title}
       disabled={count === 0}
       className={cn(
-        "num hover:text-primary text-right text-xs disabled:pointer-events-none",
+        "num hover:text-primary text-right text-control disabled:pointer-events-none",
         count === 0 ? "text-subtle" : "text-muted-foreground",
         className,
       )}

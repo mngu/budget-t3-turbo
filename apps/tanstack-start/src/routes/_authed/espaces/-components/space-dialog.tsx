@@ -79,23 +79,23 @@ export function SpaceDialog({
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent
         padded={false}
-        className="border-border-strong max-w-[520px] overflow-hidden"
+        className="border-border-strong max-w-130 overflow-hidden"
       >
         <div className="px-5 pt-4 pb-4">
           <div className="flex items-center gap-2.5">
             <span
               className={cn(
-                "flex size-[30px] flex-none items-center justify-center rounded-[9px]",
+                "flex size-8 flex-none items-center justify-center rounded-md",
                 tone.chip,
               )}
             >
               {spec.icon}
             </span>
-            <DialogTitle className="min-w-0 text-[15px] font-semibold tracking-[-0.02em] text-pretty">
+            <DialogTitle className="min-w-0 text-heading text-pretty">
               {spec.title}
             </DialogTitle>
           </div>
-          <div className="text-muted-foreground mt-2.5 text-[12.5px] text-pretty">
+          <div className="text-muted-foreground mt-2.5 text-control text-pretty">
             {spec.body}
           </div>
 
@@ -109,7 +109,7 @@ export function SpaceDialog({
                     type="button"
                     onClick={() => spec.onChoice?.(choice.key)}
                     className={cn(
-                      "grid w-full grid-cols-[16px_minmax(0,1fr)] items-start gap-2.5 rounded-[11px] border p-3 text-left",
+                      "grid w-full grid-cols-[16px_minmax(0,1fr)] items-start gap-2.5 rounded-md border p-3 text-left",
                       active
                         ? "border-primary bg-accent-soft"
                         : "border-border",
@@ -124,14 +124,14 @@ export function SpaceDialog({
                       )}
                     />
                     <span className="min-w-0">
-                      <span className="block text-[12.5px] font-semibold tracking-[-0.01em]">
+                      <span className="block text-control font-semibold tracking-[-0.01em]">
                         {choice.label}
                       </span>
-                      <span className="text-muted-foreground mt-[3px] block text-xs text-pretty">
+                      <span className="text-muted-foreground mt-1 block text-control text-pretty">
                         {choice.description}
                       </span>
                       {active && choice.warning && (
-                        <span className="text-warn mt-1.5 block text-[11.5px] text-pretty">
+                        <span className="text-warn mt-1.5 block text-control text-pretty">
                           {choice.warning}
                         </span>
                       )}
@@ -143,7 +143,7 @@ export function SpaceDialog({
           )}
 
           {spec.facts && spec.facts.length > 0 && (
-            <div className="border-border mt-3.5 flex flex-col overflow-hidden rounded-[11px] border">
+            <div className="border-border mt-3.5 flex flex-col overflow-hidden rounded-md border">
               {spec.facts.map((fact) => (
                 <div
                   key={fact.label}
@@ -151,13 +151,13 @@ export function SpaceDialog({
                 >
                   <span
                     className={cn(
-                      "num min-w-[44px] text-[12.5px] font-medium",
+                      "num min-w-11 text-meta font-medium",
                       spec.tone === "bad" ? "text-bad" : "text-foreground",
                     )}
                   >
                     {fact.value}
                   </span>
-                  <span className="text-muted-foreground min-w-0 text-xs">
+                  <span className="text-muted-foreground min-w-0 text-control">
                     {fact.label}
                   </span>
                 </div>

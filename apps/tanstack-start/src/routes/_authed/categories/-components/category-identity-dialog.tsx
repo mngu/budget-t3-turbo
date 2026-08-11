@@ -83,11 +83,11 @@ export function CategoryIdentityDialog({
     >
       <DialogContent
         padded={false}
-        className="max-w-[520px] overflow-hidden"
+        className="max-w-130 overflow-hidden"
       >
         <DialogHeader className="flex-none flex-row items-center gap-3 border-b p-4">
           <span
-            className="flex size-[30px] flex-none items-center justify-center rounded-[9px]"
+            className="flex size-8 flex-none items-center justify-center rounded-md"
             style={
               target?.color
                 ? {
@@ -100,10 +100,10 @@ export function CategoryIdentityDialog({
             <CategoryIcon name={target?.icon ?? null} />
           </span>
           <div>
-            <DialogTitle className="text-[13px] font-semibold">
+            <DialogTitle className="text-body font-semibold">
               {target?.name}
             </DialogTitle>
-            <DialogDescription className="text-subtle text-[11px]">
+            <DialogDescription className="text-subtle text-meta">
               Identité de la catégorie · couleur + icône
             </DialogDescription>
           </div>
@@ -112,14 +112,14 @@ export function CategoryIdentityDialog({
         <div className="min-h-0 flex-1 overflow-y-auto p-4">
           <div className="flex items-baseline gap-2.5">
             <span className="label-caps">Couleur</span>
-            <span className="text-muted-foreground text-[11px]">
+            <span className="text-muted-foreground text-meta">
               {takenCount >= CATEGORY_COLOR_PALETTE.length
                 ? `les ${CATEGORY_COLOR_PALETTE.length} teintes sont prises — toute nouvelle parente partagera une teinte`
                 : `${takenCount} teintes prises sur ${CATEGORY_COLOR_PALETTE.length}`}
             </span>
           </div>
 
-          <div className="mt-2.5 grid grid-cols-7 gap-[7px]">
+          <div className="mt-2.5 grid grid-cols-7 gap-2">
             {CATEGORY_COLOR_PALETTE.map((c) => {
               const mine = target?.color === c.light;
               const others = otherOwners(c.light);
@@ -135,20 +135,20 @@ export function CategoryIdentityDialog({
                   aria-label={c.name}
                   aria-pressed={mine}
                   onClick={() => onColorChange(c.light)}
-                  className="relative flex h-11 items-center justify-center rounded-[10px] border-[1.5px]"
+                  className="relative flex h-11 items-center justify-center rounded-md border-[1.5px]"
                   style={{
                     background: softCategoryColor(resolve(c.light)),
                     borderColor: mine ? resolve(c.light) : "transparent",
                   }}
                 >
                   <span
-                    className="text-primary-foreground flex size-[18px] items-center justify-center rounded-full text-[10px]"
+                    className="text-primary-foreground flex size-4 items-center justify-center rounded-full text-label"
                     style={{ background: resolve(c.light) }}
                   >
                     {mine && "✓"}
                   </span>
                   {others.length > 0 && (
-                    <span className="bg-card text-muted-foreground border-border absolute top-[3px] right-1 flex size-[11px] items-center justify-center rounded-full border text-[8px] leading-none">
+                    <span className="bg-card text-muted-foreground border-border absolute top-1 right-1 flex size-3 items-center justify-center rounded-full border text-label leading-none">
                       ●
                     </span>
                   )}
@@ -157,7 +157,7 @@ export function CategoryIdentityDialog({
             })}
           </div>
 
-          <p className="text-muted-foreground mt-2.5 flex items-start gap-2.5 text-[11.5px]">
+          <p className="text-muted-foreground mt-2.5 flex items-start gap-2.5 text-control">
             <InfoIcon className="mt-px size-3.5 flex-none" />
             <span className="min-w-0 text-pretty">
               Un point sur une teinte signale qu'elle est déjà portée par une
@@ -167,14 +167,14 @@ export function CategoryIdentityDialog({
             </span>
           </p>
 
-          <div className="border-border-strong mt-3 flex items-center gap-2.5 rounded-[10px] border border-dashed px-3 py-2.5">
+          <div className="border-border-strong mt-3 flex items-center gap-2.5 rounded-md border border-dashed px-3 py-2.5">
             <span
-              className="size-[18px] flex-none rounded-full"
+              className="size-4 flex-none rounded-full"
               style={{ background: FALLBACK_CATEGORY_COLOR }}
             />
             <div className="min-w-0">
-              <div className="text-xs font-medium">Gris de repli</div>
-              <div className="text-subtle text-[11px] text-pretty">
+              <div className="text-control font-medium">Gris de repli</div>
+              <div className="text-subtle text-meta text-pretty">
                 État « aucune couleur choisie ». Non sélectionnable — il
                 disparaît dès qu'une teinte est prise.
               </div>
@@ -185,7 +185,7 @@ export function CategoryIdentityDialog({
 
           <div className="flex flex-wrap items-baseline gap-2.5">
             <span className="label-caps">Icône</span>
-            <span className="text-muted-foreground text-[11px]">
+            <span className="text-muted-foreground text-meta">
               {target?.icon
                 ? "jeu thématique de 54 icônes Lucide · recherche en français"
                 : "aucune icône — pastille creuse"}
@@ -197,13 +197,13 @@ export function CategoryIdentityDialog({
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Chercher en français — courses, loyer, essence, impôts…"
             aria-label="Chercher une icône"
-            className="bg-background border-border-strong mt-2.5 h-[31px] rounded-[9px] text-[12.5px]"
+            className="bg-background border-border-strong mt-2.5 h-8 rounded-md text-control"
           />
 
           <div className="mt-3 flex flex-col gap-3">
             {groups.map((group) => (
               <div key={group.label}>
-                <div className="text-subtle mb-1.5 text-[11px]">
+                <div className="text-subtle mb-1.5 text-meta">
                   {group.label}
                 </div>
                 <div className="grid grid-cols-9 gap-1.5">
@@ -222,7 +222,7 @@ export function CategoryIdentityDialog({
                         aria-pressed={selected}
                         onClick={() => onIconChange(icon.name)}
                         className={cn(
-                          "relative flex h-[34px] items-center justify-center rounded-[9px] border",
+                          "relative flex h-9 items-center justify-center rounded-md border",
                           selected
                             ? "border-primary bg-accent-soft text-primary"
                             : "border-border bg-background text-muted-foreground hover:border-border-strong hover:text-foreground",
@@ -230,7 +230,7 @@ export function CategoryIdentityDialog({
                       >
                         <CategoryIcon name={icon.name} />
                         {duplicate && (
-                          <span className="bg-warn absolute right-[3px] bottom-0.5 size-[5px] rounded-full" />
+                          <span className="bg-warn absolute right-1 bottom-0.5 size-1 rounded-full" />
                         )}
                       </button>
                     );
@@ -239,7 +239,7 @@ export function CategoryIdentityDialog({
               </div>
             ))}
             {groups.length === 0 && (
-              <p className="text-muted-foreground text-[11.5px] text-pretty">
+              <p className="text-muted-foreground text-control text-pretty">
                 Aucune icône pour « {query} ». La recherche accepte les mots
                 français du jeu thématique et les noms Lucide en anglais (
                 <span className="font-mono">piggy-bank</span>,{" "}
@@ -251,9 +251,9 @@ export function CategoryIdentityDialog({
           <button
             type="button"
             onClick={() => onIconChange(null)}
-            className="border-border-strong text-muted-foreground hover:bg-accent hover:text-foreground mt-3 flex w-full items-center gap-2.5 rounded-[9px] border border-dashed px-2.5 py-1.5 text-[11.5px]"
+            className="border-border-strong text-muted-foreground hover:bg-accent hover:text-foreground mt-3 flex w-full items-center gap-2.5 rounded-md border border-dashed px-2.5 py-1.5 text-control"
           >
-            <span className="border-border-strong flex size-[22px] flex-none items-center justify-center rounded-[7px] border border-dashed">
+            <span className="border-border-strong flex size-6 flex-none items-center justify-center rounded-md border border-dashed">
               <CategoryIcon name={null} className="size-3.5" />
             </span>
             Sans icône — pastille creuse, la couleur travaille seule
@@ -263,7 +263,7 @@ export function CategoryIdentityDialog({
         {target?.color && twin && (
           <DialogFooter>
             <span
-              className="flex size-[26px] flex-none items-center justify-center rounded-lg"
+              className="flex size-7 flex-none items-center justify-center rounded-lg"
               style={{
                 background: softCategoryColor(resolve(target.color)),
                 color: resolve(target.color),

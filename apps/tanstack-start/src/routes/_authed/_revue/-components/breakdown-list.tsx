@@ -51,8 +51,15 @@ export interface BreakdownItem {
   title?: string;
 }
 
-/** Largeur de la colonne des postes, la même sur les deux écrans de la revue. */
-const BREAKDOWN_WIDTH = "w-[254px]";
+/**
+ * Largeur de la colonne des postes, la même sur les deux écrans de la revue —
+ * et la même que `KpiFocus` dans le bandeau, qui l'importe : la maquette les
+ * calcule avec la *même* expression (`rdStackPx === listPx`), c'est un
+ * alignement et non une coïncidence, il ne doit pas pouvoir dériver.
+ *
+ * 288 px = 72 u, le bas de la fourchette 288–448 du système (§1.6).
+ */
+export const BREAKDOWN_WIDTH = "w-72";
 
 // La maquette coupe à 13 lignes et replie le reste : au-delà, les barres
 // deviennent illisibles et la colonne déborde.
@@ -289,7 +296,7 @@ function BreakdownRow({
       <div className="flex items-baseline gap-2">
         {row.aClasser ? (
           <span className={ICON_SLOT}>
-            <TriangleAlertIcon className="text-warn size-[13px]" aria-hidden />
+            <TriangleAlertIcon className="text-warn size-3" aria-hidden />
           </span>
         ) : (
           row.icon !== undefined && (
@@ -300,7 +307,7 @@ function BreakdownRow({
         )}
         <span
           className={cn(
-            "min-w-0 flex-1 truncate text-sm leading-[1.15] tracking-[-0.014em]",
+            "min-w-0 flex-1 truncate text-subheading leading-[1.15] font-normal",
             // Une ligne de poste et un reste à ranger pèsent leur plein poids ;
             // seules les sous-catégories rangées s'allègent.
             row.aClasser || row.icon !== undefined
@@ -310,7 +317,7 @@ function BreakdownRow({
         >
           {row.name}
         </span>
-        <span className="num flex-none text-[13px] leading-[1.15] tracking-[-0.02em]">
+        <span className="num flex-none text-body leading-[1.15] tracking-[-0.02em]">
           {euro.format(row.total)}
         </span>
       </div>
@@ -319,7 +326,7 @@ function BreakdownRow({
             d'en haut et d'en bas, il ne peut donc pas vivre dedans (elle
             découpe). Elle est plate quand la colonne ne parle pas budget. */}
         <div
-          className={cn("relative flex h-[11px] min-w-0 flex-1 items-center")}
+          className={cn("relative flex h-3 min-w-0 flex-1 items-center")}
         >
           {row.budget ? (
             <BudgetGauge
@@ -335,11 +342,11 @@ function BreakdownRow({
           ) : (
             <div
               className={cn(
-                "bg-border-strong/60 absolute inset-x-0 h-[7px] overflow-hidden rounded-full",
+                "bg-border-strong/60 absolute inset-x-0 h-2 overflow-hidden rounded-full",
               )}
             >
               <span
-                className="block h-full min-w-[3px] rounded-full transition-[width] duration-[260ms] ease-[cubic-bezier(0.2,0.7,0.2,1)] motion-reduce:transition-none"
+                className="block h-full min-w-1 rounded-full transition-[width] duration-[260ms] ease-[cubic-bezier(0.2,0.7,0.2,1)] motion-reduce:transition-none"
                 style={{
                   width: `${((row.total / max) * 100).toFixed(2)}%`,
                   background: fill,
@@ -352,7 +359,7 @@ function BreakdownRow({
           {row.budget?.amount != null && (
             <span
               title="Budget"
-              className="bg-foreground absolute inset-y-0 w-[1.5px] rounded-[1px] opacity-55 transition-[left] duration-[460ms] ease-[cubic-bezier(0.2,0.7,0.2,1)] motion-reduce:transition-none"
+              className="bg-foreground absolute inset-y-0 w-[1.5px] rounded-xs opacity-55 transition-[left] duration-[460ms] ease-[cubic-bezier(0.2,0.7,0.2,1)] motion-reduce:transition-none"
               style={{
                 left: `${((row.budget.amount / max) * 100).toFixed(2)}%`,
               }}
@@ -365,7 +372,7 @@ function BreakdownRow({
         {captioned && (
           <span
             className={cn(
-              "num w-[74px] flex-none overflow-hidden text-right text-[10px] tracking-[-0.01em] whitespace-nowrap",
+              "num w-19 flex-none overflow-hidden text-right text-label tracking-[-0.01em] whitespace-nowrap",
               caption?.over
                 ? "text-bad font-semibold"
                 : "text-subtle font-medium",

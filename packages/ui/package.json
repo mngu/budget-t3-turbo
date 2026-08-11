@@ -35,7 +35,8 @@
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "lint": "eslint --flag unstable_native_nodejs_ts_config",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
-    "ui-add": "pnpm dlx shadcn@latest add && prettier src --write --list-different"
+    "ui-add": "pnpm dlx shadcn@latest add && prettier src --write --list-different",
+    "test": "vitest run"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
@@ -55,7 +56,8 @@
     "prettier": "catalog:",
     "react": "catalog:react19",
     "typescript": "catalog:",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "vitest": "^4.1.10"
   },
   "peerDependencies": {
     "react": "catalog:react19",

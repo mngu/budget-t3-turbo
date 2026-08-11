@@ -88,7 +88,7 @@ function AllTransactions() {
           aClasser
           internes
           searchField
-          className="border-border bg-surface-2 flex-none rounded-[11px] border px-2.5 py-2"
+          className="border-border bg-surface-2 flex-none rounded-md border px-2.5 py-2"
         />
 
         <TransactionsTable

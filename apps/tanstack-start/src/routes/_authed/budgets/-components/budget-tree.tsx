@@ -66,11 +66,11 @@ export function BudgetTree({
 
   if (tree.length === 0) {
     return (
-      <div className="bg-card rounded-[14px] border px-5 py-11 text-center">
-        <div className="text-[13px] font-medium">
+      <div className="bg-card rounded-lg border px-5 py-11 text-center">
+        <div className="text-body font-medium">
           Aucune catégorie pour le moment
         </div>
-        <p className="text-muted-foreground mx-auto mt-1.5 max-w-[420px] text-xs text-pretty">
+        <p className="text-muted-foreground mx-auto mt-1.5 max-w-105 text-control text-pretty">
           Un budget se pose sur une catégorie : créez-en d'abord depuis l'écran
           Catégories.
         </p>
@@ -79,7 +79,7 @@ export function BudgetTree({
   }
 
   return (
-    <div className="bg-card overflow-hidden rounded-[14px] border">
+    <div className="bg-card overflow-hidden rounded-lg border">
       {tree.map((parent) => {
         const detailed = isDetailed(rows, parent);
         // Par défaut, seule une parente détaillée s'ouvre : elle seule a
@@ -141,7 +141,7 @@ function ParentRow({
       onOpenChange={onToggle}
       render={<div className="border-b last:border-b-0" />}
     >
-      <div className="hover:bg-surface-2 grid min-h-[46px] grid-cols-[20px_30px_minmax(150px,1fr)_auto_224px_148px] items-center gap-2 px-3">
+      <div className="hover:bg-surface-2 grid min-h-11 grid-cols-[20px_30px_minmax(150px,1fr)_auto_224px_148px] items-center gap-2 px-3">
         <CollapsibleTrigger
           disabled={parent.children.length === 0}
           aria-label={expanded ? "Replier" : "Déplier"}
@@ -158,15 +158,15 @@ function ParentRow({
         </CollapsibleTrigger>
 
         <span
-          className="flex size-[30px] items-center justify-center rounded-[9px] border border-transparent"
+          className="flex size-8 items-center justify-center rounded-md border border-transparent"
           style={{ background: softCategoryColor(color), color }}
         >
           <CategoryIcon name={parent.icon} />
         </span>
 
-        <span className="truncate text-[13px] font-medium">{parent.name}</span>
+        <span className="truncate text-body font-medium">{parent.name}</span>
 
-        <span className="text-subtle text-[11px] whitespace-nowrap">
+        <span className="text-subtle text-meta whitespace-nowrap">
           {parent.children.length === 0 && "aucune sous-catégorie"}
         </span>
 
@@ -177,7 +177,7 @@ function ParentRow({
             <div className="flex flex-col items-end">
               <span
                 className={cn(
-                  "num text-[12.5px] font-medium",
+                  "num text-meta font-medium",
                   missing > 0 && "text-muted-foreground",
                 )}
               >
@@ -186,7 +186,7 @@ function ParentRow({
                 )}{" "}
                 /mois
               </span>
-              <span className="text-subtle text-[10px] whitespace-nowrap">
+              <span className="text-subtle text-label whitespace-nowrap">
                 {missing > 0
                   ? `${missing} sous-cat. à remplir`
                   : `somme de ${parent.children.length} sous-cat.`}
@@ -246,7 +246,7 @@ function ParentRow({
             >
               <span />
               <span
-                className="size-[7px] rounded-full"
+                className="size-2 rounded-full"
                 style={{
                   background: shadeCategoryColor(
                     color,
@@ -255,7 +255,7 @@ function ParentRow({
                   ),
                 }}
               />
-              <span className="truncate px-2 text-[12.5px]">{child.name}</span>
+              <span className="truncate px-2 text-control">{child.name}</span>
               <div className="flex items-center justify-end gap-2">
                 {detailed ? (
                   <BudgetAmount
@@ -265,7 +265,7 @@ function ParentRow({
                 ) : (
                   // Parente en budget global : la sous-catégorie n'a rien à
                   // saisir, mais sa moyenne dit d'où vient la somme.
-                  <span className="num text-subtle text-[11px] whitespace-nowrap">
+                  <span className="num text-subtle text-meta whitespace-nowrap">
                     {row && row.average > 0
                       ? `moy. ${euro0.format(row.average)}`
                       : "—"}
@@ -278,7 +278,7 @@ function ParentRow({
         })}
 
         {parent.children.length === 0 && (
-          <p className="text-muted-foreground px-3 pt-1.5 pb-1 pl-[72px] text-[11.5px]">
+          <p className="text-muted-foreground px-3 pt-1.5 pb-1 pl-18 text-control">
             Aucune sous-catégorie : le budget se pose directement sur la
             catégorie.
           </p>
@@ -313,7 +313,7 @@ function BudgetAmount({
           type="button"
           onClick={() => onSet(proposal)}
           title={`Pré-remplir le budget avec ${euro0.format(proposal)} · moyenne 6 mois`}
-          className="num text-subtle hover:text-primary text-[11.5px] whitespace-nowrap"
+          className="num text-subtle hover:text-primary text-meta whitespace-nowrap"
         >
           Moyenne {euro0.format(proposal)} →
         </button>
@@ -364,9 +364,9 @@ function AmountInput({
             e.currentTarget.blur();
           }
         }}
-        className="num border-border-strong bg-background focus:border-primary h-[29px] w-24 rounded-lg border px-2 pr-5 text-right text-[12.5px] font-medium outline-none"
+        className="num border-border-strong bg-background focus:border-primary h-7 w-24 rounded-lg border px-2 pr-5 text-right text-meta font-medium outline-none"
       />
-      <span className="text-subtle pointer-events-none absolute right-2 text-[11px]">
+      <span className="text-subtle pointer-events-none absolute right-2 text-meta">
         €
       </span>
     </span>

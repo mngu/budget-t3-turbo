@@ -62,7 +62,7 @@ export function SyncStatus({
   return (
     <div className="flex items-center gap-4">
       <div className="border-border border-r pr-4 text-right">
-        <div className={cn("num text-[13px] font-medium", tone)}>{value}</div>
+        <div className={cn("num text-body font-medium", tone)}>{value}</div>
         <div className="label-caps mt-0.5">{meta}</div>
       </div>
 

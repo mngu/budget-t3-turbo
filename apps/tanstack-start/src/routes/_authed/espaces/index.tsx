@@ -283,13 +283,13 @@ function EspacesPage() {
   // ── Rendu ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden text-[13px] leading-[1.45]">
+    <div className="flex h-dvh flex-col overflow-hidden text-body leading-[1.45]">
       <AppHeader page="espaces" />
 
       <div className="min-h-0 flex-1 overflow-y-auto">
-        <main className="mx-auto max-w-[1010px] px-6 pt-5 pb-12">
+        <main className="mx-auto max-w-250 px-6 pt-5 pb-12">
           <div className="flex min-h-9.5 flex-wrap items-center gap-6">
-            <h1 className="text-2xl font-semibold tracking-tight">Espaces</h1>
+            <h1 className="text-title">Espaces</h1>
             <div className="ml-auto flex items-center gap-4">
               <div className="border-border flex items-center gap-4 border-r pr-4">
                 <Counter
@@ -306,7 +306,7 @@ function EspacesPage() {
               </Button>
             </div>
           </div>
-          <p className="text-muted-foreground mt-2 max-w-[640px] text-[12.5px] text-pretty">
+          <p className="text-muted-foreground mt-2 max-w-160 text-control text-pretty">
             Un espace contient des comptes bancaires, des catégories et des
             transactions ; deux espaces ne voient rien l'un de l'autre. Partager
             un compte, c'est ajouter un membre à l'espace qui le contient.
@@ -317,17 +317,17 @@ function EspacesPage() {
               {incoming.map((invitation) => (
                 <div
                   key={invitation.id}
-                  className="border-border-strong bg-accent-soft flex flex-wrap items-center gap-4 rounded-[14px] border px-5 py-4"
+                  className="border-border-strong bg-accent-soft flex flex-wrap items-center gap-4 rounded-lg border px-5 py-4"
                 >
-                  <span className="bg-card border-border-strong text-primary flex size-8 flex-none items-center justify-center rounded-[10px] border">
+                  <span className="bg-card border-border-strong text-primary flex size-8 flex-none items-center justify-center rounded-md border">
                     <MailIcon className="size-4" />
                   </span>
-                  <div className="min-w-[280px] flex-1">
-                    <div className="text-[13.5px] font-semibold tracking-[-0.015em]">
+                  <div className="min-w-70 flex-1">
+                    <div className="text-body font-semibold tracking-[-0.015em]">
                       {invitation.invitedBy} vous invite dans{" "}
                       {invitation.spaceName}
                     </div>
-                    <div className="text-muted-foreground mt-1 max-w-[660px] text-xs text-pretty">
+                    <div className="text-muted-foreground mt-1 max-w-165 text-control text-pretty">
                       En acceptant, vous verrez tous les comptes, toutes les
                       catégories et tout l'historique de cet espace, comme{" "}
                       {invitation.role === "owner" ? "propriétaire" : "membre"}.
@@ -360,17 +360,17 @@ function EspacesPage() {
           )}
 
           {soloBanner && (
-            <div className="border-border-strong bg-surface-2 mt-5 flex flex-wrap items-center gap-4 rounded-[14px] border px-5 py-4">
-              <span className="bg-card border-border-strong text-primary flex size-8 flex-none items-center justify-center rounded-[10px] border">
+            <div className="border-border-strong bg-surface-2 mt-5 flex flex-wrap items-center gap-4 rounded-lg border px-5 py-4">
+              <span className="bg-card border-border-strong text-primary flex size-8 flex-none items-center justify-center rounded-md border">
                 <UsersIcon className="size-4" />
               </span>
-              <div className="min-w-[280px] flex-1">
-                <div className="text-[13.5px] font-semibold tracking-[-0.015em]">
+              <div className="min-w-70 flex-1">
+                <div className="text-body font-semibold tracking-[-0.015em]">
                   Vous êtes seul sur cet espace
                 </div>
-                <div className="text-muted-foreground mt-1 max-w-[660px] text-xs text-pretty">
+                <div className="text-muted-foreground mt-1 max-w-165 text-control text-pretty">
                   Vos{" "}
-                  <span className="num text-[11.5px]">
+                  <span className="num text-meta">
                     {soloBanner.counts.transactions.toLocaleString("fr-FR")}
                   </span>{" "}
                   transactions, vos comptes et vos catégories vivent ici. Pour
@@ -444,7 +444,7 @@ function EspacesPage() {
 function Counter({ value, label }: { value: number; label: string }) {
   return (
     <div className="text-right">
-      <div className="num text-[13px] font-medium">
+      <div className="num text-body font-medium">
         {value.toLocaleString("fr-FR")}
       </div>
       <div className="label-caps mt-0.5">{label}</div>

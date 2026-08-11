@@ -61,14 +61,14 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
       <header className="bg-sunken border-b px-5 py-3.5">
         <div className="flex items-center gap-2.5">
           <KeyRoundIcon className="text-primary size-3.5" />
-          <h2 className="text-[13.5px] font-semibold">
+          <h2 className="text-body font-semibold">
             Configuration Enable Banking
           </h2>
-          <span className="text-subtle ml-auto text-[11.5px]">
+          <span className="text-subtle ml-auto text-control">
             une seule fois, à l'installation
           </span>
         </div>
-        <p className="text-muted-foreground mt-1.5 max-w-[620px] text-[11.5px] text-pretty">
+        <p className="text-muted-foreground mt-1.5 max-w-155 text-control text-pretty">
           Ce sont les identifiants de{" "}
           <span className="text-foreground font-medium">votre</span> compte
           agrégateur, pas ceux d'une banque. Aucune banque ne vous demandera
@@ -94,14 +94,14 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
           Déclarez cette URL de redirection dans le Control Panel de votre
           application :
           <div className="mt-1.5 flex items-center gap-2">
-            <span className="bg-sunken num truncate rounded-[7px] border px-2.5 py-1 text-[11.5px]">
+            <span className="bg-sunken num truncate rounded-md border px-2.5 py-1 text-meta">
               {redirectUrl}
             </span>
             <button
               type="button"
               onClick={copyRedirect}
               className={cn(
-                "border-border-strong hover:bg-accent h-[26px] rounded-[7px] border px-2.5 text-[11.5px] whitespace-nowrap",
+                "border-border-strong hover:bg-accent h-7 rounded-md border px-2.5 text-control whitespace-nowrap",
                 copied ? "text-ok" : "text-muted-foreground",
               )}
             >
@@ -168,11 +168,11 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
         </div>
 
         {setup.error && (
-          <div className="border-bad bg-bad-soft mt-3 rounded-[9px] border px-3 py-2.5">
-            <p className="text-bad text-[11.5px] font-semibold">
+          <div className="border-bad bg-bad-soft mt-3 rounded-md border px-3 py-2.5">
+            <p className="text-bad text-control font-semibold">
               L'API Enable Banking a refusé la configuration
             </p>
-            <p className="text-muted-foreground num mt-1.5 text-[11px] break-words">
+            <p className="text-muted-foreground num mt-1.5 text-meta break-words">
               {setup.error}
             </p>
           </div>
@@ -180,7 +180,7 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
       </div>
 
       <div className="flex items-center gap-3 border-t px-5 py-3">
-        <span className="text-subtle min-w-0 flex-1 text-[11.5px]">
+        <span className="text-subtle min-w-0 flex-1 text-control">
           Rien n'est envoyé à votre banque à cette étape.
         </span>
         <Button
@@ -197,15 +197,15 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
 }
 
 const FIELD =
-  "border-input bg-background focus:border-primary num h-[33px] w-full max-w-[440px] rounded-[9px] border px-2.5 text-xs outline-none";
+  "border-input bg-background focus:border-primary num h-8 w-full max-w-110 rounded-md border px-2.5 text-control outline-none";
 
 function Step({ n, children }: { n: string; children: React.ReactNode }) {
   return (
     <li className="grid grid-cols-[22px_minmax(0,1fr)] items-start gap-3">
-      <span className="border-border-strong text-muted-foreground num flex size-[22px] items-center justify-center rounded-full border text-[11px]">
+      <span className="border-border-strong text-muted-foreground num flex size-6 items-center justify-center rounded-full border text-meta">
         {n}
       </span>
-      <div className="min-w-0 pt-px text-[12.5px]">{children}</div>
+      <div className="min-w-0 pt-px text-control">{children}</div>
     </li>
   );
 }
@@ -224,7 +224,7 @@ function Check({
     <div className="grid grid-cols-[16px_minmax(0,1fr)] items-center gap-2.5">
       <span
         className={cn(
-          "text-primary-foreground flex size-[15px] items-center justify-center rounded-full border-[1.5px] text-[9px]",
+          "text-primary-foreground flex size-4 items-center justify-center rounded-full border-[1.5px] text-label",
           bad && "border-bad bg-bad",
           ok && "border-ok bg-ok",
           pending && "border-border-strong",
@@ -233,7 +233,7 @@ function Check({
         {bad ? "✕" : ok ? "✓" : ""}
       </span>
       <span
-        className={cn("text-xs", pending ? "text-subtle" : "text-foreground")}
+        className={cn("text-control", pending ? "text-subtle" : "text-foreground")}
       >
         {children}
       </span>

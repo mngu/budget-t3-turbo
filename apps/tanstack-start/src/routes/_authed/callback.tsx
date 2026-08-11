@@ -63,7 +63,7 @@ function CallbackPage() {
       {failure ? (
         <>
           <p className="text-red-600">❌ La connexion à la banque a échoué.</p>
-          <p className="text-muted-foreground text-sm">{failure}</p>
+          <p className="text-muted-foreground text-body">{failure}</p>
           <Button render={<Link to="/banques" />}>Retour aux banques</Button>
         </>
       ) : (

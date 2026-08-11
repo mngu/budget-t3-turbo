@@ -74,11 +74,11 @@ export function RevokeDialog({
               className="grid grid-cols-[56px_minmax(0,1fr)] items-baseline gap-2.5"
             >
               <span
-                className={`num text-right text-sm font-medium ${fact.tone}`}
+                className={`num text-body text-right font-medium ${fact.tone}`}
               >
                 {fact.n}
               </span>
-              <span className="text-muted-foreground text-xs">
+              <span className="text-muted-foreground text-control">
                 {fact.label}
               </span>
             </div>

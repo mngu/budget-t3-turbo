@@ -75,10 +75,10 @@ export function CategoryDeleteDialog({
                 key={fact.label}
                 className="grid grid-cols-[56px_minmax(0,1fr)] items-baseline gap-2.5"
               >
-                <span className="num text-destructive text-right text-sm font-medium">
+                <span className="num text-destructive text-body text-right font-medium">
                   {fact.n}
                 </span>
-                <span className="text-muted-foreground text-xs">
+                <span className="text-muted-foreground text-control">
                   {fact.label}
                 </span>
               </div>

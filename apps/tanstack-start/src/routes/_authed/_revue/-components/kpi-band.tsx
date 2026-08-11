@@ -6,6 +6,7 @@ import type { Delta } from "~/lib/history";
 import type { RevueBudgets } from "~/lib/revue-budgets";
 import { euro0, signedEuro0 } from "~/lib/format";
 import { BUDGETS_OFF_MESSAGES } from "~/lib/revue-budgets";
+import { BREAKDOWN_WIDTH } from "./breakdown-list";
 import { budgetCaption, BudgetGauge } from "./budget-gauge";
 
 /**
@@ -65,12 +66,12 @@ export function KpiBand({
     // `flex-wrap` n'est pas dans la maquette, qui mesure son conteneur : il
     // évite que le bloc de flux, à largeur minimale, ne pousse le solde hors de
     // l'écran sur une fenêtre étroite.
-    <div className="flex flex-none flex-wrap items-center gap-x-[clamp(15px,2.3vw,31px)] gap-y-3">
+    <div className="flex flex-none flex-wrap items-center gap-x-[clamp(22px,3vw,40px)] gap-y-3">
       <div>
         <div className="label-caps">{label}</div>
         <div
           className={cn(
-            "num mt-0.5 text-[44px] leading-[1.05] font-medium tracking-[-0.04em]",
+            "num text-hero mt-0.5",
             balance < 0 ? "text-bad" : "text-ok",
           )}
         >
@@ -84,13 +85,13 @@ export function KpiBand({
               pastille disant déjà le sens ; ici c'est un point d'arrêt. */}
           <DeltaAmount
             delta={balanceDelta}
-            className="text-subtle text-[11px] max-lg:hidden"
+            className="text-subtle text-meta max-lg:hidden"
           />
         </div>
       </div>
 
       {flow && (
-        <div className="flex max-w-[560px] min-w-[300px] flex-1 flex-col">
+        <div className="flex max-w-140 min-w-75 flex-1 flex-col">
           <FlowRow
             label="Entrées"
             tone="ok"
@@ -157,18 +158,18 @@ export function KpiFocus({
     // *même* expression que la colonne des postes (`rdStackPx === listPx`) :
     // c'est un alignement, pas une coïncidence — d'où la reprise à l'identique
     // du `BREAKDOWN_WIDTH` de `breakdown-list.tsx`.
-    <div className="flex w-[254px] max-w-full flex-none flex-col items-end">
-      <div className="mt-0.5 flex h-[33px] w-full min-w-0 items-center justify-between gap-3.5">
+    <div className={cn(BREAKDOWN_WIDTH, "flex max-w-full flex-none flex-col items-end")}>
+      <div className="mt-0.5 flex h-8 w-full min-w-0 items-center justify-between gap-3.5">
         {children}
       </div>
-      <div className="flex min-h-[19px] items-center justify-end gap-2.5 whitespace-nowrap">
+      <div className="flex min-h-5 items-center justify-end gap-2.5 whitespace-nowrap">
         {delta ? (
           <>
             <DeltaPill delta={delta} worseWhenUp />
-            <DeltaAmount delta={delta} className="text-subtle text-[11px]" />
+            <DeltaAmount delta={delta} className="text-subtle text-meta" />
           </>
         ) : (
-          <span className="text-subtle text-[11px]">
+          <span className="text-subtle text-meta">
             Pas d'historique de comparaison
           </span>
         )}
@@ -176,18 +177,18 @@ export function KpiFocus({
 
       {budget &&
         (budget.amount === null || caption === null ? (
-          <div className="text-subtle mt-2.5 w-full text-right text-[11px]">
+          <div className="text-subtle text-meta mt-2.5 w-full text-right">
             Pas de budget sur ce poste
           </div>
         ) : (
-          <div className="mt-2.5 flex w-full flex-col gap-[5px]">
+          <div className="mt-2.5 flex w-full flex-col gap-1">
             <BudgetGauge
               covered={budget.covered}
               budget={budget.amount}
               uncovered={budget.uncovered}
               fill={budget.fill}
             />
-            <div className="num flex items-baseline justify-between gap-2.5 text-[10.5px]">
+            <div className="num text-label flex items-baseline justify-between gap-2.5">
               <span className="text-subtle">
                 Budget {euro0.format(budget.amount)}
               </span>
@@ -225,9 +226,9 @@ function FlowRow({
   className?: string;
 }) {
   return (
-    <div className={cn("flex h-[33px] items-center gap-[11px]", className)}>
-      <span className="label-caps w-[58px] flex-none">{label}</span>
-      <span className="bg-track h-[9px] min-w-10 flex-1 overflow-hidden rounded-full">
+    <div className={cn("flex h-8 items-center gap-3", className)}>
+      <span className="label-caps w-12 flex-none">{label}</span>
+      <span className="bg-track h-2 min-w-10 flex-1 overflow-hidden rounded-full">
         <span
           className={cn(
             "block h-full rounded-full opacity-85",
@@ -238,7 +239,7 @@ function FlowRow({
       </span>
       <span
         className={cn(
-          "num min-w-28 flex-none text-right text-[19px] font-medium tracking-[-0.02em]",
+          "num text-amount min-w-28 flex-none text-right",
           tone === "ok" ? "text-ok" : "text-bad",
         )}
       >
@@ -250,14 +251,14 @@ function FlowRow({
       <DeltaPill
         delta={delta}
         worseWhenUp={worseWhenUp}
-        className="w-[68px] justify-center"
+        className="w-17 justify-center"
       />
       {/* Premier sacrifié quand la fenêtre se resserre — la maquette le retire
           sous 1 320 px de conteneur. */}
       <DeltaAmount
         delta={delta}
         worseWhenUp={worseWhenUp}
-        className="min-w-26 text-[10.5px] font-semibold max-xl:hidden"
+        className="text-meta min-w-26 font-semibold max-xl:hidden"
       />
     </div>
   );
@@ -276,9 +277,9 @@ function FlowRow({
 function BudgetRow({ budget }: { budget: RevueBudgets }) {
   if (budget.off !== null) {
     return (
-      <div className="border-border flex min-h-[33px] items-center gap-[11px] border-t">
-        <span className="label-caps w-[58px] flex-none">Budget</span>
-        <span className="text-subtle min-w-0 flex-1 py-2 text-[11px]">
+      <div className="border-border flex min-h-8 items-center gap-3 border-t">
+        <span className="label-caps w-12 flex-none">Budget</span>
+        <span className="text-subtle text-meta min-w-0 flex-1 py-2">
           {BUDGETS_OFF_MESSAGES[budget.off]}
         </span>
       </div>
@@ -287,8 +288,8 @@ function BudgetRow({ budget }: { budget: RevueBudgets }) {
 
   const caption = budgetCaption(budget.covered, budget.total);
   return (
-    <div className="border-border flex h-[33px] items-center gap-[11px] border-t">
-      <span className="label-caps w-[58px] flex-none">Budget</span>
+    <div className="border-border flex h-8 items-center gap-3 border-t">
+      <span className="label-caps w-12 flex-none">Budget</span>
       <BudgetGauge
         covered={budget.covered}
         budget={budget.total}
@@ -296,17 +297,17 @@ function BudgetRow({ budget }: { budget: RevueBudgets }) {
         // Teinte neutre : l'enveloppe du mois n'appartient à aucun poste, et
         // la peindre en vert ou en rouge trancherait à la place du lecteur.
         fill="color-mix(in oklab, var(--muted-foreground) 62%, transparent)"
-        className="h-[9px] min-w-10 flex-1"
+        className="h-2 min-w-10 flex-1"
       />
-      <span className="num text-muted-foreground min-w-28 flex-none text-right text-[19px] font-medium tracking-[-0.02em]">
+      <span className="num text-amount text-muted-foreground min-w-28 flex-none text-right">
         {euro0.format(budget.total)}
       </span>
       {/* Colonne vide de la pastille : un budget n'a pas d'écart à une moyenne,
           mais la retirer décalerait le chiffre de droite d'une rangée à l'autre. */}
-      <span className="w-[68px] flex-none" />
+      <span className="w-17 flex-none" />
       <span
         className={cn(
-          "num min-w-26 flex-none text-right text-[10.5px] max-xl:hidden",
+          "num text-label min-w-26 flex-none text-right max-xl:hidden",
           caption.over ? "text-bad font-semibold" : "text-subtle font-medium",
         )}
       >
@@ -336,7 +337,7 @@ function DeltaPill({
   return (
     <span
       className={cn(
-        "num flex h-[19px] flex-none items-center gap-1 rounded-full px-2 text-[10.5px] font-semibold",
+        "num text-meta flex h-5 flex-none items-center gap-1 rounded-full px-2 font-semibold",
         bad ? "bg-bad-soft text-bad" : "bg-ok-soft text-ok",
         className,
       )}
@@ -344,10 +345,10 @@ function DeltaPill({
       {/* Aucune flèche à l'écart nul, comme la maquette : il n'y a pas de sens
           à montrer. */}
       {delta.amount > 0 && (
-        <TrendingUpIcon className="size-[13px]" aria-hidden />
+        <TrendingUpIcon className="size-3" aria-hidden />
       )}
       {delta.amount < 0 && (
-        <TrendingDownIcon className="size-[13px]" aria-hidden />
+        <TrendingDownIcon className="size-3" aria-hidden />
       )}
       {signedPercent.format(delta.pct)} %
     </span>

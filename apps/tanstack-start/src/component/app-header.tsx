@@ -103,12 +103,12 @@ export function AppHeader({ page }: { page?: HeaderPage }) {
   return (
     <header
       className={cn(
-        "bg-background relative z-30 flex h-[52px] flex-none items-center gap-3.5 px-5 transition-shadow duration-200",
+        "bg-background relative z-30 flex h-13 flex-none items-center gap-3.5 px-5 transition-shadow duration-200",
       )}
     >
       <div className="flex items-center gap-2.5">
-        <div className="bg-primary size-2.5 rounded-[2px]" />
-        <span className="text-[13.5px] font-semibold tracking-[-0.02em]">
+        <div className="bg-primary size-2.5 rounded-xs" />
+        <span className="text-body font-semibold tracking-[-0.02em]">
           Budget
         </span>
       </div>
@@ -120,7 +120,7 @@ export function AppHeader({ page }: { page?: HeaderPage }) {
           label="Revue du mois"
           active={page === "revue"}
         >
-          <ChartPieIcon className="size-[17px]" />
+          <ChartPieIcon className="size-4" />
         </NavIcon>
         <NavIcon
           to="/transactions"
@@ -128,14 +128,14 @@ export function AppHeader({ page }: { page?: HeaderPage }) {
           label="Transactions"
           active={page === "transactions"}
         >
-          <ArrowLeftRightIcon className="size-[17px]" />
+          <ArrowLeftRightIcon className="size-4" />
         </NavIcon>
       </nav>
 
       {isSettings && (
         <div className="border-border ml-1.5 flex items-baseline gap-2.5 border-l pl-4">
           <span className="label-caps">Réglages</span>
-          <span className="text-[13px] font-semibold tracking-[-0.01em]">
+          <span className="text-body font-semibold tracking-[-0.01em]">
             {settingsTitle}
           </span>
         </div>

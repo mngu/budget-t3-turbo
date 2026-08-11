@@ -153,11 +153,11 @@ export function PeriodPicker() {
             <button
               type="button"
               title="Choisir une période"
-              className="num hover:text-foreground flex h-[22px] items-center gap-1.5 pr-0.5 font-medium tracking-[-0.01em] whitespace-nowrap"
+              className="num hover:text-foreground flex h-6 items-center gap-1.5 pr-0.5 font-medium tracking-[-0.01em] whitespace-nowrap"
               {...props}
             >
               {periodLabel(from, to)}
-              <span className="text-subtle flex-none text-[9px]">▾</span>
+              <span className="text-subtle flex-none text-label">▾</span>
             </button>
           )}
         />
@@ -184,7 +184,7 @@ export function PeriodPicker() {
                     disabled={!reachable}
                     onClick={() => commit(preset.from, preset.to)}
                     className={cn(
-                      "py-1 text-left text-xs disabled:pointer-events-none disabled:opacity-40",
+                      "py-1 text-left text-control disabled:pointer-events-none disabled:opacity-40",
                       active
                         ? "text-primary font-semibold"
                         : "text-muted-foreground hover:text-foreground",
@@ -228,7 +228,7 @@ export function PeriodPicker() {
               />
 
               <div className="mt-2.5 flex items-center gap-2.5">
-                <span className="text-subtle num text-[11px]">
+                <span className="text-subtle num text-meta">
                   {draft
                     ? `Début : ${dayMonthFr.format(draft)} — choisir la fin`
                     : from && to
@@ -237,7 +237,7 @@ export function PeriodPicker() {
                 </span>
                 <button
                   type="button"
-                  className="text-primary ml-auto text-[11.5px]"
+                  className="text-primary ml-auto text-control"
                   onClick={() => setOpen(false)}
                 >
                   Fermer
@@ -248,7 +248,7 @@ export function PeriodPicker() {
         </PopoverContent>
       </Popover>
 
-      <div className="border-border bg-card ml-1.5 flex items-center gap-px rounded-[8px] border p-px">
+      <div className="border-border bg-card ml-1.5 flex items-center gap-px rounded-md border p-px">
         <StepButton
           label="Période précédente"
           onClick={() => shiftMonth(-1)}
@@ -285,7 +285,7 @@ function StepButton({
       aria-label={label}
       onClick={onClick}
       disabled={disabled}
-      className="text-subtle hover:bg-accent hover:text-foreground flex h-5 w-[22px] items-center justify-center rounded-[6px] text-sm disabled:pointer-events-none disabled:opacity-30"
+      className="text-subtle hover:bg-accent hover:text-foreground flex h-5 w-6 items-center justify-center rounded-sm text-body disabled:pointer-events-none disabled:opacity-30"
     >
       {glyph}
     </button>

@@ -64,14 +64,14 @@ export function BudgetGauge({
   return (
     <span
       className={cn(
-        "bg-track relative block h-[7px] overflow-hidden rounded-full",
+        "bg-track relative block h-2 overflow-hidden rounded-full",
         className,
       )}
     >
       <span
         className={cn(
           "absolute inset-y-0 left-0 rounded-full",
-          within > 0 && "min-w-[3px]",
+          within > 0 && "min-w-1",
           SLIDE,
         )}
         style={{ width: pct(within), background: fill }}
@@ -81,7 +81,7 @@ export function BudgetGauge({
       {over > 0 && (
         <span
           className={cn(
-            "bg-bad absolute inset-y-0 min-w-[3px] rounded-full",
+            "bg-bad absolute inset-y-0 min-w-1 rounded-full",
             SLIDE,
           )}
           style={{
@@ -92,7 +92,7 @@ export function BudgetGauge({
       )}
       {uncovered > 0 && (
         <span
-          className={cn("absolute inset-y-0 min-w-[3px]", SLIDE)}
+          className={cn("absolute inset-y-0 min-w-1", SLIDE)}
           style={{
             left: `calc(${pct(hatchAt)} + 2px)`,
             width: `calc(${pct(uncovered)} - 2px)`,

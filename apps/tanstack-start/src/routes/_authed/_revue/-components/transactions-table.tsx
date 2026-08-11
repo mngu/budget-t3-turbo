@@ -60,7 +60,7 @@ export function TransactionsTable({
           GRID,
           // Opaque et au-dessus des lignes : il reste collé en haut pendant que
           // la liste défile dessous.
-          "label-caps border-border-strong bg-background sticky top-0 z-[2] h-[30px] border-b",
+          "label-caps border-border-strong bg-background sticky top-0 z-[2] h-8 border-b",
         )}
       >
         <SortableHead label="Date" sortKey="date" />
@@ -83,17 +83,17 @@ export function TransactionsTable({
       ))}
 
       {rows.length === 0 && (
-        <p className="text-subtle py-15 text-center text-xs">
+        <p className="text-subtle py-15 text-center text-control">
           Aucune transaction ne correspond à ces filtres.
         </p>
       )}
 
-      <div className="text-subtle flex items-center justify-center gap-3 p-4 text-[11.5px]">
+      <div className="text-subtle flex items-center justify-center gap-3 p-4 text-control">
         <button
           type="button"
           disabled={page <= 1}
           onClick={() => setSearch({ page: page - 1 })}
-          className="border-border text-muted-foreground hover:bg-accent rounded-[7px] border px-2.5 py-[3px] disabled:opacity-40"
+          className="border-border text-muted-foreground hover:bg-accent rounded-md border px-2.5 py-1 disabled:opacity-40"
         >
           ‹ Précédent
         </button>
@@ -104,7 +104,7 @@ export function TransactionsTable({
           type="button"
           disabled={page >= pageCount}
           onClick={() => setSearch({ page: page + 1 })}
-          className="border-border-strong hover:bg-accent rounded-[7px] border px-2.5 py-[3px] disabled:opacity-40"
+          className="border-border-strong hover:bg-accent rounded-md border px-2.5 py-1 disabled:opacity-40"
         >
           Suivant ›
         </button>
@@ -131,7 +131,7 @@ function Row({
     <div className={cn(GRID, "border-border hover:bg-accent h-11 border-b")}>
       <span
         className={cn(
-          "num text-[11.5px]",
+          "num text-meta",
           repeatsDate ? "text-subtle" : "text-muted-foreground",
         )}
       >
@@ -139,7 +139,7 @@ function Row({
       </span>
 
       <span className="flex min-w-0 items-center gap-1.5">
-        <span className="truncate text-[13px]">{row.description}</span>
+        <span className="truncate text-body">{row.description}</span>
         <TransferBadge row={row} />
         {/* La maquette met ici une pastille de « catégorisation peu sûre »,
             calculée sur un score de confiance dont la base n'a aucun équivalent
@@ -153,7 +153,7 @@ function Row({
         )}
       </span>
 
-      <span className="text-subtle truncate text-[11.5px]">
+      <span className="text-subtle truncate text-control">
         {row.bankName}
         {debtor && ` · ${titleCase(debtor)}`}
       </span>
@@ -161,7 +161,7 @@ function Row({
       <CategoryCell row={row} parents={parents} />
 
       <span
-        className={cn("num text-right text-[13px]", signed > 0 && "text-ok")}
+        className={cn("num text-right text-body", signed > 0 && "text-ok")}
       >
         {signedEuro.format(signed)}
       </span>
@@ -213,14 +213,14 @@ function CategoryCell({
         disabled={pending}
         onClick={() => setPicking(true)}
         title="Reclasser"
-        className="hover:border-border-strong hover:bg-card -ml-2 flex h-7 min-w-0 flex-1 items-center gap-2 rounded-[7px] border border-transparent px-1.5 text-left"
+        className="hover:border-border-strong hover:bg-card -ml-2 flex h-7 min-w-0 flex-1 items-center gap-2 rounded-md border border-transparent px-1.5 text-left"
       >
         <span className="flex flex-none" style={{ color: parent?.color }}>
-          <CategoryIcon name={parent?.icon ?? null} className="size-[15px]" />
+          <CategoryIcon name={parent?.icon ?? null} className="size-4" />
         </span>
         <span
           className={cn(
-            "min-w-0 truncate text-xs",
+            "min-w-0 truncate text-control",
             aClasser || parentName === null
               ? "text-subtle"
               : "text-muted-foreground",
@@ -233,11 +233,11 @@ function CategoryCell({
             le régime normal. */}
         {row.categorySource === "manual" && (
           <span
-            className="bg-primary size-[5px] flex-none rounded-full"
+            className="bg-primary size-1 flex-none rounded-full"
             title="Catégorie corrigée à la main"
           />
         )}
-        <span className="text-subtle ml-auto flex-none text-[9px]">▾</span>
+        <span className="text-subtle ml-auto flex-none text-label">▾</span>
       </button>
 
       <CategoryPathPicker

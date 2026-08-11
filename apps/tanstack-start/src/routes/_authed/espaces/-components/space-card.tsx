@@ -87,36 +87,36 @@ export function SpaceCard({
   return (
     <div
       className={cn(
-        "bg-card overflow-hidden rounded-[14px] border",
+        "bg-card overflow-hidden rounded-lg border",
         space.isActive ? "border-primary" : "border-border-strong",
       )}
     >
       <div className="grid grid-cols-[36px_minmax(0,1fr)_auto] items-center gap-3.5 px-4 py-3.5">
         <span
           className={cn(
-            "flex size-9 items-center justify-center rounded-[11px]",
+            "flex size-9 items-center justify-center rounded-md",
             space.isActive
               ? "bg-accent-soft text-primary"
               : "bg-surface-2 text-subtle",
           )}
         >
           {shared ? (
-            <UsersIcon className="size-[17px]" />
+            <UsersIcon className="size-4" />
           ) : (
-            <UserIcon className="size-[17px]" />
+            <UserIcon className="size-4" />
           )}
         </span>
 
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2.5">
-            <span className="text-sm font-semibold tracking-[-0.015em]">
+            <span className="text-subheading">
               {space.name}
             </span>
             {space.isActive && <Badge>Espace actif</Badge>}
             <Badge variant="outline">{owner ? "Propriétaire" : "Membre"}</Badge>
             {!shared && <Badge variant="secondary">Personnel</Badge>}
           </div>
-          <div className="text-subtle mt-[3px] text-[11.5px]">
+          <div className="text-subtle mt-1 text-control">
             {shared
               ? `Créé le ${dateFr(space.createdAt)}${
                   pending > 0
@@ -173,7 +173,7 @@ export function SpaceCard({
             >
               <div className="min-w-0">
                 <div className="flex min-w-0 items-center gap-2">
-                  <span className="truncate text-[13px] font-medium">
+                  <span className="truncate text-body font-medium">
                     {member.name}
                   </span>
                   {member.isMe && (
@@ -182,11 +182,11 @@ export function SpaceCard({
                     </Badge>
                   )}
                 </div>
-                <div className="text-subtle truncate text-[11.5px]">
+                <div className="text-subtle truncate text-control">
                   {member.email}
                 </div>
               </div>
-              <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
+              <span className="text-muted-foreground flex items-center gap-1.5 text-control">
                 {member.role === "owner" ? (
                   <KeyRoundIcon className="text-primary size-3.5" />
                 ) : (
@@ -194,7 +194,7 @@ export function SpaceCard({
                 )}
                 {member.role === "owner" ? "Propriétaire" : "Membre"}
               </span>
-              <span className="text-subtle num text-[11.5px]">
+              <span className="text-subtle num text-meta">
                 depuis le {dateFr(member.since)}
               </span>
               {/* Se retirer soi-même, c'est « Quitter » : même ligne, autre
@@ -233,10 +233,10 @@ export function SpaceCard({
                   className="border-border grid min-h-11 grid-cols-[minmax(0,1fr)_106px_132px_auto] items-center gap-3.5 border-t px-4"
                 >
                   <div className="min-w-0">
-                    <div className="truncate text-[13px]">
+                    <div className="truncate text-body">
                       {invitation.email}
                     </div>
-                    <div className="text-subtle truncate text-[11.5px]">
+                    <div className="text-subtle truncate text-control">
                       invitée par {invitation.invitedBy}
                     </div>
                   </div>
@@ -248,7 +248,7 @@ export function SpaceCard({
                   </Badge>
                   <span
                     className={cn(
-                      "num text-[11.5px]",
+                      "num text-meta",
                       invitation.status === "expired"
                         ? "text-bad"
                         : "text-subtle",
@@ -300,7 +300,7 @@ export function SpaceCard({
           {space.consents.length > 0 && space.counts.members > 1 && (
             <div className="border-border flex items-start gap-2.5 border-t px-4 py-3">
               <ShieldCheckIcon className="text-subtle mt-px size-3.5 flex-none" />
-              <div className="text-muted-foreground text-xs text-pretty">
+              <div className="text-muted-foreground text-control text-pretty">
                 {space.consents.map((consent, index) => (
                   <span key={consent.bankName}>
                     {index > 0 && " "}
@@ -326,7 +326,7 @@ export function SpaceCard({
 
       {alone && (
         <div className="border-border flex flex-col items-center gap-3 border-t px-4 py-6">
-          <span className="text-subtle max-w-[420px] text-center text-xs text-pretty">
+          <span className="text-subtle max-w-105 text-center text-control text-pretty">
             Personne d'autre dans cet espace. Invitez quelqu'un par email : la
             personne verra les mêmes comptes et les mêmes catégories que vous.
           </span>
@@ -339,7 +339,7 @@ export function SpaceCard({
                   onInviteChange({ ...invite, email: e.target.value })
                 }
                 placeholder="adresse email"
-                className="w-[250px]"
+                className="w-62"
               />
               <Button
                 size="sm"
@@ -355,7 +355,7 @@ export function SpaceCard({
       {!shared && (
         <div className="border-border flex items-start gap-2.5 border-t px-4 py-3">
           <LockIcon className="text-subtle mt-px size-3.5 flex-none" />
-          <div className="text-muted-foreground text-xs text-pretty">
+          <div className="text-muted-foreground text-control text-pretty">
             Espace personnel : un seul membre, créé avec votre compte. Il peut
             devenir un espace partagé — vous le renommez et vous invitez
             quelqu'un, tout ce qu'il contient reste en place. L'opération ne se
@@ -450,7 +450,7 @@ function InviteForm({
         value={value.email}
         onChange={(e) => onChange({ ...value, email: e.target.value })}
         placeholder="adresse email"
-        className="min-w-[220px] flex-1"
+        className="min-w-55 flex-1"
       />
       <ToggleGroup
         value={[value.role]}
@@ -470,7 +470,7 @@ function InviteForm({
       >
         Envoyer l&apos;invitation
       </Button>
-      <span className="text-subtle flex-none text-[11.5px] whitespace-nowrap">
+      <span className="text-subtle flex-none text-control whitespace-nowrap">
         le lien vaut 7 jours
       </span>
     </div>
@@ -488,7 +488,7 @@ function Stat({
 }) {
   return (
     <div className="border-border border-r px-4 py-2.5 last:border-r-0">
-      <div className="num text-sm font-medium tracking-[-0.01em]">
+      <div className="num text-body font-medium">
         {value.toLocaleString("fr-FR")}
       </div>
       <div className="label-caps mt-0.5">{value > 1 ? plural : singular}</div>
@@ -513,7 +513,7 @@ function SectionLabel({
       )}
     >
       <span className="label-caps">{label}</span>
-      <span className="text-subtle text-[11.5px]">{note}</span>
+      <span className="text-subtle text-control">{note}</span>
     </div>
   );
 }

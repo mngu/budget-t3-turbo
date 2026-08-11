@@ -50,12 +50,12 @@ function AjouterBanquePage() {
   const { step } = Route.useSearch();
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden text-[13px] leading-[1.45]">
+    <div className="flex h-dvh flex-col overflow-hidden text-body leading-[1.45]">
       <AppHeader page="banques" />
 
       <div className="min-h-0 flex-1 overflow-y-auto">
-        <main className="mx-auto max-w-[1010px] px-6 pt-5 pb-12">
-          <h1 className="text-2xl font-semibold tracking-tight">
+        <main className="mx-auto max-w-250 px-6 pt-5 pb-12">
+          <h1 className="text-title">
             Ajouter une banque
           </h1>
 
@@ -63,7 +63,7 @@ function AjouterBanquePage() {
             <header className="bg-sunken flex items-center gap-3 border-b px-4.5 py-3">
               <Link
                 to="/banques"
-                className="text-muted-foreground hover:text-foreground text-xs"
+                className="text-muted-foreground hover:text-foreground text-control"
               >
                 ‹ Retour
               </Link>
@@ -100,13 +100,13 @@ function WizardStep({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 text-xs",
+        "inline-flex items-center gap-1.5 text-control",
         current ? "text-foreground font-semibold" : "text-subtle",
       )}
     >
       <span
         className={cn(
-          "num flex size-[18px] items-center justify-center rounded-full border text-[10px]",
+          "num flex size-4 items-center justify-center rounded-full border text-label",
           current
             ? "border-primary bg-primary text-primary-foreground"
             : "border-border-strong text-subtle",
@@ -151,9 +151,9 @@ function StepBanque() {
 
   return (
     <div className="px-5 pt-4.5 pb-5">
-      <h2 className="text-[13.5px] font-semibold">Choisissez votre banque</h2>
+      <h2 className="text-body font-semibold">Choisissez votre banque</h2>
 
-      <InputGroup className="mt-3 max-w-[480px]">
+      <InputGroup className="mt-3 max-w-120">
         <InputGroupAddon>
           <SearchIcon />
         </InputGroupAddon>
@@ -165,8 +165,8 @@ function StepBanque() {
 
       {aspsps.length === 0 ? (
         <div className="border-border-strong mt-3.5 rounded-xl border border-dashed px-4.5 py-6 text-center">
-          <p className="text-[12.5px] font-medium">Aucune banque trouvée</p>
-          <p className="text-muted-foreground mt-1 text-[11.5px]">
+          <p className="text-control font-medium">Aucune banque trouvée</p>
+          <p className="text-muted-foreground mt-1 text-control">
             Aucun établissement ne correspond à votre recherche. Essayez le nom
             officiel de l'établissement.
           </p>
@@ -183,13 +183,13 @@ function StepBanque() {
                 <BankLogo
                   name={aspsp.name}
                   logoUrl={aspsp.logo}
-                  className="size-8 text-xs"
+                  className="size-8 text-control"
                 />
                 <div className="min-w-0">
-                  <div className="truncate text-[12.5px] font-medium">
+                  <div className="truncate text-control font-medium">
                     {aspsp.name}
                   </div>
-                  <div className="text-subtle text-[11px]">{aspsp.country}</div>
+                  <div className="text-subtle text-meta">{aspsp.country}</div>
                 </div>
                 <Button
                   variant="outline"
@@ -206,7 +206,7 @@ function StepBanque() {
         </div>
       )}
 
-      <p className="text-subtle mt-3.5 flex max-w-[640px] items-center gap-2.5 text-[11.5px] text-pretty">
+      <p className="text-subtle mt-3.5 flex max-w-160 items-center gap-2.5 text-control text-pretty">
         <ExternalLinkIcon className="size-3.5 flex-none" />
         Vous serez redirigé vers votre banque pour autoriser l'accès
         (authentification forte), puis ramené ici automatiquement.
@@ -263,11 +263,11 @@ function StepComptes() {
       <div className="px-5 py-8">
         <div className="flex items-center justify-center gap-2.5">
           <RefreshCwIcon className="text-primary size-4 animate-spin" />
-          <span className="text-sm font-semibold">
+          <span className="text-subheading">
             Synchronisation initiale en cours…
           </span>
         </div>
-        <p className="text-muted-foreground mx-auto mt-2 max-w-[500px] text-center text-xs text-pretty">
+        <p className="text-muted-foreground mx-auto mt-2 max-w-125 text-center text-control text-pretty">
           Nous récupérons l'historique des comptes suivis. Comptez une à deux
           minutes la première fois.
         </p>
@@ -279,8 +279,8 @@ function StepComptes() {
 
   return (
     <div className="px-5 pt-4.5 pb-5">
-      <h2 className="text-[13.5px] font-semibold">Vos comptes</h2>
-      <p className="text-muted-foreground mt-1 text-[11.5px]">
+      <h2 className="text-body font-semibold">Vos comptes</h2>
+      <p className="text-muted-foreground mt-1 text-control">
         Comptes découverts — nommez-les et choisissez lesquels suivre.
       </p>
 
@@ -306,7 +306,7 @@ function StepComptes() {
 
             <span
               className={cn(
-                "text-subtle num text-[11.5px] whitespace-nowrap",
+                "text-subtle num text-meta whitespace-nowrap",
                 account.enabled ? "" : "line-through",
               )}
             >
@@ -317,7 +317,7 @@ function StepComptes() {
       </div>
 
       <div className="mt-4 flex items-center gap-3">
-        <span className="text-subtle min-w-0 flex-1 text-[11.5px]">
+        <span className="text-subtle min-w-0 flex-1 text-control">
           {kept} compte{kept > 1 ? "s" : ""} suivi{kept > 1 ? "s" : ""} sur{" "}
           {rows.length} · les comptes décochés restent visibles mais ne sont pas
           importés

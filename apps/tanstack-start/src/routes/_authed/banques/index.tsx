@@ -62,13 +62,13 @@ function BanquesPage() {
   };
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden text-[13px] leading-[1.45]">
+    <div className="flex h-dvh flex-col overflow-hidden text-body leading-[1.45]">
       <AppHeader page="banques" />
 
       <div className="min-h-0 flex-1 overflow-y-auto">
-        <main className="mx-auto max-w-[1010px] px-6 pt-5 pb-12">
+        <main className="mx-auto max-w-250 px-6 pt-5 pb-12">
           <div className="flex min-h-9.5 flex-wrap items-center gap-6">
-            <h1 className="text-2xl font-semibold tracking-tight">Banques</h1>
+            <h1 className="text-title">Banques</h1>
             <div className="ml-auto flex items-center gap-4">
               <SyncStatus
                 totalTransactions={total}
@@ -85,7 +85,7 @@ function BanquesPage() {
               )}
             </div>
           </div>
-          <p className="text-muted-foreground mt-2 max-w-[620px] text-[12.5px] text-pretty">
+          <p className="text-muted-foreground mt-2 max-w-155 text-control text-pretty">
             Vos identifiants bancaires ne passent jamais par cette application :
             chaque connexion est autorisée chez votre banque et vaut environ six
             mois.
@@ -111,10 +111,10 @@ function BanquesPage() {
 
               {connections.length === 0 && (
                 <div className="bg-card rounded-lg border px-5 py-11 text-center">
-                  <p className="text-[13.5px] font-semibold">
+                  <p className="text-body font-semibold">
                     Aucune banque connectée pour l'instant
                   </p>
-                  <p className="text-muted-foreground mx-auto mt-1.5 max-w-[420px] text-xs text-pretty">
+                  <p className="text-muted-foreground mx-auto mt-1.5 max-w-105 text-control text-pretty">
                     La configuration est en place. Ajoutez une première banque :
                     vous serez redirigé vers elle pour autoriser l'accès, puis
                     ramené ici.
@@ -132,7 +132,7 @@ function BanquesPage() {
             </div>
           )}
 
-          <p className="text-subtle mt-4 max-w-[820px] text-[11.5px] text-pretty">
+          <p className="text-subtle mt-4 max-w-205 text-control text-pretty">
             Une autorisation bancaire dure environ 180 jours. Passé ce délai la
             synchronisation s'arrête sans prévenir : c'est pourquoi le compte à
             rebours est affiché en permanence et devient une alerte un mois
@@ -159,13 +159,13 @@ function OrphanBanner({
   return (
     <div className="border-border-strong flex flex-wrap items-center gap-3.5 rounded-lg border border-dashed px-4.5 py-3.5">
       <UnlinkIcon className="text-subtle size-4 flex-none" />
-      <div className="min-w-[260px] flex-1">
-        <p className="text-[12.5px] font-medium">
+      <div className="min-w-65 flex-1">
+        <p className="text-control font-medium">
           {orphan.accountCount} compte
           {orphan.accountCount > 1 ? "s" : ""} détecté
           {orphan.accountCount > 1 ? "s" : ""} sans connexion
         </p>
-        <p className="text-subtle mt-0.5 text-[11.5px]">
+        <p className="text-subtle mt-0.5 text-control">
           {orphan.bankName} · {orphan.transactionCount} transaction
           {orphan.transactionCount > 1 ? "s" : ""} importée
           {orphan.transactionCount > 1 ? "s" : ""}, plus rattachée
@@ -175,7 +175,7 @@ function OrphanBanner({
       <Link
         to="/banques/ajouter"
         search={{ step: "banque", q: orphan.bankName }}
-        className="border-border-strong hover:bg-accent flex h-[30px] items-center rounded-[9px] border px-3.5 text-xs font-medium whitespace-nowrap"
+        className="border-border-strong hover:bg-accent flex h-8 items-center rounded-md border px-3.5 text-control font-medium whitespace-nowrap"
       >
         Connecter {orphan.bankName}
       </Link>

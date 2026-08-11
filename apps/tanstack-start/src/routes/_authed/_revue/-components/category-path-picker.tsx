@@ -117,10 +117,10 @@ export function CategoryPathPicker({
       title={title}
       description={subtitle ?? "Choisissez la catégorie à appliquer."}
       showCloseButton
-      className="w-[480px]"
+      className="w-120"
     >
       {subtitle && (
-        <div className="border-border num truncate border-b px-3 py-2 text-[12.5px]">
+        <div className="border-border num truncate border-b px-3 py-2 text-meta">
           {subtitle}
         </div>
       )}
@@ -139,7 +139,7 @@ export function CategoryPathPicker({
                 <span style={{ color: parent.parentColor }}>
                   <CategoryIcon
                     name={parent.parentIcon}
-                    className="size-[13px]"
+                    className="size-3"
                   />
                 </span>
                 {parent.parent}
@@ -162,7 +162,7 @@ export function CategoryPathPicker({
                 }}
               >
                 <span
-                  className="size-2.5 flex-none rounded-[2px]"
+                  className="size-2.5 flex-none rounded-xs"
                   style={{ background: path.color }}
                 />
                 {path.sub}

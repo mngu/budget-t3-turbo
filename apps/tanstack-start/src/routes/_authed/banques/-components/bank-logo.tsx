@@ -30,7 +30,7 @@ export function BankLogo({
     return (
       <span
         className={cn(
-          "bg-sunken text-muted-foreground flex items-center justify-center rounded-[10px] border font-semibold",
+          "bg-sunken text-muted-foreground flex items-center justify-center rounded-md border font-semibold",
           className,
         )}
       >
@@ -45,7 +45,7 @@ export function BankLogo({
       alt=""
       onError={() => setBroken(true)}
       className={cn(
-        "rounded-[10px] border bg-white object-contain p-1",
+        "rounded-md border bg-white object-contain p-1",
         className,
       )}
     />

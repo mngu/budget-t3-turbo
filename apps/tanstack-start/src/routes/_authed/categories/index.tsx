@@ -192,13 +192,13 @@ function CategoriesPage() {
   // ── Rendu ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden text-[13px] leading-[1.45]">
+    <div className="flex h-dvh flex-col overflow-hidden text-body leading-[1.45]">
       <AppHeader page="categories" />
 
       <div className="min-h-0 flex-1 overflow-y-auto">
-        <main className="mx-auto max-w-[1010px] px-6 pt-5 pb-12">
+        <main className="mx-auto max-w-250 px-6 pt-5 pb-12">
           <div className="flex min-h-9.5 flex-wrap items-center gap-6">
-            <h1 className="text-2xl font-semibold tracking-tight">
+            <h1 className="text-title">
               Catégories
             </h1>
             <div className="ml-auto flex items-stretch">
@@ -211,7 +211,7 @@ function CategoriesPage() {
               />
             </div>
           </div>
-          <p className="text-muted-foreground mt-2 max-w-160 text-[12.5px] text-pretty">
+          <p className="text-muted-foreground mt-2 max-w-160 text-control text-pretty">
             Les catégories qui rangent toutes vos transactions. La couleur et
             l'icône d'une catégorie principale l'identifient partout ailleurs —
             elles se choisissent ici, et nulle part ailleurs.
@@ -221,14 +221,14 @@ function CategoriesPage() {
             !showReviewPanel &&
             (uncategorizedCount > 0 ? (
               <section className="border-primary bg-accent-soft mt-5 flex flex-wrap items-center gap-4 rounded-xl border p-4">
-                <span className="bg-card border-primary text-primary flex size-[34px] flex-none items-center justify-center rounded-[10px] border">
+                <span className="bg-card border-primary text-primary flex size-9 flex-none items-center justify-center rounded-md border">
                   <SparklesIcon className="size-4" />
                 </span>
                 <div className="flex-1">
-                  <h2 className="text-sm font-semibold tracking-[-0.015em]">
+                  <h2 className="text-subheading">
                     Catégories manquantes
                   </h2>
-                  <p className="text-muted-foreground mt-1 text-xs text-pretty">
+                  <p className="text-muted-foreground mt-1 text-control text-pretty">
                     <span className="text-foreground font-medium">
                       {uncategorizedCount} transaction
                       {uncategorizedCount > 1 ? "s" : ""}
@@ -268,11 +268,11 @@ function CategoriesPage() {
             ) : (
               <section className="bg-card mt-5 flex flex-wrap items-center gap-3.5 rounded-xl border px-4 py-3.5">
                 <CircleCheckIcon className="text-ok size-4 flex-none" />
-                <div className="min-w-[260px] flex-1">
-                  <h2 className="text-[12.5px] font-medium">
+                <div className="min-w-65 flex-1">
+                  <h2 className="text-control font-medium">
                     Toutes vos transactions sont catégorisées
                   </h2>
-                  <p className="text-subtle mt-0.5 text-[11.5px]">
+                  <p className="text-subtle mt-0.5 text-control">
                     Une analyse peut quand même proposer des branches plus fines
                     que celles que vous avez.
                   </p>
@@ -300,10 +300,10 @@ function CategoriesPage() {
           )}
 
           <div className="mt-7 mb-3 flex flex-wrap items-center gap-2.5">
-            <h2 className="text-[15px] font-semibold tracking-[-0.02em]">
+            <h2 className="text-heading">
               Vos catégories
             </h2>
-            <span className="text-subtle text-[11.5px]">
+            <span className="text-subtle text-control">
               {/* Les décomptes vivent dans le bloc de compteurs en haut de
                   page : ne reste ici que ce que ceux-ci ne disent pas. */}
               {tree.length === 0
@@ -312,7 +312,7 @@ function CategoriesPage() {
             </span>
             <div className="ml-auto flex items-center gap-2">
               {stats.collisions > 0 && (
-                <span className="text-warn text-[11.5px]">
+                <span className="text-warn text-control">
                   {stats.collisions} collision
                   {stats.collisions > 1 ? "s" : ""} de teinte
                   {stats.withoutColor > 0 &&
@@ -394,7 +394,7 @@ function CategoriesPage() {
             }
           />
 
-          <p className="text-subtle mt-3.5 max-w-[820px] text-[11.5px] text-pretty">
+          <p className="text-subtle mt-3.5 max-w-205 text-control text-pretty">
             La couleur sert là où il n'y a pas de place — segments de barre,
             points, tuiles compactes. L'icône sert partout où il y a au moins 20
             px : listes, sélecteurs, en-têtes de catégorie. Les sous-catégories
@@ -555,7 +555,7 @@ function Stat({
   return (
     <div className="border-border border-l px-3 text-right first:border-l-0 first:pl-0 last:pr-0">
       <div
-        className={`num text-[15px] font-medium tracking-[-0.01em] ${warn ? "text-warn" : ""}`}
+        className={`num text-heading font-medium ${warn ? "text-warn" : ""}`}
       >
         {value}
       </div>

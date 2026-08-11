@@ -140,7 +140,7 @@ export function CategoryIcon({
       <span
         aria-hidden
         className={cn(
-          "rounded-[5px] border-[1.5px] border-dashed border-current opacity-55",
+          "rounded-sm border-[1.5px] border-dashed border-current opacity-55",
           className ?? "size-4",
         )}
       />
