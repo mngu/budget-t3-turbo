@@ -1,0 +1,95 @@
+apps/tanstack-start/src/routes/_authed/categories/-components/transaction-preview-drawer.tsx
+  s_64296b222148d9::t_57d48e6eecbf09 81,85,93,116,119,130
+apps/tanstack-start/src/routes/_authed/_revue/-components/refine-bar.tsx
+  s_64296b222148d9::t_a9df625c465127 182,208,217,238,270,320
+apps/tanstack-start/src/routes/login.tsx
+  s_64296b222148d9::t_a9df625c465127 100
+apps/tanstack-start/src/routes/_authed/budgets/index.tsx
+  s_64296b222148d9::t_a9df625c465127 9
+  s_64296b222148d9::t_7422042e861ef2 48,57-58,151
+  s_64296b222148d9::t_57d48e6eecbf09 8,45-47,49-56,59-66,68-73,75-78,80-83,85-86,89-93,95-140,144-150
+apps/tanstack-start/src/routes/_authed/budgets/-components/budget-tree.tsx
+  s_64296b222148d9::t_57d48e6eecbf09 73,167,258,281,367,369
+apps/tanstack-start/src/routes/_authed/_revue/-components/transactions-table.tsx
+  s_64296b222148d9::t_a9df625c465127 86,91,142,156,163,221,238
+apps/tanstack-start/src/routes/_authed/_revue/-components/breakdown-list.tsx
+  s_64296b222148d9::t_a9df625c465127 310,320,328,373
+apps/tanstack-start/src/routes/_authed/_revue/-components/category-ring.tsx
+  s_64296b222148d9::t_a9df625c465127 263,284,291
+CLAUDE.md
+  s_64296b222148d9::t_5536912fce2bba 71-72
+apps/tanstack-start/src/routes/_authed/_revue/-components/transfer-badge.tsx
+  s_64296b222148d9::t_a9df625c465127 46,98,101,106,111
+apps/tanstack-start/src/styles.css
+  s_64296b222148d9::t_8c6487d343726d 311-316,318,320
+apps/tanstack-start/src/routes/_authed/banques/ajouter.tsx
+  s_64296b222148d9::t_57d48e6eecbf09 73
+  s_64296b222148d9::t_81a7e71a6fa28b 16,54-69,71-72,89,95,155,172,175,195,256,269,306
+  s_64296b222148d9::t_2ee3da9a86ca84 53
+apps/tanstack-start/src/component/theme-picker.tsx
+  s_64296b222148d9::t_a9df625c465127 3
+apps/tanstack-start/src/routes/_authed/categories/index.tsx
+  s_64296b222148d9::t_57d48e6eecbf09 19,199,209-210
+  s_64296b222148d9::t_a9df625c465127 20
+  s_64296b222148d9::t_43ae0d3ee3985f 196-198,200-208,211-234,236-249,252-279,281-283,285,287-300,302-313,315-326,328-386,388-394
+  s_64296b222148d9::t_81a7e71a6fa28b 455
+apps/tanstack-start/src/routes/invitation.$invitationId.tsx
+  s_64296b222148d9::t_8c6487d343726d 306
+  s_64296b222148d9::t_a9df625c465127 239,325-326,348,368
+apps/tanstack-start/src/routes/_authed/espaces/-components/space-dialog.tsx
+  s_64296b222148d9::t_57d48e6eecbf09 94,98,127,130,134,154,160
+apps/tanstack-start/src/routes/_authed/_revue.tsx
+  s_64296b222148d9::t_8c6487d343726d 257
+  s_64296b222148d9::t_a9df625c465127 205,311,317
+apps/tanstack-start/src/routes/_authed/banques/index.tsx
+  s_64296b222148d9::t_57d48e6eecbf09 9,68,84-85
+  s_64296b222148d9::t_12006a9735a9cb 146
+  s_64296b222148d9::t_43ae0d3ee3985f 65-67,69-83,86-127,130-131,133-138,164,174
+apps/tanstack-start/src/routes/_authed/banques/-components/bank-logo.tsx
+  s_64296b222148d9::t_57d48e6eecbf09 47
+apps/tanstack-start/src/routes/_authed/_revue/-components/kpi-band.tsx
+  s_64296b222148d9::t_a9df625c465127 161-166,352-353
+apps/tanstack-start/src/routes/_authed/espaces/index.tsx
+  s_64296b222148d9::t_81a7e71a6fa28b 286-288,290-299,301-304,307-311,313-319,321,325,327-336,339-353,355-357,359-380,382-422
+  s_64296b222148d9::t_838de53e228e72 435
+  s_64296b222148d9::t_57d48e6eecbf09 27,289,305-306
+apps/tanstack-start/src/routes/_authed/categories/-components/category-identity-dialog.tsx
+  s_64296b222148d9::t_57d48e6eecbf09 84,142,148,157,197,203,251
+apps/tanstack-start/src/routes/_authed/banques/-components/connection-card.tsx
+  s_64296b222148d9::t_57d48e6eecbf09 36,41,44,91,137
+apps/tanstack-start/src/routes/_authed/categories/-components/category-overview-tree.tsx
+  s_64296b222148d9::t_57d48e6eecbf09 323,598,693
+apps/tanstack-start/src/routes/_authed/categories/-components/suggestions-panel.tsx
+  s_64296b222148d9::t_57d48e6eecbf09 46,54,84,141
+apps/tanstack-start/src/routes/_authed/espaces/-components/space-card.tsx
+  s_64296b222148d9::t_57d48e6eecbf09 112,117,174,183,187,234-235,325,469
+apps/tanstack-start/src/routes/_authed/banques/-components/onboarding.tsx
+  s_64296b222148d9::t_57d48e6eecbf09 67,71,97,104,175,183,205,208,227,236-239
+apps/tanstack-start/src/component/period-picker.tsx
+  s_64296b222148d9::t_a9df625c465127 160,187,214-216,242,290
+apps/tanstack-start/src/routes/_authed/_revue/-components/category-path-picker.tsx
+  s_64296b222148d9::t_a9df625c465127 123,140
+apps/tanstack-start/src/routes/_authed/_revue/-components/revue-panel.tsx
+  s_64296b222148d9::t_a9df625c465127 225,228
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "7962fc84f2b325890a5bf52d929bf88e6a28e29a",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_64296b222148d9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5148ac98-fd30-4676-857a-8c824f575210",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
