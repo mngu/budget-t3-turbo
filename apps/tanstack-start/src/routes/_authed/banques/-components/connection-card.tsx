@@ -25,7 +25,7 @@ export function ConnectionCard({
   return (
     <section
       className={cn(
-        "bg-card rounded-2xl border",
+        "bg-card rounded-lg border",
         view.critical ? tone.border : "border-border",
       )}
     >

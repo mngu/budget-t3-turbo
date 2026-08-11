@@ -7,8 +7,12 @@ function Empty({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="empty"
+      // §4.11 : « une phrase, `--subtle`, 12 px, centrée, sur un cadre
+      // pointillé `--border-strong` de rayon 8 ». La sortie de `shadcn add`
+      // posait `border-dashed` *sans* classe de largeur — aucun cadre ne
+      // s'affichait, le pointillé n'ayant rien à dessiner.
       className={cn(
-        "flex w-full min-w-0 flex-1 flex-col items-center justify-center gap-4 rounded-xl border-dashed p-6 text-center text-balance",
+        "border-border-strong text-subtle text-control flex w-full min-w-0 flex-1 flex-col items-center justify-center gap-4 rounded-md border border-dashed p-6 text-center text-balance",
         className,
       )}
       {...props}
@@ -60,7 +64,7 @@ function EmptyTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="empty-title"
-      className={cn("text-sm font-medium tracking-tight", className)}
+      className={cn("text-body font-semibold", className)}
       {...props}
     />
   );
@@ -71,7 +75,7 @@ function EmptyDescription({ className, ...props }: React.ComponentProps<"p">) {
     <div
       data-slot="empty-description"
       className={cn(
-        "text-muted-foreground [&>a:hover]:text-primary text-sm/relaxed [&>a]:underline [&>a]:underline-offset-4",
+        "text-muted-foreground [&>a:hover]:text-primary text-control [&>a]:underline [&>a]:underline-offset-4",
         className,
       )}
       {...props}
@@ -84,7 +88,7 @@ function EmptyContent({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="empty-content"
       className={cn(
-        "flex w-full max-w-sm min-w-0 flex-col items-center gap-2.5 text-sm text-balance",
+        "flex w-full max-w-sm min-w-0 flex-col items-center gap-2.5 text-control text-balance",
         className,
       )}
       {...props}

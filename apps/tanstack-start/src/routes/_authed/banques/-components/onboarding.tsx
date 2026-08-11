@@ -57,7 +57,7 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
   };
 
   return (
-    <section className="border-border-strong bg-card mt-5 overflow-hidden rounded-2xl border">
+    <section className="border-border-strong bg-card mt-5 overflow-hidden rounded-lg border">
       <header className="bg-sunken border-b px-5 py-3.5">
         <div className="flex items-center gap-2.5">
           <KeyRoundIcon className="text-primary size-3.5" />

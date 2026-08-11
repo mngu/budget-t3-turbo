@@ -205,8 +205,6 @@ function ParentRow({
           // l'option active la re-sélectionne, une parente est toujours dans
           // l'un des deux régimes.
           <ToggleGroup
-            variant="outline"
-            spacing={0}
             size="sm"
             aria-label="Régime de budget"
             className="justify-self-end"

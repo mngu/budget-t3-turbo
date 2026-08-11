@@ -26,7 +26,7 @@ function DialogBackdrop({
     <DialogPrimitive.Backdrop
       data-slot="dialog-backdrop"
       className={cn(
-        "data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0 fixed inset-0 z-50 bg-black/50 duration-150",
+        "data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0 bg-overlay fixed inset-0 z-50 duration-150",
         className,
       )}
       {...props}
@@ -66,18 +66,25 @@ function DialogContent({
         data-slot="dialog-content"
         data-variant={variant}
         className={cn(
-          "bg-popover text-popover-foreground fixed z-50 flex flex-col shadow-lg duration-150",
+          "bg-popover text-popover-foreground fixed z-50 flex flex-col shadow-modal duration-150",
           padded && "gap-4 p-6",
           variant === "drawer"
             ? "data-open:animate-in data-open:slide-in-from-right data-closed:animate-out data-closed:slide-out-to-right inset-y-0 right-0 h-full w-full max-w-md border-l"
-            : "data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 top-1/2 left-1/2 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl border",
+            : // §4.9 : rayon 16, contour marqué, **aligné en haut à 92 px**
+              // (`top-23`) et non centré, pour que la liste derrière reste
+              // lisible. Le plafond de hauteur va avec l'alignement et non aux
+              // appelants : un dialogue centré partageait son dépassement en
+              // deux, celui-ci le renvoie *entier* sous le pli — sans barre de
+              // défilement, le bas devenait inatteignable en silence. 116 px =
+              // les 92 du haut plus une marge de page de 24 en bas.
+              "data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 border-border-strong top-23 left-1/2 max-h-[calc(100dvh-116px)] w-full max-w-md -translate-x-1/2 overflow-y-auto rounded-xl border",
           className,
         )}
         {...props}
       >
         {children}
         {showCloseButton && (
-          <DialogClose className="ring-offset-background focus:ring-ring data-open:bg-accent absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden">
+          <DialogClose className="ring-offset-background focus:ring-ring data-open:bg-accent absolute top-4 right-4 rounded-md opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden">
             <XIcon className="size-4" />
             <span className="sr-only">Fermer</span>
           </DialogClose>
@@ -108,7 +115,7 @@ function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="dialog-footer"
       className={cn(
-        "bg-sunken text-subtle flex flex-none items-center gap-2.5 border-t px-4 py-2.5 text-[11.5px]",
+        "bg-sunken text-subtle flex flex-none items-center gap-2.5 text-meta border-t px-4 py-2.5",
         className,
       )}
       {...props}
@@ -120,7 +127,7 @@ function DialogTitle({ className, ...props }: DialogPrimitive.Title.Props) {
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("text-lg leading-none font-semibold", className)}
+      className={cn("text-subheading leading-none", className)}
       {...props}
     />
   );
@@ -133,7 +140,7 @@ function DialogDescription({
   return (
     <DialogPrimitive.Description
       data-slot="dialog-description"
-      className={cn("text-muted-foreground text-sm", className)}
+      className={cn("text-muted-foreground text-control", className)}
       {...props}
     />
   );

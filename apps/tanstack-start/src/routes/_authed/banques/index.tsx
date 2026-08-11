@@ -110,7 +110,7 @@ function BanquesPage() {
               ))}
 
               {connections.length === 0 && (
-                <div className="bg-card rounded-2xl border px-5 py-11 text-center">
+                <div className="bg-card rounded-lg border px-5 py-11 text-center">
                   <p className="text-[13.5px] font-semibold">
                     Aucune banque connectée pour l'instant
                   </p>
@@ -157,7 +157,7 @@ function OrphanBanner({
   orphan: { bankName: string; accountCount: number; transactionCount: number };
 }) {
   return (
-    <div className="border-border-strong flex flex-wrap items-center gap-3.5 rounded-2xl border border-dashed px-4.5 py-3.5">
+    <div className="border-border-strong flex flex-wrap items-center gap-3.5 rounded-lg border border-dashed px-4.5 py-3.5">
       <UnlinkIcon className="text-subtle size-4 flex-none" />
       <div className="min-w-[260px] flex-1">
         <p className="text-[12.5px] font-medium">

@@ -134,7 +134,7 @@ export function CategoryOverviewTree({
 
   if (tree.length === 0 && proposedParents.length === 0) {
     return (
-      <Empty className="bg-card rounded-[14px] border">
+      <Empty>
         <EmptyHeader>
           <EmptyMedia variant="icon">
             <TagsIcon />

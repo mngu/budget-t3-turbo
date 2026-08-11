@@ -59,7 +59,7 @@ function AjouterBanquePage() {
             Ajouter une banque
           </h1>
 
-          <section className="border-border-strong bg-card mt-5 overflow-hidden rounded-2xl border">
+          <section className="border-border-strong bg-card mt-5 overflow-hidden rounded-lg border">
             <header className="bg-sunken flex items-center gap-3 border-b px-4.5 py-3">
               <Link
                 to="/banques"

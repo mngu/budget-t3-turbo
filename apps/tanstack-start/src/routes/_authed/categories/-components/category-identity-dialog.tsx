@@ -83,7 +83,7 @@ export function CategoryIdentityDialog({
     >
       <DialogContent
         padded={false}
-        className="max-h-[calc(100vh-7rem)] max-w-[520px] overflow-hidden"
+        className="max-w-[520px] overflow-hidden"
       >
         <DialogHeader className="flex-none flex-row items-center gap-3 border-b p-4">
           <span

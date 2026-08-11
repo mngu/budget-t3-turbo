@@ -452,12 +452,7 @@ function InviteForm({
         placeholder="adresse email"
         className="min-w-[220px] flex-1"
       />
-      {/* `outline` + `spacing={0}` : le segmenté de la maquette. Sans eux, la
-          variante par défaut est sans bordure et son état actif (`bg-muted`)
-          ne se distingue pas du fond de la carte. */}
       <ToggleGroup
-        variant="outline"
-        spacing={0}
         value={[value.role]}
         onValueChange={([role]) =>
           role && onChange({ ...value, role: role as SpaceRole })
