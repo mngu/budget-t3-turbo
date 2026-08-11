@@ -9,6 +9,7 @@ import {
 } from "../transactions/internal-transfers";
 import {
   bankCounts,
+  earliestTransactionDate,
   listBankLabels,
   listTransactions,
   monthlyHistory,
@@ -38,6 +39,12 @@ export const transactionsRouter = {
     ),
 
   banks: orgProcedure.query(({ ctx }) => listBankLabels(ctx.organizationId)),
+
+  // Sans input, comme `banks` : la borne basse du sélecteur de période ne suit
+  // ni les comptes cochés ni la période affichée.
+  earliestDate: orgProcedure.query(({ ctx }) =>
+    earliestTransactionDate(ctx.organizationId),
+  ),
 
   bankCounts: orgProcedure
     .input(transactionsSearchSchema)

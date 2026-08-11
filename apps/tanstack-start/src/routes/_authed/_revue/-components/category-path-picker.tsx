@@ -2,7 +2,6 @@
 
 import { useMemo } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { FilterIcon } from "lucide-react";
 
 import type { CategoryTreeNode } from "@budget/api";
 import { FALLBACK_CATEGORY_COLOR } from "@budget/shared";
@@ -13,7 +12,6 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-  CommandSeparator,
 } from "@budget/ui/command";
 
 import { shadeCategoryColor, useCategoryColor } from "~/lib/category-color";
@@ -89,8 +87,6 @@ export function CategoryPathPicker({
   subtitle,
   current,
   onPick,
-  filterOn,
-  onFilter,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -99,15 +95,6 @@ export function CategoryPathPicker({
   /** Nom de la catégorie actuellement portée par la transaction. */
   current?: string | null;
   onPick: (name: string) => void;
-  /**
-   * Parente de la transaction, pour le raccourci « Filtrer sur … » du pied de
-   * modale. Absent = pas de pied : le raccourci pose un filtre de catégorie sur
-   * la liste courante, ce qui n'a de sens que là où la liste *est* la sélection
-   * (`/transactions`). Sur `/classer` ou le zoom d'une catégorie, il
-   * restreindrait un écran qui porte déjà son propre périmètre.
-   */
-  filterOn?: string | null;
-  onFilter?: (category: string) => void;
 }) {
   const paths = useCategoryPaths();
 
@@ -183,24 +170,6 @@ export function CategoryPathPicker({
             ))}
           </CommandGroup>
         ))}
-
-        {filterOn && onFilter && (
-          <>
-            <CommandSeparator />
-            <CommandGroup>
-              <CommandItem
-                value={`Filtrer sur ${filterOn}`}
-                onSelect={() => {
-                  onFilter(filterOn);
-                  onOpenChange(false);
-                }}
-              >
-                <FilterIcon />
-                Filtrer sur {filterOn}
-              </CommandItem>
-            </CommandGroup>
-          </>
-        )}
       </CommandList>
     </CommandDialog>
   );

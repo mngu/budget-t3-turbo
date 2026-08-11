@@ -708,6 +708,27 @@ export async function listBankLabels(
   return rows.map((r) => r.bankName);
 }
 
+/**
+ * Date de la transaction la plus ancienne de l'espace, ou `null` s'il n'y en a
+ * aucune — borne basse du sélecteur de période.
+ *
+ * **Sans aucun filtre, `bank` compris**, alors que la search en porte un : la
+ * borne d'un calendrier ne peut pas dépendre des comptes cochés, sinon décocher
+ * un compte rendrait illégale une période déjà choisie, sur un clic qui ne
+ * parlait pas de dates. Le périmètre est l'espace, via `bank_accounts` —
+ * `transactions` ne porte pas d'`organization_id`.
+ */
+export async function earliestTransactionDate(
+  organizationId: string,
+): Promise<string | null> {
+  const [row] = await db
+    .select({ date: sql<string | null>`min(${transactions.bookingDate})` })
+    .from(transactions)
+    .innerJoin(bankAccounts, eq(transactions.accountId, bankAccounts.id))
+    .where(eq(bankAccounts.organizationId, organizationId));
+  return row?.date ?? null;
+}
+
 // Nombre de transactions par banque pour les pastilles de la barre de filtres.
 // `bank` est retiré du filtre : sinon sélectionner une banque mettrait les
 // autres à zéro et on ne saurait plus vers quoi basculer.

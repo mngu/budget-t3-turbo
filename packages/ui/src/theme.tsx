@@ -1,10 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Monitor, Moon, Sun } from "lucide-react";
 import * as z from "zod/v4";
-
-import { Button } from "./button";
 
 const ThemeModeSchema = z.enum(["light", "dark", "auto"]);
 
@@ -57,15 +54,6 @@ const setupPreferredListener = () => {
   return () => mediaQuery.removeEventListener("change", handler);
 };
 
-const getNextTheme = (current: ThemeMode): ThemeMode => {
-  const themes: ThemeMode[] =
-    getSystemTheme() === "dark"
-      ? ["auto", "light", "dark"]
-      : ["auto", "dark", "light"];
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  return themes[(themes.indexOf(current) + 1) % themes.length]!;
-};
-
 export const themeDetectorScript = (function () {
   function themeFn() {
     const isValidTheme = (theme: string): theme is ThemeMode => {
@@ -93,7 +81,6 @@ interface ThemeContextProps {
   themeMode: ThemeMode;
   resolvedTheme: ResolvedTheme;
   setTheme: (theme: ThemeMode) => void;
-  toggleMode: () => void;
 }
 const ThemeContext = React.createContext<ThemeContextProps | undefined>(
   undefined,
@@ -115,17 +102,12 @@ export function ThemeProvider({ children }: React.PropsWithChildren) {
     updateThemeClass(newTheme);
   };
 
-  const toggleMode = () => {
-    setTheme(getNextTheme(themeMode));
-  };
-
   return (
     <ThemeContext
       value={{
         themeMode,
         resolvedTheme,
         setTheme,
-        toggleMode,
       }}
     >
       <script
@@ -143,23 +125,4 @@ export function useTheme() {
     throw new Error("useTheme must be used within a ThemeProvider");
   }
   return context;
-}
-
-export function ThemeToggle() {
-  const { toggleMode } = useTheme();
-
-  // Icône pilotée uniquement par les variantes `dark:`/`auto:` (classes posées sur <html>),
-  // pour rester correcte quel que soit le CSS de l'app et sans mismatch d'hydratation.
-  return (
-    <Button
-      variant="outline"
-      size="icon"
-      onClick={toggleMode}
-      aria-label="Basculer le thème"
-    >
-      <Sun className="auto:hidden size-5 dark:hidden" />
-      <Moon className="not-auto:dark:block hidden size-5" />
-      <Monitor className="auto:block hidden size-5" />
-    </Button>
-  );
 }

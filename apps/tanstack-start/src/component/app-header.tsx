@@ -6,17 +6,13 @@ import {
   ChartPieIcon,
   LandmarkIcon,
   LogOutIcon,
-  MonitorIcon,
-  MoonIcon,
   PiggyBankIcon,
   SettingsIcon,
-  SunIcon,
   TagsIcon,
   UsersIcon,
 } from "lucide-react";
 
 import type { TransactionsSearch } from "@budget/shared";
-import type { ThemeMode } from "@budget/ui/theme";
 import { cn } from "@budget/ui";
 import { Button } from "@budget/ui/button";
 import {
@@ -30,11 +26,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@budget/ui/dropdown-menu";
-import { useTheme } from "@budget/ui/theme";
 
 import { authClient } from "~/auth/client";
 import { BankPicker } from "~/component/bank-picker";
 import { PeriodPicker } from "~/component/period-picker";
+import { ThemePicker } from "~/component/theme-picker";
 import { SEARCH_DEFAULTS } from "~/lib/transactions-search";
 import { useRevueSearch } from "~/lib/use-revue-search";
 
@@ -194,36 +190,21 @@ function NavIcon({
   );
 }
 
-const THEME_OPTIONS: {
-  mode: ThemeMode;
-  label: string;
-  Icon: typeof SunIcon;
-}[] = [
-  { mode: "auto", label: "Système", Icon: MonitorIcon },
-  { mode: "light", label: "Clair", Icon: SunIcon },
-  { mode: "dark", label: "Sombre", Icon: MoonIcon },
-];
-
 /**
  * Menu de l'engrenage : les écrans de réglages, le choix du thème, l'espace
  * actif et la déconnexion.
  *
  * **Aucun `className` ici** : la mise en forme des menus appartient à
  * `@budget/ui/dropdown-menu`, y compris le marquage de l'écran courant
- * (`aria-current`) et celui de l'option retenue (`DropdownMenuRadioItem`).
+ * (`aria-current`) et celui de l'option retenue. Le sélecteur de thème est
+ * `ThemePicker`, monté nu — il porte son propre gabarit.
  * Voir `docs/adr/0001-le-design-appartient-au-package-ui.md`.
- *
- * C'est le seul endroit de l'app qui *lit* `themeMode` plutôt que de se piloter
- * par les classes posées sur `<html>` — il doit désigner le mode actif, pas
- * seulement refléter le thème résolu. Sans risque de désaccord d'hydratation :
- * le panneau ne se monte qu'à l'ouverture, donc jamais au rendu serveur.
  *
  * L'ouverture n'est pas dupliquée dans un `useState` (le déclencheur porte
  * `aria-expanded`, dont la variante `ghost` du bouton se sert) et une entrée
  * referme le menu d'elle-même, d'où la disparition des `onNavigate`.
  */
 function SettingsMenu({ page }: { page?: HeaderPage }) {
-  const { themeMode, setTheme } = useTheme();
   const navigate = useNavigate();
 
   // `reloadDocument` comme à la connexion (`/login`) : la session est lue dans
@@ -272,18 +253,10 @@ function SettingsMenu({ page }: { page?: HeaderPage }) {
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuRadioGroup
-          value={themeMode}
-          onValueChange={(mode) => setTheme(mode as ThemeMode)}
-        >
+        <DropdownMenuGroup>
           <DropdownMenuLabel>Thème</DropdownMenuLabel>
-          {THEME_OPTIONS.map(({ mode, label, Icon }) => (
-            <DropdownMenuRadioItem key={mode} value={mode}>
-              <Icon />
-              {label}
-            </DropdownMenuRadioItem>
-          ))}
-        </DropdownMenuRadioGroup>
+          <ThemePicker />
+        </DropdownMenuGroup>
 
         <SpacePicker />
 

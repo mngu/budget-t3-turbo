@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   addMonths,
   differenceInCalendarDays,
@@ -23,6 +24,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@budget/ui/popover";
 
 import { monthBounds, toISODate } from "~/lib/date";
 import { dateFr, dayMonthFr } from "~/lib/format";
+import { useTRPC } from "~/lib/trpc";
 import { useRevueSearch } from "~/lib/use-revue-search";
 
 const monthFr = new Intl.DateTimeFormat("fr-FR", {
@@ -91,6 +93,7 @@ function buildPresets(anchor: Date): Preset[] {
  * de composer.
  */
 export function PeriodPicker() {
+  const trpc = useTRPC();
   const { search, setSearch } = useRevueSearch();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<Date | null>(null);
@@ -99,18 +102,40 @@ export function PeriodPicker() {
   const to = search.dateTo ? parseISO(search.dateTo) : undefined;
   const anchor = from ?? new Date();
 
+  // Bornes du sélecteur. La haute est aujourd'hui — il n'y a rien à regarder
+  // après. La basse est la première transaction de l'espace, et son absence
+  // (requête en vol, ou espace encore vide) vaut « pas de borne basse » plutôt
+  // que « rien n'est cliquable » : un calendrier libre pendant 200 ms est
+  // préférable à un calendrier mort.
+  const { data: earliest } = useQuery(
+    trpc.transactions.earliestDate.queryOptions(),
+  );
+  const today = new Date();
+  const min = earliest ? parseISO(earliest) : undefined;
+  // Comparé au *mois* et non au jour : un mois est atteignable dès qu'il
+  // intersecte les bornes, sinon le mois de la première transaction et le mois
+  // en cours seraient l'un et l'autre inatteignables.
+  const monthReachable = (date: Date) =>
+    (!min || endOfMonth(date) >= startOfMonth(min)) &&
+    startOfMonth(date) <= today;
+
   const commit = (start: Date, end: Date) => {
     setDraft(null);
     setOpen(false);
     setSearch({ dateFrom: toISODate(start), dateTo: toISODate(end) });
   };
 
-  const shiftMonth = (delta: number) =>
-    setSearch(
-      monthBounds(
-        delta < 0 ? subMonths(anchor, -delta) : addMonths(anchor, delta),
-      ),
-    );
+  const stepTarget = (delta: number) =>
+    delta < 0 ? subMonths(anchor, -delta) : addMonths(anchor, delta);
+
+  // La garde est ici et pas seulement sur le bouton : une URL fabriquée à la
+  // main ou un signet périmé peut poser un `dateFrom` hors bornes, et le pas
+  // suivant repartirait de là.
+  const shiftMonth = (delta: number) => {
+    const target = stepTarget(delta);
+    if (!monthReachable(target)) return;
+    setSearch(monthBounds(target));
+  };
 
   return (
     <div className="ml-auto flex items-center gap-1">
@@ -145,13 +170,21 @@ export function PeriodPicker() {
                   !!to &&
                   isSameDay(preset.from, from) &&
                   isSameDay(preset.to, to);
+                // Désactivé, jamais rogné : un raccourci dont on aurait déplacé
+                // la borne mentirait sur ce qu'il vient de sélectionner. Un
+                // raccourci qui *chevauche* les bornes reste bon — « Ce mois »
+                // sur le mois en cours finit après aujourd'hui, et c'est le mois
+                // entier qu'on veut (les budgets comptent en mois pleins).
+                const reachable =
+                  (!min || preset.to >= min) && preset.from <= today;
                 return (
                   <button
                     key={preset.label}
                     type="button"
+                    disabled={!reachable}
                     onClick={() => commit(preset.from, preset.to)}
                     className={cn(
-                      "py-1 text-left text-xs",
+                      "py-1 text-left text-xs disabled:pointer-events-none disabled:opacity-40",
                       active
                         ? "text-primary font-semibold"
                         : "text-muted-foreground hover:text-foreground",
@@ -172,6 +205,13 @@ export function PeriodPicker() {
                 locale={fr}
                 numberOfMonths={1}
                 defaultMonth={anchor}
+                // `endMonth` est la *fin* du mois en cours et non aujourd'hui :
+                // le mois courant doit rester entièrement visible et
+                // sélectionnable comme mois plein. Ce sont les jours d'après
+                // qu'on grise, pas le mois.
+                startMonth={min ? startOfMonth(min) : undefined}
+                endMonth={endOfMonth(today)}
+                disabled={min ? { before: min, after: today } : { after: today }}
                 selected={
                   draft ? { from: draft } : from ? { from, to } : undefined
                 }
@@ -212,12 +252,14 @@ export function PeriodPicker() {
         <StepButton
           label="Période précédente"
           onClick={() => shiftMonth(-1)}
+          disabled={!monthReachable(stepTarget(-1))}
           glyph="‹"
         />
         <span className="bg-border h-3 w-px" />
         <StepButton
           label="Période suivante"
           onClick={() => shiftMonth(1)}
+          disabled={!monthReachable(stepTarget(1))}
           glyph="›"
         />
       </div>
@@ -229,10 +271,12 @@ function StepButton({
   label,
   glyph,
   onClick,
+  disabled,
 }: {
   label: string;
   glyph: string;
   onClick: () => void;
+  disabled?: boolean;
 }) {
   return (
     <button
@@ -240,7 +284,8 @@ function StepButton({
       title={label}
       aria-label={label}
       onClick={onClick}
-      className="text-subtle hover:bg-accent hover:text-foreground flex h-5 w-[22px] items-center justify-center rounded-[6px] text-sm"
+      disabled={disabled}
+      className="text-subtle hover:bg-accent hover:text-foreground flex h-5 w-[22px] items-center justify-center rounded-[6px] text-sm disabled:pointer-events-none disabled:opacity-30"
     >
       {glyph}
     </button>

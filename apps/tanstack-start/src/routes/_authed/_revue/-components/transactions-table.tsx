@@ -190,7 +190,6 @@ function CategoryCell({
 }) {
   const [picking, setPicking] = useState(false);
   const { setCategory, pending } = useSetCategory();
-  const { setSearch } = useRevueSearch();
 
   // `categoryPath` vaut « Parent › Enfant », ou le seul nom quand la
   // transaction est posée sur la parente.
@@ -247,8 +246,6 @@ function CategoryCell({
         subtitle={`${row.description}  ·  ${signedEuro.format((row.direction === "debit" ? -1 : 1) * Number(row.amount))}`}
         current={row.category}
         onPick={(name) => void setCategory(row.id, name)}
-        filterOn={parentName}
-        onFilter={(category) => setSearch({ category })}
       />
     </span>
   );

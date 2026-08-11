@@ -16,7 +16,10 @@ DB=budget_t3
 
 cd "$(dirname "$0")/.."
 
-read -rp "Écraser la base locale $DB (port 5436) avec la prod ? [oui/non] " ok
+# printf + read plutôt que `read -rp` : `-p` veut dire coprocess en zsh, et le
+# script est lisible aussi bien lancé que sourcé depuis un shell zsh.
+printf 'Écraser la base locale %s (port 5436) avec la prod ? [oui/non] ' "$DB"
+read -r ok
 [[ $ok == oui ]] || exit 1
 
 dump=$(mktemp -t budget-prod.dump)

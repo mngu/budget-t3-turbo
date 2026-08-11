@@ -205,32 +205,55 @@ function DropdownMenuRadioGroup({ ...props }: MenuPrimitive.RadioGroup.Props) {
   );
 }
 
+/**
+ * Une entrée de choix. `variant="tile"` en fait une tuile — icône au-dessus de
+ * l'intitulé, tiers de la largeur — pour un groupe qui se lit d'un coup d'œil
+ * plutôt que ligne à ligne (le sélecteur de thème). L'option retenue s'y marque
+ * par la teinte pâle du reste de l'app et non par une coche : elle est seule
+ * dans sa rangée, la coche n'ajouterait rien.
+ *
+ * C'est bien un `Menu.RadioItem` et pas un `ToggleGroup`, malgré l'allure : un
+ * `ToggleGroup` posé dans un menu est un second composite que celui du menu
+ * n'enregistre pas — le focus y entre et n'en ressort plus (mesuré : ni ↓ ni →
+ * ne quittent la première tuile, les deux autres et « Se déconnecter »
+ * deviennent inatteignables au clavier).
+ */
 function DropdownMenuRadioItem({
   className,
   children,
   inset,
+  variant = "default",
   ...props
 }: MenuPrimitive.RadioItem.Props & {
   inset?: boolean;
+  variant?: "default" | "tile";
 }) {
   return (
     <MenuPrimitive.RadioItem
       data-slot="dropdown-menu-radio-item"
       data-inset={inset}
+      data-variant={variant}
       className={cn(
         "focus:bg-accent focus:text-accent-foreground focus:**:text-accent-foreground relative flex cursor-default items-center gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 data-inset:pl-7 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        // `min-w-0` : sans lui, la tuile plancherait sur la largeur de son
+        // intitulé (`min-width: auto`) et les trois seraient inégales — c'est la
+        // piste de grille qui décide, pas le mot le plus long.
+        variant === "tile" &&
+          "data-checked:bg-accent-soft data-checked:text-primary min-w-0 flex-col justify-center gap-1 px-1.5 py-1.5 text-xs data-checked:font-semibold",
         className,
       )}
       {...props}
     >
-      <span
-        className="pointer-events-none absolute right-2 flex items-center justify-center"
-        data-slot="dropdown-menu-radio-item-indicator"
-      >
-        <MenuPrimitive.RadioItemIndicator>
-          <CheckIcon />
-        </MenuPrimitive.RadioItemIndicator>
-      </span>
+      {variant === "default" && (
+        <span
+          className="pointer-events-none absolute right-2 flex items-center justify-center"
+          data-slot="dropdown-menu-radio-item-indicator"
+        >
+          <MenuPrimitive.RadioItemIndicator>
+            <CheckIcon />
+          </MenuPrimitive.RadioItemIndicator>
+        </span>
+      )}
       {children}
     </MenuPrimitive.RadioItem>
   );
