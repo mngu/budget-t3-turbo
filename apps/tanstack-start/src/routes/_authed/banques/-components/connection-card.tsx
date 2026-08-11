@@ -33,15 +33,15 @@ export function ConnectionCard({
         <BankLogo
           name={connection.aspspName}
           logoUrl={connection.logoUrl}
-          className="size-10 text-body"
+          className="text-body size-10"
         />
 
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2.5">
-            <span className="truncate text-subheading">
+            <span className="text-subheading truncate">
               {connection.aspspName}
             </span>
-            <span className="text-subtle rounded-sm border px-1.5 text-meta">
+            <span className="text-subtle text-meta rounded-sm border px-1.5">
               {connection.aspspCountry}
             </span>
           </div>
@@ -88,7 +88,7 @@ export function ConnectionCard({
 
       <div className="border-t">
         {connection.accounts.length === 0 ? (
-          <p className="text-subtle px-4.5 py-2.5 text-control">
+          <p className="text-subtle text-control px-4.5 py-2.5">
             Aucun compte rattaché — la prochaine autorisation les découvrira.
           </p>
         ) : (
@@ -134,7 +134,7 @@ function AccountRow({
           </span>
         )}
         {!account.enabled && (
-          <span className="text-subtle rounded-sm border px-1.5 text-meta">
+          <span className="text-subtle text-meta rounded-sm border px-1.5">
             exclu du suivi
           </span>
         )}

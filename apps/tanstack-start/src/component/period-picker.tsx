@@ -157,7 +157,7 @@ export function PeriodPicker() {
               {...props}
             >
               {periodLabel(from, to)}
-              <span className="text-subtle flex-none text-label">▾</span>
+              <span className="text-subtle text-label flex-none">▾</span>
             </button>
           )}
         />
@@ -184,7 +184,7 @@ export function PeriodPicker() {
                     disabled={!reachable}
                     onClick={() => commit(preset.from, preset.to)}
                     className={cn(
-                      "py-1 text-left text-control disabled:pointer-events-none disabled:opacity-40",
+                      "text-control py-1 text-left disabled:pointer-events-none disabled:opacity-40",
                       active
                         ? "text-primary font-semibold"
                         : "text-muted-foreground hover:text-foreground",
@@ -211,7 +211,9 @@ export function PeriodPicker() {
                 // qu'on grise, pas le mois.
                 startMonth={min ? startOfMonth(min) : undefined}
                 endMonth={endOfMonth(today)}
-                disabled={min ? { before: min, after: today } : { after: today }}
+                disabled={
+                  min ? { before: min, after: today } : { after: today }
+                }
                 selected={
                   draft ? { from: draft } : from ? { from, to } : undefined
                 }
@@ -237,7 +239,7 @@ export function PeriodPicker() {
                 </span>
                 <button
                   type="button"
-                  className="text-primary ml-auto text-control"
+                  className="text-primary text-control ml-auto"
                   onClick={() => setOpen(false)}
                 >
                   Fermer
@@ -285,7 +287,7 @@ function StepButton({
       aria-label={label}
       onClick={onClick}
       disabled={disabled}
-      className="text-subtle hover:bg-accent hover:text-foreground flex h-5 w-6 items-center justify-center rounded-sm text-body disabled:pointer-events-none disabled:opacity-30"
+      className="text-subtle hover:bg-accent hover:text-foreground text-body flex h-5 w-6 items-center justify-center rounded-sm disabled:pointer-events-none disabled:opacity-30"
     >
       {glyph}
     </button>

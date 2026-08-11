@@ -202,7 +202,7 @@ export const Route = createFileRoute("/_authed/_revue")({
         Vérifiez que PostgreSQL tourne (docker compose up -d) et que l'import a
         été fait (bouton Synchroniser).
       </p>
-      <pre className="text-subtle mt-4 text-control">{error.message}</pre>
+      <pre className="text-subtle text-control mt-4">{error.message}</pre>
     </main>
   ),
   component: RevueLayout,
@@ -254,7 +254,7 @@ function RevueLayout() {
     // text-body : la base typographique de la maquette. Les tailles fines
     // (11–12,5 px) sont posées au cas par cas, jamais héritées d'un rem global
     // qui décalerait aussi /banques et /categories.
-    <div className="flex h-dvh flex-col overflow-hidden text-body leading-[1.45]">
+    <div className="flex h-dvh flex-col overflow-hidden">
       <AppHeader page={page} />
 
       <div className="flex min-h-0 flex-1 flex-col px-5 pt-4.5 pb-4">
@@ -308,13 +308,13 @@ function RevueLayout() {
                 >
                   <CategoryIcon name={parent.icon} className="size-4" />
                 </span>
-                <span className="line-clamp-2 min-w-0 text-subheading leading-[1.15]">
+                <span className="text-subheading line-clamp-2 min-w-0 leading-[1.15]">
                   {parent.name}
                 </span>
               </span>
               {/* Deux décimales, comme les lignes de la colonne : ce chiffre-là
                   est un montant précis, pas un ordre de grandeur. */}
-              <span className="num min-w-24 flex-none text-right text-amount font-medium tracking-[-0.02em]">
+              <span className="num text-amount min-w-24 flex-none text-right font-medium tracking-[-0.02em]">
                 {euro.format(parent.total)}
               </span>
             </KpiFocus>

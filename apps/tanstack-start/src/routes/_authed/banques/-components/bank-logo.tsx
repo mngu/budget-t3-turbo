@@ -44,10 +44,7 @@ export function BankLogo({
       src={logoUrl}
       alt=""
       onError={() => setBroken(true)}
-      className={cn(
-        "rounded-md border bg-white object-contain p-1",
-        className,
-      )}
+      className={cn("rounded-md border bg-white object-contain p-1", className)}
     />
   );
 }

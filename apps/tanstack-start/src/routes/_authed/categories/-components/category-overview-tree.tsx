@@ -320,7 +320,7 @@ function ParentRow({
               un état normal à 13 teintes pour un nombre illimité de parentes —
               signalée, jamais interdite. */}
           {twin && (
-            <span className="text-warn bg-warn-soft flex items-center gap-1.5 text-meta rounded-md px-1.5 py-px whitespace-nowrap">
+            <span className="text-warn bg-warn-soft text-meta flex items-center gap-1.5 rounded-md px-1.5 py-px whitespace-nowrap">
               <TriangleAlertIcon className="size-3 flex-none" />
               même teinte que {twin}
             </span>
@@ -595,9 +595,7 @@ function GhostRow({
       />
       <div className="flex min-w-0 flex-wrap items-baseline gap-2.5">
         <span className="text-control font-medium">{ghost.name}</span>
-        <span className="label-caps text-primary font-semibold">
-          proposée
-        </span>
+        <span className="label-caps text-primary font-semibold">proposée</span>
         <button
           type="button"
           onClick={onPreview}
@@ -692,7 +690,7 @@ function CountButton({
       title={title}
       disabled={count === 0}
       className={cn(
-        "num hover:text-primary text-right text-control disabled:pointer-events-none",
+        "num hover:text-primary text-control text-right disabled:pointer-events-none",
         count === 0 ? "text-subtle" : "text-muted-foreground",
         className,
       )}

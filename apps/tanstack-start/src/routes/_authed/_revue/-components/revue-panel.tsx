@@ -222,10 +222,10 @@ export function RevuePanel({
               <LayersIcon className="size-4" aria-hidden />
             )}
           </span>
-          <span className="min-w-0 truncate text-heading">
+          <span className="text-heading min-w-0 truncate">
             {selected ? selected.name : "Toutes catégories"}
           </span>
-          <span className="text-subtle flex-none text-control whitespace-nowrap">
+          <span className="text-subtle text-control flex-none whitespace-nowrap">
             {selected
               ? `${selected.subs.length} sous-catégorie${selected.subs.length > 1 ? "s" : ""} · ${sharePercent(selected.total, expenses)} des sorties`
               : `${categories.length} poste${categories.length > 1 ? "s" : ""} de dépense`}

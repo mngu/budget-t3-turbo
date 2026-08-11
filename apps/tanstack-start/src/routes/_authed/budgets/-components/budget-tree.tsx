@@ -70,7 +70,7 @@ export function BudgetTree({
         <div className="text-body font-medium">
           Aucune catégorie pour le moment
         </div>
-        <p className="text-muted-foreground mx-auto mt-1.5 max-w-105 text-control text-pretty">
+        <p className="text-muted-foreground text-control mx-auto mt-1.5 max-w-105 text-pretty">
           Un budget se pose sur une catégorie : créez-en d'abord depuis l'écran
           Catégories.
         </p>
@@ -164,7 +164,7 @@ function ParentRow({
           <CategoryIcon name={parent.icon} />
         </span>
 
-        <span className="truncate text-body font-medium">{parent.name}</span>
+        <span className="text-body truncate font-medium">{parent.name}</span>
 
         <span className="text-subtle text-meta whitespace-nowrap">
           {parent.children.length === 0 && "aucune sous-catégorie"}
@@ -255,7 +255,7 @@ function ParentRow({
                   ),
                 }}
               />
-              <span className="truncate px-2 text-control">{child.name}</span>
+              <span className="text-control truncate px-2">{child.name}</span>
               <div className="flex items-center justify-end gap-2">
                 {detailed ? (
                   <BudgetAmount
@@ -278,7 +278,7 @@ function ParentRow({
         })}
 
         {parent.children.length === 0 && (
-          <p className="text-muted-foreground px-3 pt-1.5 pb-1 pl-18 text-control">
+          <p className="text-muted-foreground text-control px-3 pt-1.5 pb-1 pl-18">
             Aucune sous-catégorie : le budget se pose directement sur la
             catégorie.
           </p>
@@ -364,9 +364,9 @@ function AmountInput({
             e.currentTarget.blur();
           }
         }}
-        className="num border-border-strong bg-background focus:border-primary h-7 w-24 rounded-lg border px-2 pr-5 text-right text-meta font-medium outline-none"
+        className="num border-border-strong bg-background focus:border-primary text-meta h-7 w-24 rounded-lg border px-2 pr-5 text-right font-medium outline-none"
       />
-      <span className="text-subtle pointer-events-none absolute right-2 text-meta">
+      <span className="text-subtle text-meta pointer-events-none absolute right-2">
         €
       </span>
     </span>

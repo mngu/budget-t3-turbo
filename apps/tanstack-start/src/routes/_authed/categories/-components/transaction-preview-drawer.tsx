@@ -78,11 +78,11 @@ export function TransactionPreviewDrawer({
                 {badge.icon}
               </span>
             )}
-            <DialogTitle className="min-w-0 truncate text-body font-semibold">
+            <DialogTitle className="text-body min-w-0 truncate font-semibold">
               {title}
             </DialogTitle>
           </div>
-          <DialogDescription className="text-muted-foreground mt-1.5 text-control text-pretty">
+          <DialogDescription className="text-muted-foreground text-control mt-1.5 text-pretty">
             {description ??
               `${transactions.length} transaction${transactions.length > 1 ? "s" : ""} de l'échantillon analysé.`}
           </DialogDescription>
@@ -90,7 +90,7 @@ export function TransactionPreviewDrawer({
 
         <div className="min-h-0 flex-1 overflow-y-auto">
           {transactions.length === 0 ? (
-            <p className="text-muted-foreground px-4 py-5 text-control">
+            <p className="text-muted-foreground text-control px-4 py-5">
               Aucune transaction.
             </p>
           ) : (
@@ -113,10 +113,10 @@ export function TransactionPreviewDrawer({
                     </span>
                   )}
                   <div className="min-w-0">
-                    <div className="num truncate text-control">
+                    <div className="num text-control truncate">
                       {txn.description}
                     </div>
-                    <div className="text-subtle truncate text-meta">
+                    <div className="text-subtle text-meta truncate">
                       {txn.bankName}
                       {" · "}
                       {category ?? "Sans catégorie"}
@@ -127,7 +127,7 @@ export function TransactionPreviewDrawer({
                       crédit indiscernable d'une dépense. C'est la catégorie
                       absente, et elle seule, qui passe la ligne en warn. */}
                   <span
-                    className={`num text-right text-meta ${
+                    className={`num text-meta text-right ${
                       category === null ? "text-warn" : ""
                     }`}
                   >

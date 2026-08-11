@@ -91,11 +91,11 @@ export function SpaceDialog({
             >
               {spec.icon}
             </span>
-            <DialogTitle className="min-w-0 text-heading text-pretty">
+            <DialogTitle className="text-heading min-w-0 text-pretty">
               {spec.title}
             </DialogTitle>
           </div>
-          <div className="text-muted-foreground mt-2.5 text-control text-pretty">
+          <div className="text-muted-foreground text-control mt-2.5 text-pretty">
             {spec.body}
           </div>
 
@@ -124,14 +124,14 @@ export function SpaceDialog({
                       )}
                     />
                     <span className="min-w-0">
-                      <span className="block text-control font-semibold tracking-[-0.01em]">
+                      <span className="text-control block font-semibold tracking-[-0.01em]">
                         {choice.label}
                       </span>
-                      <span className="text-muted-foreground mt-1 block text-control text-pretty">
+                      <span className="text-muted-foreground text-control mt-1 block text-pretty">
                         {choice.description}
                       </span>
                       {active && choice.warning && (
-                        <span className="text-warn mt-1.5 block text-control text-pretty">
+                        <span className="text-warn text-control mt-1.5 block text-pretty">
                           {choice.warning}
                         </span>
                       )}
@@ -151,13 +151,13 @@ export function SpaceDialog({
                 >
                   <span
                     className={cn(
-                      "num min-w-11 text-meta font-medium",
+                      "num text-meta min-w-11 font-medium",
                       spec.tone === "bad" ? "text-bad" : "text-foreground",
                     )}
                   >
                     {fact.value}
                   </span>
-                  <span className="text-muted-foreground min-w-0 text-control">
+                  <span className="text-muted-foreground text-control min-w-0">
                     {fact.label}
                   </span>
                 </div>

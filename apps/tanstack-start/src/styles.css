@@ -308,10 +308,15 @@
   html {
     @apply font-sans;
   }
-  /* 450 est la graisse courante du système, pas 400 : elle est posée ici une
-     fois plutôt que dans les crans typographiques, pour que les quatre rôles
-     qui admettent deux graisses restent libres de monter au site. */
+  /* Le régime de texte courant du système, posé une fois. 450 est la graisse
+     courante et non 400 : elle vit ici plutôt que dans les crans, pour que les
+     quatre rôles qui admettent deux graisses restent libres de monter au site.
+     Le corps (13 px) et l'interligne (1,45) y sont pour la même raison — six
+     pages les redisaient en `text-body leading-[1.45]` sur leur conteneur
+     racine, ce qui en faisait six endroits à corriger pour un seul fait. */
   body {
+    font-size: var(--text-body);
     font-weight: 450;
+    line-height: 1.45;
   }
 }

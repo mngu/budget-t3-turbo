@@ -236,7 +236,7 @@ function InvitationPage() {
       {signedInAsInvited ? (
         <div className="border-border flex items-center gap-2.5 border-b px-5 py-3.5">
           <UserIcon className="text-subtle size-3.5 flex-none" />
-          <div className="text-muted-foreground min-w-0 text-control">
+          <div className="text-muted-foreground text-control min-w-0">
             Connecté en tant que{" "}
             <span className="text-foreground font-medium">
               {invitation.email}
@@ -303,7 +303,7 @@ function Shell({
   children?: React.ReactNode;
 }) {
   return (
-    <main className="flex min-h-dvh justify-center px-6 pt-14 pb-20 text-body leading-[1.45]">
+    <main className="flex min-h-dvh justify-center px-6 pt-14 pb-20">
       <div className="w-full max-w-118">
         <div className="flex items-center justify-center gap-2.5">
           <div className="bg-primary size-2.5 rounded-xs" />
@@ -322,10 +322,8 @@ function Shell({
             >
               {icon}
             </span>
-            <div className="mt-3 text-heading text-pretty">
-              {title}
-            </div>
-            <div className="text-muted-foreground mt-1.5 text-control text-pretty">
+            <div className="text-heading mt-3 text-pretty">{title}</div>
+            <div className="text-muted-foreground text-control mt-1.5 text-pretty">
               {body}
             </div>
           </div>
@@ -347,7 +345,7 @@ function Shell({
           {children}
 
           <div className="flex items-center gap-3 px-5 py-3.5">
-            <span className="text-subtle min-w-0 flex-1 text-control text-pretty">
+            <span className="text-subtle text-control min-w-0 flex-1 text-pretty">
               {note}
             </span>
             {secondary && (
@@ -367,7 +365,7 @@ function Shell({
           </div>
         </div>
 
-        <div className="text-subtle mt-3.5 text-center text-control text-pretty">
+        <div className="text-subtle text-control mt-3.5 text-center text-pretty">
           {footnote}
         </div>
       </div>

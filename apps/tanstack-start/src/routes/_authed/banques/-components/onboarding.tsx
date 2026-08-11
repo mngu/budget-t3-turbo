@@ -64,11 +64,11 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
           <h2 className="text-body font-semibold">
             Configuration Enable Banking
           </h2>
-          <span className="text-subtle ml-auto text-control">
+          <span className="text-subtle text-control ml-auto">
             une seule fois, à l'installation
           </span>
         </div>
-        <p className="text-muted-foreground mt-1.5 max-w-155 text-control text-pretty">
+        <p className="text-muted-foreground text-control mt-1.5 max-w-155 text-pretty">
           Ce sont les identifiants de{" "}
           <span className="text-foreground font-medium">votre</span> compte
           agrégateur, pas ceux d'une banque. Aucune banque ne vous demandera
@@ -94,14 +94,14 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
           Déclarez cette URL de redirection dans le Control Panel de votre
           application :
           <div className="mt-1.5 flex items-center gap-2">
-            <span className="bg-sunken num truncate rounded-md border px-2.5 py-1 text-meta">
+            <span className="bg-sunken num text-meta truncate rounded-md border px-2.5 py-1">
               {redirectUrl}
             </span>
             <button
               type="button"
               onClick={copyRedirect}
               className={cn(
-                "border-border-strong hover:bg-accent h-7 rounded-md border px-2.5 text-control whitespace-nowrap",
+                "border-border-strong hover:bg-accent text-control h-7 rounded-md border px-2.5 whitespace-nowrap",
                 copied ? "text-ok" : "text-muted-foreground",
               )}
             >
@@ -172,7 +172,7 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
             <p className="text-bad text-control font-semibold">
               L'API Enable Banking a refusé la configuration
             </p>
-            <p className="text-muted-foreground num mt-1.5 text-meta break-words">
+            <p className="text-muted-foreground num text-meta mt-1.5 break-words">
               {setup.error}
             </p>
           </div>
@@ -180,7 +180,7 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
       </div>
 
       <div className="flex items-center gap-3 border-t px-5 py-3">
-        <span className="text-subtle min-w-0 flex-1 text-control">
+        <span className="text-subtle text-control min-w-0 flex-1">
           Rien n'est envoyé à votre banque à cette étape.
         </span>
         <Button
@@ -202,10 +202,10 @@ const FIELD =
 function Step({ n, children }: { n: string; children: React.ReactNode }) {
   return (
     <li className="grid grid-cols-[22px_minmax(0,1fr)] items-start gap-3">
-      <span className="border-border-strong text-muted-foreground num flex size-6 items-center justify-center rounded-full border text-meta">
+      <span className="border-border-strong text-muted-foreground num text-meta flex size-6 items-center justify-center rounded-full border">
         {n}
       </span>
-      <div className="min-w-0 pt-px text-control">{children}</div>
+      <div className="text-control min-w-0 pt-px">{children}</div>
     </li>
   );
 }
@@ -224,7 +224,7 @@ function Check({
     <div className="grid grid-cols-[16px_minmax(0,1fr)] items-center gap-2.5">
       <span
         className={cn(
-          "text-primary-foreground flex size-4 items-center justify-center rounded-full border-[1.5px] text-label",
+          "text-primary-foreground text-label flex size-4 items-center justify-center rounded-full border-[1.5px]",
           bad && "border-bad bg-bad",
           ok && "border-ok bg-ok",
           pending && "border-border-strong",
@@ -233,7 +233,10 @@ function Check({
         {bad ? "✕" : ok ? "✓" : ""}
       </span>
       <span
-        className={cn("text-control", pending ? "text-subtle" : "text-foreground")}
+        className={cn(
+          "text-control",
+          pending ? "text-subtle" : "text-foreground",
+        )}
       >
         {children}
       </span>

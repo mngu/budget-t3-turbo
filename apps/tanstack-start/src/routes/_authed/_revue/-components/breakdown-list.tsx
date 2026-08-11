@@ -307,7 +307,7 @@ function BreakdownRow({
         )}
         <span
           className={cn(
-            "min-w-0 flex-1 truncate text-subheading leading-[1.15] font-normal",
+            "text-subheading min-w-0 flex-1 truncate leading-[1.15] font-normal",
             // Une ligne de poste et un reste à ranger pèsent leur plein poids ;
             // seules les sous-catégories rangées s'allègent.
             row.aClasser || row.icon !== undefined
@@ -317,7 +317,7 @@ function BreakdownRow({
         >
           {row.name}
         </span>
-        <span className="num flex-none text-body leading-[1.15] tracking-[-0.02em]">
+        <span className="num text-body flex-none leading-[1.15] tracking-[-0.02em]">
           {euro.format(row.total)}
         </span>
       </div>
@@ -325,9 +325,7 @@ function BreakdownRow({
         {/* Boîte de 11 px : la piste en fait 7 et le repère de budget la déborde
             d'en haut et d'en bas, il ne peut donc pas vivre dedans (elle
             découpe). Elle est plate quand la colonne ne parle pas budget. */}
-        <div
-          className={cn("relative flex h-3 min-w-0 flex-1 items-center")}
-        >
+        <div className={cn("relative flex h-3 min-w-0 flex-1 items-center")}>
           {row.budget ? (
             <BudgetGauge
               covered={row.budget.covered}
@@ -372,7 +370,7 @@ function BreakdownRow({
         {captioned && (
           <span
             className={cn(
-              "num w-19 flex-none overflow-hidden text-right text-label tracking-[-0.01em] whitespace-nowrap",
+              "num text-label w-19 flex-none overflow-hidden text-right tracking-[-0.01em] whitespace-nowrap",
               caption?.over
                 ? "text-bad font-semibold"
                 : "text-subtle font-medium",

@@ -158,7 +158,12 @@ export function KpiFocus({
     // *même* expression que la colonne des postes (`rdStackPx === listPx`) :
     // c'est un alignement, pas une coïncidence — d'où la reprise à l'identique
     // du `BREAKDOWN_WIDTH` de `breakdown-list.tsx`.
-    <div className={cn(BREAKDOWN_WIDTH, "flex max-w-full flex-none flex-col items-end")}>
+    <div
+      className={cn(
+        BREAKDOWN_WIDTH,
+        "flex max-w-full flex-none flex-col items-end",
+      )}
+    >
       <div className="mt-0.5 flex h-8 w-full min-w-0 items-center justify-between gap-3.5">
         {children}
       </div>
@@ -344,12 +349,8 @@ function DeltaPill({
     >
       {/* Aucune flèche à l'écart nul, comme la maquette : il n'y a pas de sens
           à montrer. */}
-      {delta.amount > 0 && (
-        <TrendingUpIcon className="size-3" aria-hidden />
-      )}
-      {delta.amount < 0 && (
-        <TrendingDownIcon className="size-3" aria-hidden />
-      )}
+      {delta.amount > 0 && <TrendingUpIcon className="size-3" aria-hidden />}
+      {delta.amount < 0 && <TrendingDownIcon className="size-3" aria-hidden />}
       {signedPercent.format(delta.pct)} %
     </span>
   );

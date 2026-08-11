@@ -109,14 +109,12 @@ export function SpaceCard({
 
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2.5">
-            <span className="text-subheading">
-              {space.name}
-            </span>
+            <span className="text-subheading">{space.name}</span>
             {space.isActive && <Badge>Espace actif</Badge>}
             <Badge variant="outline">{owner ? "Propriétaire" : "Membre"}</Badge>
             {!shared && <Badge variant="secondary">Personnel</Badge>}
           </div>
-          <div className="text-subtle mt-1 text-control">
+          <div className="text-subtle text-control mt-1">
             {shared
               ? `Créé le ${dateFr(space.createdAt)}${
                   pending > 0
@@ -173,7 +171,7 @@ export function SpaceCard({
             >
               <div className="min-w-0">
                 <div className="flex min-w-0 items-center gap-2">
-                  <span className="truncate text-body font-medium">
+                  <span className="text-body truncate font-medium">
                     {member.name}
                   </span>
                   {member.isMe && (
@@ -182,11 +180,11 @@ export function SpaceCard({
                     </Badge>
                   )}
                 </div>
-                <div className="text-subtle truncate text-control">
+                <div className="text-subtle text-control truncate">
                   {member.email}
                 </div>
               </div>
-              <span className="text-muted-foreground flex items-center gap-1.5 text-control">
+              <span className="text-muted-foreground text-control flex items-center gap-1.5">
                 {member.role === "owner" ? (
                   <KeyRoundIcon className="text-primary size-3.5" />
                 ) : (
@@ -233,10 +231,8 @@ export function SpaceCard({
                   className="border-border grid min-h-11 grid-cols-[minmax(0,1fr)_106px_132px_auto] items-center gap-3.5 border-t px-4"
                 >
                   <div className="min-w-0">
-                    <div className="truncate text-body">
-                      {invitation.email}
-                    </div>
-                    <div className="text-subtle truncate text-control">
+                    <div className="text-body truncate">{invitation.email}</div>
+                    <div className="text-subtle text-control truncate">
                       invitée par {invitation.invitedBy}
                     </div>
                   </div>
@@ -326,7 +322,7 @@ export function SpaceCard({
 
       {alone && (
         <div className="border-border flex flex-col items-center gap-3 border-t px-4 py-6">
-          <span className="text-subtle max-w-105 text-center text-control text-pretty">
+          <span className="text-subtle text-control max-w-105 text-center text-pretty">
             Personne d'autre dans cet espace. Invitez quelqu'un par email : la
             personne verra les mêmes comptes et les mêmes catégories que vous.
           </span>
@@ -470,7 +466,7 @@ function InviteForm({
       >
         Envoyer l&apos;invitation
       </Button>
-      <span className="text-subtle flex-none text-control whitespace-nowrap">
+      <span className="text-subtle text-control flex-none whitespace-nowrap">
         le lien vaut 7 jours
       </span>
     </div>

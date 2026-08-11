@@ -43,7 +43,7 @@ export function SuggestionsWaitPanel({ onClose }: { onClose: () => void }) {
           {STEPS.map((step) => (
             <li
               key={step}
-              className="text-muted-foreground grid grid-cols-[16px_minmax(0,1fr)] items-center gap-2.5 text-control"
+              className="text-muted-foreground text-control grid grid-cols-[16px_minmax(0,1fr)] items-center gap-2.5"
             >
               <span className="border-border-strong size-3.5 rounded-full border-[1.5px]" />
               <span>{step}</span>
@@ -51,7 +51,7 @@ export function SuggestionsWaitPanel({ onClose }: { onClose: () => void }) {
           ))}
         </ul>
 
-        <p className="text-subtle mt-4 max-w-190 border-t pt-3.5 text-control text-pretty">
+        <p className="text-subtle text-control mt-4 max-w-190 border-t pt-3.5 text-pretty">
           Rien n'est écrit en base pendant l'analyse : elle ne fait que
           proposer. Les propositions vous attendront dans la liste, sous la
           catégorie concernée.
@@ -81,7 +81,7 @@ export function SuggestionsReviewPanel({
       onClose={onClose}
     >
       <div className="flex flex-wrap items-center gap-3.5 px-4 py-3.5">
-        <p className="text-muted-foreground max-w-140 text-control text-pretty">
+        <p className="text-muted-foreground text-control max-w-140 text-pretty">
           {branchCount === 0 ? (
             <>
               Aucune branche à ajouter : tout ce que l'analyse propose existe
@@ -138,9 +138,7 @@ function PanelShell({
       <div className="bg-sunken flex flex-wrap items-center gap-2.5 border-b px-3.5 py-2.5">
         <SparklesIcon className="text-primary size-3.5" />
         <h2 className="text-control font-semibold">{title}</h2>
-        {tagline && (
-          <span className="text-subtle text-control">{tagline}</span>
-        )}
+        {tagline && <span className="text-subtle text-control">{tagline}</span>}
         <Button
           variant="ghost"
           size="icon-xs"

@@ -260,7 +260,7 @@ export function CategoryRing({
               </span>
             )}
             {center.name && (
-              <div className="mb-1 max-w-full truncate text-control font-semibold tracking-[-0.015em]">
+              <div className="text-control mb-1 max-w-full truncate font-semibold tracking-[-0.015em]">
                 {center.name}
               </div>
             )}
@@ -281,14 +281,14 @@ export function CategoryRing({
                   event.stopPropagation();
                   center.onBack?.();
                 }}
-                className="border-border-strong bg-card text-muted-foreground hover:border-subtle hover:text-foreground pointer-events-auto mt-3 flex h-6 items-center gap-1.5 rounded-full border pr-2.5 pl-2 text-control font-semibold whitespace-nowrap"
+                className="border-border-strong bg-card text-muted-foreground hover:border-subtle hover:text-foreground text-control pointer-events-auto mt-3 flex h-6 items-center gap-1.5 rounded-full border pr-2.5 pl-2 font-semibold whitespace-nowrap"
               >
                 <ArrowLeftIcon className="size-3" aria-hidden />
                 Toutes catégories
                 {/* La touche est *aussi* une voie de sortie, mais elle ne
                     s'annonçait nulle part : la maquette la fait dire par le
                     bouton plutôt que d'ajouter une mention à part. */}
-                <kbd className="border-border bg-surface-2 num text-subtle ml-0.5 flex h-4 items-center rounded-sm border px-1 text-label font-medium tracking-[0.02em]">
+                <kbd className="border-border bg-surface-2 num text-subtle text-label ml-0.5 flex h-4 items-center rounded-sm border px-1 font-medium tracking-[0.02em]">
                   Esc
                 </kbd>
               </button>

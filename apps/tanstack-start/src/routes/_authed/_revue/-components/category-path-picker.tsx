@@ -120,7 +120,7 @@ export function CategoryPathPicker({
       className="w-120"
     >
       {subtitle && (
-        <div className="border-border num truncate border-b px-3 py-2 text-meta">
+        <div className="border-border num text-meta truncate border-b px-3 py-2">
           {subtitle}
         </div>
       )}
@@ -137,10 +137,7 @@ export function CategoryPathPicker({
             heading={
               <span className="flex items-center gap-1.5">
                 <span style={{ color: parent.parentColor }}>
-                  <CategoryIcon
-                    name={parent.parentIcon}
-                    className="size-3"
-                  />
+                  <CategoryIcon name={parent.parentIcon} className="size-3" />
                 </span>
                 {parent.parent}
               </span>

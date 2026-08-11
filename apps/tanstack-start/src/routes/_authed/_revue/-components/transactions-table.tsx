@@ -83,12 +83,12 @@ export function TransactionsTable({
       ))}
 
       {rows.length === 0 && (
-        <p className="text-subtle py-15 text-center text-control">
+        <p className="text-subtle text-control py-15 text-center">
           Aucune transaction ne correspond à ces filtres.
         </p>
       )}
 
-      <div className="text-subtle flex items-center justify-center gap-3 p-4 text-control">
+      <div className="text-subtle text-control flex items-center justify-center gap-3 p-4">
         <button
           type="button"
           disabled={page <= 1}
@@ -139,7 +139,7 @@ function Row({
       </span>
 
       <span className="flex min-w-0 items-center gap-1.5">
-        <span className="truncate text-body">{row.description}</span>
+        <span className="text-body truncate">{row.description}</span>
         <TransferBadge row={row} />
         {/* La maquette met ici une pastille de « catégorisation peu sûre »,
             calculée sur un score de confiance dont la base n'a aucun équivalent
@@ -153,16 +153,14 @@ function Row({
         )}
       </span>
 
-      <span className="text-subtle truncate text-control">
+      <span className="text-subtle text-control truncate">
         {row.bankName}
         {debtor && ` · ${titleCase(debtor)}`}
       </span>
 
       <CategoryCell row={row} parents={parents} />
 
-      <span
-        className={cn("num text-right text-body", signed > 0 && "text-ok")}
-      >
+      <span className={cn("num text-body text-right", signed > 0 && "text-ok")}>
         {signedEuro.format(signed)}
       </span>
     </div>
@@ -220,7 +218,7 @@ function CategoryCell({
         </span>
         <span
           className={cn(
-            "min-w-0 truncate text-control",
+            "text-control min-w-0 truncate",
             aClasser || parentName === null
               ? "text-subtle"
               : "text-muted-foreground",
@@ -237,7 +235,7 @@ function CategoryCell({
             title="Catégorie corrigée à la main"
           />
         )}
-        <span className="text-subtle ml-auto flex-none text-label">▾</span>
+        <span className="text-subtle text-label ml-auto flex-none">▾</span>
       </button>
 
       <CategoryPathPicker

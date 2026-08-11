@@ -179,7 +179,7 @@ export function RefineBar({
         type="button"
         onClick={() => setCatOpen(true)}
         className={cn(
-          "flex h-7 max-w-62 flex-none items-center gap-1.5 rounded-md border px-2.5 text-control",
+          "text-control flex h-7 max-w-62 flex-none items-center gap-1.5 rounded-md border px-2.5",
           search.category
             ? "border-border-strong bg-card font-semibold"
             : "text-muted-foreground hover:bg-card border-transparent",
@@ -205,7 +205,7 @@ export function RefineBar({
             ? categoryFilterLabel(search.category)
             : "Toutes catégories"}
         </span>
-        <span className="text-subtle flex-none text-label">▾</span>
+        <span className="text-subtle text-label flex-none">▾</span>
       </button>
 
       {search.category && (
@@ -214,7 +214,7 @@ export function RefineBar({
           title="Retirer le filtre de catégorie"
           aria-label="Retirer le filtre de catégorie"
           onClick={() => setSearch({ category: undefined })}
-          className="text-subtle hover:bg-accent hover:text-foreground flex size-6 flex-none items-center justify-center rounded-md text-meta"
+          className="text-subtle hover:bg-accent hover:text-foreground text-meta flex size-6 flex-none items-center justify-center rounded-md"
         >
           ✕
         </button>
@@ -235,7 +235,7 @@ export function RefineBar({
                     setSearch({ aClasser: search.aClasser ? undefined : true })
                   }
                   className={cn(
-                    "flex h-7 flex-none items-center gap-1.5 rounded-md border px-2.5 text-control font-medium",
+                    "text-control flex h-7 flex-none items-center gap-1.5 rounded-md border px-2.5 font-medium",
                     search.aClasser
                       ? "border-warn bg-warn text-background"
                       : "bg-warn-soft text-warn border-transparent",
@@ -267,7 +267,7 @@ export function RefineBar({
               filtre de confort, c'est l'écran d'audit de la détection — c'est
               là qu'on vérifie une paire et qu'on écarte un faux positif. */}
           <Tooltip>
-            <TooltipTrigger className="text-subtle flex flex-none items-center gap-1.5 text-meta">
+            <TooltipTrigger className="text-subtle text-meta flex flex-none items-center gap-1.5">
               <ArrowLeftRightIcon className="size-3" />
               Internes
             </TooltipTrigger>
@@ -317,7 +317,7 @@ export function RefineBar({
       )}
 
       {right && (
-        <span className="text-subtle ml-auto text-control whitespace-nowrap">
+        <span className="text-subtle text-control ml-auto whitespace-nowrap">
           {right}
         </span>
       )}

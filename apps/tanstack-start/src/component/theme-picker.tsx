@@ -1,10 +1,10 @@
 import { Monitor, Moon, Sun } from "lucide-react";
 
+import type { ThemeMode } from "@budget/ui/theme";
 import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
 } from "@budget/ui/dropdown-menu";
-import type { ThemeMode } from "@budget/ui/theme";
 import { useTheme } from "@budget/ui/theme";
 
 const THEME_OPTIONS: { mode: ThemeMode; label: string; Icon: typeof Sun }[] = [

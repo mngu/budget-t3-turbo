@@ -24,7 +24,7 @@ import { toast } from "@budget/ui/toast";
 
 import type { SpaceDialogSpec } from "./-components/space-dialog";
 import { authClient } from "~/auth/client";
-import { AppHeader } from "~/component/app-header";
+import { SettingsPage } from "~/component/settings-page";
 import { useTRPCClient } from "~/lib/trpc";
 import { SpaceCard } from "./-components/space-card";
 import { SpaceDialog } from "./-components/space-dialog";
@@ -283,148 +283,143 @@ function EspacesPage() {
   // ── Rendu ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden text-body leading-[1.45]">
-      <AppHeader page="espaces" />
-
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        <main className="mx-auto max-w-250 px-6 pt-5 pb-12">
-          <div className="flex min-h-9.5 flex-wrap items-center gap-6">
-            <h1 className="text-title">Espaces</h1>
-            <div className="ml-auto flex items-center gap-4">
-              <div className="border-border flex items-center gap-4 border-r pr-4">
-                <Counter
-                  value={spaces.length}
-                  label={spaces.length > 1 ? "Espaces" : "Espace"}
-                />
-                <Counter
-                  value={members}
-                  label={members > 1 ? "Membres" : "Membre"}
-                />
-              </div>
-              <Button onClick={() => open({ kind: "create" }, "")}>
-                Créer un espace partagé
-              </Button>
-            </div>
+    <SettingsPage
+      page="espaces"
+      title="Espaces"
+      aside={
+        <div className="ml-auto flex items-center gap-4">
+          <div className="border-border flex items-center gap-4 border-r pr-4">
+            <Counter
+              value={spaces.length}
+              label={spaces.length > 1 ? "Espaces" : "Espace"}
+            />
+            <Counter
+              value={members}
+              label={members > 1 ? "Membres" : "Membre"}
+            />
           </div>
-          <p className="text-muted-foreground mt-2 max-w-160 text-control text-pretty">
-            Un espace contient des comptes bancaires, des catégories et des
-            transactions ; deux espaces ne voient rien l'un de l'autre. Partager
-            un compte, c'est ajouter un membre à l'espace qui le contient.
-          </p>
+          <Button onClick={() => open({ kind: "create" }, "")}>
+            Créer un espace partagé
+          </Button>
+        </div>
+      }
+    >
+      <p className="text-muted-foreground text-control mt-2 max-w-160 text-pretty">
+        Un espace contient des comptes bancaires, des catégories et des
+        transactions ; deux espaces ne voient rien l'un de l'autre. Partager un
+        compte, c'est ajouter un membre à l'espace qui le contient.
+      </p>
 
-          {incoming.length > 0 && (
-            <div className="mt-5 flex flex-col gap-3">
-              {incoming.map((invitation) => (
-                <div
-                  key={invitation.id}
-                  className="border-border-strong bg-accent-soft flex flex-wrap items-center gap-4 rounded-lg border px-5 py-4"
-                >
-                  <span className="bg-card border-border-strong text-primary flex size-8 flex-none items-center justify-center rounded-md border">
-                    <MailIcon className="size-4" />
-                  </span>
-                  <div className="min-w-70 flex-1">
-                    <div className="text-body font-semibold tracking-[-0.015em]">
-                      {invitation.invitedBy} vous invite dans{" "}
-                      {invitation.spaceName}
-                    </div>
-                    <div className="text-muted-foreground mt-1 max-w-165 text-control text-pretty">
-                      En acceptant, vous verrez tous les comptes, toutes les
-                      catégories et tout l'historique de cet espace, comme{" "}
-                      {invitation.role === "owner" ? "propriétaire" : "membre"}.
-                      Valable jusqu'au{" "}
-                      {new Date(invitation.expiresAt).toLocaleDateString(
-                        "fr-FR",
-                        { day: "numeric", month: "long" },
-                      )}
-                      .
-                    </div>
-                  </div>
-                  <div className="flex flex-none items-center gap-2">
-                    <Button
-                      variant="outline"
-                      disabled={busy}
-                      onClick={() => void respond(invitation, false)}
-                    >
-                      Refuser
-                    </Button>
-                    <Button
-                      disabled={busy}
-                      onClick={() => void respond(invitation, true)}
-                    >
-                      Rejoindre l&apos;espace
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {soloBanner && (
-            <div className="border-border-strong bg-surface-2 mt-5 flex flex-wrap items-center gap-4 rounded-lg border px-5 py-4">
+      {incoming.length > 0 && (
+        <div className="mt-5 flex flex-col gap-3">
+          {incoming.map((invitation) => (
+            <div
+              key={invitation.id}
+              className="border-border-strong bg-accent-soft flex flex-wrap items-center gap-4 rounded-lg border px-5 py-4"
+            >
               <span className="bg-card border-border-strong text-primary flex size-8 flex-none items-center justify-center rounded-md border">
-                <UsersIcon className="size-4" />
+                <MailIcon className="size-4" />
               </span>
               <div className="min-w-70 flex-1">
                 <div className="text-body font-semibold tracking-[-0.015em]">
-                  Vous êtes seul sur cet espace
+                  {invitation.invitedBy} vous invite dans {invitation.spaceName}
                 </div>
-                <div className="text-muted-foreground mt-1 max-w-165 text-control text-pretty">
-                  Vos{" "}
-                  <span className="num text-meta">
-                    {soloBanner.counts.transactions.toLocaleString("fr-FR")}
-                  </span>{" "}
-                  transactions, vos comptes et vos catégories vivent ici. Pour
-                  partager ce budget, invitez la personne{" "}
-                  <span className="text-foreground font-medium">
-                    dans cet espace
-                  </span>{" "}
-                  : rien à redéplacer, l'historique reste. Un espace neuf, lui,
-                  démarre vide.
+                <div className="text-muted-foreground text-control mt-1 max-w-165 text-pretty">
+                  En acceptant, vous verrez tous les comptes, toutes les
+                  catégories et tout l'historique de cet espace, comme{" "}
+                  {invitation.role === "owner" ? "propriétaire" : "membre"}.
+                  Valable jusqu'au{" "}
+                  {new Date(invitation.expiresAt).toLocaleDateString("fr-FR", {
+                    day: "numeric",
+                    month: "long",
+                  })}
+                  .
                 </div>
               </div>
-              <Button
-                className="flex-none"
-                onClick={() =>
-                  open({ kind: "share", space: soloBanner }, soloBanner.name)
-                }
-              >
-                Partager cet espace
-              </Button>
+              <div className="flex flex-none items-center gap-2">
+                <Button
+                  variant="outline"
+                  disabled={busy}
+                  onClick={() => void respond(invitation, false)}
+                >
+                  Refuser
+                </Button>
+                <Button
+                  disabled={busy}
+                  onClick={() => void respond(invitation, true)}
+                >
+                  Rejoindre l&apos;espace
+                </Button>
+              </div>
             </div>
-          )}
+          ))}
+        </div>
+      )}
 
-          <div className="mt-5 flex flex-col gap-3.5">
-            {spaces.map((space) => (
-              <SpaceCard
-                key={space.id}
-                space={space}
-                invite={inviteOf(space.id)}
-                onInviteChange={(next) =>
-                  setInvites((s) => ({ ...s, [space.id]: next }))
-                }
-                actions={{
-                  onSwitch: () => open({ kind: "switch", space }),
-                  onRename: () => open({ kind: "rename", space }, space.name),
-                  onShare: () => open({ kind: "share", space }, space.name),
-                  onDelete: () =>
-                    space.isPersonal
-                      ? open({ kind: "deletePersonal" })
-                      : open({ kind: "delete", space }, ""),
-                  onLeave: () => open({ kind: "leave", space }),
-                  onInvite: (email, role) =>
-                    email.trim().length === 0
-                      ? toast.error("Renseignez une adresse email.")
-                      : open({ kind: "invite", space, email, role }),
-                  onRemoveMember: (member) =>
-                    open({ kind: "removeMember", space, member }),
-                  onResendInvitation: (invitation) => void resend(invitation),
-                  onCancelInvitation: (invitation) =>
-                    open({ kind: "cancelInvitation", space, invitation }),
-                }}
-              />
-            ))}
+      {soloBanner && (
+        <div className="border-border-strong bg-surface-2 mt-5 flex flex-wrap items-center gap-4 rounded-lg border px-5 py-4">
+          <span className="bg-card border-border-strong text-primary flex size-8 flex-none items-center justify-center rounded-md border">
+            <UsersIcon className="size-4" />
+          </span>
+          <div className="min-w-70 flex-1">
+            <div className="text-body font-semibold tracking-[-0.015em]">
+              Vous êtes seul sur cet espace
+            </div>
+            <div className="text-muted-foreground text-control mt-1 max-w-165 text-pretty">
+              Vos{" "}
+              <span className="num text-meta">
+                {soloBanner.counts.transactions.toLocaleString("fr-FR")}
+              </span>{" "}
+              transactions, vos comptes et vos catégories vivent ici. Pour
+              partager ce budget, invitez la personne{" "}
+              <span className="text-foreground font-medium">
+                dans cet espace
+              </span>{" "}
+              : rien à redéplacer, l'historique reste. Un espace neuf, lui,
+              démarre vide.
+            </div>
           </div>
-        </main>
+          <Button
+            className="flex-none"
+            onClick={() =>
+              open({ kind: "share", space: soloBanner }, soloBanner.name)
+            }
+          >
+            Partager cet espace
+          </Button>
+        </div>
+      )}
+
+      <div className="mt-5 flex flex-col gap-3.5">
+        {spaces.map((space) => (
+          <SpaceCard
+            key={space.id}
+            space={space}
+            invite={inviteOf(space.id)}
+            onInviteChange={(next) =>
+              setInvites((s) => ({ ...s, [space.id]: next }))
+            }
+            actions={{
+              onSwitch: () => open({ kind: "switch", space }),
+              onRename: () => open({ kind: "rename", space }, space.name),
+              onShare: () => open({ kind: "share", space }, space.name),
+              onDelete: () =>
+                space.isPersonal
+                  ? open({ kind: "deletePersonal" })
+                  : open({ kind: "delete", space }, ""),
+              onLeave: () => open({ kind: "leave", space }),
+              onInvite: (email, role) =>
+                email.trim().length === 0
+                  ? toast.error("Renseignez une adresse email.")
+                  : open({ kind: "invite", space, email, role }),
+              onRemoveMember: (member) =>
+                open({ kind: "removeMember", space, member }),
+              onResendInvitation: (invitation) => void resend(invitation),
+              onCancelInvitation: (invitation) =>
+                open({ kind: "cancelInvitation", space, invitation }),
+            }}
+          />
+        ))}
       </div>
 
       <SpaceDialog
@@ -437,7 +432,7 @@ function EspacesPage() {
         onConfirm={() => void confirm()}
         onClose={() => setAction(null)}
       />
-    </div>
+    </SettingsPage>
   );
 }
 

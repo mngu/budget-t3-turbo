@@ -97,7 +97,7 @@ function LoginPage() {
           onSubmit={requestLink}
           className={cn(
             RISE,
-            "slide-in-from-bottom-[10px] border-border bg-card/82 w-93 max-w-full rounded-lg border px-5 pt-5 pb-4 shadow-glass backdrop-blur-[14px] backdrop-saturate-130 delay-[60ms] duration-[560ms]",
+            "slide-in-from-bottom-[10px] border-border bg-card/82 shadow-glass w-93 max-w-full rounded-lg border px-5 pt-5 pb-4 backdrop-blur-[14px] backdrop-saturate-130 delay-[60ms] duration-[560ms]",
           )}
         >
           <h1 className="text-amount font-semibold tracking-[-0.025em]">

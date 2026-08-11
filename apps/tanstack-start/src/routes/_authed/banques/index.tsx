@@ -6,7 +6,7 @@ import type { ConnectionSummary } from "@budget/api";
 import { Button } from "@budget/ui/button";
 import { toast } from "@budget/ui/toast";
 
-import { AppHeader } from "~/component/app-header";
+import { SettingsPage } from "~/component/settings-page";
 import { useTRPCClient } from "~/lib/trpc";
 import { ConnectionCard } from "./-components/connection-card";
 import { ConsentAlert } from "./-components/consent-alert";
@@ -62,84 +62,80 @@ function BanquesPage() {
   };
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden text-body leading-[1.45]">
-      <AppHeader page="banques" />
+    <SettingsPage
+      page="banques"
+      title="Banques"
+      aside={
+        <div className="ml-auto flex items-center gap-4">
+          <SyncStatus
+            totalTransactions={total}
+            lastImportedAt={lastImportedAt}
+          />
+          {setup.configured && (
+            <Button
+              render={
+                <Link to="/banques/ajouter" search={{ step: "banque" }} />
+              }
+            >
+              Ajouter une banque
+            </Button>
+          )}
+        </div>
+      }
+    >
+      <p className="text-muted-foreground text-control mt-2 max-w-155 text-pretty">
+        Vos identifiants bancaires ne passent jamais par cette application :
+        chaque connexion est autorisée chez votre banque et vaut environ six
+        mois.
+      </p>
 
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        <main className="mx-auto max-w-250 px-6 pt-5 pb-12">
-          <div className="flex min-h-9.5 flex-wrap items-center gap-6">
-            <h1 className="text-title">Banques</h1>
-            <div className="ml-auto flex items-center gap-4">
-              <SyncStatus
-                totalTransactions={total}
-                lastImportedAt={lastImportedAt}
-              />
-              {setup.configured && (
-                <Button
-                  render={
-                    <Link to="/banques/ajouter" search={{ step: "banque" }} />
-                  }
-                >
-                  Ajouter une banque
-                </Button>
-              )}
-            </div>
-          </div>
-          <p className="text-muted-foreground mt-2 max-w-155 text-control text-pretty">
-            Vos identifiants bancaires ne passent jamais par cette application :
-            chaque connexion est autorisée chez votre banque et vaut environ six
-            mois.
-          </p>
+      {alert && <ConsentAlert alert={alert} />}
 
-          {alert && <ConsentAlert alert={alert} />}
+      {!setup.configured ? (
+        <Onboarding setup={setup} />
+      ) : (
+        <div className="mt-5 flex flex-col gap-3.5">
+          {connections.map((connection) => (
+            <ConnectionCard
+              key={connection.id}
+              connection={connection}
+              onRevoke={() => setRevokeTarget(connection)}
+            />
+          ))}
 
-          {!setup.configured ? (
-            <Onboarding setup={setup} />
-          ) : (
-            <div className="mt-5 flex flex-col gap-3.5">
-              {connections.map((connection) => (
-                <ConnectionCard
-                  key={connection.id}
-                  connection={connection}
-                  onRevoke={() => setRevokeTarget(connection)}
-                />
-              ))}
+          {orphans.map((orphan) => (
+            <OrphanBanner key={orphan.bankName} orphan={orphan} />
+          ))}
 
-              {orphans.map((orphan) => (
-                <OrphanBanner key={orphan.bankName} orphan={orphan} />
-              ))}
-
-              {connections.length === 0 && (
-                <div className="bg-card rounded-lg border px-5 py-11 text-center">
-                  <p className="text-body font-semibold">
-                    Aucune banque connectée pour l'instant
-                  </p>
-                  <p className="text-muted-foreground mx-auto mt-1.5 max-w-105 text-control text-pretty">
-                    La configuration est en place. Ajoutez une première banque :
-                    vous serez redirigé vers elle pour autoriser l'accès, puis
-                    ramené ici.
-                  </p>
-                  <Button
-                    className="mt-4"
-                    render={
-                      <Link to="/banques/ajouter" search={{ step: "banque" }} />
-                    }
-                  >
-                    Ajouter une banque
-                  </Button>
-                </div>
-              )}
+          {connections.length === 0 && (
+            <div className="bg-card rounded-lg border px-5 py-11 text-center">
+              <p className="text-body font-semibold">
+                Aucune banque connectée pour l'instant
+              </p>
+              <p className="text-muted-foreground text-control mx-auto mt-1.5 max-w-105 text-pretty">
+                La configuration est en place. Ajoutez une première banque :
+                vous serez redirigé vers elle pour autoriser l'accès, puis
+                ramené ici.
+              </p>
+              <Button
+                className="mt-4"
+                render={
+                  <Link to="/banques/ajouter" search={{ step: "banque" }} />
+                }
+              >
+                Ajouter une banque
+              </Button>
             </div>
           )}
+        </div>
+      )}
 
-          <p className="text-subtle mt-4 max-w-205 text-control text-pretty">
-            Une autorisation bancaire dure environ 180 jours. Passé ce délai la
-            synchronisation s'arrête sans prévenir : c'est pourquoi le compte à
-            rebours est affiché en permanence et devient une alerte un mois
-            avant l'échéance.
-          </p>
-        </main>
-      </div>
+      <p className="text-subtle text-control mt-4 max-w-205 text-pretty">
+        Une autorisation bancaire dure environ 180 jours. Passé ce délai la
+        synchronisation s'arrête sans prévenir : c'est pourquoi le compte à
+        rebours est affiché en permanence et devient une alerte un mois avant
+        l'échéance.
+      </p>
 
       <RevokeDialog
         connection={revokeTarget}
@@ -147,7 +143,7 @@ function BanquesPage() {
         onOpenChange={(open) => !open && setRevokeTarget(null)}
         onConfirm={revoke}
       />
-    </div>
+    </SettingsPage>
   );
 }
 
@@ -165,7 +161,7 @@ function OrphanBanner({
           {orphan.accountCount > 1 ? "s" : ""} détecté
           {orphan.accountCount > 1 ? "s" : ""} sans connexion
         </p>
-        <p className="text-subtle mt-0.5 text-control">
+        <p className="text-subtle text-control mt-0.5">
           {orphan.bankName} · {orphan.transactionCount} transaction
           {orphan.transactionCount > 1 ? "s" : ""} importée
           {orphan.transactionCount > 1 ? "s" : ""}, plus rattachée
@@ -175,7 +171,7 @@ function OrphanBanner({
       <Link
         to="/banques/ajouter"
         search={{ step: "banque", q: orphan.bankName }}
-        className="border-border-strong hover:bg-accent flex h-8 items-center rounded-md border px-3.5 text-control font-medium whitespace-nowrap"
+        className="border-border-strong hover:bg-accent text-control flex h-8 items-center rounded-md border px-3.5 font-medium whitespace-nowrap"
       >
         Connecter {orphan.bankName}
       </Link>
@@ -204,6 +200,5 @@ function importTotals(
       }
     }
   }
-
   return { total, lastImportedAt };
 }

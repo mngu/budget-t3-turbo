@@ -16,7 +16,8 @@ import type {
   PreviewBadge,
 } from "./-components/transaction-preview-drawer";
 import type { GhostBranch } from "./-lib/suggestions";
-import { AppHeader } from "~/component/app-header";
+import { SettingsPage } from "~/component/settings-page";
+import { Stat } from "~/component/stat";
 import { softCategoryColor, useCategoryColor } from "~/lib/category-color";
 import { useTRPCClient } from "~/lib/trpc";
 import { CategoryDeleteDialog } from "./-components/category-delete-dialog";
@@ -192,217 +193,205 @@ function CategoriesPage() {
   // ── Rendu ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden text-body leading-[1.45]">
-      <AppHeader page="categories" />
+    <SettingsPage
+      page="categories"
+      title="Catégories"
+      aside={
+        <div className="ml-auto flex items-stretch">
+          <Stat value={stats.parentCount} label="Parentes" />
+          <Stat value={stats.childCount} label="Sous-catégories" />
+          <Stat
+            value={`${stats.colorsUsed} / ${CATEGORY_COLOR_PALETTE.length}`}
+            label="Teintes prises"
+            warn={stats.collisions > 0}
+          />
+        </div>
+      }
+    >
+      <p className="text-muted-foreground text-control mt-2 max-w-160 text-pretty">
+        Les catégories qui rangent toutes vos transactions. La couleur et
+        l'icône d'une catégorie principale l'identifient partout ailleurs —
+        elles se choisissent ici, et nulle part ailleurs.
+      </p>
 
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        <main className="mx-auto max-w-250 px-6 pt-5 pb-12">
-          <div className="flex min-h-9.5 flex-wrap items-center gap-6">
-            <h1 className="text-title">
-              Catégories
-            </h1>
-            <div className="ml-auto flex items-stretch">
-              <Stat value={stats.parentCount} label="Parentes" />
-              <Stat value={stats.childCount} label="Sous-catégories" />
-              <Stat
-                value={`${stats.colorsUsed} / ${CATEGORY_COLOR_PALETTE.length}`}
-                label="Teintes prises"
-                warn={stats.collisions > 0}
-              />
+      {!generating &&
+        !showReviewPanel &&
+        (uncategorizedCount > 0 ? (
+          <section className="border-primary bg-accent-soft mt-5 flex flex-wrap items-center gap-4 rounded-xl border p-4">
+            <span className="bg-card border-primary text-primary flex size-9 flex-none items-center justify-center rounded-md border">
+              <SparklesIcon className="size-4" />
+            </span>
+            <div className="flex-1">
+              <h2 className="text-subheading">Catégories manquantes</h2>
+              <p className="text-muted-foreground text-control mt-1 text-pretty">
+                <span className="text-foreground font-medium">
+                  {uncategorizedCount} transaction
+                  {uncategorizedCount > 1 ? "s" : ""}
+                </span>{" "}
+                qu'aucune de vos catégories ne décrit. Une analyse d'environ une
+                minute propose ce qui manque, et n'écrit rien tant que vous
+                n'avez pas répondu.
+              </p>
             </div>
-          </div>
-          <p className="text-muted-foreground mt-2 max-w-160 text-control text-pretty">
-            Les catégories qui rangent toutes vos transactions. La couleur et
-            l'icône d'une catégorie principale l'identifient partout ailleurs —
-            elles se choisissent ici, et nulle part ailleurs.
-          </p>
-
-          {!generating &&
-            !showReviewPanel &&
-            (uncategorizedCount > 0 ? (
-              <section className="border-primary bg-accent-soft mt-5 flex flex-wrap items-center gap-4 rounded-xl border p-4">
-                <span className="bg-card border-primary text-primary flex size-9 flex-none items-center justify-center rounded-md border">
-                  <SparklesIcon className="size-4" />
-                </span>
-                <div className="flex-1">
-                  <h2 className="text-subheading">
-                    Catégories manquantes
-                  </h2>
-                  <p className="text-muted-foreground mt-1 text-control text-pretty">
-                    <span className="text-foreground font-medium">
-                      {uncategorizedCount} transaction
-                      {uncategorizedCount > 1 ? "s" : ""}
-                    </span>{" "}
-                    qu'aucune de vos catégories ne décrit. Une analyse d'environ
-                    une minute propose ce qui manque, et n'écrit rien tant que
-                    vous n'avez pas répondu.
-                  </p>
-                </div>
-                <div className="flex items-center gap-2.5">
-                  <Button
-                    variant="outline"
-                    onClick={() =>
-                      openUncategorizedPreview(
-                        trpcClient,
-                        uncategorizedCount,
-                        setPreview,
-                      )
-                    }
-                  >
-                    Voir les {uncategorizedCount}
-                  </Button>
-                  {/* Absent de la maquette, qui ne connaît que l'analyse :
+            <div className="flex items-center gap-2.5">
+              <Button
+                variant="outline"
+                onClick={() =>
+                  openUncategorizedPreview(
+                    trpcClient,
+                    uncategorizedCount,
+                    setPreview,
+                  )
+                }
+              >
+                Voir les {uncategorizedCount}
+              </Button>
+              {/* Absent de la maquette, qui ne connaît que l'analyse :
                       classer avec les catégories existantes reste l'étape la
                       moins chère, et c'est elle qui dit si l'arbre suffit. */}
-                  <Button
-                    variant="outline"
-                    onClick={categorize}
-                    disabled={categorizing}
-                  >
-                    {categorizing && <Spinner />}
-                    Catégoriser
-                  </Button>
-                  <Button onClick={generate}>Lancer l&apos;analyse</Button>
-                </div>
-              </section>
-            ) : (
-              <section className="bg-card mt-5 flex flex-wrap items-center gap-3.5 rounded-xl border px-4 py-3.5">
-                <CircleCheckIcon className="text-ok size-4 flex-none" />
-                <div className="min-w-65 flex-1">
-                  <h2 className="text-control font-medium">
-                    Toutes vos transactions sont catégorisées
-                  </h2>
-                  <p className="text-subtle mt-0.5 text-control">
-                    Une analyse peut quand même proposer des branches plus fines
-                    que celles que vous avez.
-                  </p>
-                </div>
-                <Button variant="outline" onClick={generate}>
-                  Chercher des catégories
-                </Button>
-              </section>
-            ))}
-
-          {generating && (
-            <SuggestionsWaitPanel onClose={() => setPanelClosed(true)} />
-          )}
-
-          {/* `showReviewPanel` porte déjà le `analysis !== null` : TypeScript
-              affine à travers la constante, un second test serait mort. */}
-          {showReviewPanel && (
-            <SuggestionsReviewPanel
-              generatedAt={analysis.generatedAt}
-              branchCount={suggestions.branchCount}
-              touchedExistingParents={suggestions.touchedExistingParents}
-              newParentCount={suggestions.proposedParents.length}
-              onClose={() => setPanelClosed(true)}
-            />
-          )}
-
-          <div className="mt-7 mb-3 flex flex-wrap items-center gap-2.5">
-            <h2 className="text-heading">
-              Vos catégories
-            </h2>
-            <span className="text-subtle text-control">
-              {/* Les décomptes vivent dans le bloc de compteurs en haut de
-                  page : ne reste ici que ce que ceux-ci ne disent pas. */}
-              {tree.length === 0
-                ? "aucune catégorie pour le moment"
-                : "le compteur d'une parente ne compte que ses transactions directes"}
-            </span>
-            <div className="ml-auto flex items-center gap-2">
-              {stats.collisions > 0 && (
-                <span className="text-warn text-control">
-                  {stats.collisions} collision
-                  {stats.collisions > 1 ? "s" : ""} de teinte
-                  {stats.withoutColor > 0 &&
-                    ` · ${stats.withoutColor} sans couleur`}{" "}
-                  — l'icône fait la différence
-                </span>
-              )}
-              {tree.length > 0 && (
-                <Button
-                  variant="outline"
-                  size="xs"
-                  onClick={() =>
-                    setExpandAll((v) => (v === true ? false : true))
-                  }
-                >
-                  Tout replier / déplier
-                </Button>
-              )}
+              <Button
+                variant="outline"
+                onClick={categorize}
+                disabled={categorizing}
+              >
+                {categorizing && <Spinner />}
+                Catégoriser
+              </Button>
+              <Button onClick={generate}>Lancer l&apos;analyse</Button>
             </div>
-          </div>
+          </section>
+        ) : (
+          <section className="bg-card mt-5 flex flex-wrap items-center gap-3.5 rounded-xl border px-4 py-3.5">
+            <CircleCheckIcon className="text-ok size-4 flex-none" />
+            <div className="min-w-65 flex-1">
+              <h2 className="text-control font-medium">
+                Toutes vos transactions sont catégorisées
+              </h2>
+              <p className="text-subtle text-control mt-0.5">
+                Une analyse peut quand même proposer des branches plus fines que
+                celles que vous avez.
+              </p>
+            </div>
+            <Button variant="outline" onClick={generate}>
+              Chercher des catégories
+            </Button>
+          </section>
+        ))}
 
-          <CategoryOverviewTree
-            tree={tree}
-            ghostsByParentId={suggestions.ghostsByParentId}
-            proposedParents={suggestions.proposedParents}
-            uncategorizedCount={uncategorizedCount}
-            ownersByColor={stats.ownersByColor}
-            pendingGhosts={pending}
-            expandAllSignal={expandAll}
-            onAnalyze={generate}
-            onRename={async (id, name) =>
-              (await run(
-                () => trpcClient.categories.rename.mutate({ id, name }),
-                "Échec du renommage.",
-              )) !== null
-            }
-            onOpenIdentity={setIdentityTarget}
-            onPreview={openPreview}
-            onDelete={setDeleteTarget}
-            onAddChild={(parentId) =>
-              void run(
-                () =>
-                  trpcClient.categories.create.mutate({
-                    name: "Nouvelle sous-catégorie",
-                    parentId,
-                  }),
-                "Échec de la création.",
-              )
-            }
-            onAddParent={() =>
-              void run(
-                () =>
-                  trpcClient.categories.create.mutate({
-                    name: "Nouvelle catégorie",
-                    parentId: null,
-                  }),
-                "Échec de la création.",
-              )
-            }
-            onAcceptGhost={acceptGhost}
-            onDismissGhost={(ghost) =>
-              setDismissed((s) => new Set(s).add(ghost.key))
-            }
-            onPreviewGhost={(ghost) =>
-              setPreview({
-                title: `${ghost.parent} › ${ghost.name}`,
-                description: `${ghost.txnIds.length} transaction(s) sans catégorie qui se ressemblent — aperçu.`,
-                txns: ghostTransactions(ghost, analysis?.sample ?? []),
-                // Une branche proposée n'a pas encore d'icône : la pastille
-                // creuse dans la teinte de sa parente est exactement l'état
-                // « aucune icône choisie ».
-                badge: categoryBadge(
-                  resolveColor(ghost.parentColor),
-                  softCategoryColor(resolveColor(ghost.parentColor)),
-                  null,
-                ),
-                footer: "Proposition : elles seraient rangées ici.",
-              })
-            }
-          />
+      {generating && (
+        <SuggestionsWaitPanel onClose={() => setPanelClosed(true)} />
+      )}
 
-          <p className="text-subtle mt-3.5 max-w-205 text-control text-pretty">
-            La couleur sert là où il n'y a pas de place — segments de barre,
-            points, tuiles compactes. L'icône sert partout où il y a au moins 20
-            px : listes, sélecteurs, en-têtes de catégorie. Les sous-catégories
-            n'ont ni l'une ni l'autre en propre : elles se lisent comme une
-            famille de la teinte du parent.
-          </p>
-        </main>
+      {/* `showReviewPanel` porte déjà le `analysis !== null` : TypeScript
+              affine à travers la constante, un second test serait mort. */}
+      {showReviewPanel && (
+        <SuggestionsReviewPanel
+          generatedAt={analysis.generatedAt}
+          branchCount={suggestions.branchCount}
+          touchedExistingParents={suggestions.touchedExistingParents}
+          newParentCount={suggestions.proposedParents.length}
+          onClose={() => setPanelClosed(true)}
+        />
+      )}
+
+      <div className="mt-7 mb-3 flex flex-wrap items-center gap-2.5">
+        <h2 className="text-heading">Vos catégories</h2>
+        <span className="text-subtle text-control">
+          {/* Les décomptes vivent dans le bloc de compteurs en haut de
+                  page : ne reste ici que ce que ceux-ci ne disent pas. */}
+          {tree.length === 0
+            ? "aucune catégorie pour le moment"
+            : "le compteur d'une parente ne compte que ses transactions directes"}
+        </span>
+        <div className="ml-auto flex items-center gap-2">
+          {stats.collisions > 0 && (
+            <span className="text-warn text-control">
+              {stats.collisions} collision
+              {stats.collisions > 1 ? "s" : ""} de teinte
+              {stats.withoutColor > 0 &&
+                ` · ${stats.withoutColor} sans couleur`}{" "}
+              — l'icône fait la différence
+            </span>
+          )}
+          {tree.length > 0 && (
+            <Button
+              variant="outline"
+              size="xs"
+              onClick={() => setExpandAll((v) => (v === true ? false : true))}
+            >
+              Tout replier / déplier
+            </Button>
+          )}
+        </div>
       </div>
+
+      <CategoryOverviewTree
+        tree={tree}
+        ghostsByParentId={suggestions.ghostsByParentId}
+        proposedParents={suggestions.proposedParents}
+        uncategorizedCount={uncategorizedCount}
+        ownersByColor={stats.ownersByColor}
+        pendingGhosts={pending}
+        expandAllSignal={expandAll}
+        onAnalyze={generate}
+        onRename={async (id, name) =>
+          (await run(
+            () => trpcClient.categories.rename.mutate({ id, name }),
+            "Échec du renommage.",
+          )) !== null
+        }
+        onOpenIdentity={setIdentityTarget}
+        onPreview={openPreview}
+        onDelete={setDeleteTarget}
+        onAddChild={(parentId) =>
+          void run(
+            () =>
+              trpcClient.categories.create.mutate({
+                name: "Nouvelle sous-catégorie",
+                parentId,
+              }),
+            "Échec de la création.",
+          )
+        }
+        onAddParent={() =>
+          void run(
+            () =>
+              trpcClient.categories.create.mutate({
+                name: "Nouvelle catégorie",
+                parentId: null,
+              }),
+            "Échec de la création.",
+          )
+        }
+        onAcceptGhost={acceptGhost}
+        onDismissGhost={(ghost) =>
+          setDismissed((s) => new Set(s).add(ghost.key))
+        }
+        onPreviewGhost={(ghost) =>
+          setPreview({
+            title: `${ghost.parent} › ${ghost.name}`,
+            description: `${ghost.txnIds.length} transaction(s) sans catégorie qui se ressemblent — aperçu.`,
+            txns: ghostTransactions(ghost, analysis?.sample ?? []),
+            // Une branche proposée n'a pas encore d'icône : la pastille
+            // creuse dans la teinte de sa parente est exactement l'état
+            // « aucune icône choisie ».
+            badge: categoryBadge(
+              resolveColor(ghost.parentColor),
+              softCategoryColor(resolveColor(ghost.parentColor)),
+              null,
+            ),
+            footer: "Proposition : elles seraient rangées ici.",
+          })
+        }
+      />
+
+      <p className="text-subtle text-control mt-3.5 max-w-205 text-pretty">
+        La couleur sert là où il n'y a pas de place — segments de barre, points,
+        tuiles compactes. L'icône sert partout où il y a au moins 20 px :
+        listes, sélecteurs, en-têtes de catégorie. Les sous-catégories n'ont ni
+        l'une ni l'autre en propre : elles se lisent comme une famille de la
+        teinte du parent.
+      </p>
 
       <CategoryIdentityDialog
         target={identityTarget}
@@ -463,7 +452,7 @@ function CategoriesPage() {
         badge={preview?.badge}
         footer={preview?.footer}
       />
-    </div>
+    </SettingsPage>
   );
 }
 
@@ -539,27 +528,4 @@ function computeStats(tree: CategoryOverviewNode[]) {
     ownersByColor,
     usageByIcon,
   };
-}
-
-// Filets verticaux entre les trois compteurs, comme la maquette : c'est ce qui
-// les tient ensemble comme un bloc sans les faire passer pour trois boutons.
-function Stat({
-  value,
-  label,
-  warn,
-}: {
-  value: number | string;
-  label: string;
-  warn?: boolean;
-}) {
-  return (
-    <div className="border-border border-l px-3 text-right first:border-l-0 first:pl-0 last:pr-0">
-      <div
-        className={`num text-heading font-medium ${warn ? "text-warn" : ""}`}
-      >
-        {value}
-      </div>
-      <div className="label-caps mt-0.5">{label}</div>
-    </div>
-  );
 }

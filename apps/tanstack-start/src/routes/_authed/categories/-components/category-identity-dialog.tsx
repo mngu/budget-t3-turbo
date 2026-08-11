@@ -81,10 +81,7 @@ export function CategoryIdentityDialog({
         onOpenChange(open);
       }}
     >
-      <DialogContent
-        padded={false}
-        className="max-w-130 overflow-hidden"
-      >
+      <DialogContent padded={false} className="max-w-130 overflow-hidden">
         <DialogHeader className="flex-none flex-row items-center gap-3 border-b p-4">
           <span
             className="flex size-8 flex-none items-center justify-center rounded-md"
@@ -142,13 +139,13 @@ export function CategoryIdentityDialog({
                   }}
                 >
                   <span
-                    className="text-primary-foreground flex size-4 items-center justify-center rounded-full text-label"
+                    className="text-primary-foreground text-label flex size-4 items-center justify-center rounded-full"
                     style={{ background: resolve(c.light) }}
                   >
                     {mine && "✓"}
                   </span>
                   {others.length > 0 && (
-                    <span className="bg-card text-muted-foreground border-border absolute top-1 right-1 flex size-3 items-center justify-center rounded-full border text-label leading-none">
+                    <span className="bg-card text-muted-foreground border-border text-label absolute top-1 right-1 flex size-3 items-center justify-center rounded-full border leading-none">
                       ●
                     </span>
                   )}
@@ -157,7 +154,7 @@ export function CategoryIdentityDialog({
             })}
           </div>
 
-          <p className="text-muted-foreground mt-2.5 flex items-start gap-2.5 text-control">
+          <p className="text-muted-foreground text-control mt-2.5 flex items-start gap-2.5">
             <InfoIcon className="mt-px size-3.5 flex-none" />
             <span className="min-w-0 text-pretty">
               Un point sur une teinte signale qu'elle est déjà portée par une
@@ -197,13 +194,13 @@ export function CategoryIdentityDialog({
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Chercher en français — courses, loyer, essence, impôts…"
             aria-label="Chercher une icône"
-            className="bg-background border-border-strong mt-2.5 h-8 rounded-md text-control"
+            className="bg-background border-border-strong text-control mt-2.5 h-8 rounded-md"
           />
 
           <div className="mt-3 flex flex-col gap-3">
             {groups.map((group) => (
               <div key={group.label}>
-                <div className="text-subtle mb-1.5 text-meta">
+                <div className="text-subtle text-meta mb-1.5">
                   {group.label}
                 </div>
                 <div className="grid grid-cols-9 gap-1.5">
@@ -251,7 +248,7 @@ export function CategoryIdentityDialog({
           <button
             type="button"
             onClick={() => onIconChange(null)}
-            className="border-border-strong text-muted-foreground hover:bg-accent hover:text-foreground mt-3 flex w-full items-center gap-2.5 rounded-md border border-dashed px-2.5 py-1.5 text-control"
+            className="border-border-strong text-muted-foreground hover:bg-accent hover:text-foreground text-control mt-3 flex w-full items-center gap-2.5 rounded-md border border-dashed px-2.5 py-1.5"
           >
             <span className="border-border-strong flex size-6 flex-none items-center justify-center rounded-md border border-dashed">
               <CategoryIcon name={null} className="size-3.5" />

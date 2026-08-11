@@ -12,8 +12,8 @@ import { InputGroup, InputGroupAddon } from "@budget/ui/input-group";
 import { Spinner } from "@budget/ui/spinner";
 import { toast } from "@budget/ui/toast";
 
-import { AppHeader } from "~/component/app-header";
 import { SearchInput } from "~/component/search-input";
+import { SettingsPage } from "~/component/settings-page";
 import { toastSyncOutcome } from "~/lib/sync-toast";
 import { useTRPCClient } from "~/lib/trpc";
 import { BankLogo } from "./-components/bank-logo";
@@ -50,41 +50,27 @@ function AjouterBanquePage() {
   const { step } = Route.useSearch();
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden text-body leading-[1.45]">
-      <AppHeader page="banques" />
+    <SettingsPage page="banques" title="Ajouter une banque">
+      <section className="border-border-strong bg-card mt-5 overflow-hidden rounded-lg border">
+        <header className="bg-sunken flex items-center gap-3 border-b px-4.5 py-3">
+          <Link
+            to="/banques"
+            className="text-muted-foreground hover:text-foreground text-control"
+          >
+            ‹ Retour
+          </Link>
+          <span className="bg-border h-4 w-px" />
+          <WizardStep
+            n="1"
+            label="Choisissez votre banque"
+            current={step === "banque"}
+          />
+          <WizardStep n="2" label="Vos comptes" current={step === "comptes"} />
+        </header>
 
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        <main className="mx-auto max-w-250 px-6 pt-5 pb-12">
-          <h1 className="text-title">
-            Ajouter une banque
-          </h1>
-
-          <section className="border-border-strong bg-card mt-5 overflow-hidden rounded-lg border">
-            <header className="bg-sunken flex items-center gap-3 border-b px-4.5 py-3">
-              <Link
-                to="/banques"
-                className="text-muted-foreground hover:text-foreground text-control"
-              >
-                ‹ Retour
-              </Link>
-              <span className="bg-border h-4 w-px" />
-              <WizardStep
-                n="1"
-                label="Choisissez votre banque"
-                current={step === "banque"}
-              />
-              <WizardStep
-                n="2"
-                label="Vos comptes"
-                current={step === "comptes"}
-              />
-            </header>
-
-            {step === "comptes" ? <StepComptes /> : <StepBanque />}
-          </section>
-        </main>
-      </div>
-    </div>
+        {step === "comptes" ? <StepComptes /> : <StepBanque />}
+      </section>
+    </SettingsPage>
   );
 }
 
@@ -100,13 +86,13 @@ function WizardStep({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 text-control",
+        "text-control inline-flex items-center gap-1.5",
         current ? "text-foreground font-semibold" : "text-subtle",
       )}
     >
       <span
         className={cn(
-          "num flex size-4 items-center justify-center rounded-full border text-label",
+          "num text-label flex size-4 items-center justify-center rounded-full border",
           current
             ? "border-primary bg-primary text-primary-foreground"
             : "border-border-strong text-subtle",
@@ -166,7 +152,7 @@ function StepBanque() {
       {aspsps.length === 0 ? (
         <div className="border-border-strong mt-3.5 rounded-xl border border-dashed px-4.5 py-6 text-center">
           <p className="text-control font-medium">Aucune banque trouvée</p>
-          <p className="text-muted-foreground mt-1 text-control">
+          <p className="text-muted-foreground text-control mt-1">
             Aucun établissement ne correspond à votre recherche. Essayez le nom
             officiel de l'établissement.
           </p>
@@ -183,10 +169,10 @@ function StepBanque() {
                 <BankLogo
                   name={aspsp.name}
                   logoUrl={aspsp.logo}
-                  className="size-8 text-control"
+                  className="text-control size-8"
                 />
                 <div className="min-w-0">
-                  <div className="truncate text-control font-medium">
+                  <div className="text-control truncate font-medium">
                     {aspsp.name}
                   </div>
                   <div className="text-subtle text-meta">{aspsp.country}</div>
@@ -206,7 +192,7 @@ function StepBanque() {
         </div>
       )}
 
-      <p className="text-subtle mt-3.5 flex max-w-160 items-center gap-2.5 text-control text-pretty">
+      <p className="text-subtle text-control mt-3.5 flex max-w-160 items-center gap-2.5 text-pretty">
         <ExternalLinkIcon className="size-3.5 flex-none" />
         Vous serez redirigé vers votre banque pour autoriser l'accès
         (authentification forte), puis ramené ici automatiquement.
@@ -267,7 +253,7 @@ function StepComptes() {
             Synchronisation initiale en cours…
           </span>
         </div>
-        <p className="text-muted-foreground mx-auto mt-2 max-w-125 text-center text-control text-pretty">
+        <p className="text-muted-foreground text-control mx-auto mt-2 max-w-125 text-center text-pretty">
           Nous récupérons l'historique des comptes suivis. Comptez une à deux
           minutes la première fois.
         </p>
@@ -280,7 +266,7 @@ function StepComptes() {
   return (
     <div className="px-5 pt-4.5 pb-5">
       <h2 className="text-body font-semibold">Vos comptes</h2>
-      <p className="text-muted-foreground mt-1 text-control">
+      <p className="text-muted-foreground text-control mt-1">
         Comptes découverts — nommez-les et choisissez lesquels suivre.
       </p>
 
@@ -317,7 +303,7 @@ function StepComptes() {
       </div>
 
       <div className="mt-4 flex items-center gap-3">
-        <span className="text-subtle min-w-0 flex-1 text-control">
+        <span className="text-subtle text-control min-w-0 flex-1">
           {kept} compte{kept > 1 ? "s" : ""} suivi{kept > 1 ? "s" : ""} sur{" "}
           {rows.length} · les comptes décochés restent visibles mais ne sont pas
           importés
