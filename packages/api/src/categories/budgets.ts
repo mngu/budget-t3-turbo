@@ -143,6 +143,7 @@ export async function budgetPlan(
           // Périmètre « tous les comptes » : les deux jambes d'un virement
           // interne y sont toujours, la paire se neutralise donc toujours.
           isNull(transactions.transferPairId),
+          eq(transactions.excluded, false),
           gte(transactions.bookingDate, start),
           lt(transactions.bookingDate, end),
         ),

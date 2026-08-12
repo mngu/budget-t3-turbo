@@ -12,6 +12,7 @@ import { useRevueSearch } from "~/lib/use-revue-search";
 import { useSetCategory } from "~/lib/use-set-category";
 import { CategoryIcon } from "../../categories/-components/category-icon";
 import { CategoryPathPicker } from "./category-path-picker";
+import { ExcludeBadge } from "./exclude-badge";
 import { TransferBadge } from "./transfer-badge";
 
 /**
@@ -128,7 +129,16 @@ function Row({
   const debtor = row.raw.debtor?.name ?? row.counterparty;
 
   return (
-    <div className={cn(GRID, "border-border hover:bg-accent h-11 border-b")}>
+    <div
+      className={cn(
+        GRID,
+        // `group` : le bouton d'exclusion ne se montre qu'au survol tant que la
+        // ligne compte (voir ExcludeBadge).
+        "border-border hover:bg-accent group h-11 border-b",
+        // Une ligne écartée des totaux se lit encore, mais en retrait.
+        row.excluded && "opacity-50",
+      )}
+    >
       <span
         className={cn(
           "num text-meta",
@@ -141,6 +151,7 @@ function Row({
       <span className="flex min-w-0 items-center gap-1.5">
         <span className="text-body truncate">{row.description}</span>
         <TransferBadge row={row} />
+        <ExcludeBadge row={row} />
         {/* La maquette met ici une pastille de « catégorisation peu sûre »,
             calculée sur un score de confiance dont la base n'a aucun équivalent
             (voir CLAUDE.md). Même emplacement, mais adossé au seul fait

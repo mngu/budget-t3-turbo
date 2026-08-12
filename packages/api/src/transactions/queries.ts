@@ -141,6 +141,8 @@ export interface TransactionRow {
    * mention des tuiles ne puissent pas diverger.
    */
   transferInScope: boolean;
+  /** Exclue à la main des agrégats — elle reste dans ce relevé, et là seulement. */
+  excluded: boolean;
 }
 
 export interface CategoryBreakdownDetail {
@@ -172,11 +174,17 @@ export interface CategoryBreakdownItem {
  * elles tiennent le leur de leur compte. Toute requête qui utilise ce filtre
  * doit donc joindre `bank_accounts` (`innerJoin`), sans quoi Postgres refuse.
  */
-function transactionsFilterQuery(
+export function transactionsFilterQuery(
   organizationId: string,
   query: TransactionsSearch,
+  // Les transactions exclues à la main sortent par défaut, sans param d'URL :
+  // le défaut doit être sûr, un agrégat écrit demain les écarte sans y penser.
+  // Seuls les deux appelants qui décrivent le **relevé** (la table et les
+  // pastilles de comptes, qui annoncent ce que la table affichera) les gardent.
+  { includeExcluded = false } = {},
 ): SQL<unknown> | undefined {
   const conditions: SQL[] = [eq(bankAccounts.organizationId, organizationId)];
+  if (!includeExcluded) conditions.push(eq(transactions.excluded, false));
   // `bank` accepte une banque ou une liste (voir @budget/shared).
   const bank = bankCondition(query.bank, bankLabel);
   if (bank) conditions.push(bank);
@@ -235,7 +243,9 @@ export async function listTransactions(
   input: TransactionsSearch,
   limit = PAGE_SIZE,
 ): Promise<{ rows: TransactionRow[]; total: number }> {
-  const where = transactionsFilterQuery(organizationId, input);
+  const where = transactionsFilterQuery(organizationId, input, {
+    includeExcluded: true,
+  });
 
   // Même règle de périmètre que `twinWithinScope`, sur la jumelle jointe : la
   // jointure est déjà là pour afficher son compte, un `EXISTS` de plus serait
@@ -277,6 +287,7 @@ export async function listTransactions(
         >`coalesce(${parentCategories.color}, ${categories.color})`,
         transferTwinBank: listTwinBankLabel,
         transferInScope: twinInListScope,
+        excluded: transactions.excluded,
       })
       .from(transactions)
       .innerJoin(bankAccounts, eq(transactions.accountId, bankAccounts.id))
@@ -743,11 +754,13 @@ export async function bankCounts(
   // alors que le clic restreindra la sélection, si bien que des paires
   // aujourd'hui neutralisées cesseront de l'être : la pastille annoncerait 2
   // pour une table qui en listerait 3.
-  const where = transactionsFilterQuery(organizationId, {
-    ...input,
-    bank: undefined,
-    internes: "toutes",
-  });
+  const where = transactionsFilterQuery(
+    organizationId,
+    { ...input, bank: undefined, internes: "toutes" },
+    // Même raison que `internes: "toutes"` ci-dessus : la pastille annonce des
+    // lignes, et la table affiche les exclues.
+    { includeExcluded: true },
+  );
   const rows = await db
     .select({ bank: bankLabel, count: count() })
     .from(transactions)
@@ -786,6 +799,21 @@ export async function setTransactionCategory(
   await db
     .update(transactions)
     .set({ categoryId: match.id, categorySource: "manual" })
+    .where(and(eq(transactions.id, id), ownedByOrganization(organizationId)));
+}
+
+// Exclusion manuelle : la ligne sort de tous les agrégats (revue, budgets,
+// historique, suggestions) et reste dans le relevé, seul endroit d'où la
+// reprendre. Aucun traitement ne la pose ni ne la retire — voir le commentaire
+// de la colonne.
+export async function setTransactionExcluded(
+  organizationId: string,
+  id: number,
+  excluded: boolean,
+): Promise<void> {
+  await db
+    .update(transactions)
+    .set({ excluded })
     .where(and(eq(transactions.id, id), ownedByOrganization(organizationId)));
 }
 

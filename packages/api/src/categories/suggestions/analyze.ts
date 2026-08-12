@@ -77,6 +77,9 @@ const analysisColumns = {
 // Jointures communes aux deux moitiés de l'échantillon : la moitié « sans
 // catégorie » ne ramène que des `null` sur les deux dernières colonnes, mais
 // garder une seule forme de ligne évite de reconstruire les colonnes à la main.
+// Les deux moitiés partagent aussi le `where` : une transaction exclue à la
+// main n'a pas à façonner l'arborescence proposée — c'est la seule condition
+// commune, les filtres propres à chaque moitié s'y ajoutent.
 function analysisQuery() {
   return db
     .select(analysisColumns)
@@ -88,6 +91,8 @@ function analysisQuery() {
       eq(txnCategory.parentId, txnParentCategory.id),
     );
 }
+
+const notExcluded = eq(transactions.excluded, false);
 
 // Échantillon stratifié, plafonné à SAMPLE_LIMIT :
 //   1. les transactions sans catégorie — sans fenêtre de date, une orpheline
@@ -109,6 +114,7 @@ export async function sampleTransactions(
     .where(
       and(
         eq(bankAccounts.organizationId, organizationId),
+        notExcluded,
         isNull(transactions.categoryId),
       ),
     )
@@ -119,6 +125,7 @@ export async function sampleTransactions(
     .where(
       and(
         eq(bankAccounts.organizationId, organizationId),
+        notExcluded,
         isNotNull(transactions.categoryId),
         gte(transactions.bookingDate, since),
       ),

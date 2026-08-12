@@ -191,6 +191,11 @@ export const transactions = pgTable(
     // détection. Un `transfer_pair_id` nul avec une source 'manual' est un
     // « ce n'est pas un virement interne » — la paire ne sera plus reformée.
     transferSource: text("transfer_source", { enum: ["auto", "manual"] }),
+    // « Cette ligne ne me concerne pas » : posé à la main, jamais par un
+    // traitement. Voisin des virements internes dans son effet (la ligne sort
+    // des agrégats et reste dans le relevé), mais **inconditionnel** : un
+    // virement interne dépend des comptes affichés, une exclusion non.
+    excluded: boolean("excluded").notNull().default(false),
     raw: jsonb("raw").notNull(),
     importedAt: timestamp("imported_at", { withTimezone: true })
       .notNull()

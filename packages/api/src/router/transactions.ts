@@ -15,6 +15,7 @@ import {
   monthlyHistory,
   reviewQueue,
   setTransactionCategory,
+  setTransactionExcluded,
   transactionsByCategory,
 } from "../transactions/queries";
 import { orgProcedure } from "../trpc";
@@ -62,6 +63,14 @@ export const transactionsRouter = {
     .input(z.object({ id: z.number().int().positive(), category: z.string() }))
     .mutation(({ ctx, input }) =>
       setTransactionCategory(ctx.organizationId, input.id, input.category),
+    ),
+
+  // « Cette ligne ne me concerne pas » : la sort des agrégats, la laisse dans
+  // le relevé. Réversible, d'où le booléen plutôt que deux procédures.
+  setExcluded: orgProcedure
+    .input(z.object({ id: z.number().int().positive(), excluded: z.boolean() }))
+    .mutation(({ ctx, input }) =>
+      setTransactionExcluded(ctx.organizationId, input.id, input.excluded),
     ),
 
   // « Ce n'est pas un virement interne » : casse la paire et la marque `manual`,
