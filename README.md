@@ -36,7 +36,7 @@ c'est le document de référence, ce fichier n'en est que la porte d'entrée.
 pnpm install
 cp .env.example .env          # POSTGRES_URL, AUTH_SECRET, ANTHROPIC_API_KEY, …
 docker compose up -d          # Postgres 17, port hôte 5436
-pnpm db:push                  # push du schéma Drizzle (interactif — voir plus bas)
+pnpm db:migrate               # applique packages/db/drizzle/*.sql
 pnpm -F @budget/tanstack-start dev   # http://localhost:3000
 ```
 
@@ -48,13 +48,14 @@ classer, en silence. Le seed de départ est dans CLAUDE.md, section « Seed init
 
 ## Commandes
 
-| Commande | Effet |
-| --- | --- |
-| `pnpm dev` | tous les packages en watch |
-| `pnpm build` / `typecheck` / `lint` / `test` | turbo sur tout le monorepo |
-| `pnpm db:push` | push du schéma Drizzle — **échoue hors TTY**, replier sur `pnpm -F @budget/db with-env drizzle-kit push` |
-| `pnpm db:studio` | Drizzle Studio |
-| `pnpm --filter @budget/auth generate` | régénère `packages/db/src/auth-schema.ts` depuis la config Better Auth |
+| Commande                                     | Effet                                                                                                    |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `pnpm dev`                                   | tous les packages en watch                                                                               |
+| `pnpm build` / `typecheck` / `lint` / `test` | turbo sur tout le monorepo                                                                               |
+| `pnpm db:generate`                           | écrit le SQL d'un changement de `schema.ts` dans `packages/db/drizzle/` — à relire et committer avec lui |
+| `pnpm db:migrate`                            | applique les migrations en attente (relançable, ne fait rien s'il n'y a rien)                            |
+| `pnpm db:studio`                             | Drizzle Studio                                                                                           |
+| `pnpm --filter @budget/auth generate`        | régénère `packages/db/src/auth-schema.ts` depuis la config Better Auth                                   |
 
 **Il n'existe aucune commande CLI métier.** Import, synchronisation, catégorisation et suggestions
 se déclenchent depuis l'app, via les mutations tRPC correspondantes.

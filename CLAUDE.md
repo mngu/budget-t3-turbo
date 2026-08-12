@@ -137,7 +137,7 @@ L'app est multi-utilisateurs depuis le 2026-08-05. L'unité de cloisonnement est
 - `pnpm dev` — turbo watch dev (tous les packages/apps en mode dev).
 - `pnpm -F @budget/tanstack-start dev` — web app seule, http://localhost:3000 (port aligné sur l'URL de callback Enable Banking `http://localhost:3000/callback`).
 - `docker compose up -d` — Postgres 17 local (port hôte 5436). **Instance partagée avec l'ancien repo `budget-tracker`** (même conteneur, même volume).
-- `pnpm db:push` — push du schéma Drizzle (turbo task interactive) ; **échoue dans un environnement non-TTY**. Fallback : `pnpm -F @budget/db with-env drizzle-kit push`.
+- `pnpm db:generate` — écrit le SQL du changement de schéma dans `packages/db/drizzle/` (à relire et à committer avec le changement de `schema.ts`), puis `pnpm db:migrate` l'applique. **`push` a été supprimé le 2026-08-12** : il modifiait la base sans laisser de fichier, donc sans rien à rejouer au déploiement — la prod n'a pas de TTY et sa base ne publie aucun port. Voir « Migrations » plus bas.
 - `pnpm test` — turbo run test (Vitest sur tous les packages).
 - `pnpm build` / `pnpm typecheck` / `pnpm lint` — turbo run sur tout le monorepo.
 
@@ -151,7 +151,16 @@ L'app est multi-utilisateurs depuis le 2026-08-05. L'unité de cloisonnement est
 
 ## Base de données — ne jamais confondre avec l'ancien repo
 
-La base de ce projet est **`budget_t3`** (instance Docker **partagée** avec `budget-tracker`, port hôte 5436). Ne JAMAIS lancer un push (`db:push` / `drizzle-kit push`) ou toute commande destructive avec une `POSTGRES_URL` pointant sur la base `budget` (celle de l'ancien repo) — vérifier systématiquement le nom de la base dans `POSTGRES_URL`/`.env` avant toute opération de schéma.
+La base de ce projet est **`budget_t3`** (instance Docker **partagée** avec `budget-tracker`, port hôte 5436). Ne JAMAIS lancer une migration (`db:migrate` / `drizzle-kit migrate`) ou toute commande destructive avec une `POSTGRES_URL` pointant sur la base `budget` (celle de l'ancien repo) — vérifier systématiquement le nom de la base dans `POSTGRES_URL`/`.env` avant toute opération de schéma.
+
+### Migrations versionnées (depuis le 2026-08-12)
+
+`packages/db/drizzle/` : un `.sql` par changement, plus `meta/_journal.json`. `pnpm db:generate` écrit le fichier, `pnpm db:migrate` l'applique, et `deploy/deploy.sh` rejoue le même SQL sur la prod **avant** de démarrer le code neuf (schéma neuf + code ancien est inoffensif, l'inverse lève sur chaque écran). La base de prod ne publiant aucun port, le script y accède par un tunnel SSH vers l'IP de bridge du conteneur, le temps du `migrate`.
+
+- **`0000_baseline.sql` décrit le schéma tel qu'il tournait déjà** : il n'a jamais été exécuté nulle part. Les bases existantes ont été « baselinées » — une ligne dans `drizzle.__drizzle_migrations` qui dit « je suis au niveau du socle ». La procédure pour la prod est en tête de `deploy/deploy.sh` ; sans elle, le premier `migrate` rejoue les `CREATE TABLE` et échoue.
+- **Le migrateur ne compare que `created_at` au `when` du journal, jamais le hash** (`drizzle-orm/pg-core/dialect.js`) : une migration est « déjà appliquée » si sa date est antérieure à la dernière enregistrée. Éditer un `.sql` déjà appliqué ne le rejoue donc pas — il faut en générer un nouveau.
+  - Corollaire, et c'est le piège que `push` n'avait pas : une migration dont le `when` est **antérieur** à la dernière appliquée est ignorée **en silence**, sans erreur ni trace. `db:generate` horodate à l'heure de génération, donc deux branches qui en produisent chacune une, fusionnées dans l'autre ordre, en perdent une. Générer dans l'ordre où ça s'appliquera ; après un rebase qui réordonne des migrations, regénérer plutôt que réordonner les fichiers.
+- `pnpm db:migrate` reste **relançable** : sans rien à faire, il ne fait rien.
 
 ### Seed initial de la table `categories`
 
@@ -172,7 +181,7 @@ Ce seed n'est qu'un point de départ : aucun de ces noms n'est référencé par 
 
 La recherche de transactions similaires (`categorization/similar.ts`) utilise `similarity()` sur la description, fourni par l'extension PostgreSQL `pg_trgm`. Activée automatiquement sur un volume Docker neuf via `docker-initdb/01-pg_trgm.sql` (monté dans `/docker-entrypoint-initdb.d`, ne s'exécute qu'à la création initiale du volume — voir `docker-compose.yml`).
 
-Sur une instance déjà initialisée avant ce script (ex. le volume partagé avec `budget-tracker`), l'activer manuellement une fois (survit à `db:push`, pas géré par Drizzle) :
+Sur une instance déjà initialisée avant ce script (ex. le volume partagé avec `budget-tracker`), l'activer manuellement une fois (hors du schéma Drizzle, donc absente des migrations) :
 
 ```sql
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
