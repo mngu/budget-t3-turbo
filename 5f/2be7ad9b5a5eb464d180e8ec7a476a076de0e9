@@ -1,0 +1,53 @@
+turbo.json
+  s_10118221c7d716::t_b0417564de9e4f 39-43
+README.md
+  s_10118221c7d716::t_1ec1e39c9a2a67 39
+  s_10118221c7d716::t_f16227ea81206d 51-58
+packages/db/drizzle.config.ts
+  s_10118221c7d716::t_b4231919c94c8a 11-14
+package.json
+  s_10118221c7d716::t_b0417564de9e4f 14-15
+packages/db/drizzle/0000_baseline.sql
+  s_10118221c7d716::t_d9ad53e4f6a147 1-191
+packages/db/package.json
+  s_10118221c7d716::t_b0417564de9e4f 26-27
+deploy/deploy.sh
+  s_10118221c7d716::t_641cea53c641e3 86-92,97,99-109
+  s_10118221c7d716::t_07e43b3b5ac83a 93-96
+  s_10118221c7d716::t_02077a1af95083 35-53
+  s_10118221c7d716::t_1e2f6de51da0ee 98
+CLAUDE.md
+  s_10118221c7d716::t_de749bc9a5fdc9 154-161,163
+  s_10118221c7d716::t_be69225edd9961 140
+  s_10118221c7d716::t_549cc80cda8766 162
+  s_10118221c7d716::t_71af15ae659adf 184
+packages/db/drizzle/0001_transaction_excluded.sql
+  s_10118221c7d716::t_a0709ab0852c3c 1
+packages/db/drizzle/meta/0000_snapshot.json
+  s_10118221c7d716::t_068fadadc29475 1-1390
+packages/db/drizzle/meta/0001_snapshot.json
+  s_10118221c7d716::t_6864ea0166c3a6 1-1397
+packages/db/drizzle/meta/_journal.json
+  s_10118221c7d716::t_2ac251c7606a4b 1-20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "5f2be7ad9b5a5eb464d180e8ec7a476a076de0e9",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_10118221c7d716": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "af34d8ee-2fd4-4f5b-b2f2-78133ee6ad04",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
