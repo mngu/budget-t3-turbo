@@ -3,6 +3,7 @@
 import { TriangleAlertIcon } from "lucide-react";
 
 import { cn } from "@budget/ui";
+import { Toolbar } from "@budget/ui/toolbar";
 
 import type { RevueBudgets } from "~/lib/revue-budgets";
 import type { RevueCategory } from "~/lib/revue-categories";
@@ -211,7 +212,19 @@ export function BreakdownList({
         BREAKDOWN_WIDTH,
       )}
     >
-      <div className="flex min-h-0 flex-1 [scrollbar-width:thin] [scrollbar-color:var(--border-strong)_transparent] flex-col overflow-y-auto">
+      {/* La zone de défilement *est* la barre d'outils : une seule tabulation
+          entre dans la colonne, les flèches haut/bas la parcourent en bouclant.
+          Une liste de treize boutons prenait sinon treize tabulations à
+          traverser — et les lignes de lecture seule restent atteignables
+          (`focusableWhenDisabled`, actif par défaut), sans quoi la colonne
+          serait muette au clavier dès qu'on descend dans un poste.
+          (Home/Fin ne font rien : `Toolbar` n'active pas `enableHomeAndEndKeys`
+          du composite.) */}
+      <Toolbar.Root
+        orientation="vertical"
+        aria-label="Répartition par poste"
+        className="flex min-h-0 flex-1 [scrollbar-width:thin] [scrollbar-color:var(--border-strong)_transparent] flex-col overflow-y-auto"
+      >
         {/* Clé de **position** et non de nom : c'est ce qui fait exister la
             transition de la barre. Keyée par nom, chaque changement de niveau ou
             de période démonte toutes les lignes et les remonte à leur largeur
@@ -233,7 +246,7 @@ export function BreakdownList({
             captioned={captioned}
           />
         )}
-      </div>
+      </Toolbar.Root>
     </div>
   );
 }
@@ -284,13 +297,19 @@ function BreakdownRow({
     // toutes les lignes de cliquables à lecture seule. Le nœud était donc
     // reconstruit à sa largeur finale et la transition de la barre, pourtant
     // posée, ne se déclenchait jamais.
-    <button
+    //
+    // `Toolbar.Button` plutôt qu'un `<button>` nu : c'est lui qui inscrit la
+    // ligne dans le parcours aux flèches de `Toolbar.Root`. Il ne pose **pas**
+    // l'attribut natif `disabled` (il resterait hors du parcours) mais
+    // `aria-disabled` — d'où `not-aria-disabled:` sur le survol, `enabled:` ne
+    // distinguant plus rien ici.
+    <Toolbar.Button
       type="button"
       title={row.title}
       disabled={!row.onSelect}
       onClick={row.onSelect}
       className={cn(
-        "enabled:hover:bg-accent flex flex-none flex-col justify-center gap-1.5 rounded-lg p-2 text-left transition-colors motion-reduce:transition-none",
+        "not-aria-disabled:hover:bg-accent focus-visible:ring-accent-soft flex flex-none flex-col justify-center gap-1.5 rounded-lg p-2 text-left transition-colors outline-none focus-visible:ring-3 focus-visible:ring-inset motion-reduce:transition-none",
       )}
     >
       <div className="flex items-baseline gap-2">
@@ -380,6 +399,6 @@ function BreakdownRow({
           </span>
         )}
       </div>
-    </button>
+    </Toolbar.Button>
   );
 }

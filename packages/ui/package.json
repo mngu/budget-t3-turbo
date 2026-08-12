@@ -26,6 +26,7 @@
     "./theme": "./src/theme.tsx",
     "./toast": "./src/toast.tsx",
     "./toggle": "./src/toggle.tsx",
+    "./toolbar": "./src/toolbar.tsx",
     "./tooltip": "./src/tooltip.tsx",
     "./toggle-group": "./src/toggle-group.tsx"
   },
