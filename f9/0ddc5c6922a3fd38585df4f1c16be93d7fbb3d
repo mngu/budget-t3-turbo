@@ -1,0 +1,57 @@
+apps/tanstack-start/src/lib/history.ts
+  s_d64a8f330d9665::t_477ae6a4756fd8 6-11
+apps/tanstack-start/package.json
+  s_d64a8f330d9665::t_9b0180ab750598 12
+  s_d64a8f330d9665::t_3160aee5b74b9b 61-62
+apps/tanstack-start/vitest.config.ts
+  s_d64a8f330d9665::t_258f1b44c6eddf 1-7
+apps/tanstack-start/src/lib/date.test.ts
+  s_d64a8f330d9665::t_39d64ca6fddf95 1-73
+packages/ui/package.json
+  s_d64a8f330d9665::t_5ce3d25a23b5c3 59-60
+apps/tanstack-start/src/component/period-picker.tsx
+  s_d64a8f330d9665::t_d0c96865a1a3f7 134,137-140,148-154,162-171
+  s_d64a8f330d9665::t_8a646b52059ebc 204
+  s_d64a8f330d9665::t_7beb5e34a66231 191-193,196
+  s_d64a8f330d9665::t_b6f7eec04d0fa9 234-251
+  s_d64a8f330d9665::t_f4779ff6b58343 292-294
+  s_d64a8f330d9665::t_b8a632d860192d 115-118
+  s_d64a8f330d9665::t_48e5244d9eb29e 43-50,52-58
+  s_d64a8f330d9665::t_ad786eef41c645 76-78,80-81,83-85
+  s_d64a8f330d9665::t_b6702f8d8c22d2 6,24-31
+apps/tanstack-start/src/lib/revue-budgets.ts
+  s_d64a8f330d9665::t_aa0f5f85fb2e6d 55-71,76-78
+  s_d64a8f330d9665::t_aa778fa0c50434 36
+  s_d64a8f330d9665::t_ceb213f4b947a8 25-27
+  s_d64a8f330d9665::t_4c0fd49ab01388 2-3,5
+apps/tanstack-start/src/lib/transactions-search.ts
+  s_d64a8f330d9665::t_a792aeafac5cbd 35-37
+  s_d64a8f330d9665::t_8b25831aeb69f3 3
+apps/tanstack-start/src/lib/date.ts
+  s_d64a8f330d9665::t_fd86c90ff03a90 1-8,14-56
+packages/api/src/categories/budgets.ts
+  s_d64a8f330d9665::t_1b0c05382659f8 19-23
+pnpm-lock.yaml
+  s_d64a8f330d9665::t_7a89fd8a290c71 228-230,8571-8578,12545-12572
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "f90ddc5c6922a3fd38585df4f1c16be93d7fbb3d",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_d64a8f330d9665": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c2981ced-ef30-41ac-b707-44a7cace491a",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
