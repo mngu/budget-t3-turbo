@@ -1,0 +1,61 @@
+packages/api/src/transactions/queries.test.ts
+  s_10118221c7d716::t_f4c3e8947db171 9-12
+  s_10118221c7d716::t_8ace0ffe69a3fe 15-17,20
+  s_10118221c7d716::t_28b93a3d99aa0b 3
+  s_10118221c7d716::t_4d7f8ad7bf48ff 18-19
+  s_10118221c7d716::t_222996a341d18c 1-2,4-6,13-14,21-41
+  s_10118221c7d716::t_9f62a476f197a4 7-8
+packages/db/src/index.ts
+  s_10118221c7d716::t_ce8e3c73608d9a 2-4
+packages/db/src/schema.ts
+  s_10118221c7d716::t_37c5ae1441df91 194-198
+packages/api/src/transactions/queries.ts
+  s_10118221c7d716::t_0d6b99851333ba 144-145
+  s_10118221c7d716::t_e68354199e178b 246-248
+  s_10118221c7d716::t_4eb13d3cd55cea 757-763
+  s_10118221c7d716::t_10fee6f694f60b 177,180-184,187
+  s_10118221c7d716::t_41c6944c36ab34 290
+  s_10118221c7d716::t_d8d256fa2da37d 805-819
+packages/api/src/router/transactions.ts
+  s_10118221c7d716::t_28b93a3d99aa0b 71
+  s_10118221c7d716::t_60a3314706f1f4 18
+  s_10118221c7d716::t_440b53436e88c5 68-70,72-75
+CLAUDE.md
+  s_10118221c7d716::t_28b93a3d99aa0b 48,50,71-72,103
+  s_10118221c7d716::t_1bc5d727036a75 22
+packages/api/src/categories/budgets.ts
+  s_10118221c7d716::t_801d9b369ffaf6 146
+apps/tanstack-start/src/routes/_authed/_revue/-components/transactions-table.tsx
+  s_10118221c7d716::t_8cd81c38bc4e97 154
+  s_10118221c7d716::t_02d402fd20c667 15
+  s_10118221c7d716::t_6d1ceec8662098 135-136,139
+  s_10118221c7d716::t_45d1e51910a1e4 132-134,137-138,140-141
+apps/tanstack-start/src/routes/_authed/_revue/-components/exclude-badge.tsx
+  s_10118221c7d716::t_8fc85c5519b52c 1-135
+packages/api/src/categories/suggestions/analyze.ts
+  s_10118221c7d716::t_f8404bab605ef0 128
+  s_10118221c7d716::t_caf1068a72b65f 80-82,95
+  s_10118221c7d716::t_4506e89e542ff6 117
+  s_10118221c7d716::t_ba4e8f608b5844 96
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "d314009b4d50154f88af1a8804f6d574c43aa36d",
+  "prompts": {},
+  "humans": {
+    "h_baa52ab231f280": {
+      "author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_10118221c7d716": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "af34d8ee-2fd4-4f5b-b2f2-78133ee6ad04",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Alex Martin <maxime.nguyen@gmail.com>"
+    }
+  }
+}
