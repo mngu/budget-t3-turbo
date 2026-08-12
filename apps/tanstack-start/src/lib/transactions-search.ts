@@ -1,6 +1,6 @@
 import type { TransactionsSearch } from "@budget/shared";
 
-import { monthBounds } from "./date";
+import { monthBounds, monthStartDay } from "./date";
 
 // Sans période dans l'URL, les écrans se calent sur le mois en cours plutôt que
 // sur l'historique complet. Le défaut est *injecté* dans l'URL (et non appliqué
@@ -32,7 +32,9 @@ export const defaultToCurrentMonth = <
   const result = next(search);
   return (result.dateFrom ?? result.dateTo)
     ? result
-    : { ...result, ...monthBounds(new Date()) };
+    : // Le jour de départ vit dans le navigateur : le serveur pose le mois
+      // calendaire, le client réécrit l'URL sur le bon cycle au chargement.
+      { ...result, ...monthBounds(new Date(), monthStartDay()) };
 };
 
 // Valeurs par défaut retirées de l'URL. Les quatre écrans de la revue partagent

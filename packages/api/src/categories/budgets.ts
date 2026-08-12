@@ -16,6 +16,11 @@ import {
 // Fenêtre de référence : les 6 derniers mois **complets**. Le mois en cours en
 // est exclu — il ne couvre qu'une fraction du calendrier et tirerait toute
 // moyenne vers le bas, donc toute proposition avec elle.
+//
+// ponytail: mois **calendaires**, même quand le sélecteur de période cale le
+// mois sur un autre jour de départ (réglage navigateur, jamais envoyé ici). Les
+// ordres de grandeur restent comparables ; aligner la moyenne sur le cycle
+// demande de faire remonter le jour de départ jusqu'au serveur.
 const HISTORY_MONTHS = 6;
 
 // Une catégorie vue moins de 4 mois sur 6 ne reçoit pas de proposition : sa

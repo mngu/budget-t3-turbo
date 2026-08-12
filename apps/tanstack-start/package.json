@@ -9,6 +9,7 @@
     "start": "vite start",
     "format": "prettier --check . --ignore-path ../../.gitignore --ignore-path .prettierignore",
     "lint": "eslint --flag unstable_native_nodejs_ts_config",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "with-env": "dotenv -e ../../.env --"
   },
@@ -57,7 +58,8 @@
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^4.1.10"
   },
   "prettier": "@budget/prettier-config"
 }

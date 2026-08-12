@@ -1,7 +1,8 @@
 import {
+  addDays,
+  addMonths,
   differenceInCalendarMonths,
-  isFirstDayOfMonth,
-  isLastDayOfMonth,
+  isSameDay,
   parseISO,
 } from "date-fns";
 
@@ -21,8 +22,9 @@ import type { RevueCategory } from "./revue-categories";
  *   fois. Comparé à la dépense d'une sélection de comptes, il ferait passer
  *   chaque poste sous son budget sans que rien n'ait changé ;
  * - `periode` : un budget est mensuel. Le sélecteur de période propose aussi
- *   bien un trimestre qu'une plage quelconque (« 30 derniers jours ») : la
- *   première a un multiple, la seconde n'en a pas.
+ *   bien un trimestre qu'une plage quelconque (« 30 derniers jours ») : le
+ *   premier a un multiple, la seconde n'en a pas — sauf à tomber pile sur un
+ *   cycle, voir `wholeMonths`.
  */
 export type BudgetsOff = "aucun" | "comptes" | "periode";
 
@@ -31,7 +33,7 @@ export const BUDGETS_OFF_MESSAGES: Record<BudgetsOff, string> = {
   comptes:
     "Les budgets portent sur tous les comptes : la comparaison est masquée quand un filtre de comptes est actif.",
   periode:
-    "Les budgets sont mensuels : la comparaison ne s'affiche que sur des mois calendaires pleins.",
+    "Les budgets sont mensuels : la comparaison ne s'affiche que sur un nombre entier de mois.",
 };
 
 export type RevueBudgets =
@@ -50,17 +52,30 @@ export type RevueBudgets =
     };
 
 /**
- * Mois calendaires **pleins** couverts par la période, `0` si elle n'en est pas
- * faite. Un budget mensuel ne se multiplie que par ça : sur « 30 derniers
- * jours », qui chevauche deux mois partiels, le doubler serait un mensonge et
- * le laisser à un mois aussi.
+ * Mois **pleins** couverts par la période, `0` si elle n'en est pas faite. Un
+ * budget mensuel ne se multiplie que par ça : sur « 30 derniers jours », qui
+ * chevauche deux mois partiels, le doubler serait un mensonge et le laisser à un
+ * mois aussi.
+ *
+ * Le test porte sur les bornes seules — `to + 1 jour` doit tomber exactement sur
+ * `from + n mois` — et **pas** sur « commence le 1er, finit le dernier jour » :
+ * le sélecteur de période permet de caler le mois sur un autre jour de départ
+ * (28 juin – 27 juil. est un mois plein), et ce réglage vit dans le navigateur
+ * alors que cette fonction tourne aussi côté serveur, dans le loader de la
+ * revue. Dérivé des bornes, il n'a rien à lui transmettre. Le mois calendaire
+ * reste le cas particulier `startDay = 1`.
+ *
+ * ponytail: un cycle écrêté par un mois court (28 févr. – 30 mars pour un
+ * départ au 31) n'est pas reconnu et masque la comparaison ce mois-là ; à
+ * traiter en passant le jour de départ jusqu'ici, donc en le sortant du
+ * navigateur.
  */
 export function wholeMonths(from?: string, to?: string): number {
   if (!from || !to) return 0;
   const start = parseISO(from);
-  const end = parseISO(to);
-  if (!isFirstDayOfMonth(start) || !isLastDayOfMonth(end)) return 0;
-  return Math.max(0, differenceInCalendarMonths(end, start) + 1);
+  const next = addDays(parseISO(to), 1);
+  const months = differenceInCalendarMonths(next, start);
+  return months > 0 && isSameDay(addMonths(start, months), next) ? months : 0;
 }
 
 interface TreeNode {

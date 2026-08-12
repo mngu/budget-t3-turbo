@@ -56,8 +56,8 @@
     "prettier": "catalog:",
     "react": "catalog:react19",
     "typescript": "catalog:",
-    "zod": "catalog:",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.10",
+    "zod": "catalog:"
   },
   "peerDependencies": {
     "react": "catalog:react19",

@@ -3,6 +3,12 @@ import { format, parseISO, subMonths } from "date-fns";
 import type { MonthlyCategoryTotal } from "@budget/api";
 
 // Fenêtre de la moyenne de référence (« vs moy. 3 mois »).
+//
+// ponytail: les mois de référence sont des mois **calendaires** (`monthlyHistory`
+// groupe sur `to_char(booking_date, 'YYYY-MM')`), y compris quand le sélecteur de
+// période cale le mois sur un autre jour de départ. Les ordres de grandeur
+// restent comparables ; rendre la référence cyclique demande de refaire
+// l'agrégat côté serveur.
 const AVERAGE_MONTHS = 3;
 
 // Un mois de référence dont le volume tombe sous cette fraction du volume
