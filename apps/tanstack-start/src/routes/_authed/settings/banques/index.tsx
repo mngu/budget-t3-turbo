@@ -6,7 +6,6 @@ import type { ConnectionSummary } from "@budget/api";
 import { Button } from "@budget/ui/button";
 import { toast } from "@budget/ui/toast";
 
-import { SettingsPage } from "~/component/settings-page";
 import { useTRPCClient } from "~/lib/trpc";
 import { ConnectionCard } from "./-components/connection-card";
 import { ConsentAlert } from "./-components/consent-alert";
@@ -15,7 +14,7 @@ import { RevokeDialog } from "./-components/revoke-dialog";
 import { SyncStatus } from "./-components/sync-status";
 import { consentAlert } from "./-lib/consent";
 
-export const Route = createFileRoute("/_authed/banques/")({
+export const Route = createFileRoute("/_authed/settings/banques/")({
   loader: async ({ context }) => {
     // `settings.status` appelle l'API Enable Banking : les deux lectures DB
     // partent en même temps plutôt que derrière elle.
@@ -26,8 +25,28 @@ export const Route = createFileRoute("/_authed/banques/")({
     ]);
     return { setup, connections, orphans };
   },
+  staticData: { title: "Banques", aside: BanquesAside },
   component: BanquesPage,
 });
+
+function BanquesAside() {
+  const { setup, connections, orphans } = Route.useLoaderData();
+  const { total, lastImportedAt } = importTotals(connections, orphans);
+  return (
+    <div className="ml-auto flex items-center gap-4">
+      <SyncStatus totalTransactions={total} lastImportedAt={lastImportedAt} />
+      {setup.configured && (
+        <Button
+          render={
+            <Link to="/settings/banques/ajouter" search={{ step: "banque" }} />
+          }
+        >
+          Ajouter une banque
+        </Button>
+      )}
+    </div>
+  );
+}
 
 function BanquesPage() {
   const { setup, connections, orphans } = Route.useLoaderData();
@@ -40,7 +59,6 @@ function BanquesPage() {
   const [revoking, setRevoking] = useState(false);
 
   const alert = consentAlert(connections);
-  const { total, lastImportedAt } = importTotals(connections, orphans);
 
   const revoke = async () => {
     if (!revokeTarget) return;
@@ -62,27 +80,7 @@ function BanquesPage() {
   };
 
   return (
-    <SettingsPage
-      page="banques"
-      title="Banques"
-      aside={
-        <div className="ml-auto flex items-center gap-4">
-          <SyncStatus
-            totalTransactions={total}
-            lastImportedAt={lastImportedAt}
-          />
-          {setup.configured && (
-            <Button
-              render={
-                <Link to="/banques/ajouter" search={{ step: "banque" }} />
-              }
-            >
-              Ajouter une banque
-            </Button>
-          )}
-        </div>
-      }
-    >
+    <>
       <p className="text-muted-foreground text-control mt-2 max-w-155 text-pretty">
         Vos identifiants bancaires ne passent jamais par cette application :
         chaque connexion est autorisée chez votre banque et vaut environ six
@@ -120,7 +118,10 @@ function BanquesPage() {
               <Button
                 className="mt-4"
                 render={
-                  <Link to="/banques/ajouter" search={{ step: "banque" }} />
+                  <Link
+                    to="/settings/banques/ajouter"
+                    search={{ step: "banque" }}
+                  />
                 }
               >
                 Ajouter une banque
@@ -143,7 +144,7 @@ function BanquesPage() {
         onOpenChange={(open) => !open && setRevokeTarget(null)}
         onConfirm={revoke}
       />
-    </SettingsPage>
+    </>
   );
 }
 
@@ -169,7 +170,7 @@ function OrphanBanner({
         </p>
       </div>
       <Link
-        to="/banques/ajouter"
+        to="/settings/banques/ajouter"
         search={{ step: "banque", q: orphan.bankName }}
         className="border-border-strong hover:bg-accent text-control flex h-8 items-center rounded-md border px-3.5 font-medium whitespace-nowrap"
       >

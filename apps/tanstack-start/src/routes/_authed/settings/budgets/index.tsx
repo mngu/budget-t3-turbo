@@ -5,25 +5,40 @@ import { CircleCheckIcon } from "lucide-react";
 import { Button } from "@budget/ui/button";
 import { toast } from "@budget/ui/toast";
 
-import { SettingsPage } from "~/component/settings-page";
 import { Stat } from "~/component/stat";
 import { euro0 } from "~/lib/format";
 import { useTRPCClient } from "~/lib/trpc";
 import { BudgetTree } from "./-components/budget-tree";
 
-export const Route = createFileRoute("/_authed/budgets/")({
+export const Route = createFileRoute("/_authed/settings/budgets/")({
   loader: async ({ context }) => {
     const [tree, budgets] = await Promise.all([
       context.trpcClient.categories.tree.query(),
       context.trpcClient.categories.budgets.plan.query(),
     ]);
-    return { tree, budgets };
+    const unbudgeted = budgets.slots - budgets.budgeted;
+    return { tree, budgets, unbudgeted };
   },
+  staticData: { title: "Budgets", aside: BudgetsAside },
   component: BudgetsPage,
 });
 
+function BudgetsAside() {
+  const { budgets, unbudgeted } = Route.useLoaderData();
+  return (
+    <div className="ml-auto flex items-stretch">
+      <Stat value={euro0.format(budgets.total)} label="Budgété / mois" />
+      <Stat
+        value={`${budgets.budgeted} / ${budgets.slots}`}
+        label="Postes budgétés"
+      />
+      <Stat value={unbudgeted} label="Sans budget" warn={unbudgeted > 0} />
+    </div>
+  );
+}
+
 function BudgetsPage() {
-  const { tree, budgets } = Route.useLoaderData();
+  const { tree, budgets, unbudgeted } = Route.useLoaderData();
   const router = useRouter();
   const trpcClient = useTRPCClient();
   const [expandAll, setExpandAll] = useState<boolean | null>(null);
@@ -39,23 +54,8 @@ function BudgetsPage() {
     }
   };
 
-  const unbudgeted = budgets.slots - budgets.budgeted;
-
   return (
-    <SettingsPage
-      page="budgets"
-      title="Budgets"
-      aside={
-        <div className="ml-auto flex items-stretch">
-          <Stat value={euro0.format(budgets.total)} label="Budgété / mois" />
-          <Stat
-            value={`${budgets.budgeted} / ${budgets.slots}`}
-            label="Postes budgétés"
-          />
-          <Stat value={unbudgeted} label="Sans budget" warn={unbudgeted > 0} />
-        </div>
-      }
-    >
+    <>
       <p className="text-muted-foreground text-control mt-2 max-w-160 text-pretty">
         Un budget mensuel se pose sur une{" "}
         <span className="text-foreground font-medium">catégorie</span>. Si vous
@@ -148,6 +148,6 @@ function BudgetsPage() {
         inventé plutôt qu'une habitude — à saisir à la main, ou à laisser vide
         en attendant quelques mois.
       </p>
-    </SettingsPage>
+    </>
   );
 }

@@ -6,7 +6,7 @@ import { ArrowLeftIcon } from "lucide-react";
 import { cn } from "@budget/ui";
 
 import type { DrillPhase } from "./use-drill";
-import { CategoryIcon } from "../../categories/-components/category-icon";
+import { CategoryIcon } from "../../settings/categories/-components/category-icon";
 import { DRILL } from "./use-drill";
 
 export interface RingSlice {

@@ -16,7 +16,7 @@ import {
 
 import { shadeCategoryColor, useCategoryColor } from "~/lib/category-color";
 import { useTRPC } from "~/lib/trpc";
-import { CategoryIcon } from "../../categories/-components/category-icon";
+import { CategoryIcon } from "../../settings/categories/-components/category-icon";
 
 export interface CategoryPath {
   /** Catégorie parente. */

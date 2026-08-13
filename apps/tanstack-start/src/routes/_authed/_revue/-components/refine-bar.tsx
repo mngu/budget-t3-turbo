@@ -26,7 +26,7 @@ import { euro } from "~/lib/format";
 import { wholePeriod } from "~/lib/transactions-search";
 import { useTRPC } from "~/lib/trpc";
 import { useRevueSearch } from "~/lib/use-revue-search";
-import { CategoryIcon } from "../../categories/-components/category-icon";
+import { CategoryIcon } from "../../settings/categories/-components/category-icon";
 
 // Au pluriel, comme les deux totaux qui les surplombent sur `/transactions` :
 // le bouton nomme un ensemble de lignes, pas le sens d'une transaction.

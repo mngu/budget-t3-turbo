@@ -35,7 +35,10 @@ function CallbackPage() {
           ? `Autorisation refusée par la banque (${error}).`
           : "Autorisation incomplète — aucun code reçu.",
       );
-      void navigate({ to: "/banques/ajouter", search: { step: "banque" } });
+      void navigate({
+        to: "/settings/banques/ajouter",
+        search: { step: "banque" },
+      });
       return;
     }
 
@@ -44,10 +47,10 @@ function CallbackPage() {
       .then(({ connectionId, renewed }) => {
         if (renewed) {
           toast.success("Consentement renouvelé.");
-          void navigate({ to: "/banques" });
+          void navigate({ to: "/settings/banques" });
         } else {
           void navigate({
-            to: "/banques/ajouter",
+            to: "/settings/banques/ajouter",
             search: { step: "comptes", connexion: connectionId },
           });
         }
@@ -64,7 +67,9 @@ function CallbackPage() {
         <>
           <p className="text-red-600">❌ La connexion à la banque a échoué.</p>
           <p className="text-muted-foreground text-body">{failure}</p>
-          <Button render={<Link to="/banques" />}>Retour aux banques</Button>
+          <Button render={<Link to="/settings/banques" />}>
+            Retour aux banques
+          </Button>
         </>
       ) : (
         <>

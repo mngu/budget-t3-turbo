@@ -16,7 +16,6 @@ import type {
   PreviewBadge,
 } from "./-components/transaction-preview-drawer";
 import type { GhostBranch } from "./-lib/suggestions";
-import { SettingsPage } from "~/component/settings-page";
 import { Stat } from "~/component/stat";
 import { softCategoryColor, useCategoryColor } from "~/lib/category-color";
 import { useTRPCClient } from "~/lib/trpc";
@@ -31,8 +30,14 @@ import {
 import { TransactionPreviewDrawer } from "./-components/transaction-preview-drawer";
 import { deriveSuggestions, ghostTransactions } from "./-lib/suggestions";
 
-export const Route = createFileRoute("/_authed/categories/")({
-  loader: ({ context }) => context.trpcClient.categories.overview.query(),
+export const Route = createFileRoute("/_authed/settings/categories/")({
+  loader: async ({ context }) => {
+    const { tree, uncategorizedCount } =
+      await context.trpcClient.categories.overview.query();
+    const stats = computeStats(tree);
+    return { tree, uncategorizedCount, stats };
+  },
+  staticData: { title: "Catégories", aside: CategoriesAside },
   component: CategoriesPage,
 });
 
@@ -60,8 +65,23 @@ interface PreviewState {
 
 const PREVIEW_FOOTER = "Aperçu limité aux 25 transactions les plus récentes.";
 
+function CategoriesAside() {
+  const { stats } = Route.useLoaderData();
+  return (
+    <div className="ml-auto flex items-stretch">
+      <Stat value={stats.parentCount} label="Parentes" />
+      <Stat value={stats.childCount} label="Sous-catégories" />
+      <Stat
+        value={`${stats.colorsUsed} / ${CATEGORY_COLOR_PALETTE.length}`}
+        label="Teintes prises"
+        warn={stats.collisions > 0}
+      />
+    </div>
+  );
+}
+
 function CategoriesPage() {
-  const overview = Route.useLoaderData();
+  const { tree, uncategorizedCount, stats } = Route.useLoaderData();
   const router = useRouter();
   const trpcClient = useTRPCClient();
   const resolveColor = useCategoryColor();
@@ -83,8 +103,6 @@ function CategoriesPage() {
   const [preview, setPreview] = useState<PreviewState | null>(null);
   const [expandAll, setExpandAll] = useState<boolean | null>(null);
 
-  const { tree, uncategorizedCount } = overview;
-  const stats = computeStats(tree);
   const suggestions = deriveSuggestions(
     analysis?.suggestions ?? [],
     tree,
@@ -193,21 +211,7 @@ function CategoriesPage() {
   // ── Rendu ────────────────────────────────────────────────────────────────
 
   return (
-    <SettingsPage
-      page="categories"
-      title="Catégories"
-      aside={
-        <div className="ml-auto flex items-stretch">
-          <Stat value={stats.parentCount} label="Parentes" />
-          <Stat value={stats.childCount} label="Sous-catégories" />
-          <Stat
-            value={`${stats.colorsUsed} / ${CATEGORY_COLOR_PALETTE.length}`}
-            label="Teintes prises"
-            warn={stats.collisions > 0}
-          />
-        </div>
-      }
-    >
+    <>
       <p className="text-muted-foreground text-control mt-2 max-w-160 text-pretty">
         Les catégories qui rangent toutes vos transactions. La couleur et
         l'icône d'une catégorie principale l'identifient partout ailleurs —
@@ -317,7 +321,7 @@ function CategoriesPage() {
             <Button
               variant="outline"
               size="xs"
-              onClick={() => setExpandAll((v) => (v === true ? false : true))}
+              onClick={() => setExpandAll((v) => v !== true)}
             >
               Tout replier / déplier
             </Button>
@@ -452,7 +456,7 @@ function CategoriesPage() {
         badge={preview?.badge}
         footer={preview?.footer}
       />
-    </SettingsPage>
+    </>
   );
 }
 

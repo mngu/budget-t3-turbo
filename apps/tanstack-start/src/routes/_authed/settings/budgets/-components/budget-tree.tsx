@@ -20,7 +20,7 @@ import {
   useCategoryColor,
 } from "~/lib/category-color";
 import { euro0 } from "~/lib/format";
-import { CategoryIcon } from "../../categories/-components/category-icon";
+import { CategoryIcon } from "../../../settings/categories/-components/category-icon";
 
 /**
  * La même liste que `/categories`, mais en lecture : ici on ne range pas les

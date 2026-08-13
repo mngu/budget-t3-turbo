@@ -13,7 +13,6 @@ import { Spinner } from "@budget/ui/spinner";
 import { toast } from "@budget/ui/toast";
 
 import { SearchInput } from "~/component/search-input";
-import { SettingsPage } from "~/component/settings-page";
 import { toastSyncOutcome } from "~/lib/sync-toast";
 import { useTRPCClient } from "~/lib/trpc";
 import { BankLogo } from "./-components/bank-logo";
@@ -24,7 +23,7 @@ const wizardSearchSchema = z.object({
   connexion: z.coerce.number().int().positive().optional().catch(undefined),
 });
 
-export const Route = createFileRoute("/_authed/banques/ajouter")({
+export const Route = createFileRoute("/_authed/settings/banques/ajouter")({
   validateSearch: wizardSearchSchema,
   loaderDeps: ({ search }) => search,
   loader: async ({ deps, context }) => {
@@ -43,6 +42,7 @@ export const Route = createFileRoute("/_authed/banques/ajouter")({
       accounts: [] as AccountSummary[],
     };
   },
+  staticData: { title: "Ajouter une banque" },
   component: AjouterBanquePage,
 });
 
@@ -50,27 +50,25 @@ function AjouterBanquePage() {
   const { step } = Route.useSearch();
 
   return (
-    <SettingsPage page="banques" title="Ajouter une banque">
-      <section className="border-border-strong bg-card mt-5 overflow-hidden rounded-lg border">
-        <header className="bg-sunken flex items-center gap-3 border-b px-4.5 py-3">
-          <Link
-            to="/banques"
-            className="text-muted-foreground hover:text-foreground text-control"
-          >
-            ‹ Retour
-          </Link>
-          <span className="bg-border h-4 w-px" />
-          <WizardStep
-            n="1"
-            label="Choisissez votre banque"
-            current={step === "banque"}
-          />
-          <WizardStep n="2" label="Vos comptes" current={step === "comptes"} />
-        </header>
+    <section className="border-border-strong bg-card mt-5 overflow-hidden rounded-lg border">
+      <header className="bg-sunken flex items-center gap-3 border-b px-4.5 py-3">
+        <Link
+          to="/settings/banques"
+          className="text-muted-foreground hover:text-foreground text-control"
+        >
+          ‹ Retour
+        </Link>
+        <span className="bg-border h-4 w-px" />
+        <WizardStep
+          n="1"
+          label="Choisissez votre banque"
+          current={step === "banque"}
+        />
+        <WizardStep n="2" label="Vos comptes" current={step === "comptes"} />
+      </header>
 
-        {step === "comptes" ? <StepComptes /> : <StepBanque />}
-      </section>
-    </SettingsPage>
+      {step === "comptes" ? <StepComptes /> : <StepBanque />}
+    </section>
   );
 }
 
@@ -237,7 +235,7 @@ function StepComptes() {
           ? err.message
           : "Échec de la synchronisation initiale.",
       );
-      void navigate({ to: "/banques" });
+      void navigate({ to: "/settings/banques" });
     }
   };
 

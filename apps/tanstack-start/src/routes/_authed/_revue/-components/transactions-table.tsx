@@ -10,7 +10,7 @@ import { useParentCategories } from "~/lib/category-lookup";
 import { dayMonthFr, signedEuro, titleCase } from "~/lib/format";
 import { useRevueSearch } from "~/lib/use-revue-search";
 import { useSetCategory } from "~/lib/use-set-category";
-import { CategoryIcon } from "../../categories/-components/category-icon";
+import { CategoryIcon } from "../../settings/categories/-components/category-icon";
 import { CategoryPathPicker } from "./category-path-picker";
 import { ExcludeBadge } from "./exclude-badge";
 import { TransferBadge } from "./transfer-badge";

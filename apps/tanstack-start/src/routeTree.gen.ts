@@ -10,26 +10,27 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as AuthedRouteImport } from './routes/_authed'
+import { Route as AuthedRouteRouteImport } from './routes/_authed/route'
 import { Route as InvitationInvitationIdRouteImport } from './routes/invitation.$invitationId'
 import { Route as AuthedCallbackRouteImport } from './routes/_authed/callback'
-import { Route as AuthedRevueRouteImport } from './routes/_authed/_revue'
-import { Route as AuthedEspacesIndexRouteImport } from './routes/_authed/espaces/index'
-import { Route as AuthedCategoriesIndexRouteImport } from './routes/_authed/categories/index'
-import { Route as AuthedBudgetsIndexRouteImport } from './routes/_authed/budgets/index'
-import { Route as AuthedBanquesIndexRouteImport } from './routes/_authed/banques/index'
+import { Route as AuthedSettingsRouteRouteImport } from './routes/_authed/settings/route'
+import { Route as AuthedRevueRouteRouteImport } from './routes/_authed/_revue/route'
 import { Route as AuthedRevueIndexRouteImport } from './routes/_authed/_revue/index'
 import { Route as ApiTrpcSplatRouteImport } from './routes/api/trpc.$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
-import { Route as AuthedBanquesAjouterRouteImport } from './routes/_authed/banques/ajouter'
 import { Route as AuthedRevueTransactionsRouteImport } from './routes/_authed/_revue/transactions'
+import { Route as AuthedSettingsEspacesIndexRouteImport } from './routes/_authed/settings/espaces/index'
+import { Route as AuthedSettingsCategoriesIndexRouteImport } from './routes/_authed/settings/categories/index'
+import { Route as AuthedSettingsBudgetsIndexRouteImport } from './routes/_authed/settings/budgets/index'
+import { Route as AuthedSettingsBanquesIndexRouteImport } from './routes/_authed/settings/banques/index'
+import { Route as AuthedSettingsBanquesAjouterRouteImport } from './routes/_authed/settings/banques/ajouter'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthedRoute = AuthedRouteImport.update({
+const AuthedRouteRoute = AuthedRouteRouteImport.update({
   id: '/_authed',
   getParentRoute: () => rootRouteImport,
 } as any)
@@ -41,36 +42,21 @@ const InvitationInvitationIdRoute = InvitationInvitationIdRouteImport.update({
 const AuthedCallbackRoute = AuthedCallbackRouteImport.update({
   id: '/callback',
   path: '/callback',
-  getParentRoute: () => AuthedRoute,
+  getParentRoute: () => AuthedRouteRoute,
 } as any)
-const AuthedRevueRoute = AuthedRevueRouteImport.update({
+const AuthedSettingsRouteRoute = AuthedSettingsRouteRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthedRouteRoute,
+} as any)
+const AuthedRevueRouteRoute = AuthedRevueRouteRouteImport.update({
   id: '/_revue',
-  getParentRoute: () => AuthedRoute,
-} as any)
-const AuthedEspacesIndexRoute = AuthedEspacesIndexRouteImport.update({
-  id: '/espaces/',
-  path: '/espaces/',
-  getParentRoute: () => AuthedRoute,
-} as any)
-const AuthedCategoriesIndexRoute = AuthedCategoriesIndexRouteImport.update({
-  id: '/categories/',
-  path: '/categories/',
-  getParentRoute: () => AuthedRoute,
-} as any)
-const AuthedBudgetsIndexRoute = AuthedBudgetsIndexRouteImport.update({
-  id: '/budgets/',
-  path: '/budgets/',
-  getParentRoute: () => AuthedRoute,
-} as any)
-const AuthedBanquesIndexRoute = AuthedBanquesIndexRouteImport.update({
-  id: '/banques/',
-  path: '/banques/',
-  getParentRoute: () => AuthedRoute,
+  getParentRoute: () => AuthedRouteRoute,
 } as any)
 const AuthedRevueIndexRoute = AuthedRevueIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AuthedRevueRoute,
+  getParentRoute: () => AuthedRevueRouteRoute,
 } as any)
 const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
   id: '/api/trpc/$',
@@ -82,111 +68,142 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthedBanquesAjouterRoute = AuthedBanquesAjouterRouteImport.update({
-  id: '/banques/ajouter',
-  path: '/banques/ajouter',
-  getParentRoute: () => AuthedRoute,
-} as any)
 const AuthedRevueTransactionsRoute = AuthedRevueTransactionsRouteImport.update({
   id: '/transactions',
   path: '/transactions',
-  getParentRoute: () => AuthedRevueRoute,
+  getParentRoute: () => AuthedRevueRouteRoute,
 } as any)
+const AuthedSettingsEspacesIndexRoute =
+  AuthedSettingsEspacesIndexRouteImport.update({
+    id: '/espaces/',
+    path: '/espaces/',
+    getParentRoute: () => AuthedSettingsRouteRoute,
+  } as any)
+const AuthedSettingsCategoriesIndexRoute =
+  AuthedSettingsCategoriesIndexRouteImport.update({
+    id: '/categories/',
+    path: '/categories/',
+    getParentRoute: () => AuthedSettingsRouteRoute,
+  } as any)
+const AuthedSettingsBudgetsIndexRoute =
+  AuthedSettingsBudgetsIndexRouteImport.update({
+    id: '/budgets/',
+    path: '/budgets/',
+    getParentRoute: () => AuthedSettingsRouteRoute,
+  } as any)
+const AuthedSettingsBanquesIndexRoute =
+  AuthedSettingsBanquesIndexRouteImport.update({
+    id: '/banques/',
+    path: '/banques/',
+    getParentRoute: () => AuthedSettingsRouteRoute,
+  } as any)
+const AuthedSettingsBanquesAjouterRoute =
+  AuthedSettingsBanquesAjouterRouteImport.update({
+    id: '/banques/ajouter',
+    path: '/banques/ajouter',
+    getParentRoute: () => AuthedSettingsRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
+  '/settings': typeof AuthedSettingsRouteRouteWithChildren
   '/callback': typeof AuthedCallbackRoute
   '/invitation/$invitationId': typeof InvitationInvitationIdRoute
   '/transactions': typeof AuthedRevueTransactionsRoute
-  '/banques/ajouter': typeof AuthedBanquesAjouterRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
   '/': typeof AuthedRevueIndexRoute
-  '/banques': typeof AuthedBanquesIndexRoute
-  '/budgets': typeof AuthedBudgetsIndexRoute
-  '/categories': typeof AuthedCategoriesIndexRoute
-  '/espaces': typeof AuthedEspacesIndexRoute
+  '/settings/banques/ajouter': typeof AuthedSettingsBanquesAjouterRoute
+  '/settings/banques': typeof AuthedSettingsBanquesIndexRoute
+  '/settings/budgets': typeof AuthedSettingsBudgetsIndexRoute
+  '/settings/categories': typeof AuthedSettingsCategoriesIndexRoute
+  '/settings/espaces': typeof AuthedSettingsEspacesIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
+  '/settings': typeof AuthedSettingsRouteRouteWithChildren
   '/callback': typeof AuthedCallbackRoute
   '/invitation/$invitationId': typeof InvitationInvitationIdRoute
   '/transactions': typeof AuthedRevueTransactionsRoute
-  '/banques/ajouter': typeof AuthedBanquesAjouterRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
   '/': typeof AuthedRevueIndexRoute
-  '/banques': typeof AuthedBanquesIndexRoute
-  '/budgets': typeof AuthedBudgetsIndexRoute
-  '/categories': typeof AuthedCategoriesIndexRoute
-  '/espaces': typeof AuthedEspacesIndexRoute
+  '/settings/banques/ajouter': typeof AuthedSettingsBanquesAjouterRoute
+  '/settings/banques': typeof AuthedSettingsBanquesIndexRoute
+  '/settings/budgets': typeof AuthedSettingsBudgetsIndexRoute
+  '/settings/categories': typeof AuthedSettingsCategoriesIndexRoute
+  '/settings/espaces': typeof AuthedSettingsEspacesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/_authed': typeof AuthedRouteWithChildren
+  '/_authed': typeof AuthedRouteRouteWithChildren
   '/login': typeof LoginRoute
-  '/_authed/_revue': typeof AuthedRevueRouteWithChildren
+  '/_authed/_revue': typeof AuthedRevueRouteRouteWithChildren
+  '/_authed/settings': typeof AuthedSettingsRouteRouteWithChildren
   '/_authed/callback': typeof AuthedCallbackRoute
   '/invitation/$invitationId': typeof InvitationInvitationIdRoute
   '/_authed/_revue/transactions': typeof AuthedRevueTransactionsRoute
-  '/_authed/banques/ajouter': typeof AuthedBanquesAjouterRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
   '/_authed/_revue/': typeof AuthedRevueIndexRoute
-  '/_authed/banques/': typeof AuthedBanquesIndexRoute
-  '/_authed/budgets/': typeof AuthedBudgetsIndexRoute
-  '/_authed/categories/': typeof AuthedCategoriesIndexRoute
-  '/_authed/espaces/': typeof AuthedEspacesIndexRoute
+  '/_authed/settings/banques/ajouter': typeof AuthedSettingsBanquesAjouterRoute
+  '/_authed/settings/banques/': typeof AuthedSettingsBanquesIndexRoute
+  '/_authed/settings/budgets/': typeof AuthedSettingsBudgetsIndexRoute
+  '/_authed/settings/categories/': typeof AuthedSettingsCategoriesIndexRoute
+  '/_authed/settings/espaces/': typeof AuthedSettingsEspacesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/login'
+    | '/settings'
     | '/callback'
     | '/invitation/$invitationId'
     | '/transactions'
-    | '/banques/ajouter'
     | '/api/auth/$'
     | '/api/trpc/$'
     | '/'
-    | '/banques'
-    | '/budgets'
-    | '/categories'
-    | '/espaces'
+    | '/settings/banques/ajouter'
+    | '/settings/banques'
+    | '/settings/budgets'
+    | '/settings/categories'
+    | '/settings/espaces'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
+    | '/settings'
     | '/callback'
     | '/invitation/$invitationId'
     | '/transactions'
-    | '/banques/ajouter'
     | '/api/auth/$'
     | '/api/trpc/$'
     | '/'
-    | '/banques'
-    | '/budgets'
-    | '/categories'
-    | '/espaces'
+    | '/settings/banques/ajouter'
+    | '/settings/banques'
+    | '/settings/budgets'
+    | '/settings/categories'
+    | '/settings/espaces'
   id:
     | '__root__'
     | '/_authed'
     | '/login'
     | '/_authed/_revue'
+    | '/_authed/settings'
     | '/_authed/callback'
     | '/invitation/$invitationId'
     | '/_authed/_revue/transactions'
-    | '/_authed/banques/ajouter'
     | '/api/auth/$'
     | '/api/trpc/$'
     | '/_authed/_revue/'
-    | '/_authed/banques/'
-    | '/_authed/budgets/'
-    | '/_authed/categories/'
-    | '/_authed/espaces/'
+    | '/_authed/settings/banques/ajouter'
+    | '/_authed/settings/banques/'
+    | '/_authed/settings/budgets/'
+    | '/_authed/settings/categories/'
+    | '/_authed/settings/espaces/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  AuthedRoute: typeof AuthedRouteWithChildren
+  AuthedRouteRoute: typeof AuthedRouteRouteWithChildren
   LoginRoute: typeof LoginRoute
   InvitationInvitationIdRoute: typeof InvitationInvitationIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
@@ -206,7 +223,7 @@ declare module '@tanstack/react-router' {
       id: '/_authed'
       path: ''
       fullPath: ''
-      preLoaderRoute: typeof AuthedRouteImport
+      preLoaderRoute: typeof AuthedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/invitation/$invitationId': {
@@ -221,49 +238,28 @@ declare module '@tanstack/react-router' {
       path: '/callback'
       fullPath: '/callback'
       preLoaderRoute: typeof AuthedCallbackRouteImport
-      parentRoute: typeof AuthedRoute
+      parentRoute: typeof AuthedRouteRoute
+    }
+    '/_authed/settings': {
+      id: '/_authed/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthedSettingsRouteRouteImport
+      parentRoute: typeof AuthedRouteRoute
     }
     '/_authed/_revue': {
       id: '/_authed/_revue'
       path: ''
       fullPath: ''
-      preLoaderRoute: typeof AuthedRevueRouteImport
-      parentRoute: typeof AuthedRoute
-    }
-    '/_authed/espaces/': {
-      id: '/_authed/espaces/'
-      path: '/espaces'
-      fullPath: '/espaces'
-      preLoaderRoute: typeof AuthedEspacesIndexRouteImport
-      parentRoute: typeof AuthedRoute
-    }
-    '/_authed/categories/': {
-      id: '/_authed/categories/'
-      path: '/categories'
-      fullPath: '/categories'
-      preLoaderRoute: typeof AuthedCategoriesIndexRouteImport
-      parentRoute: typeof AuthedRoute
-    }
-    '/_authed/budgets/': {
-      id: '/_authed/budgets/'
-      path: '/budgets'
-      fullPath: '/budgets'
-      preLoaderRoute: typeof AuthedBudgetsIndexRouteImport
-      parentRoute: typeof AuthedRoute
-    }
-    '/_authed/banques/': {
-      id: '/_authed/banques/'
-      path: '/banques'
-      fullPath: '/banques'
-      preLoaderRoute: typeof AuthedBanquesIndexRouteImport
-      parentRoute: typeof AuthedRoute
+      preLoaderRoute: typeof AuthedRevueRouteRouteImport
+      parentRoute: typeof AuthedRouteRoute
     }
     '/_authed/_revue/': {
       id: '/_authed/_revue/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AuthedRevueIndexRouteImport
-      parentRoute: typeof AuthedRevueRoute
+      parentRoute: typeof AuthedRevueRouteRoute
     }
     '/api/trpc/$': {
       id: '/api/trpc/$'
@@ -279,62 +275,101 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authed/banques/ajouter': {
-      id: '/_authed/banques/ajouter'
-      path: '/banques/ajouter'
-      fullPath: '/banques/ajouter'
-      preLoaderRoute: typeof AuthedBanquesAjouterRouteImport
-      parentRoute: typeof AuthedRoute
-    }
     '/_authed/_revue/transactions': {
       id: '/_authed/_revue/transactions'
       path: '/transactions'
       fullPath: '/transactions'
       preLoaderRoute: typeof AuthedRevueTransactionsRouteImport
-      parentRoute: typeof AuthedRevueRoute
+      parentRoute: typeof AuthedRevueRouteRoute
+    }
+    '/_authed/settings/espaces/': {
+      id: '/_authed/settings/espaces/'
+      path: '/espaces'
+      fullPath: '/settings/espaces'
+      preLoaderRoute: typeof AuthedSettingsEspacesIndexRouteImport
+      parentRoute: typeof AuthedSettingsRouteRoute
+    }
+    '/_authed/settings/categories/': {
+      id: '/_authed/settings/categories/'
+      path: '/categories'
+      fullPath: '/settings/categories'
+      preLoaderRoute: typeof AuthedSettingsCategoriesIndexRouteImport
+      parentRoute: typeof AuthedSettingsRouteRoute
+    }
+    '/_authed/settings/budgets/': {
+      id: '/_authed/settings/budgets/'
+      path: '/budgets'
+      fullPath: '/settings/budgets'
+      preLoaderRoute: typeof AuthedSettingsBudgetsIndexRouteImport
+      parentRoute: typeof AuthedSettingsRouteRoute
+    }
+    '/_authed/settings/banques/': {
+      id: '/_authed/settings/banques/'
+      path: '/banques'
+      fullPath: '/settings/banques'
+      preLoaderRoute: typeof AuthedSettingsBanquesIndexRouteImport
+      parentRoute: typeof AuthedSettingsRouteRoute
+    }
+    '/_authed/settings/banques/ajouter': {
+      id: '/_authed/settings/banques/ajouter'
+      path: '/banques/ajouter'
+      fullPath: '/settings/banques/ajouter'
+      preLoaderRoute: typeof AuthedSettingsBanquesAjouterRouteImport
+      parentRoute: typeof AuthedSettingsRouteRoute
     }
   }
 }
 
-interface AuthedRevueRouteChildren {
+interface AuthedRevueRouteRouteChildren {
   AuthedRevueTransactionsRoute: typeof AuthedRevueTransactionsRoute
   AuthedRevueIndexRoute: typeof AuthedRevueIndexRoute
 }
 
-const AuthedRevueRouteChildren: AuthedRevueRouteChildren = {
+const AuthedRevueRouteRouteChildren: AuthedRevueRouteRouteChildren = {
   AuthedRevueTransactionsRoute: AuthedRevueTransactionsRoute,
   AuthedRevueIndexRoute: AuthedRevueIndexRoute,
 }
 
-const AuthedRevueRouteWithChildren = AuthedRevueRoute._addFileChildren(
-  AuthedRevueRouteChildren,
+const AuthedRevueRouteRouteWithChildren =
+  AuthedRevueRouteRoute._addFileChildren(AuthedRevueRouteRouteChildren)
+
+interface AuthedSettingsRouteRouteChildren {
+  AuthedSettingsBanquesAjouterRoute: typeof AuthedSettingsBanquesAjouterRoute
+  AuthedSettingsBanquesIndexRoute: typeof AuthedSettingsBanquesIndexRoute
+  AuthedSettingsBudgetsIndexRoute: typeof AuthedSettingsBudgetsIndexRoute
+  AuthedSettingsCategoriesIndexRoute: typeof AuthedSettingsCategoriesIndexRoute
+  AuthedSettingsEspacesIndexRoute: typeof AuthedSettingsEspacesIndexRoute
+}
+
+const AuthedSettingsRouteRouteChildren: AuthedSettingsRouteRouteChildren = {
+  AuthedSettingsBanquesAjouterRoute: AuthedSettingsBanquesAjouterRoute,
+  AuthedSettingsBanquesIndexRoute: AuthedSettingsBanquesIndexRoute,
+  AuthedSettingsBudgetsIndexRoute: AuthedSettingsBudgetsIndexRoute,
+  AuthedSettingsCategoriesIndexRoute: AuthedSettingsCategoriesIndexRoute,
+  AuthedSettingsEspacesIndexRoute: AuthedSettingsEspacesIndexRoute,
+}
+
+const AuthedSettingsRouteRouteWithChildren =
+  AuthedSettingsRouteRoute._addFileChildren(AuthedSettingsRouteRouteChildren)
+
+interface AuthedRouteRouteChildren {
+  AuthedRevueRouteRoute: typeof AuthedRevueRouteRouteWithChildren
+  AuthedSettingsRouteRoute: typeof AuthedSettingsRouteRouteWithChildren
+  AuthedCallbackRoute: typeof AuthedCallbackRoute
+}
+
+const AuthedRouteRouteChildren: AuthedRouteRouteChildren = {
+  AuthedRevueRouteRoute: AuthedRevueRouteRouteWithChildren,
+  AuthedSettingsRouteRoute: AuthedSettingsRouteRouteWithChildren,
+  AuthedCallbackRoute: AuthedCallbackRoute,
+}
+
+const AuthedRouteRouteWithChildren = AuthedRouteRoute._addFileChildren(
+  AuthedRouteRouteChildren,
 )
 
-interface AuthedRouteChildren {
-  AuthedRevueRoute: typeof AuthedRevueRouteWithChildren
-  AuthedCallbackRoute: typeof AuthedCallbackRoute
-  AuthedBanquesAjouterRoute: typeof AuthedBanquesAjouterRoute
-  AuthedBanquesIndexRoute: typeof AuthedBanquesIndexRoute
-  AuthedBudgetsIndexRoute: typeof AuthedBudgetsIndexRoute
-  AuthedCategoriesIndexRoute: typeof AuthedCategoriesIndexRoute
-  AuthedEspacesIndexRoute: typeof AuthedEspacesIndexRoute
-}
-
-const AuthedRouteChildren: AuthedRouteChildren = {
-  AuthedRevueRoute: AuthedRevueRouteWithChildren,
-  AuthedCallbackRoute: AuthedCallbackRoute,
-  AuthedBanquesAjouterRoute: AuthedBanquesAjouterRoute,
-  AuthedBanquesIndexRoute: AuthedBanquesIndexRoute,
-  AuthedBudgetsIndexRoute: AuthedBudgetsIndexRoute,
-  AuthedCategoriesIndexRoute: AuthedCategoriesIndexRoute,
-  AuthedEspacesIndexRoute: AuthedEspacesIndexRoute,
-}
-
-const AuthedRouteWithChildren =
-  AuthedRoute._addFileChildren(AuthedRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
-  AuthedRoute: AuthedRouteWithChildren,
+  AuthedRouteRoute: AuthedRouteRouteWithChildren,
   LoginRoute: LoginRoute,
   InvitationInvitationIdRoute: InvitationInvitationIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,

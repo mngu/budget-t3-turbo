@@ -12,7 +12,6 @@ import SuperJSON from "superjson";
 import * as Api from "@budget/api";
 
 import { auth } from "~/auth/server";
-import { env } from "~/env";
 import { getBaseUrl } from "~/lib/url";
 
 export const makeTRPCClient = createIsomorphicFn()
@@ -36,8 +35,7 @@ export const makeTRPCClient = createIsomorphicFn()
       links: [
         loggerLink({
           enabled: (op) =>
-            env.NODE_ENV === "development" ||
-            (op.direction === "down" && op.result instanceof Error),
+            op.direction === "down" && op.result instanceof Error,
         }),
         httpBatchStreamLink({
           transformer: SuperJSON,

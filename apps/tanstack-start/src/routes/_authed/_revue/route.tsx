@@ -2,14 +2,11 @@ import {
   createFileRoute,
   Outlet,
   stripSearchParams,
-  useRouterState,
 } from "@tanstack/react-router";
 
 import { transactionsSearchSchema } from "@budget/shared";
 
-import type { HeaderPage } from "~/component/app-header";
 import type { RevueCategory } from "~/lib/revue-categories";
-import { AppHeader } from "~/component/app-header";
 import { useCategoryColor } from "~/lib/category-color";
 import { euro } from "~/lib/format";
 import {
@@ -27,8 +24,8 @@ import {
   wholePeriod,
 } from "~/lib/transactions-search";
 import { useRevueSearch } from "~/lib/use-revue-search";
-import { KpiBand, KpiFocus } from "./_revue/-components/kpi-band";
-import { CategoryIcon } from "./categories/-components/category-icon";
+import { CategoryIcon } from "../settings/categories/-components/category-icon";
+import { KpiBand, KpiFocus } from "./-components/kpi-band";
 
 /**
  * Coque des écrans de la revue : en-tête persistant et bandeau de tête, autour
@@ -211,24 +208,7 @@ export const Route = createFileRoute("/_authed/_revue")({
 const sum = (items: { total: number }[]) =>
   items.reduce((acc, item) => acc + item.total, 0);
 
-// Seules les deux routes qu'une icône désigne s'allument.
-//
-// Lecture du pathname et non `useMatchRoute` : celui-ci compare aussi la search
-// et renvoyait `false` sur `/?dateFrom=…`, laissant l'icône éteinte sur sa
-// propre page — un échec silencieux, sans erreur ni type qui l'attrape.
-//
-// Rançon de ce choix : ces chemins doivent suivre à la lettre les `to` des deux
-// `NavIcon` d'`AppHeader`, et rien ne le vérifie. Renommer une des deux routes
-// sans toucher ici éteint l'icône, silencieusement là encore.
-const PAGE_BY_PATH: Record<string, HeaderPage> = {
-  "/": "revue",
-  "/transactions": "transactions",
-};
-
 function RevueLayout() {
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const page = PAGE_BY_PATH[pathname.replace(/\/$/, "") || "/"];
-
   const {
     categories,
     budgets,
@@ -254,77 +234,73 @@ function RevueLayout() {
     // text-body : la base typographique de la maquette. Les tailles fines
     // (11–12,5 px) sont posées au cas par cas, jamais héritées d'un rem global
     // qui décalerait aussi /banques et /categories.
-    <div className="flex h-dvh flex-col overflow-hidden">
-      <AppHeader page={page} />
-
-      <div className="flex min-h-0 flex-1 flex-col px-5 pt-4.5 pb-4">
-        {/* `flex-wrap` n'est pas dans la maquette, qui ne descend pas sous
+    <div className="flex min-h-0 flex-1 flex-col px-5 pt-4.5 pb-4">
+      {/* `flex-wrap` n'est pas dans la maquette, qui ne descend pas sous
             460 px : il évite que la colonne de droite, à largeur fixe, ne pousse
             le solde hors de l'écran sur une fenêtre étroite. */}
-        <div className="flex min-h-17 flex-none flex-wrap items-end gap-x-[clamp(11px,1.85vw,25px)] gap-y-3">
-          <div className="min-w-0 flex-1">
-            <KpiBand
-              label="Solde du mois"
-              balance={balance}
-              balanceDelta={balanceDelta}
-              // Les deux rangées de flux restent affichées quand un poste
-              // s'ouvre (`showFlow: true` dans la maquette depuis le passage du
-              // poste ouvert en colonne à part) : le solde et les deux flux
-              // décrivent le mois, le poste vient à côté et non à leur place.
-              flow={{
-                revenues: { amount: revenues, delta: revenuesDelta },
-                expenses: { amount: expenses, delta: expensesDelta },
-              }}
-              // Troisième rangée du bandeau depuis la maquette du 2026-08-06 :
-              // la dépense du mois contre l'enveloppe de `/budgets`. Elle
-              // apparaît donc aussi sur `/transactions`, qui monte le même
-              // bandeau — c'est ce que fait `Transactions.dc.html`.
-              budget={budgets}
-            />
-          </div>
+      <div className="flex min-h-17 flex-none flex-wrap items-end gap-x-[clamp(11px,1.85vw,25px)] gap-y-3">
+        <div className="min-w-0 flex-1">
+          <KpiBand
+            label="Solde du mois"
+            balance={balance}
+            balanceDelta={balanceDelta}
+            // Les deux rangées de flux restent affichées quand un poste
+            // s'ouvre (`showFlow: true` dans la maquette depuis le passage du
+            // poste ouvert en colonne à part) : le solde et les deux flux
+            // décrivent le mois, le poste vient à côté et non à leur place.
+            flow={{
+              revenues: { amount: revenues, delta: revenuesDelta },
+              expenses: { amount: expenses, delta: expensesDelta },
+            }}
+            // Troisième rangée du bandeau depuis la maquette du 2026-08-06 :
+            // la dépense du mois contre l'enveloppe de `/budgets`. Elle
+            // apparaît donc aussi sur `/transactions`, qui monte le même
+            // bandeau — c'est ce que fait `Transactions.dc.html`.
+            budget={budgets}
+          />
+        </div>
 
-          {parent && (
-            <KpiFocus
-              label={`${parent.subs.length} sous-catégorie${parent.subs.length > 1 ? "s" : ""}`}
-              delta={parent.delta}
-              // Absent quand la revue ne compare pas ; `amount: null` quand
-              // c'est ce poste-là qui n'a pas de budget — l'écran le dit plutôt
-              // que de laisser un vide sous les autres.
-              budget={
-                budgets.off
-                  ? undefined
-                  : {
-                      amount: parent.budget,
-                      covered: parent.covered,
-                      uncovered: parent.total - parent.covered,
-                      fill: resolveColor(parent.color),
-                    }
-              }
-            >
-              <span className="flex min-w-0 flex-1 items-center gap-2">
-                <span
-                  className="flex flex-none self-center"
-                  style={{ color: resolveColor(parent.color) }}
-                >
-                  <CategoryIcon name={parent.icon} className="size-4" />
-                </span>
-                <span className="text-subheading line-clamp-2 min-w-0 leading-[1.15]">
-                  {parent.name}
-                </span>
+        {parent && (
+          <KpiFocus
+            label={`${parent.subs.length} sous-catégorie${parent.subs.length > 1 ? "s" : ""}`}
+            delta={parent.delta}
+            // Absent quand la revue ne compare pas ; `amount: null` quand
+            // c'est ce poste-là qui n'a pas de budget — l'écran le dit plutôt
+            // que de laisser un vide sous les autres.
+            budget={
+              budgets.off
+                ? undefined
+                : {
+                    amount: parent.budget,
+                    covered: parent.covered,
+                    uncovered: parent.total - parent.covered,
+                    fill: resolveColor(parent.color),
+                  }
+            }
+          >
+            <span className="flex min-w-0 flex-1 items-center gap-2">
+              <span
+                className="flex flex-none self-center"
+                style={{ color: resolveColor(parent.color) }}
+              >
+                <CategoryIcon name={parent.icon} className="size-4" />
               </span>
-              {/* Deux décimales, comme les lignes de la colonne : ce chiffre-là
+              <span className="text-subheading line-clamp-2 min-w-0 leading-[1.15]">
+                {parent.name}
+              </span>
+            </span>
+            {/* Deux décimales, comme les lignes de la colonne : ce chiffre-là
                   est un montant précis, pas un ordre de grandeur. */}
-              <span className="num text-amount min-w-24 flex-none text-right font-medium tracking-[-0.02em]">
-                {euro.format(parent.total)}
-              </span>
-            </KpiFocus>
-          )}
-        </div>
+            <span className="num text-amount min-w-24 flex-none text-right font-medium tracking-[-0.02em]">
+              {euro.format(parent.total)}
+            </span>
+          </KpiFocus>
+        )}
+      </div>
 
-        {/* Chaque écran rend son contenu **et** sa colonne des postes. */}
-        <div className="mt-3 flex min-h-0 flex-1 gap-5">
-          <Outlet />
-        </div>
+      {/* Chaque écran rend son contenu **et** sa colonne des postes. */}
+      <div className="mt-3 flex min-h-0 flex-1 gap-5">
+        <Outlet />
       </div>
     </div>
   );

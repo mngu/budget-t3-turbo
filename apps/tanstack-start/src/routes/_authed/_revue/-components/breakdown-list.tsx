@@ -9,7 +9,7 @@ import type { RevueBudgets } from "~/lib/revue-budgets";
 import type { RevueCategory } from "~/lib/revue-categories";
 import { shadeCategoryColor } from "~/lib/category-color";
 import { euro } from "~/lib/format";
-import { CategoryIcon } from "../../categories/-components/category-icon";
+import { CategoryIcon } from "../../settings/categories/-components/category-icon";
 import { budgetCaption, BudgetGauge } from "./budget-gauge";
 
 export interface BreakdownItem {

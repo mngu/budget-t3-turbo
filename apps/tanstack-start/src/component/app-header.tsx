@@ -31,18 +31,11 @@ import { ThemePicker } from "~/component/theme-picker";
 import { SEARCH_DEFAULTS } from "~/lib/transactions-search";
 import { useRevueSearch } from "~/lib/use-revue-search";
 
-/**
- * Écran mis en avant dans l'en-tête. `undefined` est un état légitime : rien
- * ne s'allume pour la revue, la barre n'ayant plus de rangée de navigation —
- * seuls `isSettings` et le menu de l'engrenage s'en servent encore.
- */
-export type HeaderPage =
-  | "revue"
-  | "transactions"
-  | "categories"
-  | "budgets"
-  | "banques"
-  | "espaces";
+declare module "@tanstack/react-router" {
+  interface StaticDataRouteOption {
+    title?: string;
+  }
+}
 
 /**
  * Les écrans de réglages, dans l'ordre du menu de l'engrenage. Une seule table
@@ -53,17 +46,29 @@ export type HeaderPage =
 const SETTINGS_PAGES = [
   {
     page: "categories",
-    to: "/categories",
+    to: "/settings/categories",
     title: "Catégories",
     Icon: TagsIcon,
   },
-  { page: "budgets", to: "/budgets", title: "Budgets", Icon: PiggyBankIcon },
-  { page: "banques", to: "/banques", title: "Banques", Icon: LandmarkIcon },
-  { page: "espaces", to: "/espaces", title: "Espaces", Icon: UsersIcon },
+  {
+    page: "budgets",
+    to: "/settings/budgets",
+    title: "Budgets",
+    Icon: PiggyBankIcon,
+  },
+  {
+    page: "banques",
+    to: "/settings/banques",
+    title: "Banques",
+    Icon: LandmarkIcon,
+  },
+  {
+    page: "espaces",
+    to: "/settings/espaces",
+    title: "Espaces",
+    Icon: UsersIcon,
+  },
 ] as const;
-
-const settingsPage = (page?: HeaderPage) =>
-  SETTINGS_PAGES.find((entry) => entry.page === page);
 
 /**
  * En-tête unique de l'application — portage de `AppHeader.dc.html` (Claude
@@ -82,9 +87,8 @@ const settingsPage = (page?: HeaderPage) =>
  * mois entiers : un en-tête unique ne peut pas diverger d'une route à l'autre,
  * et `Transactions.dc.html` ne le pose pas non plus.
  */
-export function AppHeader({ page }: { page?: HeaderPage }) {
-  const settingsTitle = settingsPage(page)?.title;
-  const isSettings = settingsTitle !== undefined;
+export function AppHeader({ title }: { title?: string }) {
+  const isSettings = title !== undefined;
 
   // Appelé inconditionnellement (règle des hooks) mais lu seulement hors des
   // écrans de réglages : là-bas, `useSearch({ strict: false })` renvoie la
@@ -123,7 +127,7 @@ export function AppHeader({ page }: { page?: HeaderPage }) {
         <div className="border-border ml-1.5 flex items-baseline gap-2.5 border-l pl-4">
           <span className="label-caps">Réglages</span>
           <span className="text-body font-semibold tracking-[-0.01em]">
-            {settingsTitle}
+            {title}
           </span>
         </div>
       )}
@@ -137,7 +141,7 @@ export function AppHeader({ page }: { page?: HeaderPage }) {
         )}
       >
         {!isSettings && <BankPicker />}
-        <SettingsMenu page={page} />
+        <SettingsMenu page={title} />
       </div>
     </header>
   );
@@ -157,7 +161,7 @@ export function AppHeader({ page }: { page?: HeaderPage }) {
  * `aria-expanded`, dont la variante `ghost` du bouton se sert) et une entrée
  * referme le menu d'elle-même, d'où la disparition des `onNavigate`.
  */
-function SettingsMenu({ page }: { page?: HeaderPage }) {
+function SettingsMenu({ page }: { page?: string }) {
   const navigate = useNavigate();
 
   // `reloadDocument` comme à la connexion (`/login`) : la session est lue dans

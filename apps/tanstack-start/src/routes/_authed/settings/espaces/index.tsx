@@ -24,19 +24,20 @@ import { toast } from "@budget/ui/toast";
 
 import type { SpaceDialogSpec } from "./-components/space-dialog";
 import { authClient } from "~/auth/client";
-import { SettingsPage } from "~/component/settings-page";
 import { useTRPCClient } from "~/lib/trpc";
 import { SpaceCard } from "./-components/space-card";
 import { SpaceDialog } from "./-components/space-dialog";
 
-export const Route = createFileRoute("/_authed/espaces/")({
+export const Route = createFileRoute("/_authed/settings/espaces/")({
   loader: async ({ context }) => {
     const [spaces, incoming] = await Promise.all([
       context.trpcClient.spaces.list.query(),
       context.trpcClient.spaces.incoming.query(),
     ]);
-    return { spaces, incoming };
+    const members = spaces.reduce((n, s) => n + s.counts.members, 0);
+    return { spaces, incoming, members };
   },
+  staticData: { title: "Espaces", aside: EspacesAside },
   component: EspacesPage,
 });
 
@@ -46,7 +47,6 @@ export const Route = createFileRoute("/_authed/espaces/")({
  * « quel espace, déjà ? » au moment de confirmer.
  */
 type Action =
-  | { kind: "create" }
   | { kind: "share"; space: Space }
   | { kind: "rename"; space: Space }
   | { kind: "delete"; space: Space }
@@ -60,6 +60,83 @@ type Action =
 const CREATE_EMPTY = "vide";
 const CREATE_CONVERT = "convertir";
 
+/**
+ * Les compteurs et la création, posés dans la rangée de titre par le layout
+ * (`staticData.aside`). Le geste vit donc ici et non parmi ceux d'EspacesPage :
+ * l'aside est rendu *au-dessus* de la page, aucun état de la page ne lui est
+ * atteignable. Il n'en a pas besoin — le loader lui suffit.
+ */
+function EspacesAside() {
+  const { spaces, members } = Route.useLoaderData();
+  const router = useRouter();
+  const trpcClient = useTRPCClient();
+  const personal = spaces.find((s) => s.isPersonal);
+
+  const [creating, setCreating] = useState(false);
+  const [draft, setDraft] = useState("");
+  const [choice, setChoice] = useState(CREATE_CONVERT);
+  const [busy, setBusy] = useState(false);
+
+  const confirm = async () => {
+    // Deux chemins, une seule décision : ouvrir l'espace qu'on a déjà, ou en
+    // créer un vide. Le premier garde comptes, catégories et historique —
+    // c'est le seul moyen, rien ne déplace un compte d'un espace à l'autre.
+    const convert = choice === CREATE_CONVERT ? personal : undefined;
+    setBusy(true);
+    try {
+      await (convert
+        ? trpcClient.spaces.share.mutate({ id: convert.id, name: draft })
+        : trpcClient.spaces.create.mutate({ name: draft }));
+      setCreating(false);
+      await router.invalidate();
+      toast.success(
+        convert
+          ? "Espace partagé — invitez maintenant les membres."
+          : "Espace créé — il est vide.",
+      );
+    } catch (err) {
+      toast.error(
+        err instanceof Error
+          ? err.message
+          : "Échec de la création de l'espace.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="ml-auto flex items-center gap-4">
+      <div className="border-border flex items-center gap-4 border-r pr-4">
+        <Counter
+          value={spaces.length}
+          label={spaces.length > 1 ? "Espaces" : "Espace"}
+        />
+        <Counter value={members} label={members > 1 ? "Membres" : "Membre"} />
+      </div>
+      <Button
+        onClick={() => {
+          setDraft("");
+          setChoice(personal ? CREATE_CONVERT : CREATE_EMPTY);
+          setCreating(true);
+        }}
+      >
+        Créer un espace partagé
+      </Button>
+      <SpaceDialog
+        spec={
+          creating
+            ? createSpec({ personal, draft, choice, setChoice, setDraft })
+            : null
+        }
+        busy={busy}
+        onConfirm={() => void confirm()}
+        onClose={() => setCreating(false)}
+      />
+    </div>
+  );
+}
+
 function EspacesPage() {
   const { spaces, incoming } = Route.useLoaderData();
   const router = useRouter();
@@ -69,14 +146,12 @@ function EspacesPage() {
   // Saisie du dialogue : nom de l'espace, ou nom retapé pour confirmer une
   // suppression. Un seul champ à la fois, jamais deux dans le même dialogue.
   const [draft, setDraft] = useState("");
-  const [choice, setChoice] = useState(CREATE_CONVERT);
   const [busy, setBusy] = useState(false);
   const [invites, setInvites] = useState<
     Record<string, { email: string; role: SpaceRole }>
   >({});
 
   const personal = spaces.find((s) => s.isPersonal);
-  const members = spaces.reduce((n, s) => n + s.counts.members, 0);
   const soloBanner =
     spaces.length === 1 && personal !== undefined ? personal : null;
 
@@ -86,7 +161,6 @@ function EspacesPage() {
   const open = (next: Action, initialDraft = "") => {
     setAction(next);
     setDraft(initialDraft);
-    setChoice(personal ? CREATE_CONVERT : CREATE_EMPTY);
   };
 
   const run = async (task: () => Promise<unknown>, fallback: string) => {
@@ -109,31 +183,6 @@ function EspacesPage() {
   const confirm = async () => {
     if (!action) return;
     switch (action.kind) {
-      case "create": {
-        // Deux chemins, une seule décision : ouvrir l'espace qu'on a déjà, ou
-        // en créer un vide. Le premier garde comptes, catégories et historique
-        // — c'est le seul moyen, rien ne déplace un compte d'un espace à
-        // l'autre.
-        const convert = choice === CREATE_CONVERT && personal !== undefined;
-        const ok = await run(
-          () =>
-            convert
-              ? trpcClient.spaces.share.mutate({
-                  id: personal.id,
-                  name: draft,
-                })
-              : trpcClient.spaces.create.mutate({ name: draft }),
-          "Échec de la création de l'espace.",
-        );
-        if (ok) {
-          toast.success(
-            convert
-              ? "Espace partagé — invitez maintenant les membres."
-              : "Espace créé — il est vide.",
-          );
-        }
-        return;
-      }
       case "share": {
         const ok = await run(
           () =>
@@ -283,27 +332,7 @@ function EspacesPage() {
   // ── Rendu ────────────────────────────────────────────────────────────────
 
   return (
-    <SettingsPage
-      page="espaces"
-      title="Espaces"
-      aside={
-        <div className="ml-auto flex items-center gap-4">
-          <div className="border-border flex items-center gap-4 border-r pr-4">
-            <Counter
-              value={spaces.length}
-              label={spaces.length > 1 ? "Espaces" : "Espace"}
-            />
-            <Counter
-              value={members}
-              label={members > 1 ? "Membres" : "Membre"}
-            />
-          </div>
-          <Button onClick={() => open({ kind: "create" }, "")}>
-            Créer un espace partagé
-          </Button>
-        </div>
-      }
-    >
+    <>
       <p className="text-muted-foreground text-control mt-2 max-w-160 text-pretty">
         Un espace contient des comptes bancaires, des catégories et des
         transactions ; deux espaces ne voient rien l'un de l'autre. Partager un
@@ -423,16 +452,12 @@ function EspacesPage() {
       </div>
 
       <SpaceDialog
-        spec={
-          action
-            ? describe(action, { personal, draft, choice, setChoice, setDraft })
-            : null
-        }
+        spec={action ? describe(action, { draft, setDraft }) : null}
         busy={busy}
         onConfirm={() => void confirm()}
         onClose={() => setAction(null)}
       />
-    </SettingsPage>
+    </>
   );
 }
 
@@ -447,6 +472,56 @@ function Counter({ value, label }: { value: number; label: string }) {
   );
 }
 
+/** Le dialogue de création. Hors de `describe` : son geste vit dans l'aside. */
+function createSpec(ctx: {
+  personal: Space | undefined;
+  draft: string;
+  choice: string;
+  setChoice: (key: string) => void;
+  setDraft: (value: string) => void;
+}): SpaceDialogSpec {
+  const { personal, draft, choice, setChoice, setDraft } = ctx;
+  const convert = choice === CREATE_CONVERT && personal !== undefined;
+  return {
+    icon: <UsersIcon className="size-4" />,
+    tone: "primary",
+    title: "Créer un espace partagé",
+    body: "Un espace partagé réunit plusieurs personnes sur les mêmes comptes, les mêmes catégories et le même historique. Deux façons d'y arriver — la première garde ce que vous avez déjà.",
+    choices: personal
+      ? [
+          {
+            key: CREATE_CONVERT,
+            label: "Partager mon espace actuel",
+            description: `Vos ${personal.counts.accounts} compte(s), ${personal.counts.categories} catégories et ${personal.counts.transactions.toLocaleString("fr-FR")} transactions restent en place ; l'espace change de nom et accueille d'autres membres.`,
+            warning:
+              "Vous n'aurez plus d'espace personnel séparé, et cela ne se défait pas.",
+          },
+          {
+            key: CREATE_EMPTY,
+            label: "Partir d'un espace vide",
+            description:
+              "Un espace neuf, sans compte ni catégorie. À réserver à un budget qui n'a rien à voir avec le vôtre.",
+            warning:
+              "Il faudra reconnecter les banques ici ; l'historique et les catégories de votre espace ne suivent pas.",
+          },
+        ]
+      : undefined,
+    choice,
+    onChoice: setChoice,
+    input: {
+      label: convert ? "Nouveau nom de l'espace" : "Nom de l'espace",
+      placeholder: "Foyer Rossi",
+      value: draft,
+    },
+    onInput: setDraft,
+    hint: convert ? "Vous inviterez les membres juste après." : undefined,
+    footnote: convert ? "Rien n'est supprimé." : "Aucune donnée n'est copiée.",
+    cta: convert ? "Partager cet espace" : "Créer l'espace",
+    cancel: "Annuler",
+    disabled: draft.trim().length === 0,
+  };
+}
+
 /**
  * Le contenu du dialogue pour un geste. Fonction pure : elle ne décide rien,
  * elle formule — l'exécution est dans `confirm`. Les deux se lisent côte à
@@ -455,59 +530,13 @@ function Counter({ value, label }: { value: number; label: string }) {
 function describe(
   action: Action,
   ctx: {
-    personal: Space | undefined;
     draft: string;
-    choice: string;
-    setChoice: (key: string) => void;
     setDraft: (value: string) => void;
   },
 ): SpaceDialogSpec {
-  const { draft, choice, setChoice, setDraft, personal } = ctx;
+  const { draft, setDraft } = ctx;
 
   switch (action.kind) {
-    case "create": {
-      const convert = choice === CREATE_CONVERT && personal !== undefined;
-      return {
-        icon: <UsersIcon className="size-4" />,
-        tone: "primary",
-        title: "Créer un espace partagé",
-        body: "Un espace partagé réunit plusieurs personnes sur les mêmes comptes, les mêmes catégories et le même historique. Deux façons d'y arriver — la première garde ce que vous avez déjà.",
-        choices: personal
-          ? [
-              {
-                key: CREATE_CONVERT,
-                label: "Partager mon espace actuel",
-                description: `Vos ${personal.counts.accounts} compte(s), ${personal.counts.categories} catégories et ${personal.counts.transactions.toLocaleString("fr-FR")} transactions restent en place ; l'espace change de nom et accueille d'autres membres.`,
-                warning:
-                  "Vous n'aurez plus d'espace personnel séparé, et cela ne se défait pas.",
-              },
-              {
-                key: CREATE_EMPTY,
-                label: "Partir d'un espace vide",
-                description:
-                  "Un espace neuf, sans compte ni catégorie. À réserver à un budget qui n'a rien à voir avec le vôtre.",
-                warning:
-                  "Il faudra reconnecter les banques ici ; l'historique et les catégories de votre espace ne suivent pas.",
-              },
-            ]
-          : undefined,
-        choice,
-        onChoice: setChoice,
-        input: {
-          label: convert ? "Nouveau nom de l'espace" : "Nom de l'espace",
-          placeholder: "Foyer Rossi",
-          value: draft,
-        },
-        onInput: setDraft,
-        hint: convert ? "Vous inviterez les membres juste après." : undefined,
-        footnote: convert
-          ? "Rien n'est supprimé."
-          : "Aucune donnée n'est copiée.",
-        cta: convert ? "Partager cet espace" : "Créer l'espace",
-        cancel: "Annuler",
-        disabled: draft.trim().length === 0,
-      };
-    }
     case "share":
       return {
         icon: <UsersIcon className="size-4" />,

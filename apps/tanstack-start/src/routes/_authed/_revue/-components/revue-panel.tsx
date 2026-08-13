@@ -17,7 +17,7 @@ import {
 import { euro0, sharePercent } from "~/lib/format";
 import { focusedCategory } from "~/lib/revue-categories";
 import { useRevueSearch } from "~/lib/use-revue-search";
-import { CategoryIcon } from "../../categories/-components/category-icon";
+import { CategoryIcon } from "../../settings/categories/-components/category-icon";
 import { BreakdownList, breakdownRows } from "./breakdown-list";
 import { CategoryRing } from "./category-ring";
 import { useDrill } from "./use-drill";
