@@ -24,7 +24,7 @@ export interface TxnForLlm {
 // laissées sans catégorie y figurent sans être priorisées.
 export function buildSystemPrompt(categoryNames: string[]): string {
   return `Tu catégorises des transactions bancaires personnelles pour le budget d'un ménage français.
-Les comptes appartiennent à Alex Martin et Camille Durand (banques : Société Générale, Caisse d'Épargne Île-de-France, Revolut).
+Chaque transaction porte sa banque et sa contrepartie : aucune identité n'est codée ici.
 
 Pour chaque transaction, choisis une catégorie parmi cette liste, et uniquement parmi celle-ci :
 ${categoryNames.map((c) => `- ${c}`).join("\n")}

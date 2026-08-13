@@ -66,7 +66,7 @@
 # banque échoue au retour de SCA.
 set -euo pipefail
 
-HOST=${DEPLOY_HOST:-root@VPS_IP}
+HOST=${DEPLOY_HOST:?"exporter DEPLOY_HOST=root@<ip-du-vps>"}
 DIR=/docker/budget
 
 cd "$(dirname "$0")/.."

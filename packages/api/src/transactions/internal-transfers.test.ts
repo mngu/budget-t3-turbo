@@ -9,9 +9,10 @@ vi.mock("@budget/db/client", () => ({ db: {} }));
 
 const { matchInternalTransfers } = await import("./internal-transfers");
 
-// Comptes réels : les deux Caisse d'Épargne, Revolut, et un SG sans IBAN en
-// base (le compte 3, jamais synchronisé) — ce dernier vérifie que l'absence
-// d'IBAN ne bloque pas la détection.
+// IBANs fictifs, calqués sur la configuration réelle : les deux Caisse
+// d'Épargne, Revolut, et un SG sans IBAN en base (le compte 3, jamais
+// synchronisé) — ce dernier vérifie que l'absence d'IBAN ne bloque pas la
+// détection.
 const CE_PERSO = "FR7610000000000000000000001";
 const CE_COMMUN = "FR7610000000000000000000002";
 const REVOLUT = "FR7610000000000000000000003";

@@ -9,7 +9,7 @@
 # deux côtés, le dump transite sur stdout de ssh.
 set -euo pipefail
 
-HOST=${DEPLOY_HOST:-root@VPS_IP}
+HOST=${DEPLOY_HOST:?"exporter DEPLOY_HOST=root@<ip-du-vps>"}
 DIR=/docker/budget
 # En dur : la base `budget` de l'ancien repo vit dans la MÊME instance locale.
 DB=budget_t3

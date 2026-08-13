@@ -59,3 +59,5 @@ dist/
 
 # data
 data/
+# design handoff (données de maquette, non publiées)
+design_handoff_budget/
