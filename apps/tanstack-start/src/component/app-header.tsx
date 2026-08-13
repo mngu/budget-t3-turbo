@@ -2,8 +2,6 @@
 
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
-  ArrowLeftRightIcon,
-  ChartPieIcon,
   LandmarkIcon,
   LogOutIcon,
   PiggyBankIcon,
@@ -12,7 +10,6 @@ import {
   UsersIcon,
 } from "lucide-react";
 
-import type { TransactionsSearch } from "@budget/shared";
 import { cn } from "@budget/ui";
 import { Button } from "@budget/ui/button";
 import {
@@ -35,10 +32,9 @@ import { SEARCH_DEFAULTS } from "~/lib/transactions-search";
 import { useRevueSearch } from "~/lib/use-revue-search";
 
 /**
- * Écran mis en avant dans l'en-tête. `undefined` est un état légitime :
- * `/classer` et `/categorie/$name` vivent bien dans la coque de la revue mais
- * n'ont pas d'icône, la rangée étant réduite à deux entrées — allumer celle de
- * la revue y ferait promettre « vous êtes ici » à un lien qui emmène ailleurs.
+ * Écran mis en avant dans l'en-tête. `undefined` est un état légitime : rien
+ * ne s'allume pour la revue, la barre n'ayant plus de rangée de navigation —
+ * seuls `isSettings` et le menu de l'engrenage s'en servent encore.
  */
 export type HeaderPage =
   | "revue"
@@ -106,31 +102,22 @@ export function AppHeader({ page }: { page?: HeaderPage }) {
         "bg-background relative z-30 flex h-13 flex-none items-center gap-3.5 px-5 transition-shadow duration-200",
       )}
     >
-      <div className="flex items-center gap-2.5">
+      {/* La marque *est* le retour à la revue. C'est le seul lien de la barre
+          depuis que la rangée de navigation en est partie : les liens entre les
+          deux écrans de la revue vivent maintenant dans la zone centrale, mais
+          les quatre écrans de réglages n'ont rien d'autre pour rentrer. La
+          search est intégralement conservée — c'est le même périmètre. */}
+      <Link
+        to="/"
+        search={linkSearch}
+        title="Revue du mois"
+        className="flex items-center gap-2.5 hover:opacity-60"
+      >
         <div className="bg-primary size-2.5 rounded-xs" />
         <span className="text-body font-semibold tracking-[-0.02em]">
           Budget
         </span>
-      </div>
-
-      <nav className="ml-2.5 flex items-center gap-4">
-        <NavIcon
-          to="/"
-          search={linkSearch}
-          label="Revue du mois"
-          active={page === "revue"}
-        >
-          <ChartPieIcon className="size-4" />
-        </NavIcon>
-        <NavIcon
-          to="/transactions"
-          search={linkSearch}
-          label="Transactions"
-          active={page === "transactions"}
-        >
-          <ArrowLeftRightIcon className="size-4" />
-        </NavIcon>
-      </nav>
+      </Link>
 
       {isSettings && (
         <div className="border-border ml-1.5 flex items-baseline gap-2.5 border-l pl-4">
@@ -153,40 +140,6 @@ export function AppHeader({ page }: { page?: HeaderPage }) {
         <SettingsMenu page={page} />
       </div>
     </header>
-  );
-}
-
-function NavIcon({
-  to,
-  search,
-  label,
-  active,
-  children,
-}: {
-  to: "/" | "/transactions";
-  search: TransactionsSearch;
-  label: string;
-  active: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <Link
-      to={to}
-      // La search est intégralement conservée d'un écran à l'autre : c'est le
-      // même périmètre vu de deux façons.
-      search={search}
-      title={label}
-      aria-label={label}
-      aria-current={active ? "page" : undefined}
-      className={cn(
-        "flex",
-        active
-          ? "text-primary drop-shadow-[0_0_7px_color-mix(in_oklab,var(--primary)_55%,transparent)]"
-          : "text-subtle hover:text-foreground",
-      )}
-    >
-      {children}
-    </Link>
   );
 }
 

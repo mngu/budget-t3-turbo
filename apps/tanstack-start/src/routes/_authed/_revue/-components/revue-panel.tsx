@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { LayersIcon } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { ArrowRightIcon, LayersIcon } from "lucide-react";
 
 import { cn } from "@budget/ui";
 
@@ -230,6 +231,20 @@ export function RevuePanel({
               ? `${selected.subs.length} sous-catégorie${selected.subs.length > 1 ? "s" : ""} · ${sharePercent(selected.total, expenses)} des sorties`
               : `${categories.length} poste${categories.length > 1 ? "s" : ""} de dépense`}
           </span>
+
+          {/* Le passage à la table, à droite du fil d'ariane : la barre de
+              l'application n'a plus de rangée de navigation, ce lien-ci est la
+              voie vers `/transactions`. La search est conservée telle quelle —
+              le poste ouvert arrive donc en filtre de l'autre côté. */}
+          <Link
+            to="/transactions"
+            search={search}
+            title="Ouvrir la liste des transactions"
+            className="border-border bg-card text-muted-foreground hover:border-subtle hover:text-foreground hover:bg-accent text-control ml-auto flex h-7 flex-none items-center gap-1.5 rounded-full border pr-2 pl-3 font-medium whitespace-nowrap"
+          >
+            Voir les transactions
+            <ArrowRightIcon className="text-subtle size-3.5" aria-hidden />
+          </Link>
         </div>
 
         {/* L'anneau s'étire sur toute la place disponible (pas d'`items-center`) :

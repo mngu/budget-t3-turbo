@@ -1,4 +1,5 @@
-import { createFileRoute, useLoaderData } from "@tanstack/react-router";
+import { createFileRoute, Link, useLoaderData } from "@tanstack/react-router";
+import { ArrowLeftIcon } from "lucide-react";
 
 import { PAGE_SIZE } from "@budget/shared";
 
@@ -77,6 +78,31 @@ function AllTransactions() {
   return (
     <>
       <div className="flex min-w-0 flex-1 flex-col">
+        {/* Le retour à la revue, au même rang que son fil d'ariane : la barre de
+            l'application n'a plus de rangée de navigation, les deux écrans se
+            renvoient l'un à l'autre depuis leur propre zone centrale. La search
+            est conservée telle quelle, c'est le même périmètre. */}
+        <div className="flex min-w-0 flex-none items-center gap-3">
+          <Link
+            to="/"
+            search={search}
+            title="Revenir à la revue du mois"
+            className="border-border bg-card text-muted-foreground hover:border-subtle hover:text-foreground hover:bg-accent text-control flex h-7 flex-none items-center gap-1.5 rounded-full border pr-3 pl-2 font-medium whitespace-nowrap"
+          >
+            <ArrowLeftIcon className="text-subtle size-3.5" aria-hidden />
+            Revue du mois
+          </Link>
+          <span className="bg-border h-5 w-px flex-none" />
+          <span className="text-heading truncate">Transactions</span>
+          {/* Le décompte de la sélection, pas celui du mois : `total` est le
+              nombre de lignes que les filtres laissent passer, toutes pages
+              confondues. Le bandeau au-dessus, lui, décrit le mois entier — les
+              deux ne parlent pas du même périmètre, et c'est voulu. */}
+          <span className="text-subtle text-control flex-none whitespace-nowrap">
+            {total} ligne{total > 1 ? "s" : ""}
+          </span>
+        </div>
+
         {/* Seul écran à porter tous les filtres : c'est le seul dont la liste est
           la sélection elle-même, et non une répartition qu'un filtre de
           catégorie porterait à 100 % du total. C'est aussi la seule voie pour
@@ -88,7 +114,7 @@ function AllTransactions() {
           aClasser
           internes
           searchField
-          className="border-border bg-surface-2 flex-none rounded-md border px-2.5 py-2"
+          className="border-border bg-surface-2 mt-4 flex-none rounded-md border px-2.5 py-2"
         />
 
         <TransactionsTable

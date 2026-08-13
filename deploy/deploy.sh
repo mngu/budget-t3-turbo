@@ -45,7 +45,10 @@
 #     exec -T db psql -U budget -d budget_t3 -v ON_ERROR_STOP=1 \
 #     -c 'CREATE SCHEMA IF NOT EXISTS drizzle' \
 #     -c 'CREATE TABLE IF NOT EXISTS drizzle.__drizzle_migrations (id SERIAL PRIMARY KEY, hash text NOT NULL, created_at bigint)' \
-#     -c \"INSERT INTO drizzle.__drizzle_migrations (hash, created_at) VALUES ('\$H', \$W)\""
+#     -c \"INSERT INTO drizzle.__drizzle_migrations (hash, created_at) VALUES ('$H', $W)\""
+#
+# ($H et $W sont développés par le shell local — le shell distant ne les connaît
+# pas ; les échapper enverrait deux chaînes vides et un SQL invalide.)
 #
 # Les migrations suivantes (à partir de 0001) s'appliquent alors toutes seules
 # ci-dessous. Si la base avait dérivé du socle, ça se verra là : une migration
