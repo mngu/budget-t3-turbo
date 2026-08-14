@@ -1,16 +1,18 @@
 "use client";
 
-import { TriangleAlertIcon } from "lucide-react";
+import { LayersIcon, TriangleAlertIcon } from "lucide-react";
 
 import { cn } from "@budget/ui";
 import { Toolbar } from "@budget/ui/toolbar";
 
 import type { RevueBudgets } from "../-lib/revue-budgets";
 import type { RevueCategory } from "../-lib/revue-categories";
+import type { Delta } from "~/routes/_authed/_period-overview/-lib/history";
 import { CategoryIcon } from "~/component/category-icon";
-import { shadeCategoryColor } from "~/lib/category-color";
-import { euro } from "~/lib/format";
+import { shadeCategoryColor, useCategoryColor } from "~/lib/category-color";
+import { euro, euro0 } from "~/lib/format";
 import { budgetCaption, BudgetGauge } from "./budget-gauge";
+import { DeltaAmount, DeltaPill } from "./delta-pill";
 
 export interface BreakdownItem {
   name: string;
@@ -172,19 +174,19 @@ const subGauge = (
  */
 export function BreakdownList({
   rows,
-  fold = false,
+  parent,
+  categories,
+  expenses,
+  budgets,
 }: {
   rows: BreakdownItem[];
-  /**
-   * Replier la queue de liste sous un « + N autres ». La maquette ne le fait
-   * **que** sur les sous-catégories (`shown = subs.slice(0, LIST_MAX)`), jamais
-   * sur les catégories parentes, dont elle rend toujours la liste entière : au
-   * premier niveau chaque ligne est une porte d'entrée vers ses enfants, et le
-   * repli la condamnerait — c'est ce qui faisait disparaître « Sans catégorie »,
-   * dernière de la liste par construction, derrière un « + 1 autres ».
-   */
-  fold?: boolean;
+  parent: RevueCategory | null;
+  categories: RevueCategory[];
+  expenses: number;
+  budgets: RevueBudgets;
 }) {
+  const resolveColor = useCategoryColor();
+  const fold = parent !== null;
   const shown = fold ? rows.slice(0, MAX_ROWS) : rows;
   const rest = fold ? rows.slice(MAX_ROWS) : [];
   const restTotal = rest.reduce((acc, r) => acc + r.total, 0);
@@ -195,44 +197,137 @@ export function BreakdownList({
   // aucune ligne budgétée, aucun « reste 45 € », 74 px de vide en moins.
   const captioned = rows.some((row) => row.budget?.amount != null);
 
+  const subs = categories.flatMap((category) => category.subs);
+  const subCount = subs.filter((sub) => sub.filter !== null).length;
+  const aClasser = subs.reduce(
+    (total, sub) => total + (sub.filter === null ? sub.total : 0),
+    0,
+  );
+
   return (
-    <div className={cn("hidden flex-none flex-col pt-4 lg:flex")}>
-      {/* La zone de défilement *est* la barre d'outils : une seule tabulation
-          entre dans la colonne, les flèches haut/bas la parcourent en bouclant.
-          Une liste de treize boutons prenait sinon treize tabulations à
-          traverser — et les lignes de lecture seule restent atteignables
-          (`focusableWhenDisabled`, actif par défaut), sans quoi la colonne
-          serait muette au clavier dès qu'on descend dans un poste.
-          (Home/Fin ne font rien : `Toolbar` n'active pas `enableHomeAndEndKeys`
-          du composite.) */}
-      <Toolbar.Root
-        orientation="vertical"
-        aria-label="Répartition par poste"
-        className="flex min-h-0 flex-1 scrollbar-thin [scrollbar-color:var(--border-strong)_transparent] flex-col overflow-y-auto"
-      >
-        {/* Clé de **position** et non de nom : c'est ce qui fait exister la
-            transition de la barre. Keyée par nom, chaque changement de niveau ou
-            de période démonte toutes les lignes et les remonte à leur largeur
-            finale — la transition est bien posée mais ne se déclenche jamais.
-            Réutiliser le nœud de même rang le fait glisser de l'ancienne largeur
-            à la nouvelle, comme le `sc-for` de la maquette. Sans danger ici : la
-            ligne n'a ni état local ni champ de saisie. */}
-        {shown.map((row, index) => (
-          <BreakdownRow key={index} row={row} max={max} captioned={captioned} />
-        ))}
-        {rest.length > 0 && (
-          <BreakdownRow
-            row={{
-              name: `+ ${rest.length} autres`,
-              total: restTotal,
-              color: "var(--border-strong)",
-            }}
-            max={max}
-            captioned={captioned}
-          />
+    <>
+      <div className="h-28 px-2">
+        {!parent ? (
+          // Aucun poste ouvert : la colonne garde son en-tête plutôt qu'un
+          // trou au-dessus des postes, et il dit ce que la liste du dessous
+          // détaille. Le reliquat « à classer » n'apparaît qu'à partir du
+          // premier euro — sinon la ligne annoncerait un travail à faire là
+          // où il n'y en a pas.
+          <div className={cn("flex max-w-full flex-none flex-col items-end")}>
+            <div className="flex h-8 w-full min-w-0 items-center justify-between gap-4">
+              <span className="flex min-w-0 flex-1 items-center gap-2">
+                <span className="text-subtle flex flex-none self-center">
+                  <LayersIcon className="size-4" aria-hidden />
+                </span>
+                <span className="text-subheading min-w-0 truncate leading-[1.15]">
+                  Toutes catégories
+                </span>
+              </span>
+              {/* Sans décimale, à la différence du total d'un poste ouvert :
+                    c'est le même nombre que la rangée « Sorties » du bandeau,
+                    à deux cents près il se lirait comme un autre. */}
+              <span className="num text-amount min-w-24 flex-none text-right font-medium tracking-[-0.02em]">
+                {euro0.format(expenses)}
+              </span>
+            </div>
+            {/* « de dépense » n'est pas de l'ornement : le loader force
+                  `direction: "debit"`, la colonne n'inventorie que les sorties —
+                  et sur `/transactions`, dont le sélecteur de sens peut être sur
+                  « Crédits », rien d'autre ne le dit. */}
+            <div className="text-subtle text-meta flex min-h-5 items-center justify-end whitespace-nowrap">
+              {categories.length} poste{categories.length > 1 ? "s" : ""} de
+              dépense · {subCount} sous-catégorie{subCount > 1 ? "s" : ""}
+            </div>
+            {aClasser > 0 && (
+              <div className="text-warn text-meta mt-2.5 flex items-center gap-1.5 whitespace-nowrap">
+                <TriangleAlertIcon className="size-3" aria-hidden />
+                <span className="num">{euro0.format(aClasser)}</span> à classer
+              </div>
+            )}
+          </div>
+        ) : (
+          <KpiFocus
+            label={`${parent.subs.length} sous-catégorie${parent.subs.length > 1 ? "s" : ""}`}
+            delta={parent.delta}
+            // Absent quand la revue ne compare pas ; `amount: null` quand
+            // c'est ce poste-là qui n'a pas de budget — l'écran le dit plutôt
+            // que de laisser un vide sous les autres.
+            budget={
+              budgets.off
+                ? undefined
+                : {
+                    amount: parent.budget,
+                    covered: parent.covered,
+                    uncovered: parent.total - parent.covered,
+                    fill: resolveColor(parent.color),
+                  }
+            }
+          >
+            <span className="flex min-w-0 flex-1 items-center gap-2">
+              <span
+                className="flex flex-none self-center"
+                style={{ color: resolveColor(parent.color) }}
+              >
+                <CategoryIcon name={parent.icon} className="size-4" />
+              </span>
+              <span className="text-subheading line-clamp-2 min-w-0 leading-[1.15]">
+                {parent.name}
+              </span>
+            </span>
+            {/* Deux décimales, comme les lignes de la colonne : ce chiffre-là
+                    est un montant précis, pas un ordre de grandeur. */}
+            <span className="num text-amount min-w-24 flex-none text-right font-medium tracking-[-0.02em]">
+              {euro.format(parent.total)}
+            </span>
+          </KpiFocus>
         )}
-      </Toolbar.Root>
-    </div>
+      </div>
+      <div className="flex justify-center">
+        <hr className="w-64" />
+      </div>
+      <div className={cn("hidden flex-none flex-col pt-4 lg:flex")}>
+        {/* La zone de défilement *est* la barre d'outils : une seule tabulation
+            entre dans la colonne, les flèches haut/bas la parcourent en bouclant.
+            Une liste de treize boutons prenait sinon treize tabulations à
+            traverser — et les lignes de lecture seule restent atteignables
+            (`focusableWhenDisabled`, actif par défaut), sans quoi la colonne
+            serait muette au clavier dès qu'on descend dans un poste.
+            (Home/Fin ne font rien : `Toolbar` n'active pas `enableHomeAndEndKeys`
+            du composite.) */}
+        <Toolbar.Root
+          orientation="vertical"
+          aria-label="Répartition par poste"
+          className="flex min-h-0 flex-1 scrollbar-thin [scrollbar-color:var(--border-strong)_transparent] flex-col overflow-y-auto"
+        >
+          {/* Clé de **position** et non de nom : c'est ce qui fait exister la
+              transition de la barre. Keyée par nom, chaque changement de niveau ou
+              de période démonte toutes les lignes et les remonte à leur largeur
+              finale — la transition est bien posée mais ne se déclenche jamais.
+              Réutiliser le nœud de même rang le fait glisser de l'ancienne largeur
+              à la nouvelle, comme le `sc-for` de la maquette. Sans danger ici : la
+              ligne n'a ni état local ni champ de saisie. */}
+          {shown.map((row, index) => (
+            <BreakdownRow
+              key={index}
+              row={row}
+              max={max}
+              captioned={captioned}
+            />
+          ))}
+          {rest.length > 0 && (
+            <BreakdownRow
+              row={{
+                name: `+ ${rest.length} autres`,
+                total: restTotal,
+                color: "var(--border-strong)",
+              }}
+              max={max}
+              captioned={captioned}
+            />
+          )}
+        </Toolbar.Root>
+      </div>
+    </>
   );
 }
 
@@ -371,10 +466,14 @@ function BreakdownRow({
         {/* Colonne de reste : ouverte dès qu'une ligne a un budget chiffré, vide
             sur celles qui n'en ont pas — sinon leur jauge irait jusqu'au bord et
             les lignes ne s'aligneraient plus entre elles. */}
-        {captioned && (
+      </div>
+      {captioned && row.budget?.amount && (
+        <div className="num text-label flex items-baseline justify-between gap-2.5">
+          <span className="text-subtle">
+            Budget {euro0.format(row.budget.amount)}
+          </span>
           <span
             className={cn(
-              "num text-label w-19 flex-none overflow-hidden text-right tracking-[-0.01em] whitespace-nowrap",
               caption?.over
                 ? "text-bad font-semibold"
                 : "text-subtle font-medium",
@@ -382,8 +481,98 @@ function BreakdownRow({
           >
             {caption?.text}
           </span>
+        </div>
+      )}
+    </Toolbar.Button>
+  );
+}
+
+/**
+ * Colonne de droite du bandeau, le poste ouvert : intitulé calé à gauche,
+ * contenu sur une rangée de 33 px calée à droite, écart en dessous. Elle
+ * n'existe que tant qu'un poste l'occupe — c'est la contrepartie du bloc de
+ * flux, qui disparaît au même moment.
+ *
+ * Pas de prop de polarité : un poste est toujours une sortie, et une sortie qui
+ * monte est toujours une mauvaise nouvelle.
+ */
+export function KpiFocus({
+  delta,
+  budget,
+  children,
+}: {
+  label: string;
+  delta: Delta | null;
+  /**
+   * Comparaison au budget du poste ouvert. **Absent** = la revue ne compare pas
+   * du tout (la raison est déjà dite dans le bandeau, la répéter ici serait du
+   * bruit) ; `amount: null` = c'est ce poste-là qui n'a pas de budget, et
+   * l'écran le dit — un blanc se lirait comme un budget à zéro.
+   */
+  budget?: {
+    amount: number | null;
+    covered: number;
+    uncovered: number;
+    /** Teinte du poste : sa jauge appartient à la même famille que son arc. */
+    fill: string;
+  };
+  children: React.ReactNode;
+}) {
+  const caption =
+    budget?.amount == null
+      ? null
+      : budgetCaption(budget.covered, budget.amount);
+  return (
+    // Largeur de la colonne de droite. La maquette la calcule, mais avec la
+    // *même* expression que la colonne des postes (`rdStackPx === listPx`) :
+    // c'est un alignement, pas une coïncidence — d'où la reprise à l'identique
+    // du `BREAKDOWN_WIDTH` de `breakdown-list.tsx`.
+    <div className={cn("flex max-w-full flex-none flex-col items-end")}>
+      <div className="mt-0.5 flex h-8 w-full min-w-0 items-center justify-between gap-3.5">
+        {children}
+      </div>
+      <div className="flex min-h-5 items-center justify-end gap-2.5 whitespace-nowrap">
+        {delta ? (
+          <>
+            <DeltaPill delta={delta} worseWhenUp />
+            <DeltaAmount delta={delta} className="text-subtle text-meta" />
+          </>
+        ) : (
+          <span className="text-subtle text-meta">
+            Pas d'historique de comparaison
+          </span>
         )}
       </div>
-    </Toolbar.Button>
+
+      {budget &&
+        (budget.amount === null || caption === null ? (
+          <div className="text-subtle text-meta mt-2.5 w-full text-right">
+            Pas de budget sur ce poste
+          </div>
+        ) : (
+          <div className="mt-2.5 flex w-full flex-col gap-1">
+            <BudgetGauge
+              covered={budget.covered}
+              budget={budget.amount}
+              uncovered={budget.uncovered}
+              fill={budget.fill}
+            />
+            <div className="num text-label flex items-baseline justify-between gap-2.5">
+              <span className="text-subtle">
+                Budget {euro0.format(budget.amount)}
+              </span>
+              <span
+                className={cn(
+                  caption.over
+                    ? "text-bad font-semibold"
+                    : "text-subtle font-medium",
+                )}
+              >
+                {caption.text}
+              </span>
+            </div>
+          </div>
+        ))}
+    </div>
   );
 }

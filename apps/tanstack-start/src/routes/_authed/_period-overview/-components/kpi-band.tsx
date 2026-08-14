@@ -1,5 +1,3 @@
-import { TrendingDownIcon, TrendingUpIcon } from "lucide-react";
-
 import { cn } from "@budget/ui";
 
 import type { Delta } from "../-lib/history";
@@ -7,6 +5,7 @@ import type { RevueBudgets } from "../-lib/revue-budgets";
 import { euro0, signedEuro0 } from "~/lib/format";
 import { BUDGETS_OFF_MESSAGES } from "../-lib/revue-budgets";
 import { budgetCaption, BudgetGauge } from "./budget-gauge";
+import { DeltaAmount, DeltaPill } from "./delta-pill";
 
 /**
  * Bandeau de tête — portage de `KpiBand.dc.html` (projet Claude Design
@@ -113,96 +112,6 @@ export function KpiBand({
           {budget && <BudgetRow budget={budget} />}
         </div>
       )}
-    </div>
-  );
-}
-
-/**
- * Colonne de droite du bandeau, le poste ouvert : intitulé calé à gauche,
- * contenu sur une rangée de 33 px calée à droite, écart en dessous. Elle
- * n'existe que tant qu'un poste l'occupe — c'est la contrepartie du bloc de
- * flux, qui disparaît au même moment.
- *
- * Pas de prop de polarité : un poste est toujours une sortie, et une sortie qui
- * monte est toujours une mauvaise nouvelle.
- */
-export function KpiFocus({
-  delta,
-  budget,
-  children,
-}: {
-  label: string;
-  delta: Delta | null;
-  /**
-   * Comparaison au budget du poste ouvert. **Absent** = la revue ne compare pas
-   * du tout (la raison est déjà dite dans le bandeau, la répéter ici serait du
-   * bruit) ; `amount: null` = c'est ce poste-là qui n'a pas de budget, et
-   * l'écran le dit — un blanc se lirait comme un budget à zéro.
-   */
-  budget?: {
-    amount: number | null;
-    covered: number;
-    uncovered: number;
-    /** Teinte du poste : sa jauge appartient à la même famille que son arc. */
-    fill: string;
-  };
-  children: React.ReactNode;
-}) {
-  const caption =
-    budget?.amount == null
-      ? null
-      : budgetCaption(budget.covered, budget.amount);
-  return (
-    // Largeur de la colonne de droite. La maquette la calcule, mais avec la
-    // *même* expression que la colonne des postes (`rdStackPx === listPx`) :
-    // c'est un alignement, pas une coïncidence — d'où la reprise à l'identique
-    // du `BREAKDOWN_WIDTH` de `breakdown-list.tsx`.
-    <div className={cn("flex max-w-full flex-none flex-col items-end")}>
-      <div className="mt-0.5 flex h-8 w-full min-w-0 items-center justify-between gap-3.5">
-        {children}
-      </div>
-      <div className="flex min-h-5 items-center justify-end gap-2.5 whitespace-nowrap">
-        {delta ? (
-          <>
-            <DeltaPill delta={delta} worseWhenUp />
-            <DeltaAmount delta={delta} className="text-subtle text-meta" />
-          </>
-        ) : (
-          <span className="text-subtle text-meta">
-            Pas d'historique de comparaison
-          </span>
-        )}
-      </div>
-
-      {budget &&
-        (budget.amount === null || caption === null ? (
-          <div className="text-subtle text-meta mt-2.5 w-full text-right">
-            Pas de budget sur ce poste
-          </div>
-        ) : (
-          <div className="mt-2.5 flex w-full flex-col gap-1">
-            <BudgetGauge
-              covered={budget.covered}
-              budget={budget.amount}
-              uncovered={budget.uncovered}
-              fill={budget.fill}
-            />
-            <div className="num text-label flex items-baseline justify-between gap-2.5">
-              <span className="text-subtle">
-                Budget {euro0.format(budget.amount)}
-              </span>
-              <span
-                className={cn(
-                  caption.over
-                    ? "text-bad font-semibold"
-                    : "text-subtle font-medium",
-                )}
-              >
-                {caption.text}
-              </span>
-            </div>
-          </div>
-        ))}
     </div>
   );
 }
@@ -315,73 +224,3 @@ function BudgetRow({ budget }: { budget: RevueBudgets }) {
     </div>
   );
 }
-
-/**
- * Écart en pourcentage. Sa couleur ne suit pas son signe mais sa *polarité* :
- * des sorties en hausse sont une mauvaise nouvelle, des entrées en hausse non.
- */
-function DeltaPill({
-  delta,
-  worseWhenUp,
-  className,
-}: {
-  delta: Delta | null;
-  worseWhenUp: boolean;
-  className?: string;
-}) {
-  // Pas de pourcentage quand la référence vaut zéro : « +∞ % » ne dit rien que
-  // l'écart en euros ne dise mieux.
-  if (delta?.pct == null) return null;
-  const bad = worseWhenUp ? delta.amount > 0 : delta.amount < 0;
-  return (
-    <span
-      className={cn(
-        "num text-meta flex h-5 flex-none items-center gap-1 rounded-full px-2 font-semibold",
-        bad ? "bg-bad-soft text-bad" : "bg-ok-soft text-ok",
-        className,
-      )}
-    >
-      {/* Aucune flèche à l'écart nul, comme la maquette : il n'y a pas de sens
-          à montrer. */}
-      {delta.amount > 0 && <TrendingUpIcon className="size-3" aria-hidden />}
-      {delta.amount < 0 && <TrendingDownIcon className="size-3" aria-hidden />}
-      {signedPercent.format(delta.pct)} %
-    </span>
-  );
-}
-
-/** L'écart en euros, second rôle de la pastille. */
-function DeltaAmount({
-  delta,
-  worseWhenUp,
-  className,
-}: {
-  delta: Delta | null;
-  /** Absent = la mention reste neutre, comme sous le solde de la maquette. */
-  worseWhenUp?: boolean;
-  className?: string;
-}) {
-  if (!delta) return null;
-  const bad =
-    worseWhenUp === undefined
-      ? undefined
-      : worseWhenUp
-        ? delta.amount > 0
-        : delta.amount < 0;
-  return (
-    <span
-      className={cn(
-        "num flex-none text-right whitespace-nowrap",
-        bad === undefined ? undefined : bad ? "text-bad" : "text-ok",
-        className,
-      )}
-    >
-      {signedEuro0.format(delta.amount)} vs moy.
-    </span>
-  );
-}
-
-const signedPercent = new Intl.NumberFormat("fr-FR", {
-  maximumFractionDigits: 0,
-  signDisplay: "exceptZero",
-});
