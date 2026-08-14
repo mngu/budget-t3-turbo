@@ -1,0 +1,34 @@
+apps/tanstack-start/src/routes/_authed/settings/categories/-components/category-identity-dialog.tsx
+  h_c1b75a3cdf5637 22
+apps/tanstack-start/src/routes/_authed/settings/budgets/-components/budget-tree.tsx
+  h_c1b75a3cdf5637 17
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/category-ring.tsx
+  h_c1b75a3cdf5637 9
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/category-path-picker.tsx
+  h_c1b75a3cdf5637 17
+apps/tanstack-start/src/routes/_authed/settings/categories/-components/category-overview-tree.tsx
+  h_c1b75a3cdf5637 43
+apps/tanstack-start/src/routes/_authed/_period-overview/route.tsx
+  h_c1b75a3cdf5637 12
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/transactions-table.tsx
+  h_c1b75a3cdf5637 9
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/breakdown-list.tsx
+  h_c1b75a3cdf5637 10
+apps/tanstack-start/src/routes/_authed/settings/categories/-lib/use-preview.tsx
+  h_c1b75a3cdf5637 12
+apps/tanstack-start/src/routes/_authed/_period-overview/index.tsx
+  h_c1b75a3cdf5637 9
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/refine-bar.tsx
+  h_c1b75a3cdf5637 22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "73db7e326c9914e95ac60e86853144e822917851",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
