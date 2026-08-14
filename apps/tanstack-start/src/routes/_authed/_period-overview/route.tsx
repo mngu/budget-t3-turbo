@@ -27,11 +27,7 @@ import {
 } from "~/lib/transactions-search";
 import { useRevueSearch } from "~/lib/use-revue-search";
 import { CategoryIcon } from "../settings/categories/-components/category-icon";
-import {
-  BREAKDOWN_WIDTH,
-  BreakdownList,
-  breakdownRows,
-} from "./-components/breakdown-list";
+import { BreakdownList, breakdownRows } from "./-components/breakdown-list";
 import { KpiBand, KpiFocus } from "./-components/kpi-band";
 
 /**
@@ -297,7 +293,7 @@ function RevueLayout() {
           <Outlet />
         </div>
       </div>
-      <div>
+      <div className="w-80">
         <div className="h-28 px-2">
           {!parent ? (
             // Aucun poste ouvert : la colonne garde son en-tête plutôt qu'un
@@ -305,12 +301,7 @@ function RevueLayout() {
             // détaille. Le reliquat « à classer » n'apparaît qu'à partir du
             // premier euro — sinon la ligne annoncerait un travail à faire là
             // où il n'y en a pas.
-            <div
-              className={cn(
-                BREAKDOWN_WIDTH,
-                "flex max-w-full flex-none flex-col items-end",
-              )}
-            >
+            <div className={cn("flex max-w-full flex-none flex-col items-end")}>
               <div className="flex h-8 w-full min-w-0 items-center justify-between gap-4">
                 <span className="flex min-w-0 flex-1 items-center gap-2">
                   <span className="text-subtle flex flex-none self-center">

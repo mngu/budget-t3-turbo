@@ -52,16 +52,6 @@ export interface BreakdownItem {
   title?: string;
 }
 
-/**
- * Largeur de la colonne des postes, la même sur les deux écrans de la revue —
- * et la même que `KpiFocus` dans le bandeau, qui l'importe : la maquette les
- * calcule avec la *même* expression (`rdStackPx === listPx`), c'est un
- * alignement et non une coïncidence, il ne doit pas pouvoir dériver.
- *
- * 288 px = 72 u, le bas de la fourchette 288–448 du système (§1.6).
- */
-export const BREAKDOWN_WIDTH = "w-72";
-
 // La maquette coupe à 13 lignes et replie le reste : au-delà, les barres
 // deviennent illisibles et la colonne déborde.
 const MAX_ROWS = 13;
@@ -206,9 +196,7 @@ export function BreakdownList({
   const captioned = rows.some((row) => row.budget?.amount != null);
 
   return (
-    <div
-      className={cn("hidden flex-none flex-col pt-4 lg:flex", BREAKDOWN_WIDTH)}
-    >
+    <div className={cn("hidden flex-none flex-col pt-4 lg:flex")}>
       {/* La zone de défilement *est* la barre d'outils : une seule tabulation
           entre dans la colonne, les flèches haut/bas la parcourent en bouclant.
           Une liste de treize boutons prenait sinon treize tabulations à

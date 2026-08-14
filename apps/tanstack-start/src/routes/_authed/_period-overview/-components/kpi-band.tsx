@@ -6,7 +6,6 @@ import type { Delta } from "~/lib/history";
 import type { RevueBudgets } from "~/lib/revue-budgets";
 import { euro0, signedEuro0 } from "~/lib/format";
 import { BUDGETS_OFF_MESSAGES } from "~/lib/revue-budgets";
-import { BREAKDOWN_WIDTH } from "./breakdown-list";
 import { budgetCaption, BudgetGauge } from "./budget-gauge";
 
 /**
@@ -158,12 +157,7 @@ export function KpiFocus({
     // *même* expression que la colonne des postes (`rdStackPx === listPx`) :
     // c'est un alignement, pas une coïncidence — d'où la reprise à l'identique
     // du `BREAKDOWN_WIDTH` de `breakdown-list.tsx`.
-    <div
-      className={cn(
-        BREAKDOWN_WIDTH,
-        "flex max-w-full flex-none flex-col items-end p-2",
-      )}
-    >
+    <div className={cn("flex max-w-full flex-none flex-col items-end")}>
       <div className="mt-0.5 flex h-8 w-full min-w-0 items-center justify-between gap-3.5">
         {children}
       </div>
