@@ -1,26 +1,15 @@
 import { useState } from "react";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { CircleCheckIcon, SparklesIcon, TriangleAlertIcon } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
 
-import type { CategoryOverviewNode, SuggestionsRun } from "@budget/api";
+import type { CategoryOverviewNode } from "@budget/api";
 import { CATEGORY_COLOR_PALETTE } from "@budget/shared";
 import { Button } from "@budget/ui/button";
-import { Spinner } from "@budget/ui/spinner";
 import { toast } from "@budget/ui/toast";
 
-import type { DeleteTarget } from "./-components/category-delete-dialog";
-import type { IdentityTarget } from "./-components/category-identity-dialog";
-import type { PreviewRequest } from "./-components/category-overview-tree";
-import type {
-  PreviewableTransaction,
-  PreviewBadge,
-} from "./-components/transaction-preview-drawer";
-import type { GhostBranch } from "./-lib/suggestions";
 import { Stat } from "~/component/stat";
-import { softCategoryColor, useCategoryColor } from "~/lib/category-color";
 import { useTRPCClient } from "~/lib/trpc";
+import { AnalysisBanner } from "./-components/analysis-banner";
 import { CategoryDeleteDialog } from "./-components/category-delete-dialog";
-import { CategoryIcon } from "./-components/category-icon";
 import { CategoryIdentityDialog } from "./-components/category-identity-dialog";
 import { CategoryOverviewTree } from "./-components/category-overview-tree";
 import {
@@ -28,7 +17,10 @@ import {
   SuggestionsWaitPanel,
 } from "./-components/suggestions-panel";
 import { TransactionPreviewDrawer } from "./-components/transaction-preview-drawer";
-import { deriveSuggestions, ghostTransactions } from "./-lib/suggestions";
+import { useCategoryCrud } from "./-lib/use-category-crud";
+import { usePreview } from "./-lib/use-preview";
+import { useRun } from "./-lib/use-run";
+import { useSuggestions } from "./-lib/use-suggestions";
 
 export const Route = createFileRoute("/_authed/settings/categories/")({
   loader: async ({ context }) => {
@@ -40,30 +32,6 @@ export const Route = createFileRoute("/_authed/settings/categories/")({
   staticData: { title: "Catégories", aside: CategoriesAside },
   component: CategoriesPage,
 });
-
-/**
- * La proposition de l'analyse, telle que cet écran la retient — **en mémoire du
- * navigateur, nulle part ailleurs**. Le serveur ne garde rien : quitter la page
- * ou recharger la perd, et il suffit de relancer l'analyse. C'est assumé — elle
- * ne fait que proposer, rien n'est écrit en base tant qu'on n'a pas cliqué
- * « Ajouter ».
- *
- * Le seul ajout à ce que renvoie `generate` est l'horodatage : c'est le client
- * qui le pose, l'instant qui compte étant celui où *il* a reçu la proposition.
- */
-interface Analysis extends SuggestionsRun {
-  generatedAt: Date;
-}
-
-interface PreviewState {
-  title: string;
-  description: string;
-  txns: PreviewableTransaction[];
-  badge: PreviewBadge;
-  footer: string;
-}
-
-const PREVIEW_FOOTER = "Aperçu limité aux 25 transactions les plus récentes.";
 
 function CategoriesAside() {
   const { stats } = Route.useLoaderData();
@@ -82,68 +50,21 @@ function CategoriesAside() {
 
 function CategoriesPage() {
   const { tree, uncategorizedCount, stats } = Route.useLoaderData();
-  const router = useRouter();
   const trpcClient = useTRPCClient();
-  const resolveColor = useCategoryColor();
+  const run = useRun();
 
-  const [analysis, setAnalysis] = useState<Analysis | null>(null);
-  const [generating, setGenerating] = useState(false);
-  const [categorizing, setCategorizing] = useState(false);
-  const [panelClosed, setPanelClosed] = useState(false);
-  // Le rejet d'une proposition n'a rien à écrire en base : la proposition
-  // elle-même n'existe que dans cette page, et disparaît au prochain
-  // « Lancer l'analyse ».
-  const [dismissed, setDismissed] = useState<ReadonlySet<string>>(new Set());
-  const [pending, setPending] = useState<ReadonlySet<string>>(new Set());
-  const [identityTarget, setIdentityTarget] = useState<IdentityTarget | null>(
-    null,
-  );
-  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
-  const [deleting, setDeleting] = useState(false);
-  const [preview, setPreview] = useState<PreviewState | null>(null);
+  // Gestion courante (créer, renommer, supprimer, identité) — sans LLM.
+  const crud = useCategoryCrud();
+  // Analyse des catégories manquantes — le run vit dans le navigateur.
+  const analysis = useSuggestions(tree);
+  const preview = usePreview();
+
   const [expandAll, setExpandAll] = useState<boolean | null>(null);
+  const [categorizing, setCategorizing] = useState(false);
 
-  const suggestions = deriveSuggestions(
-    analysis?.suggestions ?? [],
-    tree,
-    dismissed,
-  );
-  const showReviewPanel =
-    !generating &&
-    analysis !== null &&
-    !panelClosed &&
-    suggestions.branchCount > 0;
-
-  // ── Mutations ────────────────────────────────────────────────────────────
-
-  const run = async <T,>(
-    action: () => Promise<T>,
-    fallbackMessage: string,
-  ): Promise<T | null> => {
-    try {
-      const result = await action();
-      await router.invalidate();
-      return result;
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : fallbackMessage);
-      return null;
-    }
-  };
-
-  // Pas d'`invalidate` : l'analyse n'écrit rien, il n'y a rien à recharger.
-  const generate = async () => {
-    setGenerating(true);
-    setPanelClosed(false);
-    setDismissed(new Set());
-    try {
-      const result = await trpcClient.categories.suggestions.generate.mutate();
-      setAnalysis({ ...result, generatedAt: new Date() });
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Échec de l'analyse.");
-    }
-    setGenerating(false);
-  };
-
+  // Catégorisation LLM avec l'arbre **existant** : voisine de l'analyse par le
+  // bouton qui la porte, mais rien à voir par ce qu'elle fait — elle n'invente
+  // aucune catégorie. Un booléen et quinze lignes, elle n'a pas de hook.
   const categorize = async () => {
     setCategorizing(true);
     const result = await run(
@@ -160,56 +81,6 @@ function CategoriesPage() {
     setCategorizing(false);
   };
 
-  const acceptGhost = async (ghost: GhostBranch) => {
-    setPending((s) => new Set(s).add(ghost.key));
-    const result = await run(
-      () =>
-        trpcClient.categories.suggestions.accept.mutate({
-          parent: ghost.parent,
-          parentColor: ghost.parentColor,
-          child: { name: ghost.name, txnIds: ghost.txnIds },
-        }),
-      "Échec de l'ajout de la catégorie.",
-    );
-    if (result) {
-      toast.success(
-        result.transactionsCategorized > 0
-          ? `« ${ghost.name} » ajoutée — ${result.transactionsCategorized} transaction(s) rangée(s).`
-          : `« ${ghost.name} » ajoutée. Aucune transaction rangée : elles ont toutes reçu une catégorie depuis l'analyse.`,
-      );
-    }
-    setPending((s) => {
-      const next = new Set(s);
-      next.delete(ghost.key);
-      return next;
-    });
-  };
-
-  const openPreview = async ({
-    name,
-    includesChildren,
-    color,
-    soft,
-    icon,
-  }: PreviewRequest) => {
-    const result = await trpcClient.transactions.list.query({
-      page: 1,
-      sort: "date",
-      order: "desc",
-      internes: "toutes",
-      category: name,
-    });
-    setPreview({
-      title: name,
-      description: `${result.rows.length} transaction(s) — aperçu de cette catégorie (25 plus récentes)${includesChildren ? ", y compris les sous-catégories" : ""}.`,
-      txns: result.rows,
-      badge: categoryBadge(color, soft, icon),
-      footer: PREVIEW_FOOTER,
-    });
-  };
-
-  // ── Rendu ────────────────────────────────────────────────────────────────
-
   return (
     <>
       <p className="text-muted-foreground text-control mt-2 max-w-160 text-pretty">
@@ -218,83 +89,29 @@ function CategoriesPage() {
         elles se choisissent ici, et nulle part ailleurs.
       </p>
 
-      {!generating &&
-        !showReviewPanel &&
-        (uncategorizedCount > 0 ? (
-          <section className="border-primary bg-accent-soft mt-5 flex flex-wrap items-center gap-4 rounded-xl border p-4">
-            <span className="bg-card border-primary text-primary flex size-9 flex-none items-center justify-center rounded-md border">
-              <SparklesIcon className="size-4" />
-            </span>
-            <div className="flex-1">
-              <h2 className="text-subheading">Catégories manquantes</h2>
-              <p className="text-muted-foreground text-control mt-1 text-pretty">
-                <span className="text-foreground font-medium">
-                  {uncategorizedCount} transaction
-                  {uncategorizedCount > 1 ? "s" : ""}
-                </span>{" "}
-                qu'aucune de vos catégories ne décrit. Une analyse d'environ une
-                minute propose ce qui manque, et n'écrit rien tant que vous
-                n'avez pas répondu.
-              </p>
-            </div>
-            <div className="flex items-center gap-2.5">
-              <Button
-                variant="outline"
-                onClick={() =>
-                  openUncategorizedPreview(
-                    trpcClient,
-                    uncategorizedCount,
-                    setPreview,
-                  )
-                }
-              >
-                Voir les {uncategorizedCount}
-              </Button>
-              {/* Absent de la maquette, qui ne connaît que l'analyse :
-                      classer avec les catégories existantes reste l'étape la
-                      moins chère, et c'est elle qui dit si l'arbre suffit. */}
-              <Button
-                variant="outline"
-                onClick={categorize}
-                disabled={categorizing}
-              >
-                {categorizing && <Spinner />}
-                Catégoriser
-              </Button>
-              <Button onClick={generate}>Lancer l&apos;analyse</Button>
-            </div>
-          </section>
-        ) : (
-          <section className="bg-card mt-5 flex flex-wrap items-center gap-3.5 rounded-xl border px-4 py-3.5">
-            <CircleCheckIcon className="text-ok size-4 flex-none" />
-            <div className="min-w-65 flex-1">
-              <h2 className="text-control font-medium">
-                Toutes vos transactions sont catégorisées
-              </h2>
-              <p className="text-subtle text-control mt-0.5">
-                Une analyse peut quand même proposer des branches plus fines que
-                celles que vous avez.
-              </p>
-            </div>
-            <Button variant="outline" onClick={generate}>
-              Chercher des catégories
-            </Button>
-          </section>
-        ))}
-
-      {generating && (
-        <SuggestionsWaitPanel onClose={() => setPanelClosed(true)} />
+      {analysis.panel === null && (
+        <AnalysisBanner
+          uncategorizedCount={uncategorizedCount}
+          categorizing={categorizing}
+          onCategorize={categorize}
+          onAnalyze={analysis.generate}
+          onPreviewUncategorized={() =>
+            void preview.openUncategorized(uncategorizedCount)
+          }
+        />
       )}
 
-      {/* `showReviewPanel` porte déjà le `analysis !== null` : TypeScript
-              affine à travers la constante, un second test serait mort. */}
-      {showReviewPanel && (
+      {analysis.panel?.kind === "wait" && (
+        <SuggestionsWaitPanel onClose={analysis.closePanel} />
+      )}
+
+      {analysis.panel?.kind === "review" && (
         <SuggestionsReviewPanel
-          generatedAt={analysis.generatedAt}
-          branchCount={suggestions.branchCount}
-          touchedExistingParents={suggestions.touchedExistingParents}
-          newParentCount={suggestions.proposedParents.length}
-          onClose={() => setPanelClosed(true)}
+          generatedAt={analysis.panel.generatedAt}
+          branchCount={analysis.panel.branchCount}
+          touchedExistingParents={analysis.panel.touchedExistingParents}
+          newParentCount={analysis.panel.newParentCount}
+          onClose={analysis.closePanel}
         />
       )}
 
@@ -302,7 +119,7 @@ function CategoriesPage() {
         <h2 className="text-heading">Vos catégories</h2>
         <span className="text-subtle text-control">
           {/* Les décomptes vivent dans le bloc de compteurs en haut de
-                  page : ne reste ici que ce que ceux-ci ne disent pas. */}
+              page : ne reste ici que ce que ceux-ci ne disent pas. */}
           {tree.length === 0
             ? "aucune catégorie pour le moment"
             : "le compteur d'une parente ne compte que ses transactions directes"}
@@ -331,62 +148,22 @@ function CategoriesPage() {
 
       <CategoryOverviewTree
         tree={tree}
-        ghostsByParentId={suggestions.ghostsByParentId}
-        proposedParents={suggestions.proposedParents}
+        ghostsByParentId={analysis.suggestions.ghostsByParentId}
+        proposedParents={analysis.suggestions.proposedParents}
         uncategorizedCount={uncategorizedCount}
         ownersByColor={stats.ownersByColor}
-        pendingGhosts={pending}
+        pendingGhosts={analysis.pending}
         expandAllSignal={expandAll}
-        onAnalyze={generate}
-        onRename={async (id, name) =>
-          (await run(
-            () => trpcClient.categories.rename.mutate({ id, name }),
-            "Échec du renommage.",
-          )) !== null
-        }
-        onOpenIdentity={setIdentityTarget}
-        onPreview={openPreview}
-        onDelete={setDeleteTarget}
-        onAddChild={(parentId) =>
-          void run(
-            () =>
-              trpcClient.categories.create.mutate({
-                name: "Nouvelle sous-catégorie",
-                parentId,
-              }),
-            "Échec de la création.",
-          )
-        }
-        onAddParent={() =>
-          void run(
-            () =>
-              trpcClient.categories.create.mutate({
-                name: "Nouvelle catégorie",
-                parentId: null,
-              }),
-            "Échec de la création.",
-          )
-        }
-        onAcceptGhost={acceptGhost}
-        onDismissGhost={(ghost) =>
-          setDismissed((s) => new Set(s).add(ghost.key))
-        }
-        onPreviewGhost={(ghost) =>
-          setPreview({
-            title: `${ghost.parent} › ${ghost.name}`,
-            description: `${ghost.txnIds.length} transaction(s) sans catégorie qui se ressemblent — aperçu.`,
-            txns: ghostTransactions(ghost, analysis?.sample ?? []),
-            // Une branche proposée n'a pas encore d'icône : la pastille
-            // creuse dans la teinte de sa parente est exactement l'état
-            // « aucune icône choisie ».
-            badge: categoryBadge(
-              resolveColor(ghost.parentColor),
-              softCategoryColor(resolveColor(ghost.parentColor)),
-              null,
-            ),
-            footer: "Proposition : elles seraient rangées ici.",
-          })
-        }
+        onAnalyze={analysis.generate}
+        onRename={crud.onRename}
+        onOpenIdentity={crud.onOpenIdentity}
+        onDelete={crud.onDelete}
+        onAddChild={crud.onAddChild}
+        onAddParent={crud.onAddParent}
+        onPreview={(request) => void preview.openCategory(request)}
+        onAcceptGhost={analysis.acceptGhost}
+        onDismissGhost={analysis.dismissGhost}
+        onPreviewGhost={(ghost) => preview.openGhost(ghost, analysis.sample)}
       />
 
       <p className="text-subtle text-control mt-3.5 max-w-205 text-pretty">
@@ -398,109 +175,32 @@ function CategoriesPage() {
       </p>
 
       <CategoryIdentityDialog
-        target={identityTarget}
-        onOpenChange={(open) => !open && setIdentityTarget(null)}
+        target={crud.identityTarget}
+        onOpenChange={(open) => !open && crud.closeIdentity()}
         ownersByColor={stats.ownersByColor}
         usageByIcon={stats.usageByIcon}
-        onColorChange={(color) => {
-          if (!identityTarget) return;
-          setIdentityTarget({ ...identityTarget, color });
-          void run(
-            () =>
-              trpcClient.categories.updateColor.mutate({
-                id: identityTarget.id,
-                color,
-              }),
-            "Échec du changement de couleur.",
-          );
-        }}
-        onIconChange={(icon) => {
-          if (!identityTarget) return;
-          setIdentityTarget({ ...identityTarget, icon });
-          void run(
-            () =>
-              trpcClient.categories.updateIcon.mutate({
-                id: identityTarget.id,
-                icon,
-              }),
-            "Échec du changement d'icône.",
-          );
-        }}
+        onColorChange={crud.changeColor}
+        onIconChange={crud.changeIcon}
       />
 
       <CategoryDeleteDialog
-        target={deleteTarget}
-        deleting={deleting}
-        onOpenChange={(open) => !open && setDeleteTarget(null)}
-        onConfirm={async () => {
-          if (!deleteTarget) return;
-          setDeleting(true);
-          const done = await run(
-            () => trpcClient.categories.remove.mutate({ id: deleteTarget.id }),
-            "Échec de la suppression.",
-          );
-          if (done !== null) {
-            toast.success(`« ${deleteTarget.name} » supprimée.`);
-            setDeleteTarget(null);
-          }
-          setDeleting(false);
-        }}
+        target={crud.deleteTarget}
+        deleting={crud.deleting}
+        onOpenChange={(open) => !open && crud.closeDelete()}
+        onConfirm={() => void crud.confirmDelete()}
       />
 
       <TransactionPreviewDrawer
-        open={preview !== null}
-        onOpenChange={(open) => !open && setPreview(null)}
-        title={preview?.title ?? ""}
-        description={preview?.description}
-        transactions={preview?.txns ?? []}
-        badge={preview?.badge}
-        footer={preview?.footer}
+        open={preview.preview !== null}
+        onOpenChange={(open) => !open && preview.close()}
+        title={preview.preview?.title ?? ""}
+        description={preview.preview?.description}
+        transactions={preview.preview?.txns ?? []}
+        badge={preview.preview?.badge}
+        footer={preview.preview?.footer}
       />
     </>
   );
-}
-
-// Pastille d'en-tête du panneau d'aperçu : la teinte et l'aplat déjà résolus
-// pour le thème par l'appelant (l'aplat est celui de la parente, jamais dérivé
-// d'un palier de sous-catégorie — voir PreviewRequest), et l'icône de la
-// catégorie, creuse si elle n'en a pas.
-function categoryBadge(
-  color: string,
-  soft: string,
-  icon: string | null,
-): PreviewBadge {
-  return {
-    color,
-    soft,
-    icon: <CategoryIcon name={icon} className="size-3.5" />,
-  };
-}
-
-async function openUncategorizedPreview(
-  trpcClient: ReturnType<typeof useTRPCClient>,
-  total: number,
-  setPreview: (state: PreviewState) => void,
-) {
-  const result = await trpcClient.transactions.list.query({
-    page: 1,
-    sort: "date",
-    order: "desc",
-    internes: "toutes",
-    category: "none",
-  });
-  setPreview({
-    title: "Sans catégorie",
-    description: `${total} transaction(s) qu'aucune branche ne décrit — aperçu des ${result.rows.length} plus récentes.`,
-    txns: result.rows,
-    // Pas de catégorie, donc pas de teinte : c'est le seul aperçu qui porte
-    // l'avertissement plutôt qu'une famille de couleur.
-    badge: {
-      color: "var(--warn)",
-      soft: "var(--warn-soft)",
-      icon: <TriangleAlertIcon className="size-3.5" />,
-    },
-    footer: "Une transaction sans catégorie signale une branche manquante.",
-  });
 }
 
 // Compteurs de l'en-tête et données dérivées du choix de teinte. « Teintes

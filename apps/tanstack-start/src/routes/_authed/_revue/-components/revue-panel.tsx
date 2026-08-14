@@ -7,7 +7,6 @@ import { ArrowRightIcon, LayersIcon } from "lucide-react";
 import { cn } from "@budget/ui";
 
 import type { RingSlice } from "./category-ring";
-import type { RevueBudgets } from "~/lib/revue-budgets";
 import type { RevueCategory } from "~/lib/revue-categories";
 import {
   shadeCategoryColor,
@@ -18,7 +17,6 @@ import { euro0, sharePercent } from "~/lib/format";
 import { focusedCategory } from "~/lib/revue-categories";
 import { useRevueSearch } from "~/lib/use-revue-search";
 import { CategoryIcon } from "../../settings/categories/-components/category-icon";
-import { BreakdownList, breakdownRows } from "./breakdown-list";
 import { CategoryRing } from "./category-ring";
 import { useDrill } from "./use-drill";
 
@@ -45,17 +43,10 @@ import { useDrill } from "./use-drill";
  */
 export function RevuePanel({
   categories,
-  budgets,
   expenses,
 }: {
   /** Postes de sortie, du plus gros au plus petit. */
   categories: RevueCategory[];
-  /**
-   * Comparaison au budget, telle que le loader du layout l'a tranchée : passée
-   * telle quelle à `breakdownRows`, qui en tire les jauges de la colonne. Le
-   * bandeau, monté par le layout, en tire sa rangée « Budget ».
-   */
-  budgets: RevueBudgets;
   /** Total des sorties de la période, dénominateur de la part affichée au centre. */
   expenses: number;
 }) {
@@ -170,26 +161,6 @@ export function RevuePanel({
     setAClasserSel(false);
     drill(category.filter, () => setSearch({ category: category.filter }));
   };
-
-  // Les lignes de la colonne, jauges comprises. Au niveau des parents chacune
-  // est une porte d'entrée vers ses enfants ; une fois descendu, elles sont en
-  // lecture seule — c'est l'anneau qui surligne une sous-catégorie.
-  const rows = breakdownRows(categories, selected, resolveColor, budgets).map(
-    (row, index) => {
-      if (selected) return row;
-      // Les lignes suivent l'ordre de `categories` : l'index désigne le même
-      // poste des deux côtés.
-      const category = categories[index];
-      // Sans sous-catégorie, la ligne n'est pas une porte : elle reste
-      // désactivée plutôt que d'ouvrir sur le vide (voir `selected`).
-      if (!category?.subs.length) return row;
-      return {
-        ...row,
-        title: `Voir la répartition de « ${row.name} »`,
-        onSelect: () => descend(category),
-      };
-    },
-  );
 
   return (
     // Fragment, comme `/transactions` : la colonne des postes est une **sœur**
@@ -325,8 +296,6 @@ export function RevuePanel({
           />
         </div>
       </div>
-
-      <BreakdownList rows={rows} fold={selected !== null} />
     </>
   );
 }

@@ -207,10 +207,7 @@ export function BreakdownList({
 
   return (
     <div
-      className={cn(
-        "hidden flex-none flex-col pt-0.5 lg:flex",
-        BREAKDOWN_WIDTH,
-      )}
+      className={cn("hidden flex-none flex-col pt-4 lg:flex", BREAKDOWN_WIDTH)}
     >
       {/* La zone de défilement *est* la barre d'outils : une seule tabulation
           entre dans la colonne, les flèches haut/bas la parcourent en bouclant.
@@ -223,7 +220,7 @@ export function BreakdownList({
       <Toolbar.Root
         orientation="vertical"
         aria-label="Répartition par poste"
-        className="flex min-h-0 flex-1 [scrollbar-width:thin] [scrollbar-color:var(--border-strong)_transparent] flex-col overflow-y-auto"
+        className="flex min-h-0 flex-1 scrollbar-thin [scrollbar-color:var(--border-strong)_transparent] flex-col overflow-y-auto"
       >
         {/* Clé de **position** et non de nom : c'est ce qui fait exister la
             transition de la barre. Keyée par nom, chaque changement de niveau ou

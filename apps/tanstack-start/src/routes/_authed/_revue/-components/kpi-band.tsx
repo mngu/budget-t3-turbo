@@ -161,7 +161,7 @@ export function KpiFocus({
     <div
       className={cn(
         BREAKDOWN_WIDTH,
-        "flex max-w-full flex-none flex-col items-end",
+        "flex max-w-full flex-none flex-col items-end p-2",
       )}
     >
       <div className="mt-0.5 flex h-8 w-full min-w-0 items-center justify-between gap-3.5">

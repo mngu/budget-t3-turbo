@@ -106,7 +106,7 @@ export function CategoryIdentityDialog({
           </div>
         </DialogHeader>
 
-        <div className="min-h-0 flex-1 overflow-y-auto p-4">
+        <div className="min-h-0 flex-1 scrollbar-thin overflow-y-auto p-4">
           <div className="flex items-baseline gap-2.5">
             <span className="label-caps">Couleur</span>
             <span className="text-muted-foreground text-meta">

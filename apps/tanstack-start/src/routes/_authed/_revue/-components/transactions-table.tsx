@@ -55,7 +55,7 @@ export function TransactionsTable({
   const grouped = search.sort === "date";
 
   return (
-    <div className="min-h-0 flex-1 overflow-y-auto pr-2">
+    <div className="min-h-0 flex-1 scrollbar-thin overflow-y-auto pr-2">
       <div
         className={cn(
           GRID,

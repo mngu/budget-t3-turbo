@@ -3,12 +3,14 @@ import {
   Outlet,
   stripSearchParams,
 } from "@tanstack/react-router";
+import { LayersIcon, TriangleAlertIcon } from "lucide-react";
 
 import { transactionsSearchSchema } from "@budget/shared";
+import { cn } from "@budget/ui";
 
 import type { RevueCategory } from "~/lib/revue-categories";
 import { useCategoryColor } from "~/lib/category-color";
-import { euro } from "~/lib/format";
+import { euro, euro0 } from "~/lib/format";
 import {
   averagesByCategory,
   deltaTo,
@@ -24,6 +26,11 @@ import {
   wholePeriod,
 } from "~/lib/transactions-search";
 import { useRevueSearch } from "~/lib/use-revue-search";
+import {
+  BREAKDOWN_WIDTH,
+  BreakdownList,
+  breakdownRows,
+} from "~/routes/_authed/_revue/-components/breakdown-list";
 import { CategoryIcon } from "../settings/categories/-components/category-icon";
 import { KpiBand, KpiFocus } from "./-components/kpi-band";
 
@@ -219,7 +226,7 @@ function RevueLayout() {
     expensesDelta,
     balanceDelta,
   } = Route.useLoaderData();
-  const { search } = useRevueSearch();
+  const { search, setSearch } = useRevueSearch();
   const resolveColor = useCategoryColor();
 
   // Le poste ouvert est une fonction pure du search param : filtrer une parente
@@ -229,78 +236,154 @@ function RevueLayout() {
   // fonction partagée plutôt qu'une seconde copie : les deux ne peuvent pas
   // nommer deux postes différents.
   const parent = focusedCategory(categories, search.category);
+  // De quoi habiller l'en-tête de la colonne quand aucun poste n'est ouvert.
+  // `filter: null` est le segment fabriqué par `byCategory` — le reliquat porté
+  // par la parente : il n'est pas une sous-catégorie de plus, il est ce qui
+  // reste à ranger.
+  const subs = categories.flatMap((category) => category.subs);
+  const subCount = subs.filter((sub) => sub.filter !== null).length;
+  const aClasser = subs.reduce(
+    (total, sub) => total + (sub.filter === null ? sub.total : 0),
+    0,
+  );
+  const rows = breakdownRows(categories, parent, resolveColor, budgets).map(
+    (row, index) => {
+      if (parent) return row;
+      // Les lignes suivent l'ordre de `categories` : l'index désigne le même
+      // poste des deux côtés.
+      const category = categories[index];
+      // Sans sous-catégorie, la ligne n'est pas une porte : elle reste
+      // désactivée plutôt que d'ouvrir sur le vide (voir `selected`).
+      if (!category?.subs.length) return row;
+      return {
+        ...row,
+        title: `Voir la répartition de « ${row.name} »`,
+        onSelect: () => setSearch({ category: category.filter }),
+      };
+    },
+  );
 
   return (
-    // text-body : la base typographique de la maquette. Les tailles fines
-    // (11–12,5 px) sont posées au cas par cas, jamais héritées d'un rem global
-    // qui décalerait aussi /banques et /categories.
-    <div className="flex min-h-0 flex-1 flex-col px-5 pt-4.5 pb-4">
-      {/* `flex-wrap` n'est pas dans la maquette, qui ne descend pas sous
+    <div className="flex w-full gap-4">
+      <div className="flex min-h-0 flex-1 flex-col">
+        {/* `flex-wrap` n'est pas dans la maquette, qui ne descend pas sous
             460 px : il évite que la colonne de droite, à largeur fixe, ne pousse
             le solde hors de l'écran sur une fenêtre étroite. */}
-      <div className="flex min-h-17 flex-none flex-wrap items-end gap-x-[clamp(11px,1.85vw,25px)] gap-y-3">
-        <div className="min-w-0 flex-1">
-          <KpiBand
-            label="Solde du mois"
-            balance={balance}
-            balanceDelta={balanceDelta}
-            // Les deux rangées de flux restent affichées quand un poste
-            // s'ouvre (`showFlow: true` dans la maquette depuis le passage du
-            // poste ouvert en colonne à part) : le solde et les deux flux
-            // décrivent le mois, le poste vient à côté et non à leur place.
-            flow={{
-              revenues: { amount: revenues, delta: revenuesDelta },
-              expenses: { amount: expenses, delta: expensesDelta },
-            }}
-            // Troisième rangée du bandeau depuis la maquette du 2026-08-06 :
-            // la dépense du mois contre l'enveloppe de `/budgets`. Elle
-            // apparaît donc aussi sur `/transactions`, qui monte le même
-            // bandeau — c'est ce que fait `Transactions.dc.html`.
-            budget={budgets}
-          />
+        <div className="flex min-h-17 flex-none flex-wrap items-end gap-x-[clamp(11px,1.85vw,25px)] gap-y-3">
+          <div className="min-w-0 flex-1">
+            <KpiBand
+              label="Solde du mois"
+              balance={balance}
+              balanceDelta={balanceDelta}
+              // Les deux rangées de flux restent affichées quand un poste
+              // s'ouvre (`showFlow: true` dans la maquette depuis le passage du
+              // poste ouvert en colonne à part) : le solde et les deux flux
+              // décrivent le mois, le poste vient à côté et non à leur place.
+              flow={{
+                revenues: { amount: revenues, delta: revenuesDelta },
+                expenses: { amount: expenses, delta: expensesDelta },
+              }}
+              // Troisième rangée du bandeau depuis la maquette du 2026-08-06 :
+              // la dépense du mois contre l'enveloppe de `/budgets`. Elle
+              // apparaît donc aussi sur `/transactions`, qui monte le même
+              // bandeau — c'est ce que fait `Transactions.dc.html`.
+              budget={budgets}
+            />
+          </div>
         </div>
 
-        {parent && (
-          <KpiFocus
-            label={`${parent.subs.length} sous-catégorie${parent.subs.length > 1 ? "s" : ""}`}
-            delta={parent.delta}
-            // Absent quand la revue ne compare pas ; `amount: null` quand
-            // c'est ce poste-là qui n'a pas de budget — l'écran le dit plutôt
-            // que de laisser un vide sous les autres.
-            budget={
-              budgets.off
-                ? undefined
-                : {
-                    amount: parent.budget,
-                    covered: parent.covered,
-                    uncovered: parent.total - parent.covered,
-                    fill: resolveColor(parent.color),
-                  }
-            }
-          >
-            <span className="flex min-w-0 flex-1 items-center gap-2">
-              <span
-                className="flex flex-none self-center"
-                style={{ color: resolveColor(parent.color) }}
-              >
-                <CategoryIcon name={parent.icon} className="size-4" />
-              </span>
-              <span className="text-subheading line-clamp-2 min-w-0 leading-[1.15]">
-                {parent.name}
-              </span>
-            </span>
-            {/* Deux décimales, comme les lignes de la colonne : ce chiffre-là
-                  est un montant précis, pas un ordre de grandeur. */}
-            <span className="num text-amount min-w-24 flex-none text-right font-medium tracking-[-0.02em]">
-              {euro.format(parent.total)}
-            </span>
-          </KpiFocus>
-        )}
+        {/* Chaque écran rend son contenu **et** sa colonne des postes. */}
+        <div className="mt-3 flex min-h-0 flex-1 gap-5">
+          <Outlet />
+        </div>
       </div>
-
-      {/* Chaque écran rend son contenu **et** sa colonne des postes. */}
-      <div className="mt-3 flex min-h-0 flex-1 gap-5">
-        <Outlet />
+      <div>
+        <div className="h-28 px-2">
+          {!parent ? (
+            // Aucun poste ouvert : la colonne garde son en-tête plutôt qu'un
+            // trou au-dessus des postes, et il dit ce que la liste du dessous
+            // détaille. Le reliquat « à classer » n'apparaît qu'à partir du
+            // premier euro — sinon la ligne annoncerait un travail à faire là
+            // où il n'y en a pas.
+            <div
+              className={cn(
+                BREAKDOWN_WIDTH,
+                "flex max-w-full flex-none flex-col items-end",
+              )}
+            >
+              <div className="flex h-8 w-full min-w-0 items-center justify-between gap-4">
+                <span className="flex min-w-0 flex-1 items-center gap-2">
+                  <span className="text-subtle flex flex-none self-center">
+                    <LayersIcon className="size-4" aria-hidden />
+                  </span>
+                  <span className="text-subheading min-w-0 truncate leading-[1.15]">
+                    Toutes catégories
+                  </span>
+                </span>
+                {/* Sans décimale, à la différence du total d'un poste ouvert :
+                    c'est le même nombre que la rangée « Sorties » du bandeau,
+                    à deux cents près il se lirait comme un autre. */}
+                <span className="num text-amount min-w-24 flex-none text-right font-medium tracking-[-0.02em]">
+                  {euro0.format(expenses)}
+                </span>
+              </div>
+              {/* « de dépense » n'est pas de l'ornement : le loader force
+                  `direction: "debit"`, la colonne n'inventorie que les sorties —
+                  et sur `/transactions`, dont le sélecteur de sens peut être sur
+                  « Crédits », rien d'autre ne le dit. */}
+              <div className="text-subtle text-meta flex min-h-5 items-center justify-end whitespace-nowrap">
+                {categories.length} poste{categories.length > 1 ? "s" : ""} de
+                dépense · {subCount} sous-catégorie{subCount > 1 ? "s" : ""}
+              </div>
+              {aClasser > 0 && (
+                <div className="text-warn text-meta mt-2.5 flex items-center gap-1.5 whitespace-nowrap">
+                  <TriangleAlertIcon className="size-3" aria-hidden />
+                  <span className="num">{euro0.format(aClasser)}</span> à
+                  classer
+                </div>
+              )}
+            </div>
+          ) : (
+            <KpiFocus
+              label={`${parent.subs.length} sous-catégorie${parent.subs.length > 1 ? "s" : ""}`}
+              delta={parent.delta}
+              // Absent quand la revue ne compare pas ; `amount: null` quand
+              // c'est ce poste-là qui n'a pas de budget — l'écran le dit plutôt
+              // que de laisser un vide sous les autres.
+              budget={
+                budgets.off
+                  ? undefined
+                  : {
+                      amount: parent.budget,
+                      covered: parent.covered,
+                      uncovered: parent.total - parent.covered,
+                      fill: resolveColor(parent.color),
+                    }
+              }
+            >
+              <span className="flex min-w-0 flex-1 items-center gap-2">
+                <span
+                  className="flex flex-none self-center"
+                  style={{ color: resolveColor(parent.color) }}
+                >
+                  <CategoryIcon name={parent.icon} className="size-4" />
+                </span>
+                <span className="text-subheading line-clamp-2 min-w-0 leading-[1.15]">
+                  {parent.name}
+                </span>
+              </span>
+              {/* Deux décimales, comme les lignes de la colonne : ce chiffre-là
+                    est un montant précis, pas un ordre de grandeur. */}
+              <span className="num text-amount min-w-24 flex-none text-right font-medium tracking-[-0.02em]">
+                {euro.format(parent.total)}
+              </span>
+            </KpiFocus>
+          )}
+        </div>
+        <div className="flex justify-center">
+          <hr className="w-64" />
+        </div>
+        <BreakdownList rows={rows} fold={parent !== null} />
       </div>
     </div>
   );

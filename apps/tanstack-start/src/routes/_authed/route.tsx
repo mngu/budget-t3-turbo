@@ -26,7 +26,9 @@ function AuthedLayout() {
   return (
     <div className="flex h-dvh flex-col overflow-hidden">
       <AppHeader title={title} />
-      <Outlet />
+      <div className="flex flex-1 scrollbar-thin overflow-auto p-5">
+        <Outlet />
+      </div>
     </div>
   );
 }

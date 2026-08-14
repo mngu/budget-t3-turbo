@@ -30,23 +30,12 @@ export default defineConfig({
     host: true,
   },
   plugins: [
-    tsConfigPaths({
-      projects: ["./tsconfig.json"],
-    }),
-    nitro({
-      // lucide-react n'a pas de champ `exports` : Node résout donc le specifier
-      // nu par `main` (du CJS), alors que le tracer de nitro ne copie que ce que
-      // le bundler a lu (l'ESM). Le build passe, `.output` démarre, et le
-      // premier rendu SSR meurt en ERR_MODULE_NOT_FOUND — invisible en dev, qui
-      // résout depuis les vrais node_modules. L'inliner supprime la résolution à
-      // l'exécution. À retenter de retirer quand nitro sortira de l'alpha.
-      externals: {
-        inline: ["lucide-react"],
-      },
-    }),
-    tanstackStart(),
-    viteReact(),
-    tailwindcss(),
+    // En premier, et c'est ce qui rend ses numéros de ligne justes : le plugin
+    // est en `enforce: "pre"`, mais ceux de TanStack aussi (`tanstack-router:hmr`
+    // et `:autoimport`), et ils réimpriment les fichiers de route par babel.
+    // Placé après eux, code-inspector lisait le fichier régénéré — tout le
+    // fichier sur une seule ligne, donc des `:1:251984:` inexploitables. Le
+    // symptôme ne touchait que les routes, les composants ordinaires étant justes.
     codeInspectorPlugin({
       bundler: "vite",
       // Sans ça, WebStorm ouvre `apps/tanstack-start` comme un projet à part au
@@ -64,5 +53,22 @@ export default defineConfig({
         "{file}",
       ],
     }),
+    tsConfigPaths({
+      projects: ["./tsconfig.json"],
+    }),
+    nitro({
+      // lucide-react n'a pas de champ `exports` : Node résout donc le specifier
+      // nu par `main` (du CJS), alors que le tracer de nitro ne copie que ce que
+      // le bundler a lu (l'ESM). Le build passe, `.output` démarre, et le
+      // premier rendu SSR meurt en ERR_MODULE_NOT_FOUND — invisible en dev, qui
+      // résout depuis les vrais node_modules. L'inliner supprime la résolution à
+      // l'exécution. À retenter de retirer quand nitro sortira de l'alpha.
+      externals: {
+        inline: ["lucide-react"],
+      },
+    }),
+    tanstackStart(),
+    viteReact(),
+    tailwindcss(),
   ],
 });

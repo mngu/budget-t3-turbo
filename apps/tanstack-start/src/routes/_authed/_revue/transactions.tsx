@@ -1,12 +1,9 @@
-import { createFileRoute, Link, useLoaderData } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeftIcon } from "lucide-react";
 
 import { PAGE_SIZE } from "@budget/shared";
 
-import { useCategoryColor } from "~/lib/category-color";
 import { reviewScope } from "~/lib/transactions-search";
-import { useRevueSearch } from "~/lib/use-revue-search";
-import { BreakdownList, breakdownRows } from "./-components/breakdown-list";
 import { RefineBar } from "./-components/refine-bar";
 import { TransactionsTable } from "./-components/transactions-table";
 
@@ -45,88 +42,54 @@ function AllTransactions() {
   const search = Route.useSearch();
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
-  // Les postes viennent du loader du layout : la colonne et le bandeau lisent la
-  // même répartition, elle n'a pas à être chargée deux fois. `budgets` porte la
-  // comparaison au budget, tranchée là-haut pour les deux écrans à la fois.
-  const { categories, budgets } = useLoaderData({ from: "/_authed/_revue" });
-  const { setSearch } = useRevueSearch();
-  const resolveColor = useCategoryColor();
-  // Même règle que sur `/` : filtrer une parente replie la colonne sur ses
-  // sous-catégories, filtrer une sous-catégorie replie sur celles de sa parente.
-  const parent =
-    (search.category === undefined
-      ? null
-      : (categories.find((c) => c.filter === search.category) ??
-        categories.find((c) =>
-          c.subs.some((s) => s.filter === search.category),
-        ))) ?? null;
-  const breakdown = breakdownRows(
-    categories,
-    parent,
-    resolveColor,
-    budgets,
-  ).map((row, index) => {
-    if (parent) return row;
-    const category = categories[index];
-    return {
-      ...row,
-      title: `N'afficher que « ${row.name} »`,
-      onSelect: () => setSearch({ category: category?.filter }),
-    };
-  });
-
   return (
-    <>
-      <div className="flex min-w-0 flex-1 flex-col">
-        {/* Le retour à la revue, au même rang que son fil d'ariane : la barre de
+    <div className="flex min-w-0 flex-1 flex-col">
+      {/* Le retour à la revue, au même rang que son fil d'ariane : la barre de
             l'application n'a plus de rangée de navigation, les deux écrans se
             renvoient l'un à l'autre depuis leur propre zone centrale. La search
             est conservée telle quelle, c'est le même périmètre. */}
-        <div className="flex min-w-0 flex-none items-center gap-3">
-          <Link
-            to="/"
-            search={search}
-            title="Revenir à la revue du mois"
-            className="border-border bg-card text-muted-foreground hover:border-subtle hover:text-foreground hover:bg-accent text-control flex h-7 flex-none items-center gap-1.5 rounded-full border pr-3 pl-2 font-medium whitespace-nowrap"
-          >
-            <ArrowLeftIcon className="text-subtle size-3.5" aria-hidden />
-            Revue du mois
-          </Link>
-          <span className="bg-border h-5 w-px flex-none" />
-          <span className="text-heading truncate">Transactions</span>
-          {/* Le décompte de la sélection, pas celui du mois : `total` est le
+      <div className="flex min-w-0 flex-none items-center gap-3">
+        <Link
+          to="/"
+          search={search}
+          title="Revenir à la revue du mois"
+          className="border-border bg-card text-muted-foreground hover:border-subtle hover:text-foreground hover:bg-accent text-control flex h-7 flex-none items-center gap-1.5 rounded-full border pr-3 pl-2 font-medium whitespace-nowrap"
+        >
+          <ArrowLeftIcon className="text-subtle size-3.5" aria-hidden />
+          Revue du mois
+        </Link>
+        <span className="bg-border h-5 w-px flex-none" />
+        <span className="text-heading truncate">Transactions</span>
+        {/* Le décompte de la sélection, pas celui du mois : `total` est le
               nombre de lignes que les filtres laissent passer, toutes pages
               confondues. Le bandeau au-dessus, lui, décrit le mois entier — les
               deux ne parlent pas du même périmètre, et c'est voulu. */}
-          <span className="text-subtle text-control flex-none whitespace-nowrap">
-            {total} ligne{total > 1 ? "s" : ""}
-          </span>
-        </div>
+        <span className="text-subtle text-control flex-none whitespace-nowrap">
+          {total} ligne{total > 1 ? "s" : ""}
+        </span>
+      </div>
 
-        {/* Seul écran à porter tous les filtres : c'est le seul dont la liste est
+      {/* Seul écran à porter tous les filtres : c'est le seul dont la liste est
           la sélection elle-même, et non une répartition qu'un filtre de
           catégorie porterait à 100 % du total. C'est aussi la seule voie pour
           retirer le filtre de catégorie ici — la colonne des postes, une fois
           repliée sur les sous-catégories, n'affiche plus la ligne qui le
           porte. */}
-        <RefineBar
-          sens
-          aClasser
-          internes
-          searchField
-          className="border-border bg-surface-2 mt-4 flex-none rounded-md border px-2.5 py-2"
-        />
+      <RefineBar
+        sens
+        aClasser
+        internes
+        searchField
+        className="border-border bg-surface-2 mt-4 flex-none rounded-md border px-2.5 py-2"
+      />
 
-        <TransactionsTable
-          rows={rows}
-          flagged={new Set(flagged)}
-          page={search.page}
-          pageCount={pageCount}
-          total={total}
-        />
-      </div>
-
-      <BreakdownList rows={breakdown} fold={parent !== null} />
-    </>
+      <TransactionsTable
+        rows={rows}
+        flagged={new Set(flagged)}
+        page={search.page}
+        pageCount={pageCount}
+        total={total}
+      />
+    </div>
   );
 }
