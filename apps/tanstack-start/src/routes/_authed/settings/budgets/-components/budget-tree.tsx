@@ -14,13 +14,13 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@budget/ui/toggle-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@budget/ui/tooltip";
 
+import { CategoryIcon } from "~/component/category-icon";
 import {
   shadeCategoryColor,
   softCategoryColor,
   useCategoryColor,
 } from "~/lib/category-color";
 import { euro0 } from "~/lib/format";
-import { CategoryIcon } from "../../../settings/categories/-components/category-icon";
 
 /**
  * La même liste que `/categories`, mais en lecture : ici on ne range pas les

@@ -9,6 +9,7 @@ import { transactionsSearchSchema } from "@budget/shared";
 import { cn } from "@budget/ui";
 
 import type { RevueCategory } from "~/lib/revue-categories";
+import { CategoryIcon } from "~/component/category-icon";
 import { useCategoryColor } from "~/lib/category-color";
 import { euro, euro0 } from "~/lib/format";
 import {
@@ -26,7 +27,6 @@ import {
   wholePeriod,
 } from "~/lib/transactions-search";
 import { useRevueSearch } from "~/lib/use-revue-search";
-import { CategoryIcon } from "../settings/categories/-components/category-icon";
 import { BreakdownList, breakdownRows } from "./-components/breakdown-list";
 import { KpiBand, KpiFocus } from "./-components/kpi-band";
 

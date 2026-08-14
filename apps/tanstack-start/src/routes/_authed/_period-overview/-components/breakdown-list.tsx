@@ -7,9 +7,9 @@ import { Toolbar } from "@budget/ui/toolbar";
 
 import type { RevueBudgets } from "~/lib/revue-budgets";
 import type { RevueCategory } from "~/lib/revue-categories";
+import { CategoryIcon } from "~/component/category-icon";
 import { shadeCategoryColor } from "~/lib/category-color";
 import { euro } from "~/lib/format";
-import { CategoryIcon } from "../../settings/categories/-components/category-icon";
 import { budgetCaption, BudgetGauge } from "./budget-gauge";
 
 export interface BreakdownItem {

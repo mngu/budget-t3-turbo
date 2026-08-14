@@ -40,12 +40,12 @@ import {
 } from "@budget/ui/empty";
 
 import type { GhostBranch } from "../-lib/suggestions";
+import { CategoryIcon } from "~/component/category-icon";
 import {
   shadeCategoryColor,
   softCategoryColor,
   useCategoryColor,
 } from "~/lib/category-color";
-import { CategoryIcon } from "./category-icon";
 
 // Au-delà de ce nombre de parentes, la liste s'ouvre repliée : passé une
 // dizaine de branches déployées, la page n'est plus lisible d'un coup d'œil.

@@ -14,9 +14,9 @@ import {
   CommandList,
 } from "@budget/ui/command";
 
+import { CategoryIcon } from "~/component/category-icon";
 import { shadeCategoryColor, useCategoryColor } from "~/lib/category-color";
 import { useTRPC } from "~/lib/trpc";
-import { CategoryIcon } from "../../settings/categories/-components/category-icon";
 
 export interface CategoryPath {
   /** Catégorie parente. */

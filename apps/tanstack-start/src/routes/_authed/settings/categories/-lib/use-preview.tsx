@@ -9,9 +9,9 @@ import type {
   PreviewBadge,
 } from "../-components/transaction-preview-drawer";
 import type { GhostBranch } from "./suggestions";
+import { CategoryIcon } from "~/component/category-icon";
 import { softCategoryColor, useCategoryColor } from "~/lib/category-color";
 import { useTRPCClient } from "~/lib/trpc";
-import { CategoryIcon } from "../-components/category-icon";
 import { ghostTransactions } from "./suggestions";
 
 export interface PreviewState {

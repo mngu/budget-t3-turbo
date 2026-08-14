@@ -19,6 +19,7 @@ import { InputGroup, InputGroupAddon } from "@budget/ui/input-group";
 import { ToggleGroup, ToggleGroupItem } from "@budget/ui/toggle-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@budget/ui/tooltip";
 
+import { CategoryIcon } from "~/component/category-icon";
 import { SearchInput } from "~/component/search-input";
 import { softCategoryColor, useCategoryColor } from "~/lib/category-color";
 import { useParentCategories } from "~/lib/category-lookup";
@@ -26,7 +27,6 @@ import { euro } from "~/lib/format";
 import { wholePeriod } from "~/lib/transactions-search";
 import { useTRPC } from "~/lib/trpc";
 import { useRevueSearch } from "~/lib/use-revue-search";
-import { CategoryIcon } from "../../settings/categories/-components/category-icon";
 
 // Au pluriel, comme les deux totaux qui les surplombent sur `/transactions` :
 // le bouton nomme un ensemble de lignes, pas le sens d'une transaction.

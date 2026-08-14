@@ -6,6 +6,7 @@ import { cn } from "@budget/ui";
 
 import type { RingSlice } from "./-components/category-ring";
 import type { RevueCategory } from "~/lib/revue-categories";
+import { CategoryIcon } from "~/component/category-icon";
 import {
   shadeCategoryColor,
   softCategoryColor,
@@ -14,7 +15,6 @@ import {
 import { euro0, sharePercent } from "~/lib/format";
 import { focusedCategory } from "~/lib/revue-categories";
 import { useRevueSearch } from "~/lib/use-revue-search";
-import { CategoryIcon } from "../settings/categories/-components/category-icon";
 import { CategoryRing } from "./-components/category-ring";
 import { useDrill } from "./-components/use-drill";
 
