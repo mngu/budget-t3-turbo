@@ -6,15 +6,15 @@ import { useRouter } from "@tanstack/react-router";
 import type { TransactionsSearch } from "@budget/shared";
 import { transactionsSearchSchema } from "@budget/shared";
 
+import type { RevueCategory } from "~/lib/revue-categories";
+import { focusedCategory } from "~/lib/revue-categories";
 import { defaultToCurrentMonth } from "~/lib/transactions-search";
 
 /**
- * Le temps du forage. `outMs` a **trois** lecteurs : la durée CSS du repli, le
- * délai du `setTimeout` qui échange le niveau sur un clic, et le plancher que le
- * dépliage laisse au repli quand la navigation part d'ailleurs. Les deux
- * premiers ne peuvent pas diverger sans que l'anneau change de niveau avant
- * d'avoir fini de se replier ; le troisième ne peut pas descendre sous la durée
- * CSS sans rendre le repli invisible sur un loader rapide.
+ * Le temps du forage. `outMs` a **deux** lecteurs : la durée CSS du repli, et le
+ * plancher que le dépliage laisse au repli — il ne peut pas descendre sous la
+ * durée CSS sans rendre le repli invisible sur un loader rapide, qui rend en
+ * 30 ms.
  */
 export const DRILL = {
   outMs: 120,
@@ -51,7 +51,11 @@ export type DrillPhase = "out" | "in" | null;
 // `undefined`, une borne répétée sur une seule valeur) et le défaut de période,
 // sans lequel la réécriture d'URL qui *injecte* le mois en cours au chargement
 // se lirait comme un changement de période et replierait l'anneau pour rien.
-const PERIOD = transactionsSearchSchema.pick({ dateFrom: true, dateTo: true });
+const PERIOD = transactionsSearchSchema.pick({
+  dateFrom: true,
+  dateTo: true,
+  category: true,
+});
 
 function periodKey(search: unknown) {
   const period = defaultToCurrentMonth({
@@ -59,6 +63,21 @@ function periodKey(search: unknown) {
     next: (s) => s,
   });
   return `${period.dateFrom}|${period.dateTo}`;
+}
+
+/**
+ * Le niveau que l'anneau **affiche** pour un filtre donné : la parente ouverte,
+ * ou rien. Ce n'est pas `search.category` : surligner une sous-catégorie le
+ * change sans changer le niveau, et une parente **sans sous-catégorie** n'ouvre
+ * aucun niveau (même expression que `selected`, côté écran) — replier l'anneau
+ * dans ces deux cas ferait clignoter la répartition pour rien.
+ */
+export function levelKey(search: unknown, categories: RevueCategory[]) {
+  const focused = focusedCategory(
+    categories,
+    PERIOD.parse(search).category ?? undefined,
+  );
+  return focused?.subs.length ? focused.filter : "";
 }
 
 const reducedMotion = () =>
@@ -77,17 +96,23 @@ const reducedMotion = () =>
  * loader un peu lent. C'est la seule différence avec la maquette, dont le niveau
  * est un état local échangé dans la même passe que la phase.
  *
- * Deux entrées, parce que les deux gestes ne partent pas du même endroit :
- * `drill()` pour un clic sur un poste, qui retient la navigation le temps du
- * repli ; et l'effet ci-dessous pour la période, changée depuis l'en-tête — le
- * layout ne partage aucun état avec l'écran, et il n'y a rien à retenir puisque
- * la navigation est déjà partie.
+ * **Une seule entrée** : l'abonnement au routeur ci-dessous. Le geste qui change
+ * de niveau n'a rien à déclarer — qu'il vienne de l'anneau, de la colonne des
+ * postes (montée par le layout, qui ne partage aucun état avec l'écran) ou du
+ * sélecteur de période, il navigue, et c'est la navigation qui replie. Il a
+ * existé un `drill(target, apply)` qui retenait la navigation le temps du
+ * repli : il est devenu inutile le jour où le dépliage a reçu son plancher
+ * (`left`, plus bas), et deux instances du hook — une par appelant — laissaient
+ * l'anneau immobile sur un clic dans la colonne.
  *
  * @param search Les search params dont l'anneau dépend : le poste ouvert et la
  *   période.
+ * @param categories Les postes du niveau courant, seuls à dire si une parente
+ *   ouvre un niveau (voir `levelKey`).
  */
 export function useDrill(
   search: Pick<TransactionsSearch, "category" | "dateFrom" | "dateTo">,
+  categories: RevueCategory[],
 ) {
   const [phase, setPhase] = useState<DrillPhase>(null);
   const [dir, setDir] = useState<1 | -1>(1);
@@ -97,9 +122,6 @@ export function useDrill(
   // pour que le second annule le premier — le niveau attendu n'arrivait jamais.
   const pending = useRef(false);
   const foldedAt = useRef(0);
-  const swapTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
-    undefined,
-  );
   // Le filet du repli, puis le plancher du dépliage — jamais les deux en même
   // temps : le premier est désarmé à l'instant où le second est posé.
   const unfoldTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
@@ -112,7 +134,7 @@ export function useDrill(
 
   const router = useRouter();
   // Le niveau observé : le poste ouvert **et** la période, les deux le changent.
-  const level = `${periodKey(search)}|${search.category ?? ""}`;
+  const level = `${periodKey(search)}|${levelKey(search, categories)}`;
 
   const fold = useCallback((direction: 1 | -1) => {
     pending.current = true;
@@ -160,34 +182,42 @@ export function useDrill(
     else unfoldTimer.current = setTimeout(unfold, left);
   }, [level]);
 
-  // Le changement de période, venu de l'en-tête : rien à retenir, la navigation
-  // est déjà partie — l'anneau se replie pendant que le loader travaille et se
-  // déplie sur les nouvelles données. C'est l'événement du routeur et non la
-  // search rendue, pour deux raisons : elle n'arrive qu'*avec* le loader (elle
-  // est lue sur les matches), et le repli est un `setState` qu'un effet ne peut
-  // déclencher qu'en réponse à un système extérieur — ici l'abonnement.
+  // Le repli : rien à retenir, la navigation est déjà partie — l'anneau se
+  // replie pendant que le loader travaille et se déplie sur les nouvelles
+  // données. C'est l'événement du routeur et non la search rendue, pour deux
+  // raisons : elle n'arrive qu'*avec* le loader (elle est lue sur les matches),
+  // et le repli est un `setState` qu'un effet ne peut déclencher qu'en réponse
+  // à un système extérieur — ici l'abonnement.
   //
-  // Ne se déclenche que sur la **période** : surligner une sous-catégorie change
-  // bien `search.category` sans changer le niveau affiché, replier l'anneau y
-  // serait une régression.
+  // Ne se déclenche que sur la période ou le **niveau affiché** : surligner une
+  // sous-catégorie change bien `search.category` sans changer de niveau, replier
+  // l'anneau y serait une régression (voir `levelKey`).
   useEffect(
     () =>
       router.subscribe("onBeforeNavigate", ({ fromLocation, toLocation }) => {
         if (!fromLocation || pending.current || reducedMotion()) return;
         const from = periodKey(fromLocation.search);
         const to = periodKey(toLocation.search);
-        if (from === to) return;
-        // Le sens se lit dans la rotation : avancer dans le temps entre dans le
-        // mois suivant, reculer en sort. Les bornes sont ISO, leur ordre
-        // lexicographique est l'ordre chronologique.
-        fold(to > from ? 1 : -1);
+        // Le sens se lit dans la rotation. Sur la période : avancer dans le
+        // temps entre dans le mois suivant, reculer en sort — les bornes sont
+        // ISO, leur ordre lexicographique est l'ordre chronologique. Sur le
+        // niveau : entrer dans un poste, ou en sortir vers « toutes catégories ».
+        if (from !== to) {
+          fold(to > from ? 1 : -1);
+          return;
+        }
+        const next = levelKey(toLocation.search, categories);
+        if (next === levelKey(fromLocation.search, categories)) return;
+        fold(next === "" ? -1 : 1);
       }),
-    [router, fold],
+    // `categories` est dans les dépendances : l'arbre change avec la période, et
+    // une parente qui avait des sous-catégories le mois dernier peut ne plus en
+    // avoir — capturé périmé, il déciderait à faux de replier ou non.
+    [router, fold, categories],
   );
 
   useEffect(
     () => () => {
-      clearTimeout(swapTimer.current);
       clearTimeout(unfoldTimer.current);
       clearTimeout(settleTimer.current);
       cancelAnimationFrame(frame.current);
@@ -195,26 +225,5 @@ export function useDrill(
     [],
   );
 
-  /**
-   * @param target Le poste visé, tel qu'il apparaîtra dans `search.category`.
-   * @param apply  Ce qui l'y met — appelé une fois le repli terminé.
-   */
-  const drill = (target: string | undefined, apply: () => void) => {
-    // Un forage à la fois : deux séquences imbriquées laisseraient l'anneau
-    // replié sur un niveau que plus personne n'attend.
-    if (pending.current || target === search.category) return;
-    // Mouvement réduit : l'échange se fait sur place. Ce n'est pas qu'une
-    // affaire de CSS — c'est le délai du repli qu'il faut sauter, et
-    // `motion-reduce:transition-none` ne peut rien contre un `setTimeout`.
-    if (reducedMotion()) {
-      apply();
-      return;
-    }
-    // Sortir d'un poste tourne dans l'autre sens que d'y entrer.
-    fold(target === undefined ? -1 : 1);
-    clearTimeout(swapTimer.current);
-    swapTimer.current = setTimeout(apply, DRILL.outMs);
-  };
-
-  return { phase, dir, drill };
+  return { phase, dir };
 }

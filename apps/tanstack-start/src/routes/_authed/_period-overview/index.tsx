@@ -1,12 +1,10 @@
-"use client";
-
 import { useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useLoaderData } from "@tanstack/react-router";
 import { ArrowRightIcon, LayersIcon } from "lucide-react";
 
 import { cn } from "@budget/ui";
 
-import type { RingSlice } from "./category-ring";
+import type { RingSlice } from "./-components/category-ring";
 import type { RevueCategory } from "~/lib/revue-categories";
 import {
   shadeCategoryColor,
@@ -16,40 +14,48 @@ import {
 import { euro0, sharePercent } from "~/lib/format";
 import { focusedCategory } from "~/lib/revue-categories";
 import { useRevueSearch } from "~/lib/use-revue-search";
-import { CategoryIcon } from "../../settings/categories/-components/category-icon";
-import { CategoryRing } from "./category-ring";
-import { useDrill } from "./use-drill";
+import { CategoryIcon } from "../settings/categories/-components/category-icon";
+import { CategoryRing } from "./-components/category-ring";
+import { useDrill } from "./-components/use-drill";
 
 /**
- * L'anneau de la revue du mois, la colonne des postes à sa droite, et le fil
- * d'ariane qui les coiffe. Le bandeau de tête, lui, vit dans le layout `_revue`,
- * partagé avec `/transactions`.
+ * Revue du mois — portage de la maquette « Revue du mois épurée » (Claude
+ * Design, projet fc13100e-7ea1-4dac-8d2f-6614e40a7209, importée le 2026-07-31).
+ * Elle a vécu sur `/revue-epuree` jusqu'au 2026-08-03, date à laquelle elle a
+ * *remplacé* l'ancienne revue (tuiles de synthèse + deux listes de catégories à
+ * barres segmentées) : un anneau et une liste dépliable disent la même chose en
+ * un écran, et les composants de l'ancienne ont été supprimés avec elle.
  *
- * **Un seul geste au niveau des parents : descendre.** L'arc et la ligne de la
- * colonne désignent le même poste, ils font donc la même chose (`descend`) —
- * l'arc a eu un temps un rôle propre, « mettre en avant sans quitter le niveau
- * des parents », qui n'existe plus. Il n'en reste aucun état local : le niveau
- * affiché est `focusedCategory(search.category)`, la même expression que celle
- * dont le layout tire `KpiFocus`, si bien que le fil d'ariane, l'anneau et le
- * bandeau ne peuvent pas nommer trois postes différents.
+ * L'écran se réduit à l'anneau : le bandeau de tête et la colonne des postes
+ * sont montés par le layout `_revue`, qui porte aussi la search et le loader —
+ * `/transactions` affiche exactement les mêmes.
  *
- * La colonne et le fil d'ariane restent montés ici et non dans le layout : leur
- * geste et leur intitulé ne valent que sur cet écran (sur `/transactions` la
- * ligne pose un filtre, elle ne fait rien descendre).
+ * Trois branches de la maquette ne sont pas portées : elles y sont **mortes**,
+ * pas oubliées. `mode` est fixé à `'anneau'` (tout le pavage/treemap et la
+ * bascule des deux vues sont inatteignables), `sv` est fixé à `'liste'`, et le
+ * booléen `montants` ne nourrit que les tuiles du pavage. `ecarts`,
+ * `reviewCount` et `reviewDots` sont calculés dans le script mais jamais liés
+ * au template — ce dernier n'a d'ailleurs aucun équivalent en base (pas de
+ * score de confiance, voir CLAUDE.md).
  *
- * L'anneau interne de sous-catégories de la maquette n'est pas porté : elle ne
- * l'affiche qu'*à la place* de la colonne, quand celle-ci ne tient plus en
- * largeur. Ici la colonne reste affichée, à droite de l'anneau.
+ * S'y est ajouté le 2026-08-04 le **halo derrière l'anneau** : `haloBg`
+ * (dégradé conique des trois plus gros postes, radial une fois un poste ouvert)
+ * et l'animation `@keyframes breathe` qui l'accompagnait sont calculés et
+ * déclarés, mais aucun nœud du template ne les porte. Non portés pour la même
+ * raison que les trois branches ci-dessus : morts dans la maquette, pas
+ * oubliés ici.
  */
-export function RevuePanel({
-  categories,
-  expenses,
-}: {
-  /** Postes de sortie, du plus gros au plus petit. */
-  categories: RevueCategory[];
-  /** Total des sorties de la période, dénominateur de la part affichée au centre. */
-  expenses: number;
-}) {
+export const Route = createFileRoute("/_authed/_period-overview/")({
+  component: PeriodOverview,
+});
+
+function PeriodOverview() {
+  // Les agrégats sont ceux du layout : l'anneau et la colonne des postes lisent
+  // la même répartition, elle n'a pas à être chargée deux fois.
+  const { categories, expenses } = useLoaderData({
+    from: "/_authed/_period-overview",
+  });
+
   const resolveColor = useCategoryColor();
   const { search, setSearch } = useRevueSearch();
 
@@ -58,25 +64,16 @@ export function RevuePanel({
   // search entière parce que le niveau tient au poste ouvert **et** à la
   // période — un changement de mois joue donc la même animation qu'un clic sur
   // un poste, c'est la seule de l'anneau. Voir `useDrill`.
-  const { phase, dir, drill } = useDrill(search);
-  // Le segment « À classer » n'a pas de filtre qui le désigne (voir
-  // `RevueCategory.subs`) : son surlignage est le seul qui reste local.
-  const [aClasserSel, setAClasserSel] = useState(false);
+  const { phase, dir } = useDrill(search, categories);
 
   const clear = () => {
     setHover(null);
-    setAClasserSel(false);
     // Ne naviguer que s'il y a un filtre à retirer : `setSearch` relance le
     // loader de la route, et Échap est *aussi* la touche qui referme les
     // popovers de l'en-tête — sans cette garde, chaque fermeture de sélecteur
     // rejouerait les agrégats de l'écran pour rien.
     if (search.category === undefined) return;
-    const remove = () => setSearch({ category: undefined });
-    // Forer seulement s'il y a un niveau à quitter : sur un poste sans
-    // sous-catégorie (voir `selected`) l'anneau ne bouge pas, animer le vide
-    // ferait clignoter la répartition des parents pour rien.
-    if (selected) drill(undefined, remove);
-    else remove();
+    setSearch({ category: undefined });
   };
 
   useEffect(() => {
@@ -111,7 +108,7 @@ export function RevuePanel({
     ) ?? null;
   const subSelected =
     subByParam ??
-    (aClasserSel && selected && search.category === selected.filter
+    (selected && search.category === selected.filter
       ? (selected.subs.find((s) => s.filter === null) ?? null)
       : null);
   const selectedColor = selected ? resolveColor(selected.color) : "";
@@ -158,8 +155,7 @@ export function RevuePanel({
     // Le survol est remis à zéro : son index désignerait une part de l'ancien
     // niveau.
     setHover(null);
-    setAClasserSel(false);
-    drill(category.filter, () => setSearch({ category: category.filter }));
+    setSearch({ category: category.filter });
   };
 
   return (
@@ -248,18 +244,13 @@ export function RevuePanel({
               }
               const sub = selected.subs[index];
               if (!sub) return;
-              // « À classer » n'est pas une catégorie de la base : le poser dans
-              // l'URL donnerait un filtre sans résultat. Seul segment dont le
-              // surlignage ne quitte pas la page.
               if (sub.filter === null) {
-                setAClasserSel((current) => !current);
                 // Le filtre revient sur la parente : c'est ce que le segment
                 // désigne de plus précis, et c'est aussi ce qui ancre le
                 // pense-bête local (voir `subSelected`).
                 setSearch({ category: selected.filter });
                 return;
               }
-              setAClasserSel(false);
               setSearch({
                 category:
                   search.category === sub.filter

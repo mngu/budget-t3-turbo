@@ -19,7 +19,7 @@ import { TransactionsTable } from "./-components/transactions-table";
  * ses lignes commande le niveau de l'anneau, donc un état de l'écran (voir
  * `RevuePanel`). Ici il n'a rien à commander d'autre que le filtre.
  */
-export const Route = createFileRoute("/_authed/_revue/transactions")({
+export const Route = createFileRoute("/_authed/_period-overview/transactions")({
   loaderDeps: ({ search }) => search,
   loader: async ({ deps, context }) => {
     const [result, review] = await Promise.all([

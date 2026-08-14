@@ -26,12 +26,12 @@ import {
   wholePeriod,
 } from "~/lib/transactions-search";
 import { useRevueSearch } from "~/lib/use-revue-search";
+import { CategoryIcon } from "../settings/categories/-components/category-icon";
 import {
   BREAKDOWN_WIDTH,
   BreakdownList,
   breakdownRows,
-} from "~/routes/_authed/_revue/-components/breakdown-list";
-import { CategoryIcon } from "../settings/categories/-components/category-icon";
+} from "./-components/breakdown-list";
 import { KpiBand, KpiFocus } from "./-components/kpi-band";
 
 /**
@@ -65,7 +65,7 @@ import { KpiBand, KpiFocus } from "./-components/kpi-band";
  * tenues d'être compatibles avec `transactionsSearchSchema`, l'en-tête et la
  * colonne le lisant via `useSearch({ strict: false })`.
  */
-export const Route = createFileRoute("/_authed/_revue")({
+export const Route = createFileRoute("/_authed/_period-overview")({
   validateSearch: transactionsSearchSchema,
   search: {
     middlewares: [stripSearchParams(SEARCH_DEFAULTS), defaultToCurrentMonth],
