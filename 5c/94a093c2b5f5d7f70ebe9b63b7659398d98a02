@@ -1,0 +1,22 @@
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/delta-pill.tsx
+  h_c1b75a3cdf5637 1-76
+apps/tanstack-start/src/routes/_authed/_period-overview/route.tsx
+  h_c1b75a3cdf5637 19,231,284-289
+  h_c1b75a3cdf5637 290
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/kpi-band.tsx
+  h_c1b75a3cdf5637 8
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/breakdown-list.tsx
+  h_c1b75a3cdf5637 3,10,12-13,15,177-180,183-186,188-189,200-205,208-282,284-288,302-304,309-319,323-330,470-474,484-543,546-576
+  h_c1b75a3cdf5637 206,289-301,305-308,320-322,469
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "5c94a093c2b5f5d7f70ebe9b63b7659398d98a02",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
