@@ -1,0 +1,84 @@
+apps/tanstack-start/src/routes/_authed/_revue/-components/transactions-table.tsx
+  h_c1b75a3cdf5637 58
+apps/tanstack-start/src/routes/_authed/settings/route.tsx
+  h_c1b75a3cdf5637 20
+apps/tanstack-start/src/routes/_authed/route.tsx
+  h_c1b75a3cdf5637 29-31
+apps/tanstack-start/src/routes/_authed/settings/categories/-lib/use-preview.tsx
+  s_4e17d3f6916cb8::t_b22f6343776ced 1-120
+apps/tanstack-start/src/routes/_authed/_revue/index.tsx
+  h_c1b75a3cdf5637 39,43
+apps/tanstack-start/src/routes/_authed/settings/categories/-lib/use-run.ts
+  s_4e17d3f6916cb8::t_b1f149b2f22551 19
+  s_4e17d3f6916cb8::t_3bcf7c19d00a2f 1-18,20-32
+apps/tanstack-start/src/routes/_authed/_revue/-components/kpi-band.tsx
+  h_c1b75a3cdf5637 164
+apps/tanstack-start/src/routes/_authed/settings/categories/-components/analysis-banner.tsx
+  s_4e17d3f6916cb8::t_d59969e426c79d 1-76,82-89
+  s_4e17d3f6916cb8::t_b1f149b2f22551 77-81
+apps/tanstack-start/src/routes/_authed/settings/categories/-components/category-identity-dialog.tsx
+  h_c1b75a3cdf5637 109
+apps/tanstack-start/src/routes/_authed/settings/categories/-lib/use-category-crud.ts
+  s_4e17d3f6916cb8::t_62e5b765e2cc86 1-45,48-94
+  s_4e17d3f6916cb8::t_b1f149b2f22551 46-47
+apps/tanstack-start/src/routes/_authed/_revue/transactions.tsx
+  h_c1b75a3cdf5637 1,46,86-89,91,93
+  h_c1b75a3cdf5637 47,51-63,67-70,72,78-84,90,92
+apps/tanstack-start/vite.config.ts
+  s_2d9bb1fe574c9f::t_eea503d8c1b74b 33-38
+  s_2d9bb1fe574c9f::t_8e7f232f472a2e 56-72
+apps/tanstack-start/src/routes/_authed/settings/categories/-lib/use-suggestions.ts
+  s_4e17d3f6916cb8::t_2ab41bfee68819 135
+  s_4e17d3f6916cb8::t_2719f4d2e3e80b 34-36
+  s_4e17d3f6916cb8::t_6bd37075288081 1-33,37-134,136-143
+apps/tanstack-start/src/routes/_authed/_revue/route.tsx
+  s_71a6df047895c4::t_24b9fddff287be 6,9,13
+  h_c1b75a3cdf5637 29,31-33,229,249-264,267-269,298,300-301,311,314,370-373,375-378,380-386
+  s_71a6df047895c4::t_9a01ded7fcf256 302-310,312-313,315-322,326,328-329,334,337-346,363
+  s_71a6df047895c4::t_032b621ae98ba1 30
+  s_71a6df047895c4::t_b53e421c17ed1d 323-325,327,330-333,335-336
+  s_71a6df047895c4::t_2b7bdbafe86dbc 239-248
+  s_71a6df047895c4::t_b52bc40eeb562e 347-349,360-362
+  h_c1b75a3cdf5637 272-292,295-297,299,350-359,364-369
+apps/tanstack-start/src/routes/_authed/settings/categories/index.tsx
+  s_4e17d3f6916cb8::t_2ed2fa11e28a76 2,4,11,20-23,54,56-60,62-63,65-67,92-102,104-105,108,110-114,122,151-152,155,157-166,178-179,182-183,187-190,194-200
+apps/tanstack-start/src/routes/_authed/_revue/-components/breakdown-list.tsx
+  h_c1b75a3cdf5637 210,223
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "362e8169e0fd6cd31a7aabb1a80261f2c3126ecb",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_2d9bb1fe574c9f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "13905030-8e5e-47af-8607-fe91f25972a1",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    },
+    "s_4e17d3f6916cb8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "aa55cd18-355a-409a-bba3-4ff4fd45007f",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    },
+    "s_71a6df047895c4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1ba08255-a63c-4f7d-8291-566854a6b361",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
