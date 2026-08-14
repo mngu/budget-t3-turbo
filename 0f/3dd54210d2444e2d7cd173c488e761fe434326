@@ -1,0 +1,19 @@
+apps/tanstack-start/src/routes/_authed/_period-overview/route.tsx
+  h_c1b75a3cdf5637 30,296
+  h_c1b75a3cdf5637 304
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/kpi-band.tsx
+  h_c1b75a3cdf5637 160
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/breakdown-list.tsx
+  h_c1b75a3cdf5637 199
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "0f3dd54210d2444e2d7cd173c488e761fe434326",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
