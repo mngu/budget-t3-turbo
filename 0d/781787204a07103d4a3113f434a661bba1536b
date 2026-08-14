@@ -1,0 +1,47 @@
+apps/tanstack-start/src/routes/_authed/_period-overview/index.tsx
+  s_198b9681fbe770::t_ca26a1a355ce00 158
+  h_c1b75a3cdf5637 2,7,17-19,22-27,29-31,33-39,41-46,48-58,111
+  s_198b9681fbe770::t_10a7bfbd06c9fa 67,76
+apps/tanstack-start/src/routes/_authed/_period-overview/route.tsx
+  h_c1b75a3cdf5637 29,34,68
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/use-drill.ts
+  s_198b9681fbe770::t_0d308fcf60413b 75
+  s_198b9681fbe770::t_95a04977997a9c 137
+  s_198b9681fbe770::t_9fbe73c0552234 185-216
+  s_198b9681fbe770::t_6486f05f803684 228
+  s_198b9681fbe770::t_57174e256cf0c3 13,18,42,45,54-74,76-81,86,129,132,217,226,229
+  s_198b9681fbe770::t_0a159640077a5c 99-115
+  s_198b9681fbe770::t_485dfe5a52fb2f 14-17
+  s_198b9681fbe770::t_d06cfe3442499c 9-10
+  s_198b9681fbe770::t_ad720e3764765e 82
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/use-drill.test.ts
+  s_198b9681fbe770::t_cbfff567f30c9b 1-5,7-45
+  s_198b9681fbe770::t_9da2265e1c78a7 6
+apps/tanstack-start/vitest.config.ts
+  s_198b9681fbe770::t_cdb14e10f49b1d 7-11
+apps/tanstack-start/src/routeTree.gen.ts
+  h_c1b75a3cdf5637 17-18,21,52-62,73-78,115,118,130,133,144,148,151,193,197,200,253-254,257,260-261,264-265,281-282,285-286,326-328,331-336,338-341,363,369
+apps/tanstack-start/src/routes/_authed/_period-overview/transactions.tsx
+  h_c1b75a3cdf5637 22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "0d781787204a07103d4a3113f434a661bba1536b",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_198b9681fbe770": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "50f1fa95-05d7-4565-bc9b-014259cbee41",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
