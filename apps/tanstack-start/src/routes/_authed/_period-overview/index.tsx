@@ -5,7 +5,7 @@ import { ArrowRightIcon, LayersIcon } from "lucide-react";
 import { cn } from "@budget/ui";
 
 import type { RingSlice } from "./-components/category-ring";
-import type { RevueCategory } from "~/lib/revue-categories";
+import type { RevueCategory } from "./-lib/revue-categories";
 import { CategoryIcon } from "~/component/category-icon";
 import {
   shadeCategoryColor,
@@ -13,10 +13,10 @@ import {
   useCategoryColor,
 } from "~/lib/category-color";
 import { euro0, sharePercent } from "~/lib/format";
-import { focusedCategory } from "~/lib/revue-categories";
 import { useRevueSearch } from "~/lib/use-revue-search";
 import { CategoryRing } from "./-components/category-ring";
 import { useDrill } from "./-components/use-drill";
+import { focusedCategory } from "./-lib/revue-categories";
 
 /**
  * Revue du mois — portage de la maquette « Revue du mois épurée » (Claude

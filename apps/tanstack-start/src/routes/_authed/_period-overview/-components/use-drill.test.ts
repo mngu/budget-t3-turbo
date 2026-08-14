@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { RevueCategory } from "~/lib/revue-categories";
+import type { RevueCategory } from "../-lib/revue-categories";
 import { levelKey } from "./use-drill";
 
 const category = (filter: string, subs: string[] = []): RevueCategory => ({

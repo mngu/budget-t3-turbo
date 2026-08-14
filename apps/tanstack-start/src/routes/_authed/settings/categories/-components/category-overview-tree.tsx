@@ -40,6 +40,7 @@ import {
 } from "@budget/ui/empty";
 
 import type { GhostBranch } from "../-lib/suggestions";
+import type { PreviewRequest } from "../-lib/use-preview";
 import { CategoryIcon } from "~/component/category-icon";
 import {
   shadeCategoryColor,
@@ -52,26 +53,6 @@ import {
 // Une parente qui porte une proposition reste toujours dépliée — sinon la
 // proposition serait posée dans la liste sans que rien ne la montre.
 const COLLAPSE_THRESHOLD = 8;
-
-/**
- * Ce que le panneau d'aperçu a besoin de savoir de la ligne cliquée : son nom,
- * mais aussi sa teinte et son icône — l'en-tête du panneau les reprend, et les
- * deux vont ensemble (une couleur sans icône y ferait une pastille creuse au
- * milieu d'un titre). Une sous-catégorie porte son palier de teinte et l'icône
- * de son parent, comme partout ailleurs.
- *
- * `soft` est fourni plutôt que dérivé de `color` : l'aplat de fond est toujours
- * celui de la **parente**, y compris pour une sous-catégorie, où `color` est
- * déjà un palier mélangé vers `--card`. Le repasser dans `softCategoryColor`
- * mélangerait deux fois et rendrait la pastille indiscernable de la carte.
- */
-export interface PreviewRequest {
-  name: string;
-  includesChildren: boolean;
-  color: string;
-  soft: string;
-  icon: string | null;
-}
 
 export interface CategoryOverviewTreeActions {
   onRename: (id: number, name: string) => Promise<boolean>;

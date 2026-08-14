@@ -9,36 +9,8 @@ import {
   DialogTitle,
 } from "@budget/ui/dialog";
 
+import type { PreviewableTransaction, PreviewBadge } from "../-lib/use-preview";
 import { dateFr, euro } from "~/lib/format";
-
-// Sous-ensemble minimal commun à TxnForAnalysis (échantillon LLM) et
-// TransactionRow (données réelles de la table transactions) — le drawer ne
-// lit que ces champs, pas besoin de caster l'un ou l'autre.
-//
-// Les trois derniers sont optionnels parce que l'échantillon d'analyse ne les
-// porte pas : `TxnForAnalysis` est sérialisé tel quel dans `buildAnalysisPrompt`
-// (`JSON.stringify(txns)`), y ajouter une date pour la seule vitrine changerait
-// un prompt calibré. La colonne de date disparaît alors au lieu de laisser une
-// cellule vide, qui se lirait comme une ligne cassée.
-export interface PreviewableTransaction {
-  id: number;
-  description: string;
-  counterparty: string | null;
-  bankName: string;
-  amount: string | number;
-  direction: "debit" | "credit";
-  bookingDate?: string;
-  /** Chemin affiché « Parent › Enfant », ou la feuille seule. */
-  categoryPath?: string | null;
-  category?: string | null;
-}
-
-/** Teinte + icône de ce que le panneau montre, reprises de la ligne cliquée. */
-export interface PreviewBadge {
-  color: string;
-  soft: string;
-  icon: React.ReactNode;
-}
 
 interface TransactionPreviewDrawerProps {
   open: boolean;

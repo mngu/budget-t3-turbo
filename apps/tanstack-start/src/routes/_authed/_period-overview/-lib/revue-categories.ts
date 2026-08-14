@@ -1,4 +1,4 @@
-import type { Delta } from "~/lib/history";
+import type { Delta } from "./history";
 
 /**
  * Un poste de sortie de la revue, tel que le loader du layout `_revue` le

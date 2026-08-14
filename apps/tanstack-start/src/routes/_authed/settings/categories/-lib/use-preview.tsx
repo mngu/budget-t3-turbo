@@ -1,18 +1,63 @@
+import type { ReactNode } from "react";
 import { useState } from "react";
 import { TriangleAlertIcon } from "lucide-react";
 
 import type { TxnForAnalysis } from "@budget/api";
 
-import type { PreviewRequest } from "../-components/category-overview-tree";
-import type {
-  PreviewableTransaction,
-  PreviewBadge,
-} from "../-components/transaction-preview-drawer";
 import type { GhostBranch } from "./suggestions";
 import { CategoryIcon } from "~/component/category-icon";
 import { softCategoryColor, useCategoryColor } from "~/lib/category-color";
 import { useTRPCClient } from "~/lib/trpc";
 import { ghostTransactions } from "./suggestions";
+
+/**
+ * Ce que le panneau d'aperçu a besoin de savoir de la ligne cliquée : son nom,
+ * mais aussi sa teinte et son icône — l'en-tête du panneau les reprend, et les
+ * deux vont ensemble (une couleur sans icône y ferait une pastille creuse au
+ * milieu d'un titre). Une sous-catégorie porte son palier de teinte et l'icône
+ * de son parent, comme partout ailleurs.
+ *
+ * `soft` est fourni plutôt que dérivé de `color` : l'aplat de fond est toujours
+ * celui de la **parente**, y compris pour une sous-catégorie, où `color` est
+ * déjà un palier mélangé vers `--card`. Le repasser dans `softCategoryColor`
+ * mélangerait deux fois et rendrait la pastille indiscernable de la carte.
+ */
+export interface PreviewRequest {
+  name: string;
+  includesChildren: boolean;
+  color: string;
+  soft: string;
+  icon: string | null;
+}
+
+// Sous-ensemble minimal commun à TxnForAnalysis (échantillon LLM) et
+// TransactionRow (données réelles de la table transactions) — le drawer ne
+// lit que ces champs, pas besoin de caster l'un ou l'autre.
+//
+// Les trois derniers sont optionnels parce que l'échantillon d'analyse ne les
+// porte pas : `TxnForAnalysis` est sérialisé tel quel dans `buildAnalysisPrompt`
+// (`JSON.stringify(txns)`), y ajouter une date pour la seule vitrine changerait
+// un prompt calibré. La colonne de date disparaît alors au lieu de laisser une
+// cellule vide, qui se lirait comme une ligne cassée.
+export interface PreviewableTransaction {
+  id: number;
+  description: string;
+  counterparty: string | null;
+  bankName: string;
+  amount: string | number;
+  direction: "debit" | "credit";
+  bookingDate?: string;
+  /** Chemin affiché « Parent › Enfant », ou la feuille seule. */
+  categoryPath?: string | null;
+  category?: string | null;
+}
+
+/** Teinte + icône de ce que le panneau montre, reprises de la ligne cliquée. */
+export interface PreviewBadge {
+  color: string;
+  soft: string;
+  icon: ReactNode;
+}
 
 export interface PreviewState {
   title: string;

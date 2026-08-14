@@ -5,7 +5,7 @@ import { useRouter } from "@tanstack/react-router";
 
 import { toast } from "@budget/ui/toast";
 
-import { useTRPCClient } from "./trpc";
+import { useTRPCClient } from "~/lib/trpc";
 
 /**
  * Écriture de la catégorie d'une transaction, partagée par les quatre écrans de

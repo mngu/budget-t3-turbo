@@ -2,10 +2,24 @@ import { useState } from "react";
 
 import { toast } from "@budget/ui/toast";
 
-import type { DeleteTarget } from "../-components/category-delete-dialog";
-import type { IdentityTarget } from "../-components/category-identity-dialog";
 import { useTRPCClient } from "~/lib/trpc";
 import { useRun } from "./use-run";
+
+export interface DeleteTarget {
+  id: number;
+  name: string;
+  /** Total cumulé — sous-catégories comprises pour une parente. */
+  transactionCount: number;
+  childCount: number;
+  childNames: string[];
+}
+
+export interface IdentityTarget {
+  id: number;
+  name: string;
+  color: string | null;
+  icon: string | null;
+}
 
 /**
  * La gestion courante de l'arborescence : créer, renommer, supprimer, et

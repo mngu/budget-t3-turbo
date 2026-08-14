@@ -2,10 +2,10 @@ import { TrendingDownIcon, TrendingUpIcon } from "lucide-react";
 
 import { cn } from "@budget/ui";
 
-import type { Delta } from "~/lib/history";
-import type { RevueBudgets } from "~/lib/revue-budgets";
+import type { Delta } from "../-lib/history";
+import type { RevueBudgets } from "../-lib/revue-budgets";
 import { euro0, signedEuro0 } from "~/lib/format";
-import { BUDGETS_OFF_MESSAGES } from "~/lib/revue-budgets";
+import { BUDGETS_OFF_MESSAGES } from "../-lib/revue-budgets";
 import { budgetCaption, BudgetGauge } from "./budget-gauge";
 
 /**
@@ -16,7 +16,7 @@ import { budgetCaption, BudgetGauge } from "./budget-gauge";
  *
  * Monté une seule fois, par le layout `_revue` : les deux écrans qu'il coiffe
  * disent la même chose du même périmètre. Il ne calcule aucun écart lui-même —
- * la moyenne de référence est choisie par l'appelant (voir `~/lib/history`).
+ * la moyenne de référence est choisie par l'appelant (voir `../-lib/history`).
  */
 /** Un flux du bandeau : son montant *positif* et son écart à la moyenne. */
 interface Flow {

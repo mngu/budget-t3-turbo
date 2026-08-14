@@ -6,9 +6,9 @@ import { useRouter } from "@tanstack/react-router";
 import type { TransactionsSearch } from "@budget/shared";
 import { transactionsSearchSchema } from "@budget/shared";
 
-import type { RevueCategory } from "~/lib/revue-categories";
-import { focusedCategory } from "~/lib/revue-categories";
+import type { RevueCategory } from "../-lib/revue-categories";
 import { defaultToCurrentMonth } from "~/lib/transactions-search";
+import { focusedCategory } from "../-lib/revue-categories";
 
 /**
  * Le temps du forage. `outMs` a **deux** lecteurs : la durée CSS du repli, et le

@@ -5,8 +5,8 @@ import { TriangleAlertIcon } from "lucide-react";
 import { cn } from "@budget/ui";
 import { Toolbar } from "@budget/ui/toolbar";
 
-import type { RevueBudgets } from "~/lib/revue-budgets";
-import type { RevueCategory } from "~/lib/revue-categories";
+import type { RevueBudgets } from "../-lib/revue-budgets";
+import type { RevueCategory } from "../-lib/revue-categories";
 import { CategoryIcon } from "~/component/category-icon";
 import { shadeCategoryColor } from "~/lib/category-color";
 import { euro } from "~/lib/format";

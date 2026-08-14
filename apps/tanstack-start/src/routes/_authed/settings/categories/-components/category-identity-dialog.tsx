@@ -19,15 +19,9 @@ import {
 } from "@budget/ui/dialog";
 import { Input } from "@budget/ui/input";
 
+import type { IdentityTarget } from "../-lib/use-category-crud";
 import { CategoryIcon } from "~/component/category-icon";
 import { softCategoryColor, useCategoryColor } from "~/lib/category-color";
-
-export interface IdentityTarget {
-  id: number;
-  name: string;
-  color: string | null;
-  icon: string | null;
-}
 
 interface CategoryIdentityDialogProps {
   target: IdentityTarget | null;

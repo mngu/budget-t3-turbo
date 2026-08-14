@@ -8,18 +8,10 @@ import { LayersIcon, TriangleAlertIcon } from "lucide-react";
 import { transactionsSearchSchema } from "@budget/shared";
 import { cn } from "@budget/ui";
 
-import type { RevueCategory } from "~/lib/revue-categories";
+import type { RevueCategory } from "./-lib/revue-categories";
 import { CategoryIcon } from "~/component/category-icon";
 import { useCategoryColor } from "~/lib/category-color";
 import { euro, euro0 } from "~/lib/format";
-import {
-  averagesByCategory,
-  deltaTo,
-  referenceAverage,
-  totalsByMonth,
-} from "~/lib/history";
-import { attachBudgets } from "~/lib/revue-budgets";
-import { focusedCategory } from "~/lib/revue-categories";
 import {
   defaultToCurrentMonth,
   reviewScope,
@@ -29,6 +21,14 @@ import {
 import { useRevueSearch } from "~/lib/use-revue-search";
 import { BreakdownList, breakdownRows } from "./-components/breakdown-list";
 import { KpiBand, KpiFocus } from "./-components/kpi-band";
+import {
+  averagesByCategory,
+  deltaTo,
+  referenceAverage,
+  totalsByMonth,
+} from "./-lib/history";
+import { attachBudgets } from "./-lib/revue-budgets";
+import { focusedCategory } from "./-lib/revue-categories";
 
 /**
  * Coque des écrans de la revue : en-tête persistant et bandeau de tête, autour

@@ -16,14 +16,7 @@ import {
 import { Badge } from "@budget/ui/badge";
 import { Spinner } from "@budget/ui/spinner";
 
-export interface DeleteTarget {
-  id: number;
-  name: string;
-  /** Total cumulé — sous-catégories comprises pour une parente. */
-  transactionCount: number;
-  childCount: number;
-  childNames: string[];
-}
+import type { DeleteTarget } from "../-lib/use-category-crud";
 
 export function CategoryDeleteDialog({
   target,

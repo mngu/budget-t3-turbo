@@ -5,12 +5,12 @@ import { useState } from "react";
 import type { TransactionRow } from "@budget/api";
 import { cn } from "@budget/ui";
 
-import type { ParentCategory } from "~/lib/category-lookup";
+import type { ParentCategory } from "../-lib/category-lookup";
 import { CategoryIcon } from "~/component/category-icon";
-import { useParentCategories } from "~/lib/category-lookup";
 import { dayMonthFr, signedEuro, titleCase } from "~/lib/format";
 import { useRevueSearch } from "~/lib/use-revue-search";
-import { useSetCategory } from "~/lib/use-set-category";
+import { useParentCategories } from "../-lib/category-lookup";
+import { useSetCategory } from "../-lib/use-set-category";
 import { CategoryPathPicker } from "./category-path-picker";
 import { ExcludeBadge } from "./exclude-badge";
 import { TransferBadge } from "./transfer-badge";
