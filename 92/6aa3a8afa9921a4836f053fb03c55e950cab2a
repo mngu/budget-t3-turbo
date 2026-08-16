@@ -1,0 +1,60 @@
+apps/tanstack-start/src/routes/_authed/_period-overview/route.tsx
+  h_c1b75a3cdf5637 16-17,60-67,92-95,112-120,176,186-188,208,219-220,237,247
+  h_c1b75a3cdf5637 18,68,209
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/new-budget-gauge.tsx
+  h_c1b75a3cdf5637 1-57
+packages/shared/src/schemas.ts
+  h_c1b75a3cdf5637 65-90
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/breakdown-list.tsx
+  h_c1b75a3cdf5637 1,3,7-9,11-12,15,18-21,23-34,36,38-75,77-81,83-86,90,92-101,103-107,111-121,129-132,134-137,139,141,143-151,153,155
+  h_c1b75a3cdf5637 22,35,37,82,124,133
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/budget-gauge.tsx
+  h_c1b75a3cdf5637 46,54,62,94,99
+apps/tanstack-start/src/routes/_authed/_period-overview/index.tsx
+  h_c1b75a3cdf5637 227-228,247-248,256-257,271,282-283,285
+  h_c1b75a3cdf5637 167-168,171-199,201,205-214,216,220-226,229-246,249-255,258-270,272-281
+apps/tanstack-start/src/component/category-icon.tsx
+  h_c1b75a3cdf5637 133,137,145-146,151,153-154,156
+  h_c1b75a3cdf5637 152,155
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/new-kpi-band.tsx
+  h_c1b75a3cdf5637 1-75
+packages/api/src/transactions/queries.ts
+  s_42fc084766031f::t_b524ee774c249e 199,207
+  h_c1b75a3cdf5637 2-3,5-10,31-32,34,178-197,200-201,203-205,208-213,215-224,226-241
+  s_42fc084766031f::t_7611ec2384e842 214,225
+  s_96e9e4684a70ab::t_8492653a0e6a78 198,202,206
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/gauge.tsx
+  h_c1b75a3cdf5637 1-44
+packages/api/src/router/transactions.ts
+  h_c1b75a3cdf5637 12-13,15,45-48,50-53,55-58
+  h_c1b75a3cdf5637 49,54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "926aa3a8afa9921a4836f053fb03c55e950cab2a",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_42fc084766031f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a7178433-8603-4a80-81ab-26bc641794a5",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    },
+    "s_96e9e4684a70ab": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7fe07483-cd95-4d03-8fc9-6a3400d6a8d0",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
