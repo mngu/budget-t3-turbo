@@ -62,3 +62,29 @@ export const transactionsSearchSchema = z.object({
 });
 
 export type TransactionsSearch = z.infer<typeof transactionsSearchSchema>;
+
+export const breakdownByCategoriesSchema = z.object({
+  parentName: z.string().nullable(),
+  categoryName: z.string().nullable(),
+  parentIcon: z.string().nullable(),
+  parentColor: z.string().nullable(),
+  budgetCatAmount: z.number().nullable(),
+  budgetParentAmount: z.number().nullable(),
+  total: z.number(),
+});
+
+export type BreakdownByCategories = z.infer<typeof breakdownByCategoriesSchema>;
+
+export const budgetStatsSchema = z.object({
+  totalBudget: z.coerce.number(),
+  totalAmount: z.coerce.number(),
+});
+
+export type BudgetStats = z.infer<typeof budgetStatsSchema>;
+
+export const globalStatsSchema = z.object({
+  debit: z.coerce.number(),
+  credit: z.coerce.number(),
+});
+
+export type GlobalStats = z.infer<typeof globalStatsSchema>;

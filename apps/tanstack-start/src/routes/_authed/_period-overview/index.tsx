@@ -164,129 +164,124 @@ function PeriodOverview() {
     // ne coiffe donc que l'anneau, qu'il nomme, et la colonne récupère sa
     // hauteur — c'est le `ch - 41` que la maquette retranche au diamètre de
     // l'anneau, et lui seul.
-    <>
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        {/* Le fil d'ariane nomme le **niveau** que l'anneau affiche, et lui
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+      {/* Le fil d'ariane nomme le **niveau** que l'anneau affiche, et lui
             seul : mettre un arc en avant ne le déplace pas — c'est une
             position, pas une sélection. */}
-        <div className="flex min-w-0 flex-none items-center gap-3">
-          <span
-            className={cn(
-              "flex size-7 flex-none items-center justify-center rounded-lg",
-              !selected && "bg-sunken text-subtle",
-            )}
-            style={
-              selected
-                ? {
-                    background: softCategoryColor(selectedColor),
-                    color: selectedColor,
-                  }
-                : undefined
-            }
-          >
-            {selected ? (
-              <CategoryIcon name={selected.icon} className="size-4" />
-            ) : (
-              <LayersIcon className="size-4" aria-hidden />
-            )}
-          </span>
-          <span className="text-heading min-w-0 truncate">
-            {selected ? selected.name : "Toutes catégories"}
-          </span>
-          <span className="text-subtle text-control flex-none whitespace-nowrap">
-            {selected
-              ? `${selected.subs.length} sous-catégorie${selected.subs.length > 1 ? "s" : ""} · ${sharePercent(selected.total, expenses)} des sorties`
-              : `${categories.length} poste${categories.length > 1 ? "s" : ""} de dépense`}
-          </span>
+      <div className="flex min-w-0 flex-none items-center gap-3">
+        <span
+          className={cn(
+            "flex size-7 flex-none items-center justify-center rounded-lg",
+            !selected && "bg-sunken text-subtle",
+          )}
+          style={
+            selected
+              ? {
+                  background: softCategoryColor(selectedColor),
+                  color: selectedColor,
+                }
+              : undefined
+          }
+        >
+          {selected ? (
+            <CategoryIcon name={selected.icon} className="size-4" />
+          ) : (
+            <LayersIcon className="size-4" aria-hidden />
+          )}
+        </span>
+        <span className="text-heading min-w-0 truncate">
+          {selected ? selected.name : "Toutes catégories"}
+        </span>
+        <span className="text-subtle text-control flex-none whitespace-nowrap">
+          {selected
+            ? `${selected.subs.length} sous-catégorie${selected.subs.length > 1 ? "s" : ""} · ${sharePercent(selected.total, expenses)} des sorties`
+            : `${categories.length} poste${categories.length > 1 ? "s" : ""} de dépense`}
+        </span>
 
-          {/* Le passage à la table, à droite du fil d'ariane : la barre de
+        {/* Le passage à la table, à droite du fil d'ariane : la barre de
               l'application n'a plus de rangée de navigation, ce lien-ci est la
               voie vers `/transactions`. La search est conservée telle quelle —
               le poste ouvert arrive donc en filtre de l'autre côté. */}
-          <Link
-            to="/transactions"
-            search={search}
-            title="Ouvrir la liste des transactions"
-            className="border-border bg-card text-muted-foreground hover:border-subtle hover:text-foreground hover:bg-accent text-control ml-auto flex h-7 flex-none items-center gap-1.5 rounded-full border pr-2 pl-3 font-medium whitespace-nowrap"
-          >
-            Voir les transactions
-            <ArrowRightIcon className="text-subtle size-3.5" aria-hidden />
-          </Link>
-        </div>
+        <Link
+          to="/transactions"
+          search={search}
+          title="Ouvrir la liste des transactions"
+          className="border-border bg-card text-muted-foreground hover:border-subtle hover:text-foreground hover:bg-accent text-control ml-auto flex h-7 flex-none items-center gap-1.5 rounded-full border pr-2 pl-3 font-medium whitespace-nowrap"
+        >
+          Voir les transactions
+          <ArrowRightIcon className="text-subtle size-3.5" aria-hidden />
+        </Link>
+      </div>
 
-        {/* L'anneau s'étire sur toute la place disponible (pas d'`items-center`) :
+      {/* L'anneau s'étire sur toute la place disponible (pas d'`items-center`) :
           c'est de là qu'il tire sa taille, sa boîte carrée étant en confinement
           de taille — centrée dans un conteneur à dimension automatique, elle
           s'effondrerait à zéro. */}
-        <div className="relative mt-3 flex min-h-0 min-w-0 flex-1">
-          <CategoryRing
-            slices={slices}
-            activeIndex={activeIndex >= 0 ? activeIndex : null}
-            hoverIndex={hover}
-            phase={phase}
-            dir={dir}
-            // Pas de survol pendant le forage : l'index désignerait une part de
-            // l'anneau replié, et le centre nommerait un poste qui s'en va.
-            onHover={(index) => {
-              if (phase !== null && index !== null) return;
-              setHover(index);
-            }}
-            // Les arcs sont dans l'ordre de `subs` / `categories`, dont `slices`
-            // est le calque : l'index désigne la même part des deux côtés.
-            onActivate={(index) => {
-              // Au niveau des parents, l'arc fait exactement ce que fait la
-              // ligne de la colonne : il descend. Les deux désignent le même
-              // poste, ils ne peuvent pas répondre différemment.
-              if (!selected) {
-                const category = categories[index];
-                if (category?.subs.length) descend(category);
-                return;
-              }
-              const sub = selected.subs[index];
-              if (!sub) return;
-              if (sub.filter === null) {
-                // Le filtre revient sur la parente : c'est ce que le segment
-                // désigne de plus précis, et c'est aussi ce qui ancre le
-                // pense-bête local (voir `subSelected`).
-                setSearch({ category: selected.filter });
-                return;
-              }
-              setSearch({
-                category:
-                  search.category === sub.filter
-                    ? // Retirer le surlignage d'une sous-catégorie ne remonte pas
-                      // d'un cran : on est toujours *dans* le poste ouvert, et le
-                      // filtre revient donc à lui, pas à rien.
-                      selected.filter
-                    : sub.filter,
-              });
-            }}
-            center={{
-              icon: focus
-                ? selected
-                  ? null
-                  : (categories.find((c) => c.name === focus.name)?.icon ??
-                    null)
-                : (selected?.icon ?? null),
-              iconColor: focus ? focus.color : selectedColor || "var(--subtle)",
-              name: focus?.name ?? selected?.name ?? "",
-              amount: euro0.format(
-                focus?.total ?? selected?.total ?? levelTotal,
-              ),
-              label: focus
-                ? `${sharePercent(focus.total, levelTotal)} ${selected ? "du poste" : "du total"}`
-                : selected
-                  ? `${sharePercent(selected.total, expenses)} du total`
-                  : "Sorties",
-              // Troisième voie de sortie, avec Échap et le clic à côté : la
-              // maquette l'a ajoutée parce que les deux autres ne s'annoncent
-              // nulle part. Ne pas en supprimer une en croyant les autres
-              // suffisantes.
-              onBack: selected ? clear : undefined,
-            }}
-          />
-        </div>
+      <div className="relative mt-3 flex min-h-0 min-w-0 flex-1">
+        <CategoryRing
+          slices={slices}
+          activeIndex={activeIndex >= 0 ? activeIndex : null}
+          hoverIndex={hover}
+          phase={phase}
+          dir={dir}
+          // Pas de survol pendant le forage : l'index désignerait une part de
+          // l'anneau replié, et le centre nommerait un poste qui s'en va.
+          onHover={(index) => {
+            if (phase !== null && index !== null) return;
+            setHover(index);
+          }}
+          // Les arcs sont dans l'ordre de `subs` / `categories`, dont `slices`
+          // est le calque : l'index désigne la même part des deux côtés.
+          onActivate={(index) => {
+            // Au niveau des parents, l'arc fait exactement ce que fait la
+            // ligne de la colonne : il descend. Les deux désignent le même
+            // poste, ils ne peuvent pas répondre différemment.
+            if (!selected) {
+              const category = categories[index];
+              if (category?.subs.length) descend(category);
+              return;
+            }
+            const sub = selected.subs[index];
+            if (!sub) return;
+            if (sub.filter === null) {
+              // Le filtre revient sur la parente : c'est ce que le segment
+              // désigne de plus précis, et c'est aussi ce qui ancre le
+              // pense-bête local (voir `subSelected`).
+              setSearch({ category: selected.filter });
+              return;
+            }
+            setSearch({
+              category:
+                search.category === sub.filter
+                  ? // Retirer le surlignage d'une sous-catégorie ne remonte pas
+                    // d'un cran : on est toujours *dans* le poste ouvert, et le
+                    // filtre revient donc à lui, pas à rien.
+                    selected.filter
+                  : sub.filter,
+            });
+          }}
+          center={{
+            icon: focus
+              ? selected
+                ? null
+                : (categories.find((c) => c.name === focus.name)?.icon ?? null)
+              : (selected?.icon ?? null),
+            iconColor: focus ? focus.color : selectedColor || "var(--subtle)",
+            name: focus?.name ?? selected?.name ?? "",
+            amount: euro0.format(focus?.total ?? selected?.total ?? levelTotal),
+            label: focus
+              ? `${sharePercent(focus.total, levelTotal)} ${selected ? "du poste" : "du total"}`
+              : selected
+                ? `${sharePercent(selected.total, expenses)} du total`
+                : "Sorties",
+            // Troisième voie de sortie, avec Échap et le clic à côté : la
+            // maquette l'a ajoutée parce que les deux autres ne s'annoncent
+            // nulle part. Ne pas en supprimer une en croyant les autres
+            // suffisantes.
+            onBack: selected ? clear : undefined,
+          }}
+        />
       </div>
-    </>
+    </div>
   );
 }

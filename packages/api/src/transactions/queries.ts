@@ -1,6 +1,13 @@
 // Lectures et corrections manuelles sur la table des transactions.
+import { z } from "zod/v4";
+
 import type { SQL } from "@budget/db";
-import type { TransactionsSearch } from "@budget/shared";
+import type {
+  BreakdownByCategories,
+  BudgetStats,
+  GlobalStats,
+  TransactionsSearch,
+} from "@budget/shared";
 import {
   alias,
   and,
@@ -21,7 +28,10 @@ import {
 import { db } from "@budget/db/client";
 import { bankAccounts, categories, transactions } from "@budget/db/schema";
 import {
+  breakdownByCategoriesSchema,
+  budgetStatsSchema,
   FALLBACK_CATEGORY_COLOR,
+  globalStatsSchema,
   PAGE_SIZE,
   REVIEW_QUEUE_LIMIT,
 } from "@budget/shared";
@@ -163,6 +173,70 @@ export interface CategoryBreakdownItem {
   // Vide si la catégorie n'a pas d'enfant : le graphique retombe alors sur une
   // barre d'un seul tenant.
   breakdown: CategoryBreakdownDetail[];
+}
+
+function filterTransactions(organizationId: string, query: TransactionsSearch) {
+  return sql`
+    WITH filtered_transactions AS (
+      SELECT t, ba, c, cbp, cbc, p
+      FROM transactions t
+      LEFT JOIN bank_accounts ba ON t.account_id = ba.id
+      LEFT JOIN categories c ON t.category_id = c.id
+      LEFT JOIN category_budgets cbc ON cbc.category_id = c.id
+      LEFT JOIN categories p ON c.parent_id = p.id
+      LEFT JOIN category_budgets cbp ON cbp.category_id = p.id
+      WHERE t.booking_date BETWEEN ${query.dateFrom} AND ${query.dateTo}
+      AND t.excluded = 'false'
+      AND ba.organization_id = ${organizationId}
+    )
+  `;
+}
+
+export async function breakdownByCategories(
+  organizationId: string,
+  query: TransactionsSearch,
+) {
+  const result = await db.execute<BreakdownByCategories>(sql`
+      ${filterTransactions(organizationId, query)}
+      SELECT (p).name AS "parentName", (c).name AS "categoryName", (p).icon AS "parentIcon", (p).color AS "parentColor", (cbc).amount::float8 AS "budgetCatAmount", (cbp).amount::float8 AS "budgetParentAmount", SUM((t).amount)::float8 AS total
+      FROM filtered_transactions
+      WHERE (t).direction = 'debit'
+      GROUP BY (p).name, (c).name, (p).icon, (p).color, (cbc).amount, (cbp).amount
+      ORDER BY SUM((t).amount) DESC
+    `);
+  return z.array(breakdownByCategoriesSchema).parse(result.rows);
+}
+
+export async function budgetStats(
+  organizationId: string,
+  query: TransactionsSearch,
+) {
+  const result = await db.execute<BudgetStats>(sql`
+      ${filterTransactions(organizationId, query)},
+      budget_by_cat AS (
+        SELECT (p).name, (cbp).amount, SUM((t).amount) AS total
+        FROM filtered_transactions
+        WHERE (cbp).amount IS NOT NULL
+        GROUP BY (p).name, (cbp).amount
+      )
+      SELECT SUM(b.amount) AS "totalBudget", SUM(b.total) AS "totalAmount"
+      FROM budget_by_cat b
+    `);
+  return budgetStatsSchema.parse(result.rows[0]);
+}
+
+export async function globalStats(
+  organizationId: string,
+  query: TransactionsSearch,
+) {
+  const result = await db.execute<GlobalStats>(sql`
+      ${filterTransactions(organizationId, query)}
+      SELECT
+        COALESCE(SUM((t).amount) FILTER (WHERE (t).direction = 'debit'), 0)::float8 AS debit,
+        COALESCE(SUM((t).amount) FILTER (WHERE (t).direction = 'credit'), 0)::float8 AS credit
+      FROM filtered_transactions
+    `);
+  return globalStatsSchema.parse(result.rows[0]);
 }
 
 /**

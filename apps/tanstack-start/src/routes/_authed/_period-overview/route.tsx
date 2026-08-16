@@ -7,24 +7,16 @@ import {
 import { transactionsSearchSchema } from "@budget/shared";
 
 import type { RevueCategory } from "./-lib/revue-categories";
-import { useCategoryColor } from "~/lib/category-color";
 import {
   defaultToCurrentMonth,
   reviewScope,
   SEARCH_DEFAULTS,
   wholePeriod,
 } from "~/lib/transactions-search";
-import { useRevueSearch } from "~/lib/use-revue-search";
-import { BreakdownList, breakdownRows } from "./-components/breakdown-list";
-import { KpiBand } from "./-components/kpi-band";
-import {
-  averagesByCategory,
-  deltaTo,
-  referenceAverage,
-  totalsByMonth,
-} from "./-lib/history";
+import { NewKpiBand } from "~/routes/_authed/_period-overview/-components/new-kpi-band";
+import { BreakdownList } from "./-components/breakdown-list";
+import { averagesByCategory, deltaTo } from "./-lib/history";
 import { attachBudgets } from "./-lib/revue-budgets";
-import { focusedCategory } from "./-lib/revue-categories";
 
 /**
  * Coque des écrans de la revue : en-tête persistant et bandeau de tête, autour
@@ -65,7 +57,15 @@ export const Route = createFileRoute("/_authed/_period-overview")({
   loaderDeps: ({ search }) => search,
   loader: async ({ deps, context }) => {
     const period = wholePeriod(deps);
-    const [expenses, revenues, history, tree, plan] = await Promise.all([
+    const [
+      expenses,
+      history,
+      tree,
+      plan,
+      breakdownByCategories,
+      globalStats,
+      budgetStats,
+    ] = await Promise.all([
       // `direction: "debit"` forcé, comme la maquette : sans lui un seul mois de
       // salaires écrase l'échelle et tous les postes de dépense s'affaissent à un
       // moignon indistinct (mesuré : `Revenus` à 4 000 € contre 99 € pour le plus
@@ -76,10 +76,6 @@ export const Route = createFileRoute("/_authed/_period-overview")({
       context.trpcClient.transactions.byCategory.query({
         ...period,
         direction: "debit",
-      }),
-      context.trpcClient.transactions.byCategory.query({
-        ...period,
-        direction: "credit",
       }),
       context.trpcClient.transactions.history.query(period),
       // Les icônes des postes : `transactions.byCategory` ne remonte que le
@@ -93,6 +89,10 @@ export const Route = createFileRoute("/_authed/_period-overview")({
       // période côté serveur : c'est `attachBudgets` qui les multiplie par le
       // nombre de mois affichés, ou écarte la comparaison.
       context.trpcClient.categories.budgets.plan.query(),
+      context.trpcClient.transactions.breakdownByCategories.query(deps),
+      context.trpcClient.transactions.globalStats.query(deps),
+      context.trpcClient.transactions.budgetStats.query(deps),
+
       context.queryClient.fetchQuery({
         ...context.trpc.transactions.review.queryOptions(reviewScope(deps)),
         staleTime: 0,
@@ -109,22 +109,22 @@ export const Route = createFileRoute("/_authed/_period-overview")({
         ...context.trpc.transactions.banks.queryOptions(),
         staleTime: 0,
       }),
+      context.queryClient.fetchQuery({
+        ...context.trpc.transactions.breakdownByCategories.queryOptions(deps),
+      }),
+      context.queryClient.fetchQuery({
+        ...context.trpc.transactions.globalStats.queryOptions(deps),
+      }),
+      context.queryClient.fetchQuery({
+        ...context.trpc.transactions.budgetStats.queryOptions(deps),
+      }),
     ]);
 
     const expensesTotal = sum(expenses);
-    const revenuesTotal = sum(revenues);
-    const balance = revenuesTotal - expensesTotal;
 
     // Ancre de comparaison : la fin de la période affichée, sur laquelle
     // `history` est bâti côté serveur — les deux ne peuvent pas diverger.
     const anchor = deps.dateTo ?? deps.dateFrom ?? new Date().toISOString();
-    const monthly = totalsByMonth(history);
-    const revenuesAverage = referenceAverage(monthly, anchor, (m) => m.credit);
-    const expensesAverage = referenceAverage(monthly, anchor, (m) => m.debit);
-    const balanceAverage =
-      revenuesAverage === null || expensesAverage === null
-        ? null
-        : revenuesAverage - expensesAverage;
 
     const iconByCategory = new Map(tree.map((node) => [node.name, node.icon]));
     const averageByCategory = averagesByCategory(
@@ -173,7 +173,7 @@ export const Route = createFileRoute("/_authed/_period-overview")({
         };
       });
 
-    const { categories, budgets } = attachBudgets(base, {
+    const { categories } = attachBudgets(base, {
       tree,
       plan,
       expenses: expensesTotal,
@@ -182,13 +182,10 @@ export const Route = createFileRoute("/_authed/_period-overview")({
 
     return {
       categories,
-      budgets,
       expenses: expensesTotal,
-      balance,
-      revenuesDelta: deltaTo(revenuesTotal, revenuesAverage),
-      expensesDelta: deltaTo(expensesTotal, expensesAverage),
-      balanceDelta: deltaTo(balance, balanceAverage),
-      revenues: revenuesTotal,
+      breakdownByCategories,
+      globalStats,
+      budgetStats,
     };
   },
   errorComponent: ({ error }) => (
@@ -208,43 +205,8 @@ const sum = (items: { total: number }[]) =>
   items.reduce((acc, item) => acc + item.total, 0);
 
 function RevueLayout() {
-  const {
-    categories,
-    budgets,
-    revenues,
-    expenses,
-    balance,
-    revenuesDelta,
-    expensesDelta,
-    balanceDelta,
-  } = Route.useLoaderData();
-  const { search, setSearch } = useRevueSearch();
-  const resolveColor = useCategoryColor();
-
-  // Le poste ouvert est une fonction pure du search param : filtrer une parente
-  // l'ouvre, filtrer une de ses sous-catégories ouvre la parente. C'est ce qui
-  // dispense le bandeau de tout état partagé avec l'écran courant — et c'est
-  // *la même* expression qui donne à l'anneau le niveau qu'il affiche, d'où la
-  // fonction partagée plutôt qu'une seconde copie : les deux ne peuvent pas
-  // nommer deux postes différents.
-  const parent = focusedCategory(categories, search.category);
-
-  const rows = breakdownRows(categories, parent, resolveColor, budgets).map(
-    (row, index) => {
-      if (parent) return row;
-      // Les lignes suivent l'ordre de `categories` : l'index désigne le même
-      // poste des deux côtés.
-      const category = categories[index];
-      // Sans sous-catégorie, la ligne n'est pas une porte : elle reste
-      // désactivée plutôt que d'ouvrir sur le vide (voir `selected`).
-      if (!category?.subs.length) return row;
-      return {
-        ...row,
-        title: `Voir la répartition de « ${row.name} »`,
-        onSelect: () => setSearch({ category: category.filter }),
-      };
-    },
-  );
+  const { breakdownByCategories, globalStats, budgetStats } =
+    Route.useLoaderData();
 
   return (
     <div className="flex w-full gap-4">
@@ -254,7 +216,8 @@ function RevueLayout() {
             le solde hors de l'écran sur une fenêtre étroite. */}
         <div className="flex min-h-17 flex-none flex-wrap items-end gap-x-[clamp(11px,1.85vw,25px)] gap-y-3">
           <div className="min-w-0 flex-1">
-            <KpiBand
+            <NewKpiBand globalStats={globalStats} budgetStats={budgetStats} />
+            {/*<KpiBand
               label="Solde du mois"
               balance={balance}
               balanceDelta={balanceDelta}
@@ -271,7 +234,7 @@ function RevueLayout() {
               // apparaît donc aussi sur `/transactions`, qui monte le même
               // bandeau — c'est ce que fait `Transactions.dc.html`.
               budget={budgets}
-            />
+            />*/}
           </div>
         </div>
 
@@ -281,13 +244,7 @@ function RevueLayout() {
         </div>
       </div>
       <div className="w-80">
-        <BreakdownList
-          rows={rows}
-          parent={parent}
-          categories={categories}
-          expenses={expenses}
-          budgets={budgets}
-        />
+        <BreakdownList breakdownByCategories={breakdownByCategories} />
       </div>
     </div>
   );

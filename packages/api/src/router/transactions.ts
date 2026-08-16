@@ -9,7 +9,10 @@ import {
 } from "../transactions/internal-transfers";
 import {
   bankCounts,
+  breakdownByCategories,
+  budgetStats,
   earliestTransactionDate,
+  globalStats,
   listBankLabels,
   listTransactions,
   monthlyHistory,
@@ -38,6 +41,20 @@ export const transactionsRouter = {
     .query(({ ctx, input }) =>
       transactionsByCategory(ctx.organizationId, input),
     ),
+
+  breakdownByCategories: orgProcedure
+    .input(transactionsSearchSchema)
+    .query(({ ctx, input }) =>
+      breakdownByCategories(ctx.organizationId, input),
+    ),
+
+  globalStats: orgProcedure
+    .input(transactionsSearchSchema)
+    .query(({ ctx, input }) => globalStats(ctx.organizationId, input)),
+
+  budgetStats: orgProcedure
+    .input(transactionsSearchSchema)
+    .query(({ ctx, input }) => budgetStats(ctx.organizationId, input)),
 
   banks: orgProcedure.query(({ ctx }) => listBankLabels(ctx.organizationId)),
 

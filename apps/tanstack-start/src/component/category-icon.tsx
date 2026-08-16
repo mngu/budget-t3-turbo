@@ -130,9 +130,11 @@ const ICONS: Record<string, LucideIcon> = {
 export function CategoryIcon({
   name,
   className,
+  color,
 }: {
   name: string | null;
   className?: string;
+  color?: string | null;
 }) {
   const Icon = name ? ICONS[name] : undefined;
   if (!Icon) {
@@ -140,11 +142,16 @@ export function CategoryIcon({
       <span
         aria-hidden
         className={cn(
-          "rounded-sm border-[1.5px] border-dashed border-current opacity-55",
-          className ?? "size-4",
+          "size-4 rounded-sm border-[1.5px] border-dashed border-current opacity-55",
+          className,
         )}
       />
     );
   }
-  return <Icon className={cn(className ?? "size-4")} strokeWidth={1.9} />;
+  return (
+    <Icon
+      className={cn(className ?? "size-4")}
+      style={{ color: color ?? "#999999" }}
+    />
+  );
 }

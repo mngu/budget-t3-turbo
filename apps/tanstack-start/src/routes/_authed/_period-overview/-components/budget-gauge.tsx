@@ -43,7 +43,7 @@ export function BudgetGauge({
   /** `null` = rien ne budgète cette ligne : la dépense se peint telle quelle. */
   budget: number | null;
   /** Dépense de la même ligne qu'aucun budget ne couvre. */
-  uncovered?: number;
+  uncovered?: number | null;
   /** Valeur qui occupe toute la piste. Absente, la jauge se cale sur elle-même. */
   scale?: number;
   /** Teinte du segment consommé : celle du poste, `--muted` pour le bandeau. */
@@ -51,6 +51,7 @@ export function BudgetGauge({
   className?: string;
 }) {
   const within = budget === null ? covered : Math.min(covered, budget);
+  const uncoveredValue = uncovered ?? 0;
   const over = budget === null ? 0 : Math.max(0, covered - budget);
   // Sur un axe propre les hachures suivent le budget — le reste à dépenser
   // s'intercale en piste vide ; sur un axe partagé elles suivent le consommé,
@@ -58,7 +59,7 @@ export function BudgetGauge({
   const hatchAt =
     scale === undefined ? Math.max(covered, budget ?? covered) : covered;
   // `|| 1` : une ligne à zéro sans budget diviserait par zéro.
-  const full = (scale ?? hatchAt + uncovered) || 1;
+  const full = (scale ?? hatchAt + uncoveredValue) || 1;
   const pct = (value: number) => `${((value / full) * 100).toFixed(2)}%`;
 
   return (
@@ -90,12 +91,12 @@ export function BudgetGauge({
           }}
         />
       )}
-      {uncovered > 0 && (
+      {uncoveredValue > 0 && (
         <span
           className={cn("absolute inset-y-0 min-w-1", SLIDE)}
           style={{
             left: `calc(${pct(hatchAt)} + 2px)`,
-            width: `calc(${pct(uncovered)} - 2px)`,
+            width: `calc(${pct(uncoveredValue)} - 2px)`,
             background: BUDGET_HATCH,
           }}
         />
