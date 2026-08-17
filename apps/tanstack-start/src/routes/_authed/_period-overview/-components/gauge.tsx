@@ -2,15 +2,15 @@ import { cn } from "@budget/ui";
 
 interface GaugeProps {
   value: number;
-  budget: number | null;
+  budget?: number | null;
   max: number;
-  color: string | null;
+  color?: string | null;
 }
 
 export function Gauge({ max, value, budget, color }: GaugeProps) {
   const pct = (value: number) => `${((value / max) * 100).toFixed(2)}%`;
 
-  const over = budget === null ? null : Math.max(0, value - budget);
+  const over = !budget ? null : Math.max(0, value - budget);
   const computedValue = budget ? Math.min(value, budget) : value;
 
   const valuePct = pct(computedValue);

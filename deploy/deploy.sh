@@ -66,10 +66,13 @@
 # banque échoue au retour de SCA.
 set -euo pipefail
 
-HOST=${DEPLOY_HOST:?"exporter DEPLOY_HOST=root@<ip-du-vps>"}
 DIR=/docker/budget
 
 cd "$(dirname "$0")/.."
+
+# Même résolution d'hôte que pull-db.sh : `.env` local à défaut d'export.
+HOST=${DEPLOY_HOST:-$(grep -m1 '^DEPLOY_HOST=' .env 2>/dev/null | cut -d= -f2- || true)}
+: "${HOST:?DEPLOY_HOST manquant — l'ajouter au .env local (DEPLOY_HOST=root@<ip-du-vps>) ou l'exporter}"
 
 # CI=true fait sauter la validation d'env (skipValidation dans env.ts) : le
 # build n'a besoin d'aucun secret, et aucun ne doit entrer dans une couche.

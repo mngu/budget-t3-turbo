@@ -1,11 +1,12 @@
 "use client";
 
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
+import { useState } from "react";
 import { ArrowLeftIcon } from "lucide-react";
 
 import { cn } from "@budget/ui";
 
-import type { DrillPhase } from "./use-drill";
+import type { Drill } from "./use-drill";
 import { CategoryIcon } from "~/component/category-icon";
 import { DRILL } from "./use-drill";
 
@@ -38,95 +39,91 @@ const LABEL_MIN_SHARE = 0.045;
 // à mesure que l'arc s'épaissit.
 const ICON_RADIUS = { base: 40, hover: 42, active: 43.5 };
 
-const dash = (
-  circumference: number,
-  share: number,
-  gap: number,
-  min: number,
-) => {
-  const length = Math.max(circumference * share - gap, min);
-  return `${length.toFixed(2)} ${(circumference - length).toFixed(2)}`;
+interface Arc {
+  slice: RingSlice;
+  index: number;
+  /** Part du total du niveau, et origine angulaire (la somme des précédentes). */
+  share: number;
+  offset: number;
+  active: boolean;
+  hovered: boolean;
+}
+
+const dash = (share: number) => {
+  const length = Math.max(CIRCUMFERENCE * share - ARC_GAP, 1.5);
+  return `${length.toFixed(2)} ${(CIRCUMFERENCE - length).toFixed(2)}`;
 };
 
-// Part de chaque arc et origine angulaire (la somme de celles qui le précèdent).
+/** L'arc « en avant » : le survolé, sinon l'ouvert. C'est lui que le centre nomme. */
+const litArc = (arcs: Arc[]) =>
+  arcs.find((arc) => arc.hovered) ?? arcs.find((arc) => arc.active) ?? null;
+
 // Hors du composant : le compilateur React interdit d'accumuler dans une
 // variable déclarée dans le corps d'un rendu.
-function arcLayout(totals: number[]): { share: number; offset: number }[] {
-  const sum = totals.reduce((acc, total) => acc + total, 0);
-  const layout: { share: number; offset: number }[] = [];
+function buildArcs(
+  slices: RingSlice[],
+  activeIndex: number | null,
+  hover: string | null,
+): Arc[] {
+  const sum = slices.reduce((acc, slice) => acc + slice.total, 0);
+  const arcs: Arc[] = [];
   let offset = 0;
-  for (const total of totals) {
-    const share = sum > 0 ? total / sum : 0;
-    layout.push({ share, offset });
+  for (const [index, slice] of slices.entries()) {
+    const share = sum > 0 ? slice.total / sum : 0;
+    arcs.push({
+      slice,
+      index,
+      share,
+      offset,
+      active: index === activeIndex,
+      hovered: slice.name === hover,
+    });
     offset += share;
   }
-  return layout;
+  return arcs;
 }
 
 export function CategoryRing({
   slices,
   activeIndex,
-  hoverIndex,
-  onHover,
   onActivate,
-  center,
-  phase = null,
-  dir = 1,
+  drill,
+  children,
 }: {
   slices: RingSlice[];
   /** Part « ouverte » : les autres s'estompent. `null` quand rien n'est ouvert. */
   activeIndex: number | null;
-  hoverIndex: number | null;
-  onHover: (index: number | null) => void;
   onActivate: (index: number) => void;
   /**
-   * Étape du forage (voir `useDrill`). Toute phase non nulle **replie** l'anneau :
-   * arcs à longueur nulle, étiquettes et centre effacés. Le séquencement, lui,
-   * appartient à l'appelant — c'est lui qui commande le niveau.
+   * L'étape du forage, telle que `useDrill` la rend. Toute phase non nulle
+   * **replie** l'anneau : arcs à longueur nulle, étiquettes et centre effacés.
+   * Le séquencement, lui, appartient à l'appelant — c'est lui qui commande le
+   * niveau.
    */
-  phase?: DrillPhase;
-  /** Sens du forage : 1 = on entre dans un poste, −1 = on en sort. */
-  dir?: 1 | -1;
-  center: {
-    icon: string | null;
-    iconColor: string;
-    name: string;
-    amount: string;
-    label: string;
-    /**
-     * Remonter d'un niveau. Absent tant que rien n'est sélectionné : le bouton
-     * n'occupe alors aucune place, plutôt que de creuser un trou permanent sous
-     * le libellé du centre.
-     */
-    onBack?: () => void;
-  };
+  drill: Drill;
+  /**
+   * Le contenu de la carte du centre, à qui l'anneau passe la part qu'il met en
+   * avant (survolée, sinon ouverte). Composition plutôt qu'une demi-douzaine de
+   * props : ce que le centre affiche est une décision de l'écran, la carte de
+   * verre et son effacement pendant le forage sont celles de l'anneau.
+   */
+  children: (lit: RingSlice | null) => ReactNode;
 }) {
-  const layout = arcLayout(slices.map((s) => s.total));
-  const arcs = slices.map((slice, index) => {
-    const active = activeIndex === index;
-    const hovered = hoverIndex === index;
-    return {
-      slice,
-      index,
-      share: layout[index]?.share ?? 0,
-      offset: layout[index]?.offset ?? 0,
-      active,
-      hovered,
-      width: active
-        ? ARC_WIDTH.active
-        : hovered
-          ? ARC_WIDTH.hover
-          : ARC_WIDTH.base,
-    };
-  });
+  // Le survol est de l'affichage pur : il n'a rien à faire dans l'écran. Retenu
+  // par **nom** et non par index — un index survivrait au changement de niveau
+  // en désignant une part qui n'a plus rien à voir, un nom absent ne désigne
+  // simplement plus rien.
+  const [hover, setHover] = useState<string | null>(null);
+
+  const arcs = buildArcs(slices, activeIndex, hover);
 
   // Replié : les arcs à longueur nulle, l'anneau reculé d'un cran et presque
   // effacé. Le repli est *rapide et sec* (courbe d'entrée), le dépliage lent et
   // amorti (courbe de sortie) — c'est ce contraste qui donne au geste le sens
   // d'une plongée plutôt que d'un simple fondu.
-  const folded = phase !== null;
-  const easing = phase === "out" ? DRILL.outEase : DRILL.inEase;
-  const duration = phase === "out" ? DRILL.outMs : DRILL.inMs;
+  const folded = drill.phase !== null;
+  const easing = drill.phase === "out" ? DRILL.outEase : DRILL.inEase;
+  const duration = drill.phase === "out" ? DRILL.outMs : DRILL.inMs;
 
   return (
     // `container-type: size` plutôt qu'un ResizeObserver : la boîte carrée se
@@ -146,7 +143,7 @@ export function CategoryRing({
         // `filter` de chaque arc, qui ne peut pas porter de variante `dark:` :
         // sa couleur dépend de l'arc et vit donc en style inline.
         className="relative aspect-square w-[min(100cqw,100cqh)] [--arc-glow-lit:48%] [--arc-glow:32%] dark:[--arc-glow-lit:65%] dark:[--arc-glow:45%]"
-        onMouseLeave={() => onHover(null)}
+        onMouseLeave={() => setHover(null)}
       >
         <svg
           viewBox="0 0 340 340"
@@ -159,9 +156,9 @@ export function CategoryRing({
               // Le sens du forage se lit dans la rotation : on quitte le niveau
               // en tournant d'un côté, on arrive au suivant depuis l'autre.
               transform: folded
-                ? phase === "out"
-                  ? `rotate(${dir > 0 ? -6 : 6}deg) scale(0.93)`
-                  : `rotate(${dir > 0 ? 6 : -6}deg) scale(1.05)`
+                ? drill.phase === "out"
+                  ? `rotate(${drill.dir > 0 ? -6 : 6}deg) scale(0.93)`
+                  : `rotate(${drill.dir > 0 ? 6 : -6}deg) scale(1.05)`
                 : "rotate(0deg) scale(1)",
               opacity: folded ? 0.15 : 1,
               "--drill-duration": `${duration}ms`,
@@ -184,12 +181,16 @@ export function CategoryRing({
               r={RADIUS}
               fill="none"
               stroke={arc.slice.color}
-              strokeOpacity={activeIndex === null ? 1 : arc.active ? 1 : 0.22}
-              strokeWidth={arc.width}
+              strokeOpacity={activeIndex === null || arc.active ? 1 : 0.22}
+              strokeWidth={
+                arc.active
+                  ? ARC_WIDTH.active
+                  : arc.hovered
+                    ? ARC_WIDTH.hover
+                    : ARC_WIDTH.base
+              }
               strokeDasharray={
-                folded
-                  ? `0 ${CIRCUMFERENCE.toFixed(2)}`
-                  : dash(CIRCUMFERENCE, arc.share, ARC_GAP, 1.5)
+                folded ? `0 ${CIRCUMFERENCE.toFixed(2)}` : dash(arc.share)
               }
               transform={`rotate(${(-90 + arc.offset * 360).toFixed(3)} 170 170)`}
               style={
@@ -205,7 +206,7 @@ export function CategoryRing({
                   // le repli, lui, est d'un seul bloc — sans quoi la moitié de
                   // l'anneau serait encore là quand le niveau change.
                   "--dash-delay":
-                    phase === "out"
+                    drill.phase === "out"
                       ? "0ms"
                       : `${Math.min(arc.index * DRILL.staggerMs, DRILL.staggerMaxMs)}ms`,
                 } as CSSProperties
@@ -220,7 +221,9 @@ export function CategoryRing({
               // arbitrage assumé pour la sobriété du mouvement, pas un oubli :
               // l'y remettre relance le balayage de tout l'anneau.
               className="cursor-pointer [transition:stroke-width_200ms_cubic-bezier(0.22,1,0.36,1),stroke-opacity_200ms_ease,filter_200ms_ease,stroke-dasharray_var(--dash-duration)_var(--dash-ease)_var(--dash-delay)] motion-reduce:transition-none"
-              onMouseEnter={() => onHover(arc.index)}
+              // Pas de survol pendant le forage : il désignerait une part de
+              // l'anneau replié, et le centre nommerait un poste qui s'en va.
+              onMouseEnter={() => !folded && setHover(arc.slice.name)}
               onClick={(event) => {
                 event.stopPropagation();
                 onActivate(arc.index);
@@ -231,72 +234,71 @@ export function CategoryRing({
           ))}
         </svg>
 
-        {arcs.map((arc) =>
-          arc.share > ICON_MIN_SHARE &&
-          (arc.slice.icon !== null || arc.share > LABEL_MIN_SHARE) ? (
-            <ArcLabel
-              key={arc.slice.name}
-              arc={arc}
-              dimmed={activeIndex !== null}
-              folded={folded}
-            />
-          ) : null,
-        )}
+        {/* Les étiquettes s'effacent toutes ensemble pendant le forage : une
+            opacité de groupe, que celle de chaque étiquette vient multiplier. */}
+        <div
+          className="pointer-events-none absolute inset-0 [transition:opacity_130ms_ease] motion-reduce:transition-none"
+          style={{ opacity: folded ? 0 : 1 }}
+        >
+          {arcs.map((arc) =>
+            arc.share > ICON_MIN_SHARE &&
+            (arc.slice.icon !== null || arc.share > LABEL_MIN_SHARE) ? (
+              <ArcLabel
+                key={arc.slice.name}
+                arc={arc}
+                dimmed={activeIndex !== null}
+              />
+            ) : null,
+          )}
+        </div>
 
         {/* Le centre ne capte pas la souris : il survolerait les arcs. */}
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-[24%]">
           {/* Carte translucide posée sur les arcs : c'est le flou qui la
               détache du halo coloré, pas un aplat opaque — le fond doit rester
-              devinable au travers. */}
-          {/* La carte s'efface pendant le forage : elle nomme le niveau, elle
-              ne peut pas rester lisible pendant qu'il change. */}
+              devinable au travers. Elle s'efface pendant le forage : elle nomme
+              le niveau, elle ne peut pas rester lisible pendant qu'il change. */}
           <div
             className="border-glass-border bg-glass flex max-w-full flex-col items-center rounded-xl border px-5 pt-4 pb-3.5 text-center shadow-[0_1px_2px_oklch(0_0_0/0.05),0_22px_44px_-22px_oklch(0.25_0.03_265/0.4)] backdrop-blur-[14px] backdrop-saturate-[1.3] [transition:opacity_130ms_ease] motion-reduce:transition-none"
             style={{ opacity: folded ? 0 : 1 }}
           >
-            {center.icon !== null && (
-              <span className="mb-2" style={{ color: center.iconColor }}>
-                <CategoryIcon name={center.icon} className="size-5" />
-              </span>
-            )}
-            {center.name && (
-              <div className="text-control mb-1 max-w-full truncate font-semibold tracking-[-0.015em]">
-                {center.name}
-              </div>
-            )}
-            <div className="num text-title leading-none font-medium tracking-[-0.03em]">
-              {center.amount}
-            </div>
-            <div className="label-caps mt-1 whitespace-nowrap">
-              {center.label}
-            </div>
-            {/* Le centre est `pointer-events-none` (il survolerait les arcs) :
-                le bouton doit se les rendre pour lui seul, sans quoi il
-                s'affiche sans jamais répondre au clic. */}
-            {center.onBack && (
-              <button
-                type="button"
-                title="Revenir à toutes les catégories"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  center.onBack?.();
-                }}
-                className="border-border-strong bg-card text-muted-foreground hover:border-subtle hover:text-foreground text-control pointer-events-auto mt-3 flex h-6 items-center gap-1.5 rounded-full border pr-2.5 pl-2 font-semibold whitespace-nowrap"
-              >
-                <ArrowLeftIcon className="size-3" aria-hidden />
-                Toutes catégories
-                {/* La touche est *aussi* une voie de sortie, mais elle ne
-                    s'annonçait nulle part : la maquette la fait dire par le
-                    bouton plutôt que d'ajouter une mention à part. */}
-                <kbd className="border-border bg-surface-2 num text-subtle text-label ml-0.5 flex h-4 items-center rounded-sm border px-1 font-medium tracking-[0.02em]">
-                  Esc
-                </kbd>
-              </button>
-            )}
+            {children(litArc(arcs)?.slice ?? null)}
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * Remonter d'un niveau, posé dans la carte du centre. Il vit ici et non dans
+ * l'écran parce que le centre est `pointer-events-none` (il survolerait les
+ * arcs) : le bouton doit se les rendre pour lui seul, sans quoi il s'affiche
+ * sans jamais répondre au clic.
+ *
+ * À ne rendre que sélection posée — sinon il creuse un trou permanent sous le
+ * libellé du centre.
+ */
+export function RingBackButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      title="Revenir à toutes les catégories"
+      onClick={(event) => {
+        event.stopPropagation();
+        onClick();
+      }}
+      className="border-border-strong bg-card text-muted-foreground hover:border-subtle hover:text-foreground text-control pointer-events-auto mt-3 flex h-6 items-center gap-1.5 rounded-full border pr-2.5 pl-2 font-semibold whitespace-nowrap"
+    >
+      <ArrowLeftIcon className="size-3" aria-hidden />
+      Toutes catégories
+      {/* La touche est *aussi* une voie de sortie, mais elle ne s'annonçait
+          nulle part : la maquette la fait dire par le bouton plutôt que
+          d'ajouter une mention à part. */}
+      <kbd className="border-border bg-surface-2 num text-subtle text-label ml-0.5 flex h-4 items-center rounded-sm border px-1 font-medium tracking-[0.02em]">
+        Esc
+      </kbd>
+    </button>
   );
 }
 
@@ -316,29 +318,14 @@ export function CategoryRing({
  * seule la pastille creuse disparaît — c'est l'anneau, pas la liste : un arc
  * anonyme n'a aucun autre moyen de se nommer.
  */
-function ArcLabel({
-  arc,
-  dimmed,
-  folded,
-}: {
-  arc: {
-    slice: RingSlice;
-    share: number;
-    offset: number;
-    active: boolean;
-    hovered: boolean;
-  };
-  dimmed: boolean;
-  /** Anneau replié (forage en cours) : l'étiquette s'efface avec ses arcs. */
-  folded: boolean;
-}) {
+function ArcLabel({ arc, dimmed }: { arc: Arc; dimmed: boolean }) {
   const angle = (arc.offset + arc.share / 2) * 2 * Math.PI - Math.PI / 2;
+  const lit = arc.active || arc.hovered;
   const radius = arc.active
     ? ICON_RADIUS.active
     : arc.hovered
       ? ICON_RADIUS.hover
       : ICON_RADIUS.base;
-  const lit = arc.active || arc.hovered;
   const right = Math.cos(angle) >= 0;
 
   return (
@@ -346,7 +333,7 @@ function ArcLabel({
       // Même durée que l'arc pour la position, même durée que le survol pour
       // l'estompage : l'étiquette glisse *avec* sa part, elle ne la rattrape pas.
       className={cn(
-        "pointer-events-none absolute flex -translate-y-1/2 items-center gap-1 whitespace-nowrap [transition:left_200ms_cubic-bezier(0.22,1,0.36,1),top_200ms_cubic-bezier(0.22,1,0.36,1),opacity_160ms_ease] motion-reduce:transition-none",
+        "absolute flex -translate-y-1/2 items-center gap-1 whitespace-nowrap [transition:left_200ms_cubic-bezier(0.22,1,0.36,1),top_200ms_cubic-bezier(0.22,1,0.36,1),opacity_160ms_ease] motion-reduce:transition-none",
         right
           ? "translate-x-[2px]"
           : "translate-x-[calc(-100%_-_2px)] flex-row-reverse",
@@ -354,7 +341,7 @@ function ArcLabel({
       style={{
         left: `${(50 + Math.cos(angle) * radius).toFixed(2)}%`,
         top: `${(50 + Math.sin(angle) * radius).toFixed(2)}%`,
-        opacity: folded ? 0 : lit ? 1 : dimmed ? 0.18 : 0.62,
+        opacity: lit ? 1 : dimmed ? 0.18 : 0.62,
       }}
     >
       {arc.slice.icon !== null && (

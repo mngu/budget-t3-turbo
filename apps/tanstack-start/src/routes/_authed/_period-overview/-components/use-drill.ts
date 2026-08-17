@@ -3,12 +3,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "@tanstack/react-router";
 
-import type { TransactionsSearch } from "@budget/shared";
+import type {
+  BreakdownByCategories,
+  TransactionsSearch,
+} from "@budget/shared";
 import { transactionsSearchSchema } from "@budget/shared";
 
-import type { RevueCategory } from "../-lib/revue-categories";
 import { defaultToCurrentMonth } from "~/lib/transactions-search";
-import { focusedCategory } from "../-lib/revue-categories";
+import { breakdownLevel } from "../-lib/breakdown";
 
 /**
  * Le temps du forage. `outMs` a **deux** lecteurs : la durée CSS du repli, et le
@@ -45,6 +47,13 @@ export const DRILL = {
  */
 export type DrillPhase = "out" | "in" | null;
 
+/** L'état du forage, tel que l'anneau le consomme : une phase et un sens. */
+export interface Drill {
+  phase: DrillPhase;
+  /** 1 = on entre dans un poste, −1 = on en sort. */
+  dir: 1 | -1;
+}
+
 // Les deux bornes de la période, telles que l'écran les interroge. Les searches
 // comparées sont celles des `ParsedLocation` du routeur — la query brute, avant
 // validation : d'où le schéma (une borne que la route rejette retombe sur
@@ -72,12 +81,12 @@ function periodKey(search: unknown) {
  * aucun niveau (même expression que `selected`, côté écran) — replier l'anneau
  * dans ces deux cas ferait clignoter la répartition pour rien.
  */
-export function levelKey(search: unknown, categories: RevueCategory[]) {
-  const focused = focusedCategory(
-    categories,
+export function levelKey(search: unknown, rows: BreakdownByCategories[]) {
+  const { parent } = breakdownLevel(
+    rows,
     PERIOD.parse(search).category ?? undefined,
   );
-  return focused?.subs.length ? focused.filter : "";
+  return parent?.filter ?? "";
 }
 
 const reducedMotion = () =>
@@ -107,13 +116,13 @@ const reducedMotion = () =>
  *
  * @param search Les search params dont l'anneau dépend : le poste ouvert et la
  *   période.
- * @param categories Les postes du niveau courant, seuls à dire si une parente
- *   ouvre un niveau (voir `levelKey`).
+ * @param rows La répartition de la période, seule à dire si une parente ouvre
+ *   un niveau (voir `levelKey`).
  */
 export function useDrill(
   search: Pick<TransactionsSearch, "category" | "dateFrom" | "dateTo">,
-  categories: RevueCategory[],
-) {
+  rows: BreakdownByCategories[],
+): Drill {
   const [phase, setPhase] = useState<DrillPhase>(null);
   const [dir, setDir] = useState<1 | -1>(1);
   // Un forage est en cours. La cible n'a pas à être retenue : *tout* changement
@@ -134,7 +143,7 @@ export function useDrill(
 
   const router = useRouter();
   // Le niveau observé : le poste ouvert **et** la période, les deux le changent.
-  const level = `${periodKey(search)}|${levelKey(search, categories)}`;
+  const level = `${periodKey(search)}|${levelKey(search, rows)}`;
 
   const fold = useCallback((direction: 1 | -1) => {
     pending.current = true;
@@ -206,14 +215,14 @@ export function useDrill(
           fold(to > from ? 1 : -1);
           return;
         }
-        const next = levelKey(toLocation.search, categories);
-        if (next === levelKey(fromLocation.search, categories)) return;
+        const next = levelKey(toLocation.search, rows);
+        if (next === levelKey(fromLocation.search, rows)) return;
         fold(next === "" ? -1 : 1);
       }),
-    // `categories` est dans les dépendances : l'arbre change avec la période, et
+    // `rows` est dans les dépendances : la répartition change avec la période, et
     // une parente qui avait des sous-catégories le mois dernier peut ne plus en
-    // avoir — capturé périmé, il déciderait à faux de replier ou non.
-    [router, fold, categories],
+    // avoir — capturée périmée, elle déciderait à faux de replier ou non.
+    [router, fold, rows],
   );
 
   useEffect(

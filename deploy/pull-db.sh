@@ -9,12 +9,17 @@
 # deux côtés, le dump transite sur stdout de ssh.
 set -euo pipefail
 
-HOST=${DEPLOY_HOST:?"exporter DEPLOY_HOST=root@<ip-du-vps>"}
 DIR=/docker/budget
 # En dur : la base `budget` de l'ancien repo vit dans la MÊME instance locale.
 DB=budget_t3
 
 cd "$(dirname "$0")/.."
+
+# L'hôte se lit dans le `.env` local (non committé, donc rien de personnel dans
+# le dépôt) à défaut d'être exporté : lancé depuis WebStorm ou par un double-clic,
+# le script n'hérite d'aucun export du shell.
+HOST=${DEPLOY_HOST:-$(grep -m1 '^DEPLOY_HOST=' .env 2>/dev/null | cut -d= -f2- || true)}
+: "${HOST:?DEPLOY_HOST manquant — l'ajouter au .env local (DEPLOY_HOST=root@<ip-du-vps>) ou l'exporter}"
 
 # printf + read plutôt que `read -rp` : `-p` veut dire coprocess en zsh, et le
 # script est lisible aussi bien lancé que sourcé depuis un shell zsh.

@@ -175,7 +175,37 @@ export interface CategoryBreakdownItem {
   breakdown: CategoryBreakdownDetail[];
 }
 
-function filterTransactions(organizationId: string, query: TransactionsSearch) {
+// Le filtre de comptes, en SQL brut : `twinWithinScope` et `bankCondition`
+// s'écrivent sur les tables Drizzle non aliasées, ils ne peuvent pas se corréler
+// aux alias `t` / `ba` de la CTE ci-dessous. Le libellé reste celui du sélecteur
+// de comptes (`coalesce(display_name, bank_name)`), jamais `account_id` : deux
+// comptes partageant un libellé sont indissociables dans l'UI.
+function bankFilter(bank: TransactionsSearch["bank"], table: "ba" | "twa") {
+  const banks = Array.isArray(bank) ? bank : bank ? [bank] : [];
+  // Une liste vide vaut « tous les comptes », comme `undefined` — même lecture
+  // que `selectedBanks` côté client.
+  if (banks.length === 0) return sql``;
+  const label = sql.raw(`coalesce(${table}.display_name, ${table}.bank_name)`);
+  return sql` AND ${inArray(label, banks)}`;
+}
+
+/**
+ * Le périmètre des agrégats de la revue : la période, les comptes affichés, ni
+ * les lignes exclues à la main, ni les virements internes.
+ *
+ * Ces derniers sortent **en dur**, sans consulter le param `internes` (qui ne
+ * gouverne que le relevé), et selon la règle de `twinWithinScope` : une paire
+ * n'est neutralisée que si ses **deux** jambes sont dans les comptes affichés —
+ * la jumelle hors sélection, la ligne redevient une vraie sortie, parce qu'elle
+ * en est vraiment une pour le périmètre regardé. Seul `bank` est ré-appliqué à
+ * la jumelle : les paires vont jusqu'à 3 jours d'écart, donc à cheval sur deux
+ * mois, et mettre les dates dans le périmètre déplacerait l'artefact sur la
+ * frontière de mois au lieu de le supprimer.
+ */
+export function filterTransactions(
+  organizationId: string,
+  query: TransactionsSearch,
+) {
   return sql`
     WITH filtered_transactions AS (
       SELECT t, ba, c, cbp, cbc, p
@@ -188,9 +218,29 @@ function filterTransactions(organizationId: string, query: TransactionsSearch) {
       WHERE t.booking_date BETWEEN ${query.dateFrom} AND ${query.dateTo}
       AND t.excluded = 'false'
       AND ba.organization_id = ${organizationId}
+      ${bankFilter(query.bank, "ba")}
+      AND NOT EXISTS (
+        SELECT 1 FROM transactions tw
+        JOIN bank_accounts twa ON tw.account_id = twa.id
+        WHERE tw.id = t.transfer_pair_id
+        AND twa.organization_id = ${organizationId}
+        ${bankFilter(query.bank, "twa")}
+      )
     )
   `;
 }
+
+// Une catégorie **racine** (sans parent) est son propre poste : c'est elle qui
+// en porte le nom, l'icône, la couleur et le budget. Sans ce repli, un
+// `GROUP BY (p).name` rassemble toutes les racines — et les transactions sans
+// catégorie du tout — dans un seul seau `null`.
+const parentName = sql`COALESCE((p).name, (c).name)`;
+const parentIcon = sql`COALESCE((p).icon, (c).icon)`;
+const parentColor = sql`COALESCE((p).color, (c).color)`;
+// …et son budget est le sien. Un `COALESCE((cbp).amount, (cbc).amount)` serait
+// faux ici : sous une parente **sans** budget, il ferait passer celui d'une
+// sous-catégorie pour le budget du poste.
+const parentBudget = sql`CASE WHEN (p).name IS NULL THEN (cbc).amount ELSE (cbp).amount END`;
 
 export async function breakdownByCategories(
   organizationId: string,
@@ -198,10 +248,19 @@ export async function breakdownByCategories(
 ) {
   const result = await db.execute<BreakdownByCategories>(sql`
       ${filterTransactions(organizationId, query)}
-      SELECT (p).name AS "parentName", (c).name AS "categoryName", (p).icon AS "parentIcon", (p).color AS "parentColor", (cbc).amount::float8 AS "budgetCatAmount", (cbp).amount::float8 AS "budgetParentAmount", SUM((t).amount)::float8 AS total
+      SELECT
+        ${parentName} AS "parentName",
+        (c).name AS "categoryName",
+        ${parentIcon} AS "parentIcon",
+        ${parentColor} AS "parentColor",
+        (cbc).amount::float8 AS "budgetCatAmount",
+        ${parentBudget}::float8 AS "budgetParentAmount",
+        SUM((t).amount)::float8 AS total
       FROM filtered_transactions
       WHERE (t).direction = 'debit'
-      GROUP BY (p).name, (c).name, (p).icon, (p).color, (cbc).amount, (cbp).amount
+      -- Par ordinaux : les colonnes 1 à 6 sont des expressions, les répéter ici
+      -- laisserait deux définitions du même poste diverger.
+      GROUP BY 1, 2, 3, 4, 5, 6
       ORDER BY SUM((t).amount) DESC
     `);
   return z.array(breakdownByCategoriesSchema).parse(result.rows);
@@ -214,10 +273,10 @@ export async function budgetStats(
   const result = await db.execute<BudgetStats>(sql`
       ${filterTransactions(organizationId, query)},
       budget_by_cat AS (
-        SELECT (p).name, (cbp).amount, SUM((t).amount) AS total
+        SELECT ${parentName} AS name, ${parentBudget} AS amount, SUM((t).amount) AS total
         FROM filtered_transactions
-        WHERE (cbp).amount IS NOT NULL
-        GROUP BY (p).name, (cbp).amount
+        WHERE ${parentBudget} IS NOT NULL
+        GROUP BY 1, 2
       )
       SELECT SUM(b.amount) AS "totalBudget", SUM(b.total) AS "totalAmount"
       FROM budget_by_cat b
@@ -690,77 +749,6 @@ export interface MonthlyCategoryTotal {
   // fraction du calendrier et fausserait toute moyenne de référence. Un volume
   // de transactions écroulé le trahit là où un montant ne le trahit pas.
   count: number;
-}
-
-// Nombre de mois d'historique remontés. 12 : il en faut 6 pour la sparkline,
-// 3 pour la moyenne de référence, et la série de mois négatifs peut être plus
-// longue que ça.
-const HISTORY_MONTHS = 12;
-
-// Historique mensuel par catégorie parente, sur la fenêtre qui *précède et
-// inclut* le mois affiché. Sert aux tuiles de la revue (comparaison à la moyenne
-// 3 mois, sparkline, série de mois négatifs) et au tri « Écart vs moy. ».
-//
-// Les bornes de date de la recherche sont volontairement ignorées — elles sont
-// remplacées par la fenêtre d'historique — mais tous les autres filtres
-// s'appliquent, pour que les tuiles parlent bien du périmètre affiché.
-//
-// `direction` est la seule exception, et elle est neutralisée **ici** plutôt
-// qu'à l'appel : la requête renvoie une colonne débit *et* une colonne crédit,
-// un filtre de sens en mettrait une des deux à zéro sur tous les mois. La tuile
-// Revenus se comparerait alors à des zéros et la série de mois négatifs
-// compterait tout l'historique. L'oubli étant invisible à l'écran (les totaux
-// du mois, eux, viennent de `byCategory` et restent justes), la garde ne doit
-// pas dépendre de l'appelant.
-export async function monthlyHistory(
-  organizationId: string,
-  input: TransactionsSearch,
-): Promise<MonthlyCategoryTotal[]> {
-  const anchor = input.dateTo ?? input.dateFrom ?? new Date().toISOString();
-  const end = new Date(anchor.slice(0, 10) + "T00:00:00Z");
-  const start = new Date(
-    Date.UTC(end.getUTCFullYear(), end.getUTCMonth() - (HISTORY_MONTHS - 1), 1),
-  );
-
-  const where = transactionsFilterQuery(organizationId, {
-    ...input,
-    direction: undefined,
-    internes: "masquer",
-    dateFrom: start.toISOString().slice(0, 10),
-    // Le mois affiché est inclus en entier, même si la borne haute de la
-    // recherche tombe en cours de mois.
-    dateTo: new Date(Date.UTC(end.getUTCFullYear(), end.getUTCMonth() + 1, 0))
-      .toISOString()
-      .slice(0, 10),
-  });
-
-  const month = sql<string>`to_char(${transactions.bookingDate}, 'YYYY-MM')`;
-  const parentName = sql<
-    string | null
-  >`coalesce(${parentCategories.name}, ${categories.name})`;
-
-  const rows = await db
-    .select({
-      month,
-      category: parentName,
-      debit: sql<string>`coalesce(sum(${transactions.amount}) filter (where ${transactions.direction} = 'debit'), 0)`,
-      credit: sql<string>`coalesce(sum(${transactions.amount}) filter (where ${transactions.direction} = 'credit'), 0)`,
-      count: count(),
-    })
-    .from(transactions)
-    .innerJoin(bankAccounts, eq(transactions.accountId, bankAccounts.id))
-    .leftJoin(categories, eq(transactions.categoryId, categories.id))
-    .leftJoin(parentCategories, eq(categories.parentId, parentCategories.id))
-    .where(where)
-    .groupBy(month, parentName);
-
-  return rows.map((r) => ({
-    month: r.month,
-    category: r.category,
-    debit: Number(r.debit),
-    credit: Number(r.credit),
-    count: r.count,
-  }));
 }
 
 export async function listBankLabels(

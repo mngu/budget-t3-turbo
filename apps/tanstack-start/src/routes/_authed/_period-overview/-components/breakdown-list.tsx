@@ -1,95 +1,54 @@
 import { LayersIcon } from "lucide-react";
 
 import type { BreakdownByCategories } from "@budget/shared";
-import { cn } from "@budget/ui";
 import { Toolbar } from "@budget/ui/toolbar";
 
+import { shadeCategoryColor, useCategoryColor } from "~/lib/category-color";
 import { euro } from "~/lib/format";
 import { useRevueSearch } from "~/lib/use-revue-search";
-import { NewBudgetGauge } from "./new-budget-gauge";
+import { breakdownLevel } from "../-lib/breakdown";
+import { BudgetGauge } from "./budget-gauge";
 
-interface NewBreakdownListProps {
-  breakdownByCategories: BreakdownByCategories[];
-}
-
-const NO_CATEGORY = "no-category";
-
+/**
+ * La colonne des postes : le même niveau que l'anneau de `/`, en lecture. Les
+ * deux sortent de `breakdownLevel` — c'est ce qui leur interdit de se
+ * contredire, et ce qui fait qu'un clic ici et un clic sur l'arc correspondant
+ * mènent au même endroit.
+ */
 export function BreakdownList({
   breakdownByCategories,
-}: NewBreakdownListProps) {
+}: {
+  breakdownByCategories: BreakdownByCategories[];
+}) {
   const { search, setSearch } = useRevueSearch();
-  const { category: searchCategory } = search;
+  const resolveColor = useCategoryColor();
 
-  let grandTotal = 0;
-  const data = breakdownByCategories.reduce<
-    Record<
-      string,
-      {
-        total: number;
-        budgetAmount: number | null;
-        icon: string | null;
-        parentColor: string | null;
-      }
-    >
-  >(
-    (
-      acc,
-      {
-        parentName,
-        categoryName,
-        parentIcon,
-        parentColor,
-        budgetCatAmount,
-        budgetParentAmount,
-        total,
-      },
-    ) => {
-      const name = searchCategory ? categoryName : parentName;
-      if (searchCategory && searchCategory !== parentName) {
-        return acc;
-      }
-      grandTotal += total;
-      if (name === null) {
-        acc[NO_CATEGORY] = {
-          total,
-          budgetAmount: null,
-          icon: null,
-          parentColor: null,
-        };
-      }
-      if (name && acc[name]) {
-        acc[name].total += total;
-      }
-      if (name && !acc[name]) {
-        acc[name] = {
-          total,
-          budgetAmount: searchCategory ? budgetCatAmount : budgetParentAmount,
-          parentColor,
-          icon: parentIcon,
-        };
-      }
+  const level = breakdownLevel(breakdownByCategories, search.category);
+  const parent = level.parent;
+  const parentColor = parent ? resolveColor(parent.color) : null;
 
-      return acc;
-    },
-    {},
-  );
-
-  const categoriesCount = Object.entries(data).length;
-  const subCategoriesCount = breakdownByCategories.length;
-  const parentCategoryElement = searchCategory
-    ? breakdownByCategories.find(
-        (breakdown) => breakdown.parentName === searchCategory,
-      )
-    : undefined;
-  const maxValue = Math.max(
-    grandTotal,
-    parentCategoryElement?.budgetParentAmount ?? 0,
+  // L'échelle est commune à toute la colonne : une jauge calée sur son propre
+  // budget peindrait un poste à 10 € aussi long qu'un poste à 1 700 € juste
+  // au-dessus, et la colonne cesserait de se lire de haut en bas.
+  const max = Math.max(
+    level.total,
+    ...level.slices.map((slice) => slice.budget ?? 0),
   );
 
   return (
     <div className="flex flex-col gap-4">
       <div className="h-28 px-2">
-        {!searchCategory ? (
+        {parent ? (
+          <BudgetGauge
+            value={level.total}
+            max={Math.max(level.total, parent.budget ?? 0)}
+            label={parent.name}
+            iconName={parent.icon}
+            color={parentColor}
+            budget={parent.budget}
+            valueSize="xl"
+          />
+        ) : (
           <div className="flex flex-col gap-1">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -97,28 +56,15 @@ export function BreakdownList({
                 <span className="text-subheading">Toutes les catégories</span>
               </div>
               <strong className="num text-amount">
-                {euro.format(grandTotal)}
+                {euro.format(level.total)}
               </strong>
             </div>
             <div className="text-subtle text-meta flex justify-end">
-              {categoriesCount} poste
-              {categoriesCount > 1 ? "s" : ""} de dépense · {subCategoriesCount}{" "}
-              sous-catégorie
-              {subCategoriesCount > 1 ? "s" : ""}
+              {level.postes} poste{level.postes > 1 ? "s" : ""} de dépense ·{" "}
+              {breakdownByCategories.length} sous-catégorie
+              {breakdownByCategories.length > 1 ? "s" : ""}
             </div>
           </div>
-        ) : (
-          parentCategoryElement && (
-            <NewBudgetGauge
-              value={grandTotal}
-              max={maxValue}
-              label={parentCategoryElement.parentName}
-              iconName={parentCategoryElement.parentIcon}
-              color={parentCategoryElement.parentColor}
-              budget={parentCategoryElement.budgetParentAmount}
-              valueSize="xl"
-            />
-          )
         )}
       </div>
 
@@ -131,24 +77,36 @@ export function BreakdownList({
         aria-label="Répartition par poste"
         className="flex min-h-0 flex-1 scrollbar-thin flex-col overflow-y-auto"
       >
-        {Object.entries(data).map(([categoryName, breakdown]) => (
+        {level.slices.map((slice, index) => (
           <Toolbar.Button
-            key={categoryName}
+            // Clé positionnelle, contrairement aux arcs : le nom change à chaque
+            // niveau, et c'est la *ligne* qui doit glisser d'une largeur à
+            // l'autre plutôt que d'être remontée.
+            key={index}
             type="button"
-            className={cn(
-              "not-aria-disabled:hover:bg-accent focus-visible:ring-accent-soft flex flex-none cursor-pointer flex-col justify-center gap-1.5 rounded-lg p-2 transition-colors outline-none focus-visible:ring-3 focus-visible:ring-inset motion-reduce:transition-none",
-            )}
-            onClick={() => setSearch({ category: categoryName })}
+            // Un poste sans sous-catégorie n'ouvre aucun niveau ; au niveau du
+            // bas, plus rien ne se creuse.
+            disabled={slice.subs === 0}
+            className="not-aria-disabled:hover:bg-accent focus-visible:ring-accent-soft flex flex-none cursor-pointer flex-col justify-center gap-1.5 rounded-lg p-2 transition-colors outline-none focus-visible:ring-3 focus-visible:ring-inset motion-reduce:transition-none"
+            onClick={() => setSearch({ category: slice.filter })}
           >
-            <NewBudgetGauge
-              value={breakdown.total}
-              budget={breakdown.budgetAmount}
-              iconName={breakdown.icon}
-              label={
-                categoryName === NO_CATEGORY ? "Sans catégorie" : categoryName
+            <BudgetGauge
+              value={slice.total}
+              budget={slice.budget}
+              // Une sous-catégorie n'a pas d'icône à elle : elle se lit dans la
+              // famille de sa parente, dont elle reprend l'icône. Sans ce repli
+              // la colonne se remplirait de pastilles creuses (l'état « aucune
+              // icône choisie » de `CategoryIcon`).
+              iconName={parent ? parent.icon : slice.icon}
+              label={slice.name}
+              // Une sous-catégorie n'a pas de teinte propre : c'est un palier de
+              // celle de sa parente, dérivé de son rang.
+              color={
+                parentColor
+                  ? shadeCategoryColor(parentColor, index, level.slices.length)
+                  : resolveColor(slice.color)
               }
-              color={breakdown.parentColor}
-              max={maxValue}
+              max={max}
             />
           </Toolbar.Button>
         ))}

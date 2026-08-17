@@ -6,17 +6,14 @@ import {
 
 import { transactionsSearchSchema } from "@budget/shared";
 
-import type { RevueCategory } from "./-lib/revue-categories";
 import {
   defaultToCurrentMonth,
   reviewScope,
   SEARCH_DEFAULTS,
   wholePeriod,
 } from "~/lib/transactions-search";
-import { NewKpiBand } from "~/routes/_authed/_period-overview/-components/new-kpi-band";
 import { BreakdownList } from "./-components/breakdown-list";
-import { averagesByCategory, deltaTo } from "./-lib/history";
-import { attachBudgets } from "./-lib/revue-budgets";
+import { KpiBand } from "./-components/kpi-band";
 
 /**
  * Coque des écrans de la revue : en-tête persistant et bandeau de tête, autour
@@ -57,132 +54,41 @@ export const Route = createFileRoute("/_authed/_period-overview")({
   loaderDeps: ({ search }) => search,
   loader: async ({ deps, context }) => {
     const period = wholePeriod(deps);
-    const [
-      expenses,
-      history,
-      tree,
-      plan,
-      breakdownByCategories,
-      globalStats,
-      budgetStats,
-    ] = await Promise.all([
-      // `direction: "debit"` forcé, comme la maquette : sans lui un seul mois de
-      // salaires écrase l'échelle et tous les postes de dépense s'affaissent à un
-      // moignon indistinct (mesuré : `Revenus` à 4 000 € contre 99 € pour le plus
-      // gros poste de sortie). Deux conséquences voulues — l'anneau et la colonne
-      // répondent à « où part l'argent » et non « qu'affiche la table », et les
-      // catégories d'entrée n'y figurent pas : la modale « Filtrer par catégorie »
-      // de `RefineBar`, qui liste les deux sens, reste la voie pour les atteindre.
-      context.trpcClient.transactions.byCategory.query({
-        ...period,
-        direction: "debit",
-      }),
-      context.trpcClient.transactions.history.query(period),
-      // Les icônes des postes : `transactions.byCategory` ne remonte que le
-      // libellé et la couleur, `categories.icon` vit dans l'arborescence. Lue par
-      // le client tRPC, à la différence des `fetchQuery` qui suivent : ceux-là
-      // n'alimentent que le cache react-query dont se servent l'en-tête (badge
-      // « À revoir », sélecteur de comptes) et les routes filles.
-      context.trpcClient.categories.tree.query(),
-      // Les budgets mensuels de `/budgets`, que la revue compare désormais à la
-      // dépense de la période (maquette du 2026-08-06). Sans dimension de
-      // période côté serveur : c'est `attachBudgets` qui les multiplie par le
-      // nombre de mois affichés, ou écarte la comparaison.
-      context.trpcClient.categories.budgets.plan.query(),
-      context.trpcClient.transactions.breakdownByCategories.query(deps),
-      context.trpcClient.transactions.globalStats.query(deps),
-      context.trpcClient.transactions.budgetStats.query(deps),
+    const [breakdownByCategories, globalStats, budgetStats] = await Promise.all(
+      [
+        // La répartition des sorties : une ligne par couple (parente, catégorie),
+        // budgets compris. C'est la **seule** source du niveau affiché — l'anneau
+        // de `/`, la colonne des postes et le forage en sortent tous, par
+        // `breakdownLevel`. Le sens `debit` est forcé côté SQL, comme la maquette :
+        // sans lui un seul mois de salaires écrase l'échelle et tous les postes de
+        // dépense s'affaissent à un moignon indistinct (mesuré : `Revenus` à
+        // 4 000 € contre 99 € pour le plus gros poste de sortie).
+        //
+        // `wholePeriod` et non `deps` : le périmètre de la revue est la période et
+        // les comptes, jamais le poste filtré — sinon l'anneau porterait le poste
+        // ouvert à 100 % de sa propre répartition.
+        context.trpcClient.transactions.breakdownByCategories.query(period),
+        context.trpcClient.transactions.globalStats.query(period),
+        context.trpcClient.transactions.budgetStats.query(period),
 
-      context.queryClient.fetchQuery({
-        ...context.trpc.transactions.review.queryOptions(reviewScope(deps)),
-        staleTime: 0,
-      }),
-      context.queryClient.fetchQuery({
-        ...context.trpc.categories.tree.queryOptions(),
-        staleTime: 0,
-      }),
-      context.queryClient.fetchQuery({
-        ...context.trpc.transactions.bankCounts.queryOptions(deps),
-        staleTime: 0,
-      }),
-      context.queryClient.fetchQuery({
-        ...context.trpc.transactions.banks.queryOptions(),
-        staleTime: 0,
-      }),
-      context.queryClient.fetchQuery({
-        ...context.trpc.transactions.breakdownByCategories.queryOptions(deps),
-      }),
-      context.queryClient.fetchQuery({
-        ...context.trpc.transactions.globalStats.queryOptions(deps),
-      }),
-      context.queryClient.fetchQuery({
-        ...context.trpc.transactions.budgetStats.queryOptions(deps),
-      }),
-    ]);
-
-    const expensesTotal = sum(expenses);
-
-    // Ancre de comparaison : la fin de la période affichée, sur laquelle
-    // `history` est bâti côté serveur — les deux ne peuvent pas diverger.
-    const anchor = deps.dateTo ?? deps.dateFrom ?? new Date().toISOString();
-
-    const iconByCategory = new Map(tree.map((node) => [node.name, node.icon]));
-    const averageByCategory = averagesByCategory(
-      history,
-      anchor,
-      (r) => r.debit,
+        // Ceux-ci n'alimentent que le cache react-query dont se servent l'en-tête
+        // (badge « À revoir », sélecteur de comptes) et les routes filles.
+        context.queryClient.fetchQuery({
+          ...context.trpc.transactions.review.queryOptions(reviewScope(deps)),
+          staleTime: 0,
+        }),
+        context.queryClient.fetchQuery({
+          ...context.trpc.transactions.bankCounts.queryOptions(deps),
+          staleTime: 0,
+        }),
+        context.queryClient.fetchQuery({
+          ...context.trpc.transactions.banks.queryOptions(),
+          staleTime: 0,
+        }),
+      ],
     );
 
-    // L'arborescence des postes est construite ici, dans le loader, plutôt que
-    // dans le composant : `/` en a besoin pour l'anneau et le layout pour la
-    // colonne, et un enfant ne peut lire que les *données* de son parent.
-    const base: RevueCategory[] = [...expenses]
-      .sort((a, b) => b.total - a.total)
-      .map((item) => {
-        // `transactions.byCategory` regroupe les transactions sans catégorie sous
-        // un libellé vide ; `history` les remonte à `null`. La clé de jointure est
-        // la chaîne vide des deux côtés (voir `averagesByCategory`), le libellé
-        // affiché est celui de la revue.
-        const key = item.category;
-        return {
-          name: key || "Sans catégorie",
-          // Sentinelle du search param : le groupe sans rattachement se filtre
-          // par « none », pas par la chaîne vide ni par son libellé d'affichage.
-          filter: key || "none",
-          total: item.total,
-          color: item.color,
-          icon: iconByCategory.get(key) ?? null,
-          subs: item.breakdown.map((b) => ({
-            name: b.category,
-            total: b.total,
-            // Le segment « À classer » est fabriqué par `byCategory` (le reliquat
-            // porté par la parente) : son libellé ne correspond à aucune ligne de
-            // `categories`, aucun filtre ne peut le désigner.
-            filter: b.unallocated ? null : b.category,
-            budget: null,
-          })),
-          // Posés par `attachBudgets` juste après : la comparaison au budget
-          // dépend de la période et des comptes, pas de la répartition.
-          budget: null,
-          covered: 0,
-          // Une catégorie absente de toute la fenêtre de référence a bien une
-          // moyenne de zéro : c'est un poste neuf, pas une donnée manquante.
-          delta: averageByCategory
-            ? deltaTo(item.total, averageByCategory.get(key) ?? 0)
-            : null,
-        };
-      });
-
-    const { categories } = attachBudgets(base, {
-      tree,
-      plan,
-      expenses: expensesTotal,
-      search: deps,
-    });
-
     return {
-      categories,
-      expenses: expensesTotal,
       breakdownByCategories,
       globalStats,
       budgetStats,
@@ -201,9 +107,6 @@ export const Route = createFileRoute("/_authed/_period-overview")({
   component: RevueLayout,
 });
 
-const sum = (items: { total: number }[]) =>
-  items.reduce((acc, item) => acc + item.total, 0);
-
 function RevueLayout() {
   const { breakdownByCategories, globalStats, budgetStats } =
     Route.useLoaderData();
@@ -216,25 +119,7 @@ function RevueLayout() {
             le solde hors de l'écran sur une fenêtre étroite. */}
         <div className="flex min-h-17 flex-none flex-wrap items-end gap-x-[clamp(11px,1.85vw,25px)] gap-y-3">
           <div className="min-w-0 flex-1">
-            <NewKpiBand globalStats={globalStats} budgetStats={budgetStats} />
-            {/*<KpiBand
-              label="Solde du mois"
-              balance={balance}
-              balanceDelta={balanceDelta}
-              // Les deux rangées de flux restent affichées quand un poste
-              // s'ouvre (`showFlow: true` dans la maquette depuis le passage du
-              // poste ouvert en colonne à part) : le solde et les deux flux
-              // décrivent le mois, le poste vient à côté et non à leur place.
-              flow={{
-                revenues: { amount: revenues, delta: revenuesDelta },
-                expenses: { amount: expenses, delta: expensesDelta },
-              }}
-              // Troisième rangée du bandeau depuis la maquette du 2026-08-06 :
-              // la dépense du mois contre l'enveloppe de `/budgets`. Elle
-              // apparaît donc aussi sur `/transactions`, qui monte le même
-              // bandeau — c'est ce que fait `Transactions.dc.html`.
-              budget={budgets}
-            />*/}
+            <KpiBand globalStats={globalStats} budgetStats={budgetStats} />
           </div>
         </div>
 

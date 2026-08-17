@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { createFileRoute, Link, useLoaderData } from "@tanstack/react-router";
 import { ArrowRightIcon, LayersIcon } from "lucide-react";
 
 import { cn } from "@budget/ui";
 
 import type { RingSlice } from "./-components/category-ring";
-import type { RevueCategory } from "./-lib/revue-categories";
 import { CategoryIcon } from "~/component/category-icon";
 import {
   shadeCategoryColor,
@@ -14,9 +13,9 @@ import {
 } from "~/lib/category-color";
 import { euro0, sharePercent } from "~/lib/format";
 import { useRevueSearch } from "~/lib/use-revue-search";
-import { CategoryRing } from "./-components/category-ring";
+import { CategoryRing, RingBackButton } from "./-components/category-ring";
 import { useDrill } from "./-components/use-drill";
-import { focusedCategory } from "./-lib/revue-categories";
+import { breakdownLevel } from "./-lib/breakdown";
 
 /**
  * Revue du mois — portage de la maquette « Revue du mois épurée » (Claude
@@ -52,22 +51,20 @@ export const Route = createFileRoute("/_authed/_period-overview/")({
 function PeriodOverview() {
   // Les agrégats sont ceux du layout : l'anneau et la colonne des postes lisent
   // la même répartition, elle n'a pas à être chargée deux fois.
-  const { categories, expenses } = useLoaderData({
+  const { breakdownByCategories } = useLoaderData({
     from: "/_authed/_period-overview",
   });
 
   const resolveColor = useCategoryColor();
   const { search, setSearch } = useRevueSearch();
 
-  const [hover, setHover] = useState<number | null>(null);
   // Le forage : replier l'anneau, changer de niveau, le déplier. Il guette la
   // search entière parce que le niveau tient au poste ouvert **et** à la
   // période — un changement de mois joue donc la même animation qu'un clic sur
   // un poste, c'est la seule de l'anneau. Voir `useDrill`.
-  const { phase, dir } = useDrill(search, categories);
+  const drill = useDrill(search, breakdownByCategories);
 
   const clear = () => {
-    setHover(null);
     // Ne naviguer que s'il y a un filtre à retirer : `setSearch` relance le
     // loader de la route, et Échap est *aussi* la touche qui referme les
     // popovers de l'en-tête — sans cette garde, chaque fermeture de sélecteur
@@ -96,67 +93,39 @@ function PeriodOverview() {
   // montrer au niveau du dessous, l'anneau y serait vide et le seul moyen d'en
   // ressortir serait le bouton du centre. Le bandeau, lui, continue de le
   // nommer — sur `/transactions` c'est un filtre parfaitement légitime.
-  const focused = focusedCategory(categories, search.category);
-  const selected = focused?.subs.length ? focused : null;
-  // Sous-catégorie surlignée. Le param prime toujours : le pense-bête local du
-  // segment « À classer » ne vaut qu'à défaut, et seulement tant que le filtre
-  // est resté sur la parente — sans quoi retirer le filtre depuis le rappel
-  // laisserait un arc surligné que plus rien dans l'URL ne justifie.
-  const subByParam =
-    selected?.subs.find(
-      (s) => s.filter !== null && s.filter === search.category,
-    ) ?? null;
-  const subSelected =
-    subByParam ??
-    (selected && search.category === selected.filter
-      ? (selected.subs.find((s) => s.filter === null) ?? null)
-      : null);
+  const level = breakdownLevel(breakdownByCategories, search.category);
+  const selected = level.parent;
   const selectedColor = selected ? resolveColor(selected.color) : "";
 
   // Une sous-catégorie n'a pas de couleur propre à l'écran : c'est un palier de
   // la teinte de son parent, du plus dense au plus proche de la surface — même
   // convention que les barres de la revue.
-  const slices: RingSlice[] = selected
-    ? selected.subs.map((sub, index) => ({
-        name: sub.name,
-        total: sub.total,
-        color: shadeCategoryColor(
-          resolveColor(selected.color),
-          index,
-          selected.subs.length,
-        ),
-        icon: null,
-      }))
-    : categories.map((category) => ({
-        name: category.name,
-        total: category.total,
-        color: resolveColor(category.color),
-        icon: category.icon,
-      }));
+  const slices: RingSlice[] = level.slices.map((slice, index) => ({
+    name: slice.name,
+    total: slice.total,
+    color: selected
+      ? shadeCategoryColor(selectedColor, index, level.slices.length)
+      : resolveColor(slice.color),
+    icon: slice.icon,
+  }));
 
-  const levelTotal = slices.reduce((acc, s) => acc + s.total, 0);
-  // Au niveau des parents rien n'est jamais surligné : les deux gestes qui
-  // désignent un poste y descendent (voir `descend`), il n'y a donc plus d'état
-  // « en avant parmi ses pairs ». Descendu, c'est la sous-catégorie filtrée.
-  const activeIndex = subSelected
-    ? slices.findIndex((s) => s.name === subSelected.name)
-    : -1;
-  const focus =
-    (hover !== null ? slices[hover] : null) ??
-    (activeIndex >= 0 ? slices[activeIndex] : null) ??
-    null;
-
-  /**
-   * Descendre dans un poste : l'unique geste du niveau des parents, partagé par
-   * la ligne de la colonne **et** par l'arc. Les deux désignent la même chose,
-   * ils font donc la même chose.
-   */
-  const descend = (category: RevueCategory) => {
-    // Le survol est remis à zéro : son index désignerait une part de l'ancien
-    // niveau.
-    setHover(null);
-    setSearch({ category: category.filter });
-  };
+  // Sous-catégorie surlignée. Au niveau des parents rien ne l'est jamais : les
+  // deux gestes qui désignent un poste y descendent, il n'y a donc plus d'état
+  // « en avant parmi ses pairs ».
+  //
+  // Le param prime toujours ; le segment « À classer », qu'aucun filtre ne
+  // désigne, ne se surligne qu'à défaut et seulement tant que le filtre est
+  // resté sur la parente — sans quoi retirer le filtre depuis le rappel
+  // laisserait un arc surligné que plus rien dans l'URL ne justifie.
+  const byParam = level.slices.findIndex(
+    (s) => !s.aClasser && s.filter === search.category,
+  );
+  const activeIndex =
+    byParam >= 0
+      ? byParam
+      : selected && search.category === selected.filter
+        ? level.slices.findIndex((s) => s.aClasser)
+        : -1;
 
   return (
     // Fragment, comme `/transactions` : la colonne des postes est une **sœur**
@@ -194,8 +163,8 @@ function PeriodOverview() {
         </span>
         <span className="text-subtle text-control flex-none whitespace-nowrap">
           {selected
-            ? `${selected.subs.length} sous-catégorie${selected.subs.length > 1 ? "s" : ""} · ${sharePercent(selected.total, expenses)} des sorties`
-            : `${categories.length} poste${categories.length > 1 ? "s" : ""} de dépense`}
+            ? `${level.slices.length} sous-catégorie${level.slices.length > 1 ? "s" : ""} · ${sharePercent(level.total, level.expenses)} des sorties`
+            : `${level.postes} poste${level.postes > 1 ? "s" : ""} de dépense`}
         </span>
 
         {/* Le passage à la table, à droite du fil d'ariane : la barre de
@@ -221,66 +190,78 @@ function PeriodOverview() {
         <CategoryRing
           slices={slices}
           activeIndex={activeIndex >= 0 ? activeIndex : null}
-          hoverIndex={hover}
-          phase={phase}
-          dir={dir}
-          // Pas de survol pendant le forage : l'index désignerait une part de
-          // l'anneau replié, et le centre nommerait un poste qui s'en va.
-          onHover={(index) => {
-            if (phase !== null && index !== null) return;
-            setHover(index);
-          }}
-          // Les arcs sont dans l'ordre de `subs` / `categories`, dont `slices`
-          // est le calque : l'index désigne la même part des deux côtés.
+          drill={drill}
+          // Les arcs sont dans l'ordre de `level.slices`, dont `slices` est le
+          // calque : l'index désigne la même part des deux côtés.
           onActivate={(index) => {
+            const slice = level.slices[index];
+            if (!slice) return;
             // Au niveau des parents, l'arc fait exactement ce que fait la
             // ligne de la colonne : il descend. Les deux désignent le même
-            // poste, ils ne peuvent pas répondre différemment.
+            // poste, ils ne peuvent pas répondre différemment. Un poste sans
+            // sous-catégorie n'ouvre aucun niveau et ne répond donc pas.
             if (!selected) {
-              const category = categories[index];
-              if (category?.subs.length) descend(category);
-              return;
-            }
-            const sub = selected.subs[index];
-            if (!sub) return;
-            if (sub.filter === null) {
-              // Le filtre revient sur la parente : c'est ce que le segment
-              // désigne de plus précis, et c'est aussi ce qui ancre le
-              // pense-bête local (voir `subSelected`).
-              setSearch({ category: selected.filter });
+              if (slice.subs > 0) setSearch({ category: slice.filter });
               return;
             }
             setSearch({
               category:
-                search.category === sub.filter
-                  ? // Retirer le surlignage d'une sous-catégorie ne remonte pas
-                    // d'un cran : on est toujours *dans* le poste ouvert, et le
-                    // filtre revient donc à lui, pas à rien.
-                    selected.filter
-                  : sub.filter,
+                // Retirer le surlignage d'une sous-catégorie ne remonte pas
+                // d'un cran : on est toujours *dans* le poste ouvert, le filtre
+                // revient donc à lui, pas à rien. C'est aussi, sans branche à
+                // part, ce que fait « À classer », dont le filtre **est** celui
+                // de sa parente.
+                search.category === slice.filter
+                  ? selected.filter
+                  : slice.filter,
             });
           }}
-          center={{
-            icon: focus
-              ? selected
-                ? null
-                : (categories.find((c) => c.name === focus.name)?.icon ?? null)
-              : (selected?.icon ?? null),
-            iconColor: focus ? focus.color : selectedColor || "var(--subtle)",
-            name: focus?.name ?? selected?.name ?? "",
-            amount: euro0.format(focus?.total ?? selected?.total ?? levelTotal),
-            label: focus
-              ? `${sharePercent(focus.total, levelTotal)} ${selected ? "du poste" : "du total"}`
-              : selected
-                ? `${sharePercent(selected.total, expenses)} du total`
-                : "Sorties",
-            // Troisième voie de sortie, avec Échap et le clic à côté : la
-            // maquette l'a ajoutée parce que les deux autres ne s'annoncent
-            // nulle part. Ne pas en supprimer une en croyant les autres
-            // suffisantes.
-            onBack: selected ? clear : undefined,
+        >
+          {/* Le centre nomme l'arc mis en avant, à défaut le niveau lui-même.
+              L'icône vient de la part (`null` sur une sous-catégorie, elles
+              n'en ont pas) — au niveau des parents, `slices` porte déjà celle
+              de la catégorie. */}
+          {(focus) => {
+            const name = focus?.name ?? selected?.name;
+            const icon = focus ? focus.icon : (selected?.icon ?? null);
+            return (
+              <>
+                {icon !== null && (
+                  <span
+                    className="mb-2"
+                    style={{
+                      color: focus
+                        ? focus.color
+                        : selectedColor || "var(--subtle)",
+                    }}
+                  >
+                    <CategoryIcon name={icon} className="size-5" />
+                  </span>
+                )}
+                {name && (
+                  <div className="text-control mb-1 max-w-full truncate font-semibold tracking-[-0.015em]">
+                    {name}
+                  </div>
+                )}
+                <div className="num text-title leading-none font-medium tracking-[-0.03em]">
+                  {euro0.format(focus?.total ?? level.total)}
+                </div>
+                <div className="label-caps mt-1 whitespace-nowrap">
+                  {focus
+                    ? `${sharePercent(focus.total, level.total)} ${selected ? "du poste" : "du total"}`
+                    : selected
+                      ? `${sharePercent(level.total, level.expenses)} du total`
+                      : "Sorties"}
+                </div>
+                {/* Troisième voie de sortie, avec Échap et le clic à côté : la
+                    maquette l'a ajoutée parce que les deux autres ne
+                    s'annoncent nulle part. Ne pas en supprimer une en croyant
+                    les autres suffisantes. */}
+                {selected && <RingBackButton onClick={clear} />}
+              </>
+            );
           }}
-        />
+        </CategoryRing>
       </div>
     </div>
   );

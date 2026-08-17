@@ -15,7 +15,6 @@ import {
   globalStats,
   listBankLabels,
   listTransactions,
-  monthlyHistory,
   reviewQueue,
   setTransactionCategory,
   setTransactionExcluded,
@@ -67,10 +66,6 @@ export const transactionsRouter = {
   bankCounts: orgProcedure
     .input(transactionsSearchSchema)
     .query(({ ctx, input }) => bankCounts(ctx.organizationId, input)),
-
-  history: orgProcedure
-    .input(transactionsSearchSchema)
-    .query(({ ctx, input }) => monthlyHistory(ctx.organizationId, input)),
 
   review: orgProcedure
     .input(transactionsSearchSchema)
