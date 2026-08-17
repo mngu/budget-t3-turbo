@@ -1,0 +1,37 @@
+apps/tanstack-start/src/routes/_authed/settings/categories/-components/category-overview-tree.tsx
+  h_c1b75a3cdf5637 284,521,523
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/transactions-table.tsx
+  h_c1b75a3cdf5637 227,231
+  h_c1b75a3cdf5637 228-230,232
+apps/tanstack-start/src/routes/_authed/_period-overview/index.tsx
+  h_c1b75a3cdf5637 170-176
+  h_c1b75a3cdf5637 177
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/refine-bar.tsx
+  h_c1b75a3cdf5637 188,193,403
+apps/tanstack-start/src/routes/_authed/settings/budgets/-components/budget-tree.tsx
+  h_c1b75a3cdf5637 162,164
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/category-path-picker.tsx
+  h_c1b75a3cdf5637 142
+  h_c1b75a3cdf5637 139-141,143
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/category-ring.tsx
+  h_c1b75a3cdf5637 355,359
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/overview-header.tsx
+  h_c1b75a3cdf5637 34,42
+  h_c1b75a3cdf5637 39-41,43
+apps/tanstack-start/src/routes/_authed/settings/categories/-components/category-identity-dialog.tsx
+  h_c1b75a3cdf5637 82-83,90,265
+  h_c1b75a3cdf5637 84-86,88-89,91,262-264,266
+knip.json
+  h_c1b75a3cdf5637 1-9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "654022e77dcc5b3e65c11a89ad8e099c1379bf3a",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
