@@ -352,10 +352,11 @@ function ArcLabel({ arc, dimmed }: { arc: Arc; dimmed: boolean }) {
       }}
     >
       {arc.slice.icon !== null && (
-        <span className="flex flex-none" style={{ color: arc.slice.color }}>
+        <span className="flex flex-none">
           <CategoryIcon
             name={arc.slice.icon}
             className={lit ? "size-5" : "size-4"}
+            color={arc.slice.color}
           />
         </span>
       )}

@@ -167,15 +167,14 @@ function PeriodOverview() {
             return (
               <>
                 {icon !== null && (
-                  <span
-                    className="mb-2"
-                    style={{
-                      color: focus
-                        ? focus.color
-                        : selectedColor || "var(--subtle)",
-                    }}
-                  >
-                    <CategoryIcon name={icon} className="size-5" />
+                  <span className="mb-2">
+                    <CategoryIcon
+                      name={icon}
+                      className="size-5"
+                      color={
+                        focus ? focus.color : selectedColor || "var(--subtle)"
+                      }
+                    />
                   </span>
                 )}
                 {name && (

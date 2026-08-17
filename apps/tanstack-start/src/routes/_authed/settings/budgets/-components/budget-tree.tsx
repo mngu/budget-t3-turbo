@@ -159,9 +159,9 @@ function ParentRow({
 
         <span
           className="flex size-8 items-center justify-center rounded-md border border-transparent"
-          style={{ background: softCategoryColor(color), color }}
+          style={{ background: softCategoryColor(color) }}
         >
-          <CategoryIcon name={parent.icon} />
+          <CategoryIcon name={parent.icon} color={color} />
         </span>
 
         <span className="text-body truncate font-medium">{parent.name}</span>

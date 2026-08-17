@@ -185,16 +185,12 @@ export function RefineBar({
             : "text-muted-foreground hover:bg-card border-transparent",
         )}
       >
-        <span
-          className="flex flex-none"
-          style={{
-            color: activeParent?.color ?? "var(--subtle)",
-          }}
-        >
+        <span className="flex flex-none">
           {search.category ? (
             <CategoryIcon
               name={activeParent?.icon ?? null}
               className="size-3"
+              color={activeParent?.color ?? "var(--subtle)"}
             />
           ) : (
             <TagIcon className="size-3" />
@@ -399,12 +395,12 @@ function CategoryFilterDialog({
                 className="flex size-6 flex-none items-center justify-center rounded-md"
                 style={{
                   background: softCategoryColor(resolveColor(item.color)),
-                  color: resolveColor(item.color),
                 }}
               >
                 <CategoryIcon
                   name={parents.get(item.category)?.icon ?? null}
                   className="size-3"
+                  color={resolveColor(item.color)}
                 />
               </span>
               <span

@@ -21,7 +21,6 @@ export function OverviewHeader({ breakdownByCategories }: OverviewHeaderProps) {
   const level = breakdownLevel(breakdownByCategories, search.category);
   const selected = level.parent;
   const selectedColor = selected ? resolveColor(selected.color) : "";
-  console.log("MAX pathname", pathname);
 
   return (
     <div className="flex min-w-0 flex-none items-center gap-3">
@@ -32,15 +31,16 @@ export function OverviewHeader({ breakdownByCategories }: OverviewHeaderProps) {
         )}
         style={
           selected
-            ? {
-                background: softCategoryColor(selectedColor),
-                color: selectedColor,
-              }
+            ? { background: softCategoryColor(selectedColor) }
             : undefined
         }
       >
         {selected ? (
-          <CategoryIcon name={selected.icon} className="size-4" />
+          <CategoryIcon
+            name={selected.icon}
+            className="size-4"
+            color={selectedColor}
+          />
         ) : (
           <LayersIcon className="size-4" aria-hidden />
         )}

@@ -136,9 +136,11 @@ export function CategoryPathPicker({
             key={parent.parent}
             heading={
               <span className="flex items-center gap-1.5">
-                <span style={{ color: parent.parentColor }}>
-                  <CategoryIcon name={parent.parentIcon} className="size-3" />
-                </span>
+                <CategoryIcon
+                  name={parent.parentIcon}
+                  className="size-3"
+                  color={parent.parentColor}
+                />
                 {parent.parent}
               </span>
             }

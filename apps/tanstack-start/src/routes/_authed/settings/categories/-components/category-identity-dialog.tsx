@@ -79,16 +79,16 @@ export function CategoryIdentityDialog({
         <DialogHeader className="flex-none flex-row items-center gap-3 border-b p-4">
           <span
             className="flex size-8 flex-none items-center justify-center rounded-md"
-            style={
-              target?.color
-                ? {
-                    background: softCategoryColor(resolve(target.color)),
-                    color: resolve(target.color),
-                  }
-                : { background: "var(--sunken)", color: "var(--subtle)" }
-            }
+            style={{
+              background: target?.color
+                ? softCategoryColor(resolve(target.color))
+                : "var(--sunken)",
+            }}
           >
-            <CategoryIcon name={target?.icon ?? null} />
+            <CategoryIcon
+              name={target?.icon ?? null}
+              color={resolve(target?.color ? target.color : "var(--subtle)")}
+            />
           </span>
           <div>
             <DialogTitle className="text-body font-semibold">
@@ -257,10 +257,13 @@ export function CategoryIdentityDialog({
               className="flex size-7 flex-none items-center justify-center rounded-lg"
               style={{
                 background: softCategoryColor(resolve(target.color)),
-                color: resolve(target.color),
               }}
             >
-              <CategoryIcon name={target.icon} className="size-3.5" />
+              <CategoryIcon
+                name={target.icon}
+                className="size-3.5"
+                color={resolve(target.color)}
+              />
             </span>
             <span className="min-w-0">
               Même teinte que{" "}

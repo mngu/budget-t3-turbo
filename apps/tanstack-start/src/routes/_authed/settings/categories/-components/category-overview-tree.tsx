@@ -278,11 +278,10 @@ function ParentRow({
           className="relative flex size-8 items-center justify-center rounded-md border"
           style={{
             background: softCategoryColor(resolve(color)),
-            color: resolve(color),
             borderColor: parent.color ? "transparent" : "var(--border-strong)",
           }}
         >
-          <CategoryIcon name={parent.icon} />
+          <CategoryIcon name={parent.icon} color={resolve(color)} />
           <span
             className="border-card absolute -right-0.5 -bottom-0.5 size-2 rounded-full border-[1.5px]"
             style={{ background: resolve(color) }}
@@ -519,9 +518,9 @@ function ProposedParentRow({
         <span />
         <span
           className="flex size-8 items-center justify-center rounded-md border border-dashed"
-          style={{ color, borderColor: color }}
+          style={{ borderColor: color }}
         >
-          <CategoryIcon name={null} />
+          <CategoryIcon name={null} color={color} />
         </span>
         <div className="flex min-w-0 items-center gap-2.5">
           <span className="text-body font-medium">{proposed.name}</span>

@@ -224,8 +224,12 @@ function CategoryCell({
         title="Reclasser"
         className="hover:border-border-strong hover:bg-card -ml-2 flex h-7 min-w-0 flex-1 items-center gap-2 rounded-md border border-transparent px-1.5 text-left"
       >
-        <span className="flex flex-none" style={{ color: parent?.color }}>
-          <CategoryIcon name={parent?.icon ?? null} className="size-4" />
+        <span className="flex flex-none">
+          <CategoryIcon
+            name={parent?.icon ?? null}
+            className="size-4"
+            color={parent?.color}
+          />
         </span>
         <span
           className={cn(
