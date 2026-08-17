@@ -14,6 +14,7 @@ import {
 } from "~/lib/transactions-search";
 import { BreakdownList } from "./-components/breakdown-list";
 import { KpiBand } from "./-components/kpi-band";
+import { OverviewHeader } from "./-components/overview-header";
 
 /**
  * Coque des écrans de la revue : en-tête persistant et bandeau de tête, autour
@@ -124,7 +125,8 @@ function RevueLayout() {
         </div>
 
         {/* Chaque écran rend son contenu **et** sa colonne des postes. */}
-        <div className="mt-3 flex min-h-0 flex-1 gap-5">
+        <div className="mt-3 flex min-h-0 flex-1 flex-col gap-2">
+          <OverviewHeader breakdownByCategories={breakdownByCategories} />
           <Outlet />
         </div>
       </div>

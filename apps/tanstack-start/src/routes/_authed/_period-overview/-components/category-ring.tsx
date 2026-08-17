@@ -93,7 +93,8 @@ export function CategoryRing({
   slices: RingSlice[];
   /** Part « ouverte » : les autres s'estompent. `null` quand rien n'est ouvert. */
   activeIndex: number | null;
-  onActivate: (index: number) => void;
+  /** Absent = niveau en lecture seule : les arcs ne répondent plus au clic. */
+  onActivate?: (index: number) => void;
   /**
    * L'étape du forage, telle que `useDrill` la rend. Toute phase non nulle
    * **replie** l'anneau : arcs à longueur nulle, étiquettes et centre effacés.
@@ -220,14 +221,20 @@ export function CategoryRing({
               // nouvelle origine pendant que sa longueur glisse — c'est un
               // arbitrage assumé pour la sobriété du mouvement, pas un oubli :
               // l'y remettre relance le balayage de tout l'anneau.
-              className="cursor-pointer [transition:stroke-width_200ms_cubic-bezier(0.22,1,0.36,1),stroke-opacity_200ms_ease,filter_200ms_ease,stroke-dasharray_var(--dash-duration)_var(--dash-ease)_var(--dash-delay)] motion-reduce:transition-none"
+              className={cn(
+                "[transition:stroke-width_200ms_cubic-bezier(0.22,1,0.36,1),stroke-opacity_200ms_ease,filter_200ms_ease,stroke-dasharray_var(--dash-duration)_var(--dash-ease)_var(--dash-delay)] motion-reduce:transition-none",
+                onActivate && "cursor-pointer",
+              )}
               // Pas de survol pendant le forage : il désignerait une part de
               // l'anneau replié, et le centre nommerait un poste qui s'en va.
               onMouseEnter={() => !folded && setHover(arc.slice.name)}
-              onClick={(event) => {
-                event.stopPropagation();
-                onActivate(arc.index);
-              }}
+              onClick={
+                onActivate &&
+                ((event) => {
+                  event.stopPropagation();
+                  onActivate(arc.index);
+                })
+              }
             >
               <title>{arc.slice.name}</title>
             </circle>

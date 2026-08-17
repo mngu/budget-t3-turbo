@@ -25,12 +25,15 @@
     "typecheck": "turbo run typecheck",
     "ui-add": "turbo run ui-add",
     "android": "expo run:android",
-    "ios": "expo run:ios"
+    "ios": "expo run:ios",
+    "knip": "knip"
   },
   "devDependencies": {
     "@budget/prettier-config": "workspace:*",
     "@turbo/gen": "^2.5.8",
+    "@types/node": "catalog:",
     "dotenv-cli": "^10.0.0",
+    "knip": "^6.32.2",
     "prettier": "catalog:",
     "turbo": "^2.5.8",
     "typescript": "catalog:"

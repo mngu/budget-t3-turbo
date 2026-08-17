@@ -1,16 +1,9 @@
 import { useEffect } from "react";
-import { createFileRoute, Link, useLoaderData } from "@tanstack/react-router";
-import { ArrowRightIcon, LayersIcon } from "lucide-react";
-
-import { cn } from "@budget/ui";
+import { createFileRoute, useLoaderData } from "@tanstack/react-router";
 
 import type { RingSlice } from "./-components/category-ring";
 import { CategoryIcon } from "~/component/category-icon";
-import {
-  shadeCategoryColor,
-  softCategoryColor,
-  useCategoryColor,
-} from "~/lib/category-color";
+import { shadeCategoryColor, useCategoryColor } from "~/lib/category-color";
 import { euro0, sharePercent } from "~/lib/format";
 import { useRevueSearch } from "~/lib/use-revue-search";
 import { CategoryRing, RingBackButton } from "./-components/category-ring";
@@ -134,54 +127,6 @@ function PeriodOverview() {
     // hauteur — c'est le `ch - 41` que la maquette retranche au diamètre de
     // l'anneau, et lui seul.
     <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-      {/* Le fil d'ariane nomme le **niveau** que l'anneau affiche, et lui
-            seul : mettre un arc en avant ne le déplace pas — c'est une
-            position, pas une sélection. */}
-      <div className="flex min-w-0 flex-none items-center gap-3">
-        <span
-          className={cn(
-            "flex size-7 flex-none items-center justify-center rounded-lg",
-            !selected && "bg-sunken text-subtle",
-          )}
-          style={
-            selected
-              ? {
-                  background: softCategoryColor(selectedColor),
-                  color: selectedColor,
-                }
-              : undefined
-          }
-        >
-          {selected ? (
-            <CategoryIcon name={selected.icon} className="size-4" />
-          ) : (
-            <LayersIcon className="size-4" aria-hidden />
-          )}
-        </span>
-        <span className="text-heading min-w-0 truncate">
-          {selected ? selected.name : "Toutes catégories"}
-        </span>
-        <span className="text-subtle text-control flex-none whitespace-nowrap">
-          {selected
-            ? `${level.slices.length} sous-catégorie${level.slices.length > 1 ? "s" : ""} · ${sharePercent(level.total, level.expenses)} des sorties`
-            : `${level.postes} poste${level.postes > 1 ? "s" : ""} de dépense`}
-        </span>
-
-        {/* Le passage à la table, à droite du fil d'ariane : la barre de
-              l'application n'a plus de rangée de navigation, ce lien-ci est la
-              voie vers `/transactions`. La search est conservée telle quelle —
-              le poste ouvert arrive donc en filtre de l'autre côté. */}
-        <Link
-          to="/transactions"
-          search={search}
-          title="Ouvrir la liste des transactions"
-          className="border-border bg-card text-muted-foreground hover:border-subtle hover:text-foreground hover:bg-accent text-control ml-auto flex h-7 flex-none items-center gap-1.5 rounded-full border pr-2 pl-3 font-medium whitespace-nowrap"
-        >
-          Voir les transactions
-          <ArrowRightIcon className="text-subtle size-3.5" aria-hidden />
-        </Link>
-      </div>
-
       {/* L'anneau s'étire sur toute la place disponible (pas d'`items-center`) :
           c'est de là qu'il tire sa taille, sa boîte carrée étant en confinement
           de taille — centrée dans un conteneur à dimension automatique, elle
@@ -193,29 +138,24 @@ function PeriodOverview() {
           drill={drill}
           // Les arcs sont dans l'ordre de `level.slices`, dont `slices` est le
           // calque : l'index désigne la même part des deux côtés.
-          onActivate={(index) => {
-            const slice = level.slices[index];
-            if (!slice) return;
-            // Au niveau des parents, l'arc fait exactement ce que fait la
-            // ligne de la colonne : il descend. Les deux désignent le même
-            // poste, ils ne peuvent pas répondre différemment. Un poste sans
-            // sous-catégorie n'ouvre aucun niveau et ne répond donc pas.
-            if (!selected) {
-              if (slice.subs > 0) setSearch({ category: slice.filter });
-              return;
-            }
-            setSearch({
-              category:
-                // Retirer le surlignage d'une sous-catégorie ne remonte pas
-                // d'un cran : on est toujours *dans* le poste ouvert, le filtre
-                // revient donc à lui, pas à rien. C'est aussi, sans branche à
-                // part, ce que fait « À classer », dont le filtre **est** celui
-                // de sa parente.
-                search.category === slice.filter
-                  ? selected.filter
-                  : slice.filter,
-            });
-          }}
+          // Au niveau des parents, l'arc fait exactement ce que fait la ligne
+          // de la colonne : il descend. Les deux désignent le même poste, ils
+          // ne peuvent pas répondre différemment. Un poste sans sous-catégorie
+          // n'ouvre aucun niveau et ne répond donc pas.
+          //
+          // Au niveau des sous-catégories, en revanche, **rien** ne répond au
+          // clic : l'anneau y est en lecture seule, comme la colonne. Le
+          // surlignage d'une sous-catégorie ne s'y pose donc plus que par
+          // l'URL (`search.category`, en revenant de `/transactions`).
+          onActivate={
+            selected
+              ? undefined
+              : (index) => {
+                  const slice = level.slices[index];
+                  if (slice && slice.subs > 0)
+                    setSearch({ category: slice.filter });
+                }
+          }
         >
           {/* Le centre nomme l'arc mis en avant, à défaut le niveau lui-même.
               L'icône vient de la part (`null` sur une sous-catégorie, elles
