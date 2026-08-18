@@ -33,14 +33,11 @@ const GRID =
 
 export function TransactionsTable({
   rows,
-  flagged,
   page,
   pageCount,
   total,
 }: {
   rows: TransactionRow[];
-  /** Ids remontés par la file de relecture — la ligne porte une pastille. */
-  flagged: Set<number>;
   page: number;
   pageCount: number;
   total: number;
@@ -75,7 +72,6 @@ export function TransactionsTable({
         <Row
           key={row.id}
           row={row}
-          flagged={flagged.has(row.id)}
           parents={parents}
           repeatsDate={
             grouped && rows[index - 1]?.bookingDate === row.bookingDate
@@ -116,12 +112,10 @@ export function TransactionsTable({
 
 function Row({
   row,
-  flagged,
   parents,
   repeatsDate,
 }: {
   row: TransactionRow;
-  flagged: boolean;
   parents: Map<string, ParentCategory>;
   repeatsDate: boolean;
 }) {
@@ -152,16 +146,6 @@ function Row({
         <span className="text-body truncate">{row.description}</span>
         <TransferBadge row={row} />
         <ExcludeBadge row={row} />
-        {/* La maquette met ici une pastille de « catégorisation peu sûre »,
-            calculée sur un score de confiance dont la base n'a aucun équivalent
-            (voir CLAUDE.md). Même emplacement, mais adossé au seul fait
-            vérifiable : la transaction est dans la file « À revoir ». */}
-        {flagged && (
-          <span
-            className="bg-bad size-1.5 flex-none rounded-full"
-            title="À revoir : sans catégorie, à classer, ou d'un sens inattendu pour sa catégorie"
-          />
-        )}
       </span>
 
       <span className="text-subtle text-control truncate">

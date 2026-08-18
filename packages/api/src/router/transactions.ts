@@ -15,7 +15,6 @@ import {
   globalStats,
   listBankLabels,
   listTransactions,
-  reviewQueue,
   setTransactionCategory,
   setTransactionExcluded,
   transactionsByCategory,
@@ -66,10 +65,6 @@ export const transactionsRouter = {
   bankCounts: orgProcedure
     .input(transactionsSearchSchema)
     .query(({ ctx, input }) => bankCounts(ctx.organizationId, input)),
-
-  review: orgProcedure
-    .input(transactionsSearchSchema)
-    .query(({ ctx, input }) => reviewQueue(ctx.organizationId, input)),
 
   updateCategory: orgProcedure
     .input(z.object({ id: z.number().int().positive(), category: z.string() }))

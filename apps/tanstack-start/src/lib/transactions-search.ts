@@ -96,22 +96,3 @@ export const wholePeriod = <T extends TransactionsSearch>(search: T) => ({
   // pour trois réponses identiques, rechargées à chaque bascule de la puce.
   internes: "toutes" as const,
 });
-
-// Clé de la file de relecture. Les filtres de contenu comptent (le compteur de
-// l'onglet « À revoir » parle bien du périmètre affiché), mais pagination et tri
-// sont neutralisés : `reviewQueue` les ignore côté serveur, et les laisser dans
-// la clé donnerait une entrée de cache par page de la table — le compteur de
-// l'en-tête se remettrait à charger à chaque « Suivant ». Les quatre écrans
-// doivent appeler `transactions.review` par cette seule fonction, sans quoi ils
-// alimentent des entrées de cache concurrentes et le compteur change de valeur
-// d'un onglet à l'autre.
-export const reviewScope = <T extends TransactionsSearch>(search: T) => ({
-  ...search,
-  page: 1,
-  sort: "date" as const,
-  order: "desc" as const,
-  // Même raison que la pagination : `reviewQueue` écarte les virements internes
-  // sans consulter le param, une clé par valeur ferait clignoter le compteur de
-  // l'onglet au premier clic sur la puce.
-  internes: "toutes" as const,
-});

@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { PAGE_SIZE } from "@budget/shared";
 
-import { reviewScope } from "~/lib/transactions-search";
 import { RefineBar } from "./-components/refine-bar";
 import { TransactionsTable } from "./-components/transactions-table";
 
@@ -20,29 +19,18 @@ import { TransactionsTable } from "./-components/transactions-table";
  */
 export const Route = createFileRoute("/_authed/_period-overview/transactions")({
   loaderDeps: ({ search }) => search,
-  loader: async ({ deps, context }) => {
-    const [result, review] = await Promise.all([
-      context.trpcClient.transactions.list.query(deps),
-      // Une seule entrée de cache pour la file de relecture, partagée avec le
-      // badge de l'onglet « À revoir » : `reviewScope` neutralise la pagination,
-      // sinon chaque « Suivant » recalculerait le badge (voir son commentaire).
-      context.queryClient.fetchQuery({
-        ...context.trpc.transactions.review.queryOptions(reviewScope(deps)),
-        staleTime: 0,
-      }),
-    ]);
-    return { ...result, flagged: review.map((item) => item.id) };
-  },
+  loader: ({ deps, context }) =>
+    context.trpcClient.transactions.list.query(deps),
   component: AllTransactions,
 });
 
 function AllTransactions() {
-  const { rows, total, flagged } = Route.useLoaderData();
+  const { rows, total } = Route.useLoaderData();
   const search = Route.useSearch();
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
-    <div className="flex min-w-0 flex-1 flex-col">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col">
       <RefineBar
         sens
         aClasser
@@ -53,7 +41,6 @@ function AllTransactions() {
 
       <TransactionsTable
         rows={rows}
-        flagged={new Set(flagged)}
         page={search.page}
         pageCount={pageCount}
         total={total}

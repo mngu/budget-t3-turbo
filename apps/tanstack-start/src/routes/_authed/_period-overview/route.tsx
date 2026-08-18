@@ -8,7 +8,6 @@ import { transactionsSearchSchema } from "@budget/shared";
 
 import {
   defaultToCurrentMonth,
-  reviewScope,
   SEARCH_DEFAULTS,
   wholePeriod,
 } from "~/lib/transactions-search";
@@ -72,12 +71,8 @@ export const Route = createFileRoute("/_authed/_period-overview")({
         context.trpcClient.transactions.globalStats.query(period),
         context.trpcClient.transactions.budgetStats.query(period),
 
-        // Ceux-ci n'alimentent que le cache react-query dont se servent l'en-tête
-        // (badge « À revoir », sélecteur de comptes) et les routes filles.
-        context.queryClient.fetchQuery({
-          ...context.trpc.transactions.review.queryOptions(reviewScope(deps)),
-          staleTime: 0,
-        }),
+        // Ceux-ci n'alimentent que le cache react-query dont se servent
+        // l'en-tête (sélecteur de comptes) et les routes filles.
         context.queryClient.fetchQuery({
           ...context.trpc.transactions.bankCounts.queryOptions(deps),
           staleTime: 0,
