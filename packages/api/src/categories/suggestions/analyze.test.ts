@@ -105,8 +105,8 @@ describe("buildAnalysisPrompt", () => {
     expect(prompt).toContain("Réutilise les noms existants au caractère près");
   });
 
-  // Garde-fou : une proposition réduite aux nouveautés ferait du mode
-  // "replace" d'applySuggestions une suppression de masse.
+  // Garde-fou : sur un delta, le LLM repart de zéro et réinvente des variantes
+  // des noms déjà en base (voir buildAnalysisPrompt).
   it("demande l'arborescence complète et non un delta", () => {
     const prompt = buildAnalysisPrompt([txn(1)], tree);
     expect(prompt).toContain("Décris l'arborescence complète");

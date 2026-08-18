@@ -18,14 +18,11 @@ import {
 } from "../categories/mutations";
 import {
   categoriesOverview,
-  listCategories,
   listCategoryTree,
 } from "../categories/queries";
 import { generateSuggestions } from "../categories/suggestions/analyze";
 import {
   acceptSuggestion,
-  applySuggestions,
-  previewReplace,
 } from "../categories/suggestions/apply";
 import {
   categorySuggestionChildSchema,
@@ -37,14 +34,6 @@ import { orgProcedure } from "../trpc";
 const categoryId = z.number().int().positive();
 
 export const categoriesRouter = {
-  // Sans input : liste plate complète (rétrocompatible avec les appels existants).
-  // Avec input.parentId : filtre sur ce parent (null = catégories racines).
-  list: orgProcedure
-    .input(z.object({ parentId: categoryId.nullable() }).optional())
-    .query(({ ctx, input }) =>
-      listCategories(ctx.organizationId, input?.parentId),
-    ),
-
   tree: orgProcedure.query(({ ctx }) => listCategoryTree(ctx.organizationId)),
 
   overview: orgProcedure.query(({ ctx }) =>
@@ -146,19 +135,9 @@ export const categoriesRouter = {
       generateSuggestions(ctx.organizationId),
     ),
 
-    // Aperçu en lecture seule de ce que ferait le mode "replace" : quelles
-    // catégories existantes seraient supprimées vs conservées (corrections
-    // manuelles). Utilisé par la dialog de confirmation côté UI.
-    previewReplace: orgProcedure
-      .input(z.object({ suggestions: z.array(categorySuggestionSchema) }))
-      .query(({ ctx, input }) =>
-        previewReplace(ctx.organizationId, input.suggestions),
-      ),
-
     // Accepte une proposition isolée — c'est ce que fait le bouton
-    // « Ajouter » d'une ligne proposée sur /categories. À ne pas remplacer par
-    // un `apply` sur un tableau à un élément : voir le commentaire
-    // d'acceptSuggestion, l'apply relance une passe LLM sur toute la base.
+    // « Ajouter » d'une ligne proposée sur /categories, et c'est la seule voie
+    // d'écriture des suggestions (voir le commentaire d'acceptSuggestion).
     accept: orgProcedure
       .input(
         z.object({
@@ -174,20 +153,6 @@ export const categoriesRouter = {
           input.parentColor,
           input.child,
         ),
-      ),
-
-    // Crée les catégories/sous-catégories validées et relance la
-    // catégorisation. mode "merge" (défaut) additif, "replace" fait de la
-    // sélection cochée la nouvelle vérité (voir applySuggestions).
-    apply: orgProcedure
-      .input(
-        z.object({
-          suggestions: z.array(categorySuggestionSchema),
-          mode: z.enum(["merge", "replace"]).default("merge"),
-        }),
-      )
-      .mutation(({ ctx, input }) =>
-        applySuggestions(ctx.organizationId, input.suggestions, input.mode),
       ),
   },
 } satisfies TRPCRouterRecord;

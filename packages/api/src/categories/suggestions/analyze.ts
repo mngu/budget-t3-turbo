@@ -50,11 +50,11 @@ export function sampleWindowStart(
 }
 
 // Part maximale de l'échantillon réservée aux transactions sans catégorie.
-// Ce plafond n'est pas cosmétique : le LLM propose une arborescence complète
-// qui, en mode "replace", devient la vérité (voir apply.ts). S'il ne voyait que
-// les orphelines, il proposerait un arbre ne couvrant qu'elles et "replace"
-// supprimerait tout le reste — computeReplacePlan ne protège que les
-// corrections manuelles. Le contexte déjà catégorisé doit rester majoritaire.
+// Ce plafond n'est pas cosmétique : c'est la moitié déjà catégorisée qui montre
+// au LLM les habitudes réelles du foyer et les noms en place. Réduit aux seules
+// orphelines, l'échantillon lui ferait proposer un arbre qui ne couvre qu'elles,
+// déconnecté de l'existant — donc des branches redondantes que `deriveSuggestions`
+// n'écarterait pas, leurs noms ne correspondant à rien de connu.
 const UNCATEGORIZED_SAMPLE_SHARE = 0.3;
 
 // Deux alias sur `categories` : la catégorie portée par la transaction, et sa
@@ -164,10 +164,12 @@ function formatExistingTree(tree: CategoryTreeNode[]): string {
 // aux accents, donc rien ne l'empêche), et lui faire garder la couleur déjà
 // choisie pour une parente existante.
 //
-// La réponse attendue reste l'arborescence **complète**, jamais un delta :
-// `applySuggestions` en mode "replace" traite la proposition comme la nouvelle
-// vérité et supprime tout ce qui en est absent (voir apply.ts). Une proposition
-// réduite aux nouveautés y deviendrait un bouton de suppression de masse.
+// La réponse attendue reste l'arborescence **complète**, jamais un delta. Ce
+// n'est plus une question de sûreté depuis la suppression du mode "replace"
+// (2026-08-18) — plus rien ne supprime sur la foi d'une proposition — mais de
+// qualité : redemander l'arbre entier est ce qui ancre le LLM sur les noms
+// existants. Sur un delta, il repart de zéro et réinvente des variantes.
+// L'écran, lui, ne montre que ce qui manque (`deriveSuggestions`).
 export function buildAnalysisPrompt(
   txns: TxnForAnalysis[],
   tree: CategoryTreeNode[],

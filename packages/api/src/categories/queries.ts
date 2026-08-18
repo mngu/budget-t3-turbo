@@ -65,25 +65,6 @@ function buildCategoryTree<T extends CategoryOption>(
   return roots;
 }
 
-// `parentId` omis : liste plate complète. `parentId: null` : catégories
-// racines. `parentId: n` : sous-catégories de n.
-export async function listCategories(
-  organizationId: string,
-  parentId?: number | null,
-): Promise<CategoryOption[]> {
-  const where =
-    parentId === undefined
-      ? undefined
-      : parentId === null
-        ? isNull(categories.parentId)
-        : eq(categories.parentId, parentId);
-  return db
-    .select(categoryColumns)
-    .from(categories)
-    .where(and(eq(categories.organizationId, organizationId), where))
-    .orderBy(categories.id);
-}
-
 // Arborescence complète : catégories parentes avec leurs sous-catégories.
 export async function listCategoryTree(
   organizationId: string,

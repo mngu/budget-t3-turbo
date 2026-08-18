@@ -50,7 +50,6 @@ export type {
   CategorySuggestion,
   CategorySuggestionChild,
 } from "./categories/suggestions/schema";
-export type { ReplacePlan } from "./categories/suggestions/replace-plan";
 export type {
   IncomingInvitation,
   InvitationDetail,
