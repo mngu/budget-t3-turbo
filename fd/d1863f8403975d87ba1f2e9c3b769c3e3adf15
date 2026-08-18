@@ -1,0 +1,39 @@
+CLAUDE.md
+  s_8f034395d81971::t_6cbe3c98f02ec7 24,32,34,41
+  s_8f034395d81971::t_cef221d01537dd 33
+apps/tanstack-start/src/routes/_authed/route.tsx
+  h_c1b75a3cdf5637 29
+packages/api/src/router/categories.ts
+  s_8f034395d81971::t_76d7808f578b1b 139-140
+packages/api/src/categories/suggestions/analyze.test.ts
+  s_8f034395d81971::t_9b00f7b369932c 108-109
+packages/api/src/categories/suggestions/apply.ts
+  s_8f034395d81971::t_50876b287c63eb 11-19
+  s_8f034395d81971::t_9f5baeee601062 1-3
+  s_8f034395d81971::t_31d8004fe89a61 66-70
+  s_8f034395d81971::t_a133d022b6cf84 84-85
+  s_8f034395d81971::t_e75727f76cb138 45
+packages/api/src/categories/suggestions/analyze.ts
+  s_8f034395d81971::t_9b00f7b369932c 53-57,167-172
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "fdd1863f8403975d87ba1f2e9c3b769c3e3adf15",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_8f034395d81971": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "095bfaef-f5b5-48bc-9f8b-60931f46d4a8",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
