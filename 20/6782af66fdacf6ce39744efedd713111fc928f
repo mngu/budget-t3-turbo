@@ -1,0 +1,67 @@
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/breakdown-list.tsx
+  s_a9429611b6924e::t_08d8c1174c7c38 3,21
+  s_a9429611b6924e::t_fc22bbbbb811ba 27-32,70,94
+CLAUDE.md
+  s_a9429611b6924e::t_8dde8c8db85407 55,66-70,82-83,85,101
+  s_a9429611b6924e::t_d25cfe2a7d2c98 102-104
+  s_a9429611b6924e::t_3e15b668329fa6 79
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/use-drill.test.ts
+  s_a9429611b6924e::t_97cc618c065e1d 3,6-16
+packages/api/src/categories/queries.ts
+  s_a9429611b6924e::t_7ae70d374d8577 86-87
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/transactions-table.tsx
+  s_a9429611b6924e::t_bcb6c503897e64 194-197,218
+packages/api/src/categories/mutations.ts
+  s_a9429611b6924e::t_7ae70d374d8577 45,96
+apps/tanstack-start/src/routes/_authed/_period-overview/index.tsx
+  s_a9429611b6924e::t_fc22bbbbb811ba 114,120,155
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/overview-header.tsx
+  s_a9429611b6924e::t_08d8c1174c7c38 4,14
+packages/shared/src/schemas.ts
+  s_a9429611b6924e::t_a50429dbc5d39a 69,82-86
+  s_a9429611b6924e::t_2b2c54ad5a4a4c 52-68,70-80,87-91,93-108,111-113
+  s_a9429611b6924e::t_4871ee9e26ba65 81
+packages/api/src/transactions/queries.ts
+  s_a9429611b6924e::t_8600f061a535d0 221-256,260-306,308-312,314-316
+  s_a9429611b6924e::t_f724d0b04ac9ff 4,29
+apps/tanstack-start/src/routes/_authed/_period-overview/-lib/breakdown.fixture.ts
+  s_a9429611b6924e::t_60ba1b40e889e2 1,4-10,12-13,15-28,30-42,44-51
+  s_a9429611b6924e::t_812df92604536f 29
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/refine-bar.tsx
+  s_a9429611b6924e::t_d7adcdf9b38a4d 16,79,114-115,122,274-284
+apps/tanstack-start/src/routes/_authed/_period-overview/route.tsx
+  s_a9429611b6924e::t_fc22bbbbb811ba 36
+  s_a9429611b6924e::t_7ae70d374d8577 40
+apps/tanstack-start/src/routes/_authed/_period-overview/-lib/breakdown.test.ts
+  s_a9429611b6924e::t_97cc618c065e1d 4,6-20,25-29,34,36-39,43,59-61,74-75
+apps/tanstack-start/src/routes/_authed/_period-overview/-lib/category-lookup.ts
+  s_a9429611b6924e::t_bcb6c503897e64 21-23
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/category-path-picker.tsx
+  s_a9429611b6924e::t_8fccfb973796be 35-39,42-44,49-52,58,66,85,90-96,103-104,112-115,120,139
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/use-drill.ts
+  s_a9429611b6924e::t_08d8c1174c7c38 118
+  s_a9429611b6924e::t_def8ea8d8d9078 6,10,81-83
+apps/tanstack-start/src/routes/_authed/_period-overview/-lib/breakdown.ts
+  s_a9429611b6924e::t_d2efaab15e68e0 1,5-6,8-16,19,28-29,33-36,38,47-49,51,67-68,70-80,83-95,97-98,103-108,113-127,129,132,134-138
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "206782af66fdacf6ce39744efedd713111fc928f",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_a9429611b6924e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "61224eda-075f-401f-83a8-73b228aef21d",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
