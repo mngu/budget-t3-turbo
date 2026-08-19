@@ -73,6 +73,20 @@ export const Route = createFileRoute("/_authed/_period-overview")({
 
         // Ceux-ci n'alimentent que le cache react-query dont se servent
         // l'en-tête (sélecteur de comptes) et les routes filles.
+        //
+        // L'arborescence est **obligatoire** ici, et pas seulement pour éviter
+        // une requête de plus : elle est lue par `useParentCategories`
+        // (`useQuery`, non suspensif) *et* par `CategoryPathPicker`
+        // (`useSuspenseQuery`), sur la même clé. Sans préchargement, le rendu
+        // serveur peint la `RefineBar` sur un cache vide — donc la pastille
+        // creuse de `CategoryIcon` — puis la requête suspensive de la table
+        // remplit le cache, qui part déshydraté vers le client : celui-ci rend
+        // la vraie icône et l'hydratation casse. Le préchargement met les deux
+        // côtés d'accord dès la première image.
+        context.queryClient.fetchQuery({
+          ...context.trpc.categories.tree.queryOptions(),
+          staleTime: 0,
+        }),
         context.queryClient.fetchQuery({
           ...context.trpc.transactions.bankCounts.queryOptions(deps),
           staleTime: 0,

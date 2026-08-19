@@ -27,9 +27,15 @@ export interface ParentCategory {
  *
  * `transactions.list` ne remonte que le libellé, le chemin et la couleur : ni
  * l'icône ni le fait d'avoir des enfants n'en font partie, et les deux sont
- * nécessaires pour rendre une cellule de catégorie. L'arborescence est déjà
- * préchargée dans le cache react-query par les loaders des écrans de la revue,
- * donc pas de requête supplémentaire ici.
+ * nécessaires pour rendre une cellule de catégorie.
+ *
+ * `useQuery` et non `useSuspenseQuery` : ce hook sert des cellules de tableau,
+ * qui ne doivent pas suspendre. Il **dépend donc du préchargement** de
+ * `categories.tree` par le loader du layout `_period-overview` — sans lui, le
+ * rendu serveur voit un cache vide et rend la pastille creuse de
+ * `CategoryIcon`, là où le client, dont le cache déshydraté est rempli par la
+ * requête suspensive de `CategoryPathPicker` (même clé), rend la vraie icône :
+ * l'hydratation casse. Ne pas retirer ce préchargement.
  */
 export function useParentCategories(): Map<string, ParentCategory> {
   const trpc = useTRPC();
