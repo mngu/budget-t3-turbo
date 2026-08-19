@@ -1,0 +1,26 @@
+apps/tanstack-start/src/routes/_authed/_period-overview/-lib/category-lookup.ts
+  s_8f034395d81971::t_4e421c372d2654 30-38
+apps/tanstack-start/src/routes/_authed/_period-overview/route.tsx
+  s_8f034395d81971::t_eeb59d48963c36 76-89
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "609d8a78b7918ae80c05bda755a73b2a9a3ea442",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_8f034395d81971": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "095bfaef-f5b5-48bc-9f8b-60931f46d4a8",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
