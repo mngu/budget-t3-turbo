@@ -83,7 +83,8 @@ export async function listCategoryTree(
 // ne compte jamais que les transactions portées par la catégorie elle-même.
 // Ils coïncident sur une sous-catégorie, qui n'a pas d'enfant.
 // Part de `categories` (pas `transactions`, contrairement à
-// `transactions.byCategory`) pour ne perdre aucune catégorie à 0 transaction.
+// `transactions.breakdownByCategories`) pour ne perdre aucune catégorie à 0
+// transaction.
 export async function categoriesOverview(
   organizationId: string,
 ): Promise<CategoriesOverview> {

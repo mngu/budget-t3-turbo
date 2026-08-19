@@ -1,53 +1,46 @@
 import { describe, expect, it } from "vitest";
 
 import { breakdownLevel } from "./breakdown";
-import { row } from "./breakdown.fixture";
+import { parent, sub, tree, unallocated } from "./breakdown.fixture";
 
-const rows = [
-  row("Logement", "Loyer", 60, { cat: 55, parent: 100 }),
-  row("Logement", "Électricité", 30),
-  // Le reliquat porté par la parente elle-même.
-  row("Logement", "Logement", 10, { cat: 100, parent: 100 }),
-  // Deux catégories **racines** sans enfant. Elles arrivent avec `parentName`
-  // replié sur leur propre nom : sans ce repli côté SQL, elles tomberaient
-  // toutes dans le même seau que les transactions sans catégorie.
-  row("Épargne", "Épargne", 200),
-  row("Santé", "Santé", 20),
-  row(null, null, 5),
-];
+// Postgres rend l'arbre déjà groupé, trié et totalisé : ce qui se teste ici est
+// tout ce qui *reste* côté app — les libellés, les sentinelles d'URL et le
+// choix du niveau ouvert. Le regroupement et le tri, eux, se testeront contre
+// une vraie base.
+const rows = tree([
+  parent("Épargne", 200),
+  parent(
+    "Logement",
+    100,
+    [sub("Loyer", 60, 55), sub("Électricité", 30), unallocated("Logement", 10)],
+    100,
+  ),
+  parent("Santé", 20),
+  parent(null, 5),
+]);
 
 describe("breakdownLevel — niveau des parents", () => {
   const level = breakdownLevel(rows, undefined);
 
-  it("ne mélange pas les catégories racines entre elles", () => {
-    expect(level.slices.map((s) => s.name)).toEqual([
-      "Épargne",
-      "Logement",
-      "Santé",
-      "Sans catégorie",
-    ]);
-  });
-
-  it("trie les postes du plus gros au plus petit", () => {
-    expect(level.slices.map((s) => s.total)).toEqual([200, 100, 20, 5]);
+  it("nomme et filtre le poste sans rattachement par sa sentinelle", () => {
+    expect(level.slices.at(-1)).toMatchObject({
+      name: "Sans catégorie",
+      filter: "none",
+    });
   });
 
   it("ne laisse descendre que les postes qui ont de vraies sous-catégories", () => {
     expect(
-      Object.fromEntries(level.slices.map((s) => [s.name, s.subs])),
+      Object.fromEntries(level.slices.map((s) => [s.name, s.drillable])),
     ).toEqual({
-      Logement: 2,
-      Épargne: 0,
-      Santé: 0,
-      "Sans catégorie": 0,
+      Logement: true,
+      Épargne: false,
+      Santé: false,
+      "Sans catégorie": false,
     });
   });
 
-  it("filtre le groupe sans rattachement par sa sentinelle", () => {
-    expect(level.slices.at(-1)?.filter).toBe("none");
-  });
-
-  it("rend le total des sorties et le nombre de postes", () => {
+  it("reprend le total des sorties et le nombre de postes de la requête", () => {
     expect(level.total).toBe(325);
     expect(level.expenses).toBe(325);
     expect(level.postes).toBe(4);
@@ -63,10 +56,9 @@ describe("breakdownLevel — poste ouvert", () => {
     expect(level.expenses).toBe(325);
   });
 
-  it("nomme « À classer » le reliquat de la parente et le renvoie vers elle", () => {
-    const aClasser = level.slices.find((s) => s.aClasser);
-    expect(aClasser).toMatchObject({
-      name: "À classer",
+  it("donne au reliquat le nom de sa parente et le renvoie vers elle", () => {
+    expect(level.slices.find((s) => s.unallocated)).toMatchObject({
+      name: "Logement",
       filter: "Logement",
       total: 10,
     });
@@ -79,6 +71,8 @@ describe("breakdownLevel — poste ouvert", () => {
     );
   });
 
+  // La règle que « `category` est défini » ne rend pas : le param porte
+  // l'enfant, le niveau ouvert est sa parente.
   it("descend aussi quand c'est une sous-catégorie qui est filtrée", () => {
     expect(breakdownLevel(rows, "Loyer").parent?.name).toBe("Logement");
   });

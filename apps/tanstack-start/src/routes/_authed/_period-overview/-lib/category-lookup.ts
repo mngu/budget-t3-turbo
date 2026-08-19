@@ -13,21 +13,14 @@ export interface ParentCategory {
   icon: string | null;
   /** Teinte déjà résolue au thème. */
   color: string;
-  /**
-   * Vrai quand la parente a des sous-catégories. C'est *la* condition qui fait
-   * qu'une transaction posée sur elle est « à classer » : sur une parente sans
-   * enfant, la même transaction est simplement classée (voir CLAUDE.md, et le
-   * prédicat `aClasser` côté serveur, qui teste exactement ça).
-   */
-  hasChildren: boolean;
 }
 
 /**
  * Index nom de catégorie parente → identité (icône, couleur, feuilles).
  *
- * `transactions.list` ne remonte que le libellé, le chemin et la couleur : ni
- * l'icône ni le fait d'avoir des enfants n'en font partie, et les deux sont
- * nécessaires pour rendre une cellule de catégorie.
+ * `transactions.list` ne remonte que le libellé, le chemin et la couleur :
+ * l'icône n'en fait pas partie, et elle est nécessaire pour rendre une cellule
+ * de catégorie.
  *
  * `useQuery` et non `useSuspenseQuery` : ce hook sert des cellules de tableau,
  * qui ne doivent pas suspendre. Il **dépend donc du préchargement** de
@@ -50,7 +43,6 @@ export function useParentCategories(): Map<string, ParentCategory> {
           {
             icon: parent.icon,
             color: resolveColor(parent.color ?? FALLBACK_CATEGORY_COLOR),
-            hasChildren: parent.children.length > 0,
           },
         ]),
       ),

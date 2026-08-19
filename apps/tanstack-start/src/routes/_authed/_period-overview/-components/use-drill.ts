@@ -3,14 +3,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "@tanstack/react-router";
 
-import type {
-  BreakdownByCategories,
-  TransactionsSearch,
-} from "@budget/shared";
+import type { Breakdown, TransactionsSearch } from "@budget/shared";
 import { transactionsSearchSchema } from "@budget/shared";
 
 import { defaultToCurrentMonth } from "~/lib/transactions-search";
-import { breakdownLevel } from "../-lib/breakdown";
+import { openParent } from "../-lib/breakdown";
 
 /**
  * Le temps du forage. `outMs` a **deux** lecteurs : la durée CSS du repli, et le
@@ -81,12 +78,9 @@ function periodKey(search: unknown) {
  * aucun niveau (même expression que `selected`, côté écran) — replier l'anneau
  * dans ces deux cas ferait clignoter la répartition pour rien.
  */
-export function levelKey(search: unknown, rows: BreakdownByCategories[]) {
-  const { parent } = breakdownLevel(
-    rows,
-    PERIOD.parse(search).category ?? undefined,
-  );
-  return parent?.filter ?? "";
+export function levelKey(search: unknown, rows: Breakdown) {
+  const parent = openParent(rows, PERIOD.parse(search).category ?? undefined);
+  return parent?.name ?? "";
 }
 
 const reducedMotion = () =>
@@ -121,7 +115,7 @@ const reducedMotion = () =>
  */
 export function useDrill(
   search: Pick<TransactionsSearch, "category" | "dateFrom" | "dateTo">,
-  rows: BreakdownByCategories[],
+  rows: Breakdown,
 ): Drill {
   const [phase, setPhase] = useState<DrillPhase>(null);
   const [dir, setDir] = useState<1 | -1>(1);

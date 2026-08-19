@@ -1,9 +1,7 @@
 // Lectures et corrections manuelles sur la table des transactions.
-import { z } from "zod/v4";
-
 import type { SQL } from "@budget/db";
 import type {
-  BreakdownByCategories,
+  Breakdown,
   BudgetStats,
   GlobalStats,
   TransactionsSearch,
@@ -28,9 +26,8 @@ import {
 import { db } from "@budget/db/client";
 import { bankAccounts, categories, transactions } from "@budget/db/schema";
 import {
-  breakdownByCategoriesSchema,
+  breakdownSchema,
   budgetStatsSchema,
-  FALLBACK_CATEGORY_COLOR,
   globalStatsSchema,
   PAGE_SIZE,
 } from "@budget/shared";
@@ -154,26 +151,6 @@ export interface TransactionRow {
   excluded: boolean;
 }
 
-export interface CategoryBreakdownDetail {
-  category: string;
-  total: number;
-  color: string;
-  // Vrai pour la seule ligne « À classer », qui n'est pas une catégorie mais
-  // le reliquat porté par le parent lui-même. Le client s'en sert pour ne pas
-  // poser `category=À classer` en filtre — aucune ligne ne matcherait.
-  unallocated: boolean;
-}
-
-export interface CategoryBreakdownItem {
-  category: string;
-  total: number;
-  color: string;
-  // Détail par sous-catégorie, trié comme le parent (total décroissant).
-  // Vide si la catégorie n'a pas d'enfant : le graphique retombe alors sur une
-  // barre d'un seul tenant.
-  breakdown: CategoryBreakdownDetail[];
-}
-
 // Le filtre de comptes, en SQL brut : `twinWithinScope` et `bankCondition`
 // s'écrivent sur les tables Drizzle non aliasées, ils ne peuvent pas se corréler
 // aux alias `t` / `ba` de la CTE ci-dessous. Le libellé reste celui du sélecteur
@@ -241,28 +218,102 @@ const parentColor = sql`COALESCE((p).color, (c).color)`;
 // sous-catégorie pour le budget du poste.
 const parentBudget = sql`CASE WHEN (p).name IS NULL THEN (cbc).amount ELSE (cbp).amount END`;
 
+// Position d'une ligne dans l'arborescence, **établie** par Postgres plutôt que
+// déduite d'une comparaison de noms. `COALESCE((p).name, (c).name)` rend quatre
+// situations indiscernables — une sous-catégorie, le reliquat d'une parente qui
+// a des enfants, une racine qui n'en a pas, et une transaction sans catégorie :
+// les trois dernières produisent toutes une ligne dont les deux noms sont
+// égaux. `parent_id` et l'existence d'enfants les séparent sans ambiguïté.
+const nodeKind = sql`CASE
+        WHEN (c).id IS NULL THEN 'none'
+        WHEN (p).id IS NOT NULL THEN 'sub'
+        WHEN EXISTS (SELECT 1 FROM categories child WHERE child.parent_id = (c).id)
+          THEN 'unallocated'
+        ELSE 'parent'
+      END`;
+
+/**
+ * La répartition des sorties : l'arbre entier, groupé, trié et totalisé par
+ * Postgres. **Seule** source du niveau affiché par la revue — l'anneau, la
+ * colonne des postes, l'en-tête et le forage en sortent tous, et c'est ce qui
+ * les empêche de se contredire.
+ *
+ * Le sens `debit` est forcé côté SQL, comme la maquette : sans lui un seul mois
+ * de salaires écrase l'échelle et tous les postes de dépense s'affaissent à un
+ * moignon indistinct (mesuré : `Revenus` à 4 000 € contre 99 € pour le plus
+ * gros poste de sortie).
+ *
+ * Trois choses descendent ici et ne doivent pas remonter côté app :
+ * — le **tri** des enfants, parce que `shadeCategoryColor` dérive la nuance
+ *   d'un segment de son rang : le rang est donc de la donnée, pas de la mise en
+ *   forme ;
+ * — `expenses` et `postes`, que l'en-tête affiche et qu'il recompterait sinon —
+ *   deux définitions du même chiffre finissent par diverger ;
+ * — `kind`, voir `nodeKind` ci-dessus.
+ *
+ * Ce qui **reste** côté app : les libellés français, les sentinelles d'URL et
+ * le choix du niveau ouvert (`-lib/breakdown.ts`).
+ */
 export async function breakdownByCategories(
   organizationId: string,
   query: TransactionsSearch,
-) {
-  const result = await db.execute<BreakdownByCategories>(sql`
-      ${filterTransactions(organizationId, query)}
+): Promise<Breakdown> {
+  const result = await db.execute(sql`
+      ${filterTransactions(organizationId, query)},
+      leaves AS (
+        SELECT
+          COALESCE((p).id, (c).id) AS poste_id,
+          ${parentName} AS poste_name,
+          ${parentIcon} AS poste_icon,
+          ${parentColor} AS poste_color,
+          ${parentBudget} AS poste_budget,
+          (c).name AS child_name,
+          (cbc).amount AS child_budget,
+          ${nodeKind} AS child_kind,
+          SUM((t).amount) AS total
+        FROM filtered_transactions
+        WHERE (t).direction = 'debit'
+        -- Par ordinaux : les colonnes 1 à 8 sont des expressions, les répéter
+        -- ici laisserait deux définitions du même poste diverger.
+        GROUP BY 1, 2, 3, 4, 5, 6, 7, 8
+      ),
+      postes AS (
+        SELECT
+          poste_name AS name,
+          CASE WHEN poste_id IS NULL THEN 'none' ELSE 'parent' END AS kind,
+          poste_icon AS icon,
+          poste_color AS color,
+          poste_budget::float8 AS budget,
+          SUM(total)::float8 AS total,
+          -- Une racine sans sous-catégorie ne produit que des lignes 'parent' :
+          -- le FILTER lui laisse un tableau vide, et c'est ce vide qui dit à
+          -- l'app qu'elle n'ouvre aucun niveau. Le reliquat, lui, est un enfant
+          -- comme un autre — il a cessé d'être une alerte, il reste une part,
+          -- sans quoi la somme du niveau ouvert n'égalerait plus son poste.
+          COALESCE(
+            json_agg(
+              json_build_object(
+                'name', child_name,
+                'kind', child_kind,
+                'total', total::float8,
+                'budget', child_budget::float8
+              ) ORDER BY total DESC
+            ) FILTER (WHERE child_kind IN ('sub', 'unallocated')),
+            '[]'::json
+          ) AS children
+        FROM leaves
+        GROUP BY poste_id, poste_name, poste_icon, poste_color, poste_budget
+      )
       SELECT
-        ${parentName} AS "parentName",
-        (c).name AS "categoryName",
-        ${parentIcon} AS "parentIcon",
-        ${parentColor} AS "parentColor",
-        (cbc).amount::float8 AS "budgetCatAmount",
-        ${parentBudget}::float8 AS "budgetParentAmount",
-        SUM((t).amount)::float8 AS total
-      FROM filtered_transactions
-      WHERE (t).direction = 'debit'
-      -- Par ordinaux : les colonnes 1 à 6 sont des expressions, les répéter ici
-      -- laisserait deux définitions du même poste diverger.
-      GROUP BY 1, 2, 3, 4, 5, 6
-      ORDER BY SUM((t).amount) DESC
+        COALESCE(SUM(total), 0)::float8 AS expenses,
+        COUNT(*)::int AS postes,
+        COALESCE(json_agg(to_jsonb(postes) ORDER BY total DESC), '[]'::json)
+          AS parents
+      FROM postes
     `);
-  return z.array(breakdownByCategoriesSchema).parse(result.rows);
+  // Le SELECT final n'est qu'agrégats, sans GROUP BY : il rend toujours une
+  // ligne, y compris sur une période vide.
+  return breakdownSchema.parse(result.rows[0]);
 }
 
 export async function budgetStats(
@@ -330,18 +381,6 @@ export function transactionsFilterQuery(
   if (query.direction)
     conditions.push(eq(transactions.direction, query.direction));
   if (query.status) conditions.push(eq(transactions.status, query.status));
-  // « À classer » : la transaction porte une catégorie *parente* qui a par
-  // ailleurs des sous-catégories. C'est un prédicat de ligne, sans rapport avec
-  // le drapeau `unallocated` de transactionsByCategory qui, lui, est un
-  // agrégat. Ne pas confondre non plus avec `category: "none"` (aucune
-  // catégorie du tout) : ici la transaction est classée, mais trop grossièrement.
-  if (query.aClasser)
-    conditions.push(
-      sql`${categories.parentId} is null and exists (
-        select 1 from ${categories} as a_classer_children
-        where a_classer_children.parent_id = ${categories.id}
-      )`,
-    );
   if (query.category === "none")
     conditions.push(isNull(transactions.categoryId));
   else if (query.category) {
@@ -442,125 +481,6 @@ export async function listTransactions(
 
   // La colonne jsonb `raw` se type trop largement pour être inférée.
   return { rows: rows as TransactionRow[], total: countRow?.total ?? 0 };
-}
-
-// Part du graphique portant un montant rattaché directement à la catégorie
-// parente plutôt qu'à l'une de ses sous-catégories.
-const A_CLASSER_LABEL = "À classer";
-
-// Regroupe toujours au niveau de la catégorie parente : une sous-catégorie
-// remonte dans le total de son parent, une catégorie déjà racine reste
-// inchangée (parentCategories vide dans ce cas). Une barre du graphique vaut
-// donc toujours une catégorie parente, et `breakdown` porte ses segments.
-//
-// L'agrégat SQL descend jusqu'à la catégorie feuille ; le repli sur le parent
-// se fait en TypeScript. Conséquence : l'`order by` SQL porterait sur les
-// feuilles, donc l'ordre des barres comme celui des segments est refait ici
-// sur le total replié.
-export async function transactionsByCategory(
-  organizationId: string,
-  input: TransactionsSearch,
-): Promise<CategoryBreakdownItem[]> {
-  // Les virements internes sont écartés ici comme dans tous les agrégats, sans
-  // consulter le param : une jambe reste catégorisée (`Revenus › Apport …` sur
-  // les données réelles) et pèserait sur sa part de l'anneau.
-  const where = transactionsFilterQuery(organizationId, {
-    ...input,
-    internes: "masquer",
-  });
-  const rows = await db
-    .select({
-      parentId: parentCategories.id,
-      parentName: parentCategories.name,
-      parentColor: parentCategories.color,
-      categoryId: categories.id,
-      categoryName: categories.name,
-      categoryColor: categories.color,
-      total: sql<string>`sum(${transactions.amount})`,
-    })
-    .from(transactions)
-    .innerJoin(bankAccounts, eq(transactions.accountId, bankAccounts.id))
-    .leftJoin(categories, eq(transactions.categoryId, categories.id))
-    .leftJoin(parentCategories, eq(categories.parentId, parentCategories.id))
-    .where(where)
-    .groupBy(
-      parentCategories.id,
-      parentCategories.name,
-      parentCategories.color,
-      categories.id,
-      categories.name,
-      categories.color,
-    );
-
-  // `unallocated` = montant porté par la catégorie parente elle-même. Il ne
-  // devient une ligne « À classer » que si la catégorie a par ailleurs des
-  // sous-catégories ; sinon c'est simplement une catégorie racine sans enfant.
-  interface Group {
-    category: string;
-    color: string;
-    unallocated: number;
-    breakdown: CategoryBreakdownDetail[];
-  }
-  const groups = new Map<string, Group>();
-
-  for (const row of rows) {
-    const isChild = row.parentId !== null;
-    // Le leftJoin laisse passer les transactions sans catégorie (tout est null) :
-    // elles restent une part unique, sans détail, comme avant.
-    const groupId = row.parentId ?? row.categoryId;
-    const key = groupId === null ? "none" : String(groupId);
-    const total = Number(row.total);
-
-    let group = groups.get(key);
-    if (!group) {
-      // Une part croisée d'abord par ses enfants tient libellé et couleur du
-      // parent joint, sinon de la ligne elle-même. Seule la part « sans
-      // catégorie » n'a aucun des deux et retombe sur le libellé vide.
-      group = {
-        category: (isChild ? row.parentName : row.categoryName) ?? "",
-        color:
-          (isChild ? row.parentColor : row.categoryColor) ??
-          FALLBACK_CATEGORY_COLOR,
-        unallocated: 0,
-        breakdown: [],
-      };
-      groups.set(key, group);
-    }
-
-    if (isChild) {
-      group.breakdown.push({
-        category: row.categoryName ?? "",
-        total,
-        color: row.categoryColor ?? FALLBACK_CATEGORY_COLOR,
-        unallocated: false,
-      });
-    } else {
-      group.unallocated += total;
-    }
-  }
-
-  return [...groups.values()]
-    .map((group) => {
-      const breakdown = [...group.breakdown];
-      const total =
-        group.unallocated + breakdown.reduce((acc, c) => acc + c.total, 0);
-      // Le montant porté par la catégorie parente elle-même ne devient un
-      // segment qu'en présence de vraies sous-catégories.
-      if (breakdown.length > 0 && group.unallocated !== 0) {
-        breakdown.push({
-          category: A_CLASSER_LABEL,
-          total: group.unallocated,
-          color: group.color,
-          unallocated: true,
-        });
-      }
-      // Tri du plus gros au plus petit, « À classer » compris : le graphique
-      // dérive la nuance de chaque segment de son rang, un reliquat épinglé en
-      // dernier donnerait la teinte la plus pâle au plus gros des segments.
-      breakdown.sort((a, b) => b.total - a.total);
-      return { category: group.category, color: group.color, total, breakdown };
-    })
-    .sort((a, b) => b.total - a.total);
 }
 
 export interface MonthlyCategoryTotal {

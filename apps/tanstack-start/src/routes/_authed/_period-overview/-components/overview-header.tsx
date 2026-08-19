@@ -1,7 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { ArrowLeftIcon, ArrowRightIcon, LayersIcon } from "lucide-react";
 
-import type { BreakdownByCategories } from "@budget/shared";
+import type { Breakdown } from "@budget/shared";
 import { cn } from "@budget/ui";
 
 import { CategoryIcon } from "~/component/category-icon";
@@ -11,7 +11,7 @@ import { useRevueSearch } from "~/lib/use-revue-search";
 import { breakdownLevel } from "~/routes/_authed/_period-overview/-lib/breakdown";
 
 interface OverviewHeaderProps {
-  breakdownByCategories: BreakdownByCategories[];
+  breakdownByCategories: Breakdown;
 }
 
 export function OverviewHeader({ breakdownByCategories }: OverviewHeaderProps) {

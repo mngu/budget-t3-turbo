@@ -111,13 +111,13 @@ function PeriodOverview() {
   // resté sur la parente — sans quoi retirer le filtre depuis le rappel
   // laisserait un arc surligné que plus rien dans l'URL ne justifie.
   const byParam = level.slices.findIndex(
-    (s) => !s.aClasser && s.filter === search.category,
+    (s) => !s.unallocated && s.filter === search.category,
   );
   const activeIndex =
     byParam >= 0
       ? byParam
       : selected && search.category === selected.filter
-        ? level.slices.findIndex((s) => s.aClasser)
+        ? level.slices.findIndex((s) => s.unallocated)
         : -1;
 
   return (
@@ -152,7 +152,7 @@ function PeriodOverview() {
               ? undefined
               : (index) => {
                   const slice = level.slices[index];
-                  if (slice && slice.subs > 0)
+                  if (slice?.drillable)
                     setSearch({ category: slice.filter });
                 }
           }

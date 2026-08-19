@@ -33,15 +33,6 @@ export const transactionsSearchSchema = z.object({
     .optional()
     .catch(undefined),
   q: z.string().optional().catch(undefined),
-  // Ne garde que les transactions rattachées à une catégorie parente qui a des
-  // sous-catégories — le « à classer » de la revue du mois. Ce n'est pas le
-  // même prédicat que `category: "none"` (aucune catégorie du tout).
-  //
-  // Nommé d'après le libellé affiché, et non `unallocatedOnly` : le drapeau
-  // `unallocated` de `transactions.byCategory` est un *agrégat* et désigne
-  // autre chose — deux noms voisins pour deux notions distinctes se
-  // confondraient à la première relecture.
-  aClasser: z.boolean().optional().catch(undefined),
   // Virements entre deux comptes suivis (`transfer_pair_id`). Ne gouverne que
   // le **relevé** : les agrégats les excluent en dur, à l'intérieur de chaque
   // fonction, sans jamais consulter ce param — un agrégat qui laisserait le
@@ -58,17 +49,68 @@ export const transactionsSearchSchema = z.object({
 
 export type TransactionsSearch = z.infer<typeof transactionsSearchSchema>;
 
-export const breakdownByCategoriesSchema = z.object({
-  parentName: z.string().nullable(),
-  categoryName: z.string().nullable(),
-  parentIcon: z.string().nullable(),
-  parentColor: z.string().nullable(),
-  budgetCatAmount: z.number().nullable(),
-  budgetParentAmount: z.number().nullable(),
+/**
+ * La répartition des sorties, telle que Postgres la rend : l'arbre entier, déjà
+ * groupé, trié et totalisé.
+ *
+ * Le SQL produit les **faits** — appartenances, montants, budgets, ordre — et
+ * s'arrête là : aucun libellé d'affichage n'y descend. Ce qu'un nœud *est* se
+ * lit dans `kind`, jamais dans une comparaison de noms (l'ancienne forme plate
+ * déduisait le reliquat d'un `categoryName === parentName`, qui confondait trois
+ * situations distinctes). Les libellés français, les sentinelles d'URL et le
+ * choix du niveau ouvert vivent côté app, dans `-lib/breakdown.ts`.
+ *
+ * `zod` valide l'arbre entier et ce n'est pas du zèle : la requête est du SQL
+ * brut derrière un `db.execute<T>`, c'est-à-dire un cast non vérifié. Ce parse
+ * est le seul endroit où la requête et le type se rencontrent — sans lui, une
+ * colonne renommée ne se voit que trois composants plus loin, sous la forme
+ * d'un `undefined` qui rend une pastille creuse.
+ */
+const breakdownChildSchema = z.strictObject({
+  name: z.string().nullable(),
+  /**
+   * `sub` = une vraie sous-catégorie. `unallocated` = la dépense posée sur la
+   * parente elle-même : elle n'est plus signalée comme un défaut (le filtre
+   * « à classer » a été supprimé) mais elle reste une part à part entière,
+   * sans quoi la somme du niveau ouvert n'égalerait plus le total du poste.
+   */
+  kind: z.enum(["sub", "unallocated"]),
   total: z.number(),
+  budget: z.number().nullable(),
 });
 
-export type BreakdownByCategories = z.infer<typeof breakdownByCategoriesSchema>;
+// `strictObject` et non `object` : la requête construit ce nœud par
+// `to_jsonb(postes)`, qui émet **toutes** les colonnes de la CTE. Une colonne
+// ajoutée là passerait en silence dans un schéma permissif, et ce parse est
+// précisément le seul endroit où la requête et le type se rencontrent.
+const breakdownParentSchema = z.strictObject({
+  /** `null` sur le poste des transactions sans catégorie (`kind: "none"`). */
+  name: z.string().nullable(),
+  kind: z.enum(["parent", "none"]),
+  icon: z.string().nullable(),
+  color: z.string().nullable(),
+  total: z.number(),
+  budget: z.number().nullable(),
+  /**
+   * Trié par montant décroissant **dans le SQL**, reliquat compris. L'ordre
+   * n'est pas cosmétique : `shadeCategoryColor` dérive la nuance de chaque
+   * segment de son rang, donc le rang est de la donnée.
+   */
+  children: z.array(breakdownChildSchema),
+});
+
+export const breakdownSchema = z.object({
+  /** Total des sorties de la période, quel que soit le niveau affiché. */
+  expenses: z.number(),
+  /** Nombre de postes de dépense. Calculé ici pour que l'en-tête, qui l'affiche,
+   *  n'ait pas à le recompter — et ne puisse donc pas annoncer autre chose. */
+  postes: z.number(),
+  parents: z.array(breakdownParentSchema),
+});
+
+export type Breakdown = z.infer<typeof breakdownSchema>;
+export type BreakdownParent = z.infer<typeof breakdownParentSchema>;
+export type BreakdownChild = z.infer<typeof breakdownChildSchema>;
 
 export const budgetStatsSchema = z.object({
   totalBudget: z.coerce.number(),

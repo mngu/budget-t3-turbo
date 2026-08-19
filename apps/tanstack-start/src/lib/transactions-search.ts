@@ -89,7 +89,6 @@ export const wholePeriod = <T extends TransactionsSearch>(search: T) => ({
   ...search,
   page: 1,
   category: undefined,
-  aClasser: undefined,
   q: undefined,
   // Les agrégats écartent les virements internes d'eux-mêmes, quelle que soit
   // la valeur du param : le laisser passer donnerait trois clés react-query

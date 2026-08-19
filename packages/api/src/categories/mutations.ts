@@ -42,7 +42,7 @@ async function assertNameAvailable(
 // Crée une catégorie (parentId null) ou sous-catégorie (parentId d'un parent
 // existant). Couleur par défaut FALLBACK_CATEGORY_COLOR pour un parent —
 // jamais pour un enfant, qui hérite visuellement de son parent (voir
-// transactions/queries.ts, byCategory).
+// transactions/queries.ts, breakdownByCategories).
 export async function createCategory(
   organizationId: string,
   name: string,
@@ -93,7 +93,7 @@ export async function renameCategory(
 
 // Change la couleur d'une catégorie PARENTE uniquement — une sous-catégorie
 // n'a jamais de couleur propre, elle hérite toujours visuellement de son parent
-// (voir transactions/queries.ts, byCategory, qui ne regarde même pas la couleur
+// (voir transactions/queries.ts, breakdownByCategories, qui ne regarde même pas la couleur
 // d'une sous-catégorie). La palette fermée est validée par le routeur.
 export async function updateCategoryColor(
   organizationId: string,

@@ -1,18 +1,19 @@
 import { describe, expect, it } from "vitest";
 
-import { row } from "../-lib/breakdown.fixture";
+import { parent, sub, tree, unallocated } from "../-lib/breakdown.fixture";
 import { levelKey } from "./use-drill";
 
-const rows = [
-  row("Logement", "Loyer", 60),
-  row("Logement", "Électricité", 30),
-  // Le reliquat porté par la parente : sa catégorie est elle-même.
-  row("Logement", "Logement", 10),
-  // Une catégorie racine sans enfant prend la *même* forme que le reliquat —
-  // seul le décompte de vraies sous-catégories les sépare.
-  row("Épargne", "Épargne", 40),
-  row(null, null, 5),
-];
+const rows = tree([
+  parent("Logement", 100, [
+    sub("Loyer", 60),
+    sub("Électricité", 30),
+    unallocated("Logement", 10),
+  ]),
+  // Une catégorie racine sans enfant : le SQL lui laisse un `children` vide,
+  // et c'est ce vide qui l'empêche d'ouvrir un niveau.
+  parent("Épargne", 40),
+  parent(null, 5),
+]);
 
 // Le niveau que l'anneau affiche, et donc ce qui le replie : c'est *cette*
 // valeur qui doit changer, jamais `search.category` (voir `levelKey`).

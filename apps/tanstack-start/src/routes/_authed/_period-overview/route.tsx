@@ -33,12 +33,11 @@ import { OverviewHeader } from "./-components/overview-header";
  * commander d'ici (voir `RevuePanel`). Le layout lui fournit ses données —
  * `categories` — et rien d'autre.
  *
- * Le périmètre est `wholePeriod` : `category`, `aClasser` et la recherche en
+ * Le périmètre est `wholePeriod` : `category` et la recherche en
  * sont retirés, sinon filtrer un poste le porterait à 100 % de sa propre
  * répartition et il n'y aurait plus de quoi naviguer. Ne restent que la période
  * et les comptes ; le sens de `/transactions` ne commande rien non plus, les
- * agrégats forçant leur propre sens (`byCategory`) ou le neutralisant
- * (`monthlyHistory`).
+ * agrégats forçant leur propre sens (`breakdownByCategories`).
  *
  * La search vit sur ce layout et non plus sur chaque route : c'est ce qui permet
  * au `loaderDeps` ci-dessous d'exister, donc au loader de porter les agrégats

@@ -1,6 +1,6 @@
 import { LayersIcon } from "lucide-react";
 
-import type { BreakdownByCategories } from "@budget/shared";
+import type { Breakdown } from "@budget/shared";
 import { Toolbar } from "@budget/ui/toolbar";
 
 import { shadeCategoryColor, useCategoryColor } from "~/lib/category-color";
@@ -18,12 +18,18 @@ import { BudgetGauge } from "./budget-gauge";
 export function BreakdownList({
   breakdownByCategories,
 }: {
-  breakdownByCategories: BreakdownByCategories[];
+  breakdownByCategories: Breakdown;
 }) {
   const { search, setSearch } = useRevueSearch();
   const resolveColor = useCategoryColor();
 
   const level = breakdownLevel(breakdownByCategories, search.category);
+  // Les *vraies* sous-catégories, reliquats exclus : ce compteur n'a qu'un
+  // lecteur, il n'a pas à remonter dans la requête.
+  const subCount = breakdownByCategories.parents.reduce(
+    (n, poste) => n + poste.children.filter((c) => c.kind === "sub").length,
+    0,
+  );
   const parent = level.parent;
   const parentColor = parent ? resolveColor(parent.color) : null;
 
@@ -61,8 +67,7 @@ export function BreakdownList({
             </div>
             <div className="text-subtle text-meta flex justify-end">
               {level.postes} poste{level.postes > 1 ? "s" : ""} de dépense ·{" "}
-              {breakdownByCategories.length} sous-catégorie
-              {breakdownByCategories.length > 1 ? "s" : ""}
+              {subCount} sous-catégorie{subCount > 1 ? "s" : ""}
             </div>
           </div>
         )}
@@ -86,7 +91,7 @@ export function BreakdownList({
             type="button"
             // Un poste sans sous-catégorie n'ouvre aucun niveau ; au niveau du
             // bas, plus rien ne se creuse.
-            disabled={slice.subs === 0}
+            disabled={!slice.drillable}
             className="not-aria-disabled:hover:bg-accent focus-visible:ring-accent-soft flex flex-none cursor-pointer flex-col justify-center gap-1.5 rounded-lg p-2 transition-colors outline-none focus-visible:ring-3 focus-visible:ring-inset motion-reduce:transition-none"
             onClick={() => setSearch({ category: slice.filter })}
           >

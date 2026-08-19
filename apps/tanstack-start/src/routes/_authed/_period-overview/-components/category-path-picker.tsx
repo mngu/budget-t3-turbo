@@ -32,22 +32,30 @@ export interface CategoryPath {
   parentColor: string;
 }
 
-// Rattacher une transaction à la catégorie parente, c'est précisément ce que la
-// revue appelle « à classer » : le choix reste offert (toutes les catégories
-// n'ont pas de sous-catégories) mais il est nommé pour ce qu'il est.
+// Rattacher une transaction à la catégorie parente elle-même : le choix reste
+// offert (toutes les catégories n'ont pas de sous-catégories) et il est nommé
+// pour ce qu'il est. En **filtre**, la même entrée ne veut pas dire la même
+// chose — `category=Logement` retient aussi ses sous-catégories — d'où
+// `parentLabel`, que l'appelant redresse.
 const PARENT_SUB_LABEL = "Sans sous-catégorie";
 
-export function useCategoryPaths(): CategoryPath[] {
+export function useCategoryPaths(
+  parentLabel = PARENT_SUB_LABEL,
+): CategoryPath[] {
   const trpc = useTRPC();
   const { data: tree } = useSuspenseQuery(trpc.categories.tree.queryOptions());
   const resolveColor = useCategoryColor();
 
-  return useMemo(() => flattenTree(tree, resolveColor), [tree, resolveColor]);
+  return useMemo(
+    () => flattenTree(tree, resolveColor, parentLabel),
+    [tree, resolveColor, parentLabel],
+  );
 }
 
 function flattenTree(
   tree: CategoryTreeNode[],
   resolveColor: (hex: string) => string,
+  parentLabel: string,
 ): CategoryPath[] {
   return tree.flatMap((parent) => {
     const base = resolveColor(parent.color ?? FALLBACK_CATEGORY_COLOR);
@@ -55,7 +63,7 @@ function flattenTree(
     return [
       {
         parent: parent.name,
-        sub: PARENT_SUB_LABEL,
+        sub: parentLabel,
         name: parent.name,
         color: base,
         parentIcon: parent.icon,
@@ -74,17 +82,26 @@ function flattenTree(
 }
 
 /**
- * Reclassement d'une transaction : la liste complète « Parent › Sous-catégorie »
+ * Choisir une catégorie : la liste complète « Parent › Sous-catégorie »
  * filtrable au clavier, plutôt qu'un Select à deux niveaux.
  *
  * L'arborescence dépasse la cinquantaine d'entrées sur ce compte : dérouler
  * puis chercher à l'œil dans un Select y est plus lent que taper trois lettres.
+ *
+ * **Deux usages, un composant** : reclasser une transaction (`onPick` appelle la
+ * mutation) et filtrer le relevé (`onPick` pose le search param). Ils ne
+ * différaient que par leur source — la modale de filtre partait d'un agrégat de
+ * la période, donc des seules parentes ayant bougé — et c'est cette source qui a
+ * disparu. Partir de `categories.tree` donne au filtre les deux niveaux, les
+ * catégories d'entrée et celles sans mouvement, qu'il n'atteignait pas.
  */
 export function CategoryPathPicker({
   open,
   onOpenChange,
   title = "Reclasser",
   subtitle,
+  description = "Choisissez la catégorie à appliquer.",
+  parentLabel,
   current,
   onPick,
 }: {
@@ -92,11 +109,15 @@ export function CategoryPathPicker({
   onOpenChange: (open: boolean) => void;
   title?: string;
   subtitle?: string;
+  /** Texte d'accessibilité du dialogue, quand « appliquer » n'est pas le geste. */
+  description?: string;
+  /** Libellé de l'entrée qui désigne la parente elle-même (voir PARENT_SUB_LABEL). */
+  parentLabel?: string;
   /** Nom de la catégorie actuellement portée par la transaction. */
   current?: string | null;
   onPick: (name: string) => void;
 }) {
-  const paths = useCategoryPaths();
+  const paths = useCategoryPaths(parentLabel);
 
   // Les chemins arrivent à plat mais viennent déjà groupés par parente
   // (`flattenTree` émet la parente puis ses enfants) : il suffit de recoller les
@@ -115,7 +136,7 @@ export function CategoryPathPicker({
       open={open}
       onOpenChange={onOpenChange}
       title={title}
-      description={subtitle ?? "Choisissez la catégorie à appliquer."}
+      description={subtitle ?? description}
       showCloseButton
       className="w-120"
     >

@@ -17,7 +17,6 @@ import {
   listTransactions,
   setTransactionCategory,
   setTransactionExcluded,
-  transactionsByCategory,
 } from "../transactions/queries";
 import { orgProcedure } from "../trpc";
 
@@ -32,12 +31,6 @@ export const transactionsRouter = {
     )
     .query(({ ctx, input }) =>
       listTransactions(ctx.organizationId, input, input.limit),
-    ),
-
-  byCategory: orgProcedure
-    .input(transactionsSearchSchema)
-    .query(({ ctx, input }) =>
-      transactionsByCategory(ctx.organizationId, input),
     ),
 
   breakdownByCategories: orgProcedure

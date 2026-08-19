@@ -1,32 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { ArrowLeftRightIcon, SearchIcon, TagIcon } from "lucide-react";
 
 import type { TransactionsSearch } from "@budget/shared";
 import { cn } from "@budget/ui";
-import {
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandShortcut,
-} from "@budget/ui/command";
 import { InputGroup, InputGroupAddon } from "@budget/ui/input-group";
 import { ToggleGroup, ToggleGroupItem } from "@budget/ui/toggle-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@budget/ui/tooltip";
 
 import { CategoryIcon } from "~/component/category-icon";
 import { SearchInput } from "~/component/search-input";
-import { softCategoryColor, useCategoryColor } from "~/lib/category-color";
-import { euro } from "~/lib/format";
-import { wholePeriod } from "~/lib/transactions-search";
-import { useTRPC } from "~/lib/trpc";
 import { useRevueSearch } from "~/lib/use-revue-search";
 import { useParentCategories } from "../-lib/category-lookup";
+import { CategoryPathPicker } from "./category-path-picker";
 
 // Au pluriel, comme les deux totaux qui les surplombent sur `/transactions` :
 // le bouton nomme un ensemble de lignes, pas le sens d'une transaction.
@@ -67,7 +54,6 @@ const INTERNES = [
 const CONTEXT_FILTERS = {
   direction: undefined,
   category: undefined,
-  aClasser: undefined,
   // Valeur par défaut et non `undefined` : `internes` n'est pas optionnel, le
   // relevé montre tout tant qu'on ne lui demande rien.
   internes: "toutes",
@@ -90,13 +76,11 @@ function Divider() {
 
 /**
  * Barre « Affiner … » propre à un écran. Chaque écran n'expose que les filtres
- * qui ont un sens pour lui : l'écran « À revoir » ne parle que de sorties à
- * classer, son sélecteur de sens n'aurait rien à commander.
+ * qui ont un sens pour lui.
  */
 export function RefineBar({
   label,
   sens,
-  aClasser,
   internes,
   searchField,
   right,
@@ -107,8 +91,6 @@ export function RefineBar({
   label?: string;
   /** Sélecteur Tous / Débit / Crédit. */
   sens?: boolean;
-  /** Pastille « à classer seulement ». */
-  aClasser?: boolean;
   /**
    * Sélecteur des virements entre comptes suivis. Réservé à `/transactions` :
    * c'est le seul écran où ces lignes sont visibles — partout ailleurs elles
@@ -129,18 +111,15 @@ export function RefineBar({
 }) {
   const { search, setSearch } = useRevueSearch();
   const [catOpen, setCatOpen] = useState(false);
-  // Identité de la catégorie filtrée (icône + teinte). Lue dans l'arborescence
-  // et non dans `transactions.byCategory` : celui-ci n'a pas les icônes, et
-  // aucun loader ne préchauffe sa clé sans `direction` — la pastille déclenchait
-  // un agrégat complet à chaque changement de filtre.
+  // Identité de la catégorie filtrée (icône + teinte), lue dans l'arborescence —
+  // la même source que le sélecteur, préchargée par le loader du layout.
   const parents = useParentCategories();
   const activeParent = search.category
     ? parents.get(search.category)
     : undefined;
 
   const dirty =
-    !!(search.direction ?? search.category ?? search.aClasser) ||
-    search.internes !== "toutes";
+    !!(search.direction ?? search.category) || search.internes !== "toutes";
 
   return (
     <div
@@ -214,46 +193,6 @@ export function RefineBar({
         >
           ✕
         </button>
-      )}
-
-      {aClasser && (
-        <>
-          <Divider />
-          {/* La maquette teinte ce bouton en rouge ; il reste `warn` ici, comme
-              partout dans la revue où les hachures signalent « à classer » (voir
-              CLAUDE.md). Seule la géométrie suit la maquette : h26, rayon 7. */}
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <button
-                  type="button"
-                  onClick={() =>
-                    setSearch({ aClasser: search.aClasser ? undefined : true })
-                  }
-                  className={cn(
-                    "text-control flex h-7 flex-none items-center gap-1.5 rounded-md border px-2.5 font-medium",
-                    search.aClasser
-                      ? "border-warn bg-warn text-background"
-                      : "bg-warn-soft text-warn border-transparent",
-                  )}
-                >
-                  <span
-                    className="h-2 w-3.5 rounded-xs"
-                    style={{
-                      background:
-                        "repeating-linear-gradient(115deg,currentColor 0 3px,transparent 3px 7px)",
-                    }}
-                  />
-                  À classer seulement
-                </button>
-              }
-            />
-            <TooltipContent>
-              Transactions rattachées à une catégorie parente qui a des
-              sous-catégories
-            </TooltipContent>
-          </Tooltip>
-        </>
       )}
 
       {internes && (
@@ -332,92 +271,17 @@ export function RefineBar({
         </InputGroup>
       )}
 
-      <CategoryFilterDialog open={catOpen} onOpenChange={setCatOpen} />
+      <CategoryPathPicker
+        open={catOpen}
+        onOpenChange={setCatOpen}
+        title="Filtrer par catégorie"
+        description="Choisissez la catégorie à isoler dans le relevé."
+        // En filtre, désigner une parente retient aussi ses sous-catégories :
+        // « Sans sous-catégorie » y serait faux (voir PARENT_SUB_LABEL).
+        parentLabel="Toute la catégorie"
+        current={search.category}
+        onPick={(category) => setSearch({ category })}
+      />
     </div>
-  );
-}
-
-// Liste des catégories parentes avec leur poids sur la période — le même
-// classement que « Où est parti l'argent », pour filtrer depuis n'importe quel
-// écran sans revenir à la revue.
-function CategoryFilterDialog({
-  open,
-  onOpenChange,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}) {
-  const trpc = useTRPC();
-  const { search, setSearch } = useRevueSearch();
-  const resolveColor = useCategoryColor();
-  const parents = useParentCategories();
-  const { data } = useQuery({
-    ...trpc.transactions.byCategory.queryOptions(wholePeriod(search)),
-    enabled: open,
-  });
-
-  const pick = (category: string | undefined) => {
-    setSearch({ category });
-    onOpenChange(false);
-  };
-
-  return (
-    // `CommandDialog` plutôt qu'une liste dans un `Dialog` : la recherche vient
-    // avec, et elle manquait — l'arborescence compte 14 parentes.
-    <CommandDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      title="Filtrer par catégorie"
-      description="Choisissez la catégorie à isoler dans le relevé."
-    >
-      <CommandInput placeholder="Chercher une catégorie…" />
-      <CommandList>
-        <CommandEmpty>Aucune catégorie de ce nom.</CommandEmpty>
-        <CommandGroup>
-          <CommandItem
-            value="Toutes les catégories"
-            onSelect={() => pick(undefined)}
-          >
-            Toutes les catégories
-          </CommandItem>
-          {data?.map((item) => (
-            <CommandItem
-              key={item.category || "sans-categorie"}
-              value={item.category || "Sans catégorie"}
-              onSelect={() =>
-                pick(item.category === "" ? "none" : item.category)
-              }
-            >
-              {/* Pastille d'icône de la maquette : la teinte de la famille en
-                  fond très pâle, l'icône pleine par-dessus. Le mélange vise
-                  `--card`, donc il s'inverse tout seul en thème sombre. */}
-              <span
-                className="flex size-6 flex-none items-center justify-center rounded-md"
-                style={{
-                  background: softCategoryColor(resolveColor(item.color)),
-                }}
-              >
-                <CategoryIcon
-                  name={parents.get(item.category)?.icon ?? null}
-                  className="size-3"
-                  color={resolveColor(item.color)}
-                />
-              </span>
-              <span
-                className={cn(
-                  "truncate",
-                  search.category === item.category && "font-semibold",
-                )}
-              >
-                {item.category || "Sans catégorie"}
-              </span>
-              <CommandShortcut className="num">
-                {euro.format(item.total)}
-              </CommandShortcut>
-            </CommandItem>
-          ))}
-        </CommandGroup>
-      </CommandList>
-    </CommandDialog>
   );
 }

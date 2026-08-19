@@ -190,14 +190,11 @@ function CategoryCell({
   const parentName = path[0] ?? null;
   const subName = path[1] ?? null;
   const parent = parentName === null ? undefined : parents.get(parentName);
-  const aClasser = subName === null && !!parent?.hasChildren;
 
-  const label =
-    parentName === null
-      ? "Sans catégorie"
-      : aClasser
-        ? `À classer · ${parentName}`
-        : (subName ?? parentName);
+  // Poser une transaction sur une parente plutôt que sur une de ses
+  // sous-catégories n'est pas un défaut : la ligne se lit comme les autres.
+  // Seule l'absence totale de catégorie est signalée.
+  const label = parentName === null ? "Sans catégorie" : (subName ?? parentName);
 
   return (
     <span className="flex min-w-0">
@@ -218,9 +215,7 @@ function CategoryCell({
         <span
           className={cn(
             "text-control min-w-0 truncate",
-            aClasser || parentName === null
-              ? "text-subtle"
-              : "text-muted-foreground",
+            parentName === null ? "text-subtle" : "text-muted-foreground",
           )}
         >
           {label}

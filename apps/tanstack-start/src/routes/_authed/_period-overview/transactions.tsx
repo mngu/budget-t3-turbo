@@ -33,7 +33,6 @@ function AllTransactions() {
     <div className="flex min-h-0 min-w-0 flex-1 flex-col">
       <RefineBar
         sens
-        aClasser
         internes
         searchField
         className="border-border bg-surface-2 mt-4 flex-none rounded-md border px-2.5 py-2"
