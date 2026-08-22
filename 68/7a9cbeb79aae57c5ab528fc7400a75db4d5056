@@ -1,0 +1,63 @@
+apps/tanstack-start/src/routes/_authed/settings/categories/index.tsx
+  s_c96b04b11c2a85::t_4921c3250eee6a 95-96
+  s_c96b04b11c2a85::t_a61faab8115fca 9,27-30,32,39,44-45,50,52-53,60,97-98,155-168,179-186,215-218
+  s_c96b04b11c2a85::t_ceb1c39e24c80d 46-49
+  s_c96b04b11c2a85::t_97a2cf9c190e4b 187-196
+packages/db/src/schema.ts
+  s_c96b04b11c2a85::t_e2b71874841494 2,5,131-138,141-144
+apps/tanstack-start/src/routes/_authed/settings/categories/-components/category-overview-tree.tsx
+  s_c96b04b11c2a85::t_6b6fb889fa16d5 396-397
+  s_c96b04b11c2a85::t_d2c94efe69e42c 763-849
+  s_c96b04b11c2a85::t_5aa2195a7ab4e8 280,339-341,356,365,452,481,496
+  s_c96b04b11c2a85::t_ba8ef4bb269e89 9,91,105,181,225,245,252-257,357-364,394-395,398-407,482-495,730-762
+  s_c96b04b11c2a85::t_045262eff9bddc 18,51,88-90,103-104,179-180,223-224,243-244
+  s_c96b04b11c2a85::t_578af7ab68e1ab 366
+packages/db/drizzle/0003_category_budget_detailed.sql
+  s_c96b04b11c2a85::t_fa2cc9fa22612f 1
+  h_c1b75a3cdf5637 2
+apps/tanstack-start/src/component/app-header.tsx
+  s_c96b04b11c2a85::t_ed8cf021e5b751 105
+  s_c96b04b11c2a85::t_d2f9d2419a95fc 72
+packages/api/src/categories/budgets.ts
+  s_c96b04b11c2a85::t_1902ef3e322156 1,4-8,32-33,44,49-69,116,171,175-189,192-194,198-225,258-260,266
+  s_c96b04b11c2a85::t_6b6fb889fa16d5 235,238-247
+  s_c96b04b11c2a85::t_0758910af37913 226
+packages/api/src/router/categories.ts
+  s_c96b04b11c2a85::t_177f4c437b7667 10,108-117
+  s_c96b04b11c2a85::t_8ae03813817b07 19,21
+  s_c96b04b11c2a85::t_8c444fdaa50ffa 118-119
+packages/api/src/transactions/queries.ts
+  s_c96b04b11c2a85::t_177f4c437b7667 218-230,276
+  s_c96b04b11c2a85::t_351de3ca396887 282-287
+packages/api/src/categories/budgets.test.ts
+  s_c96b04b11c2a85::t_97a2cf9c190e4b 7-28
+CLAUDE.md
+  s_c96b04b11c2a85::t_f48c15c82ba51e 76
+  s_c96b04b11c2a85::t_0c505e2d9a0926 42-43
+  s_c96b04b11c2a85::t_adf175918f304e 53,60,73,128
+packages/db/drizzle/meta/0003_snapshot.json
+  s_c96b04b11c2a85::t_a0a44a3a61f607 1-1369
+packages/db/drizzle/meta/_journal.json
+  s_c96b04b11c2a85::t_65ef8fb6d9b71e 25-31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "687a9cbeb79aae57c5ab528fc7400a75db4d5056",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_c96b04b11c2a85": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "54263e9c-407c-42b9-be3d-a6e32acb86ca",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
