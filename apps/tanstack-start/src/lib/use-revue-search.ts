@@ -2,7 +2,7 @@
 
 import { useNavigate, useSearch } from "@tanstack/react-router";
 
-import type { TransactionsSearch } from "@budget/shared";
+import type { TransactionsSearch } from "@budget/api/schemas";
 
 /**
  * Search partagée par les quatre écrans de la revue (revue du mois, « À revoir »,

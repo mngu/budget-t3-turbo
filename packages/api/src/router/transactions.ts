@@ -1,8 +1,6 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod/v4";
 
-import { transactionsSearchSchema } from "@budget/shared";
-
 import {
   detectInternalTransfers,
   unlinkInternalTransfer,
@@ -18,6 +16,7 @@ import {
   setTransactionCategory,
   setTransactionExcluded,
 } from "../transactions/queries";
+import { transactionsSearchSchema } from "../transactions/schemas";
 import { orgProcedure } from "../trpc";
 
 export const transactionsRouter = {

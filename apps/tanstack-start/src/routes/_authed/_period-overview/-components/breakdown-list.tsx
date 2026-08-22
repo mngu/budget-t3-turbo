@@ -1,6 +1,6 @@
 import { LayersIcon } from "lucide-react";
 
-import type { Breakdown } from "@budget/shared";
+import type { Breakdown } from "@budget/api/schemas";
 import { Toolbar } from "@budget/ui/toolbar";
 
 import { shadeCategoryColor, useCategoryColor } from "~/lib/category-color";

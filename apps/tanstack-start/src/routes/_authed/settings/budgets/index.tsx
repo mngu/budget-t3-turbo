@@ -44,7 +44,7 @@ function BudgetsPage() {
   const [expandAll, setExpandAll] = useState<boolean | null>(null);
 
   // Chaque saisie écrit tout de suite et relance le loader : les compteurs
-  // d'en-tête viennent du serveur (voir budgetSlots) et suivent sans état local.
+  // d'en-tête viennent du serveur et suivent sans état local.
   const run = async (action: () => Promise<unknown>, fallback: string) => {
     try {
       await action();
@@ -58,11 +58,9 @@ function BudgetsPage() {
     <>
       <p className="text-muted-foreground text-control mt-2 max-w-160 text-pretty">
         Un budget mensuel se pose sur une{" "}
-        <span className="text-foreground font-medium">catégorie</span>. Si vous
-        voulez être plus précis,{" "}
-        <span className="text-foreground font-medium">détaillez-la</span> :
-        chaque sous-catégorie reçoit alors son montant, et la catégorie affiche
-        leur somme. Un budget non consommé n'est pas reporté au mois suivant.
+        <span className="text-foreground font-medium">catégorie</span>, parente
+        ou sous-catégorie : dépliez une catégorie pour être plus précis. Un
+        budget non consommé n'est pas reporté au mois suivant.
       </p>
 
       {budgets.slots > 0 && unbudgeted === 0 && (
@@ -77,18 +75,6 @@ function BudgetsPage() {
               budgétés.
             </p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              void run(
-                () => trpcClient.categories.budgets.clear.mutate(),
-                "Échec de la remise à zéro.",
-              )
-            }
-          >
-            Tout vider
-          </Button>
         </section>
       )}
 
@@ -97,7 +83,7 @@ function BudgetsPage() {
         <span className="text-subtle text-control">
           {tree.length === 0
             ? "aucune catégorie pour le moment"
-            : "un budget se pose sur une catégorie ; « détailler » le répartit sur ses sous-catégories"}
+            : "un budget se pose sur une catégorie, parente ou sous-catégorie"}
         </span>
         {tree.length > 0 && (
           <Button
@@ -107,6 +93,23 @@ function BudgetsPage() {
             onClick={() => setExpandAll((v) => (v === true ? false : true))}
           >
             Tout replier / déplier
+          </Button>
+        )}
+        {/* Le bandeau vert portait ce bouton, mais il ne s'affiche que si
+            *toutes* les catégories sont budgétées — un état que personne
+            n'atteint, les catégories de revenus n'ayant pas de budget. */}
+        {budgets.budgeted > 0 && (
+          <Button
+            variant="outline"
+            size="xs"
+            onClick={() =>
+              void run(
+                () => trpcClient.categories.budgets.clear.mutate(),
+                "Échec de la remise à zéro.",
+              )
+            }
+          >
+            Tout vider
           </Button>
         )}
       </div>
@@ -123,16 +126,6 @@ function BudgetsPage() {
                 amount,
               }),
             "Échec de l'enregistrement du budget.",
-          )
-        }
-        onSetDetailed={(categoryId, detailed) =>
-          void run(
-            () =>
-              trpcClient.categories.budgets.setDetailed.mutate({
-                categoryId,
-                detailed,
-              }),
-            "Échec du changement de mode.",
           )
         }
       />

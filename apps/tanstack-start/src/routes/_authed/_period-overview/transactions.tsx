@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { PAGE_SIZE } from "@budget/shared";
+import { PAGE_SIZE } from "@budget/api/schemas";
 
 import { RefineBar } from "./-components/refine-bar";
 import { TransactionsTable } from "./-components/transactions-table";

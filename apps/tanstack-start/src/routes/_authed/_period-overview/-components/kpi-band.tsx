@@ -1,4 +1,4 @@
-import type { BudgetStats, GlobalStats } from "@budget/shared";
+import type { BudgetStats, GlobalStats } from "@budget/api/schemas";
 import { cn } from "@budget/ui";
 
 import { useCategoryColor } from "~/lib/category-color";

@@ -1,4 +1,4 @@
-import type { Breakdown, BreakdownParent } from "@budget/shared";
+import type { Breakdown, BreakdownParent } from "@budget/api/schemas";
 import { FALLBACK_CATEGORY_COLOR } from "@budget/shared";
 
 /**

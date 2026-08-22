@@ -1,11 +1,5 @@
 // Lectures et corrections manuelles sur la table des transactions.
 import type { SQL } from "@budget/db";
-import type {
-  Breakdown,
-  BudgetStats,
-  GlobalStats,
-  TransactionsSearch,
-} from "@budget/shared";
 import {
   alias,
   and,
@@ -25,12 +19,19 @@ import {
 } from "@budget/db";
 import { db } from "@budget/db/client";
 import { bankAccounts, categories, transactions } from "@budget/db/schema";
+
+import type {
+  Breakdown,
+  BudgetStats,
+  GlobalStats,
+  TransactionsSearch,
+} from "./schemas";
 import {
   breakdownSchema,
   budgetStatsSchema,
   globalStatsSchema,
   PAGE_SIZE,
-} from "@budget/shared";
+} from "./schemas";
 
 // Nom de banque affiché : display_name choisi par l'utilisateur, sinon nom ASPSP.
 const bankLabel = sql<string>`coalesce(${bankAccounts.displayName}, ${bankAccounts.bankName})`;
@@ -184,13 +185,11 @@ export function filterTransactions(
 ) {
   return sql`
     WITH filtered_transactions AS (
-      SELECT t, ba, c, cbp, cbc, p
+      SELECT t, ba, c, p
       FROM transactions t
       LEFT JOIN bank_accounts ba ON t.account_id = ba.id
       LEFT JOIN categories c ON t.category_id = c.id
-      LEFT JOIN category_budgets cbc ON cbc.category_id = c.id
       LEFT JOIN categories p ON c.parent_id = p.id
-      LEFT JOIN category_budgets cbp ON cbp.category_id = p.id
       WHERE t.booking_date BETWEEN ${query.dateFrom} AND ${query.dateTo}
       AND t.excluded = 'false'
       AND ba.organization_id = ${organizationId}
@@ -213,10 +212,10 @@ export function filterTransactions(
 const parentName = sql`COALESCE((p).name, (c).name)`;
 const parentIcon = sql`COALESCE((p).icon, (c).icon)`;
 const parentColor = sql`COALESCE((p).color, (c).color)`;
-// …et son budget est le sien. Un `COALESCE((cbp).amount, (cbc).amount)` serait
-// faux ici : sous une parente **sans** budget, il ferait passer celui d'une
-// sous-catégorie pour le budget du poste.
-const parentBudget = sql`CASE WHEN (p).name IS NULL THEN (cbc).amount ELSE (cbp).amount END`;
+// …et son budget est le sien. Un `COALESCE((p).budget_amount,
+// (c).budget_amount)` serait faux ici : sous une parente **sans** budget, il
+// ferait passer celui d'une sous-catégorie pour le budget du poste.
+const parentBudget = sql`CASE WHEN (p).name IS NULL THEN (c).budget_amount ELSE (p).budget_amount END`;
 
 // Position d'une ligne dans l'arborescence, **établie** par Postgres plutôt que
 // déduite d'une comparaison de noms. `COALESCE((p).name, (c).name)` rend quatre
@@ -268,7 +267,7 @@ export async function breakdownByCategories(
           ${parentColor} AS poste_color,
           ${parentBudget} AS poste_budget,
           (c).name AS child_name,
-          (cbc).amount AS child_budget,
+          (c).budget_amount AS child_budget,
           ${nodeKind} AS child_kind,
           SUM((t).amount) AS total
         FROM filtered_transactions

@@ -11,8 +11,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@budget/ui/collapsible";
-import { ToggleGroup, ToggleGroupItem } from "@budget/ui/toggle-group";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@budget/ui/tooltip";
 
 import { CategoryIcon } from "~/component/category-icon";
 import {
@@ -30,27 +28,16 @@ import { euro0 } from "~/lib/format";
  */
 export interface BudgetTreeProps {
   tree: CategoryTreeNode[];
-  /** Montant, mode détaillé et moyenne de référence, par catégorie. */
+  /** Montant posé et moyenne de référence, par catégorie. */
   rows: Map<number, CategoryBudgetRow>;
   onSetAmount: (categoryId: number, amount: number | null) => void;
-  onSetDetailed: (categoryId: number, detailed: boolean) => void;
   expandAllSignal: boolean | null;
-}
-
-/**
- * Une parente sans sous-catégorie porte toujours son budget elle-même, quel que
- * soit le drapeau enregistré — même règle que `budgetSlots` côté API, sans quoi
- * son budget disparaîtrait de l'écran mais pas des compteurs.
- */
-function isDetailed(rows: BudgetTreeProps["rows"], parent: CategoryTreeNode) {
-  return parent.children.length > 0 && (rows.get(parent.id)?.detailed ?? false);
 }
 
 export function BudgetTree({
   tree,
   rows,
   onSetAmount,
-  onSetDetailed,
   expandAllSignal,
 }: BudgetTreeProps) {
   // Même idiome que `CategoryOverviewTree` : « Tout replier / déplier » doit
@@ -81,18 +68,13 @@ export function BudgetTree({
   return (
     <div className="bg-card overflow-hidden rounded-lg border">
       {tree.map((parent) => {
-        const detailed = isDetailed(rows, parent);
-        // Par défaut, seule une parente détaillée s'ouvre : elle seule a
-        // quelque chose à saisir en dessous.
-        const expanded =
-          folds.overrides[parent.id] ?? expandAllSignal ?? detailed;
+        const expanded = folds.overrides[parent.id] ?? expandAllSignal ?? false;
 
         return (
           <ParentRow
             key={parent.id}
             parent={parent}
             rows={rows}
-            detailed={detailed}
             expanded={expanded}
             onToggle={() =>
               setFolds((f) => ({
@@ -101,7 +83,6 @@ export function BudgetTree({
               }))
             }
             onSetAmount={onSetAmount}
-            onSetDetailed={onSetDetailed}
           />
         );
       })}
@@ -112,24 +93,17 @@ export function BudgetTree({
 function ParentRow({
   parent,
   rows,
-  detailed,
   expanded,
   onToggle,
   onSetAmount,
-  onSetDetailed,
 }: {
   parent: CategoryTreeNode;
   rows: BudgetTreeProps["rows"];
-  detailed: boolean;
   expanded: boolean;
   onToggle: () => void;
-} & Pick<BudgetTreeProps, "onSetAmount" | "onSetDetailed">) {
+} & Pick<BudgetTreeProps, "onSetAmount">) {
   const resolve = useCategoryColor();
   const color = resolve(parent.color ?? FALLBACK_CATEGORY_COLOR);
-  const childAmounts = parent.children.map(
-    (child) => rows.get(child.id)?.amount ?? null,
-  );
-  const missing = childAmounts.filter((a) => a === null).length;
 
   // Le pli est contrôlé : l'état vit dans `BudgetTree` (`folds.overrides` +
   // le signal « tout replier »). `Collapsible` n'apporte donc pas l'état mais
@@ -141,7 +115,7 @@ function ParentRow({
       onOpenChange={onToggle}
       render={<div className="border-b last:border-b-0" />}
     >
-      <div className="hover:bg-surface-2 grid min-h-11 grid-cols-[20px_30px_minmax(150px,1fr)_auto_224px_148px] items-center gap-2 px-3">
+      <div className="hover:bg-surface-2 grid min-h-11 grid-cols-[20px_30px_minmax(150px,1fr)_auto_224px] items-center gap-2 px-3">
         <CollapsibleTrigger
           disabled={parent.children.length === 0}
           aria-label={expanded ? "Replier" : "Déplier"}
@@ -171,69 +145,11 @@ function ParentRow({
         </span>
 
         <div className="flex items-center justify-end gap-2">
-          {detailed ? (
-            // Une parente détaillée n'a pas de montant à elle : elle affiche la
-            // somme de ses sous-catégories, et ce qui reste à y saisir.
-            <div className="flex flex-col items-end">
-              <span
-                className={cn(
-                  "num text-meta font-medium",
-                  missing > 0 && "text-muted-foreground",
-                )}
-              >
-                {euro0.format(
-                  childAmounts.reduce((sum: number, a) => sum + (a ?? 0), 0),
-                )}{" "}
-                /mois
-              </span>
-              <span className="text-subtle text-label whitespace-nowrap">
-                {missing > 0
-                  ? `${missing} sous-cat. à remplir`
-                  : `somme de ${parent.children.length} sous-cat.`}
-              </span>
-            </div>
-          ) : (
-            <BudgetAmount
-              row={rows.get(parent.id)}
-              onSet={(amount) => onSetAmount(parent.id, amount)}
-            />
-          )}
+          <BudgetAmount
+            row={rows.get(parent.id)}
+            onSet={(amount) => onSetAmount(parent.id, amount)}
+          />
         </div>
-
-        {parent.children.length > 0 && (
-          // `onValueChange` ne peut pas rendre un tableau vide ici : décocher
-          // l'option active la re-sélectionne, une parente est toujours dans
-          // l'un des deux régimes.
-          <ToggleGroup
-            size="sm"
-            aria-label="Régime de budget"
-            className="justify-self-end"
-            value={[detailed ? "detailed" : "global"]}
-            onValueChange={([value]) =>
-              value && onSetDetailed(parent.id, value === "detailed")
-            }
-          >
-            {/* Ces deux libellés ne se suffisent pas : c'est l'infobulle qui
-                dit ce que « détailler » change. Un `title` natif la ferait
-                attendre une seconde, sans style et jamais au toucher. */}
-            <Tooltip>
-              <TooltipTrigger render={<ToggleGroupItem value="global" />}>
-                Global
-              </TooltipTrigger>
-              <TooltipContent>
-                Un seul budget pour toute la catégorie
-              </TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger render={<ToggleGroupItem value="detailed" />}>
-                Détaillé
-              </TooltipTrigger>
-              <TooltipContent>
-                Un budget par sous-catégorie — la catégorie affiche leur somme
-              </TooltipContent>
-            </Tooltip>
-          </ToggleGroup>
-        )}
       </div>
 
       <CollapsibleContent className="pt-0.5 pb-2">
@@ -242,7 +158,7 @@ function ParentRow({
           return (
             <div
               key={child.id}
-              className="hover:bg-surface-2 grid min-h-11 grid-cols-[61px_8px_minmax(0,1fr)_224px_148px] items-center gap-2 px-3"
+              className="hover:bg-surface-2 grid min-h-11 grid-cols-[61px_8px_minmax(0,1fr)_224px] items-center gap-2 px-3"
             >
               <span />
               <span
@@ -257,30 +173,18 @@ function ParentRow({
               />
               <span className="text-control truncate px-2">{child.name}</span>
               <div className="flex items-center justify-end gap-2">
-                {detailed ? (
-                  <BudgetAmount
-                    row={row}
-                    onSet={(amount) => onSetAmount(child.id, amount)}
-                  />
-                ) : (
-                  // Parente en budget global : la sous-catégorie n'a rien à
-                  // saisir, mais sa moyenne dit d'où vient la somme.
-                  <span className="num text-subtle text-meta whitespace-nowrap">
-                    {row && row.average > 0
-                      ? `moy. ${euro0.format(row.average)}`
-                      : "—"}
-                  </span>
-                )}
+                <BudgetAmount
+                  row={row}
+                  onSet={(amount) => onSetAmount(child.id, amount)}
+                />
               </div>
-              <span />
             </div>
           );
         })}
 
         {parent.children.length === 0 && (
           <p className="text-muted-foreground text-control px-3 pt-1.5 pb-1 pl-18">
-            Aucune sous-catégorie : le budget se pose directement sur la
-            catégorie.
+            Aucune sous-catégorie.
           </p>
         )}
       </CollapsibleContent>

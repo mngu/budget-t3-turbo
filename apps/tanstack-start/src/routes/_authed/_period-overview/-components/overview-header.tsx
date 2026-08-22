@@ -1,7 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { ArrowLeftIcon, ArrowRightIcon, LayersIcon } from "lucide-react";
 
-import type { Breakdown } from "@budget/shared";
+import type { Breakdown } from "@budget/api/schemas";
 import { cn } from "@budget/ui";
 
 import { CategoryIcon } from "~/component/category-icon";

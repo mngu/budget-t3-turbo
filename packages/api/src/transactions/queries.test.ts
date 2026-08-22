@@ -2,9 +2,9 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { SQL } from "@budget/db";
 import { PgDialect } from "@budget/db";
-import { transactionsSearchSchema } from "@budget/shared";
 
 import { filterTransactions, transactionsFilterQuery } from "./queries";
+import { transactionsSearchSchema } from "./schemas";
 
 // Le vrai client exige POSTGRES_URL au chargement. `vi.mock` est hissé au-dessus
 // des imports : l'import statique de `./queries` reçoit donc bien le double —

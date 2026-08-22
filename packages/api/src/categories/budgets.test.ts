@@ -4,28 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 // (POSTGRES_URL requise) — voir analyze.test.ts.
 vi.mock("@budget/db/client", () => ({ db: {} }));
 
-const { budgetProposal, budgetSlots } = await import("./budgets");
-
-describe("budgetSlots", () => {
-  const tree = [
-    { id: 1, children: [{ id: 10 }, { id: 11 }] },
-    { id: 2, children: [] },
-  ];
-
-  it("compte la parente quand elle est globale", () => {
-    expect(budgetSlots(tree, new Set())).toEqual([1, 2]);
-  });
-
-  it("s'efface derrière les sous-catégories quand elle est détaillée", () => {
-    expect(budgetSlots(tree, new Set([1]))).toEqual([10, 11, 2]);
-  });
-
-  // Sinon une parente détaillée puis vidée de ses sous-catégories
-  // disparaîtrait des compteurs : plus aucun poste ne porterait son budget.
-  it("ignore le drapeau d'une parente sans sous-catégorie", () => {
-    expect(budgetSlots(tree, new Set([1, 2]))).toEqual([10, 11, 2]);
-  });
-});
+const { budgetProposal } = await import("./budgets");
 
 describe("budgetProposal", () => {
   it("moyenne sur 6 mois, mois vides compris", () => {

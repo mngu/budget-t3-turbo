@@ -1,4 +1,8 @@
-import type { Breakdown, BreakdownChild, BreakdownParent } from "@budget/shared";
+import type {
+  Breakdown,
+  BreakdownChild,
+  BreakdownParent,
+} from "@budget/api/schemas";
 
 /**
  * L'arbre rendu par `transactions.breakdownByCategories`. Partagé par les tests

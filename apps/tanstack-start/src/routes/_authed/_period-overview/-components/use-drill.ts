@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "@tanstack/react-router";
 
-import type { Breakdown, TransactionsSearch } from "@budget/shared";
-import { transactionsSearchSchema } from "@budget/shared";
+import type { Breakdown, TransactionsSearch } from "@budget/api/schemas";
+import { transactionsSearchSchema } from "@budget/api/schemas";
 
 import { defaultToCurrentMonth } from "~/lib/transactions-search";
 import { openParent } from "../-lib/breakdown";

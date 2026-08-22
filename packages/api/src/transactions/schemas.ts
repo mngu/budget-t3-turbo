@@ -1,6 +1,6 @@
 import { z } from "zod/v4";
 
-export const PAGE_SIZE = 25;
+export const PAGE_SIZE = 20;
 
 // Schéma des query params de la table de transactions — partagé entre
 // validateSearch (web) et l'input tRPC (api).
@@ -49,23 +49,6 @@ export const transactionsSearchSchema = z.object({
 
 export type TransactionsSearch = z.infer<typeof transactionsSearchSchema>;
 
-/**
- * La répartition des sorties, telle que Postgres la rend : l'arbre entier, déjà
- * groupé, trié et totalisé.
- *
- * Le SQL produit les **faits** — appartenances, montants, budgets, ordre — et
- * s'arrête là : aucun libellé d'affichage n'y descend. Ce qu'un nœud *est* se
- * lit dans `kind`, jamais dans une comparaison de noms (l'ancienne forme plate
- * déduisait le reliquat d'un `categoryName === parentName`, qui confondait trois
- * situations distinctes). Les libellés français, les sentinelles d'URL et le
- * choix du niveau ouvert vivent côté app, dans `-lib/breakdown.ts`.
- *
- * `zod` valide l'arbre entier et ce n'est pas du zèle : la requête est du SQL
- * brut derrière un `db.execute<T>`, c'est-à-dire un cast non vérifié. Ce parse
- * est le seul endroit où la requête et le type se rencontrent — sans lui, une
- * colonne renommée ne se voit que trois composants plus loin, sous la forme
- * d'un `undefined` qui rend une pastille creuse.
- */
 const breakdownChildSchema = z.strictObject({
   name: z.string().nullable(),
   /**

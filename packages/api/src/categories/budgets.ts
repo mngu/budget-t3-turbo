@@ -1,17 +1,13 @@
-// Budgets mensuels par catégorie — onglet « Budgets » de /categories.
+// Budgets mensuels par catégorie — écran /budgets.
 //
-// Un budget se pose sur une catégorie. Une parente peut être « détaillée » :
-// ce sont alors ses sous-catégories qui portent chacune un montant, et la
-// parente affiche leur somme. Les deux lectures ne coexistent jamais — c'est
-// `budgetSlots` qui tranche, et c'est de lui que sortent tous les compteurs.
-import { and, eq, gte, inArray, isNotNull, isNull, lt, sql } from "@budget/db";
+// Un budget est un montant mensuel posé sur une catégorie, sans dimension de
+// mois : `set` écrase, rien à versionner. Depuis la suppression de
+// `category_budgets` (le montant vit dans `categories.budget_amount`), il n'y a
+// plus de mode « Détaillé » : chaque catégorie, parente ou non, est un poste et
+// porte son propre montant.
+import { and, eq, gte, isNotNull, isNull, lt, sql } from "@budget/db";
 import { db } from "@budget/db/client";
-import {
-  bankAccounts,
-  categories,
-  categoryBudgets,
-  transactions,
-} from "@budget/db/schema";
+import { bankAccounts, categories, transactions } from "@budget/db/schema";
 
 // Fenêtre de référence : les 6 derniers mois **complets**. Le mois en cours en
 // est exclu — il ne couvre qu'une fraction du calendrier et tirerait toute
@@ -32,8 +28,6 @@ export interface CategoryBudgetRow {
   categoryId: number;
   /** Montant mensuel posé, ou `null` si la catégorie n'est pas budgétée. */
   amount: number | null;
-  /** Parente dont le budget est réparti sur ses sous-catégories. */
-  detailed: boolean;
   /** Dépense mensuelle moyenne sur les 6 mois complets, arrondie à 5 €. */
   average: number;
   /** Historique trop court pour proposer un montant (voir MIN_ACTIVE_MONTHS). */
@@ -42,32 +36,11 @@ export interface CategoryBudgetRow {
 
 export interface CategoryBudgetPlan {
   rows: CategoryBudgetRow[];
-  /** Total mensuel budgété, sur les seuls postes qui comptent. */
+  /** Total mensuel budgété. */
   total: number;
-  /** Postes budgétés / postes en tout — « poste » au sens de `budgetSlots`. */
+  /** Postes budgétés / postes en tout — un poste = une catégorie. */
   budgeted: number;
   slots: number;
-}
-
-/**
- * Les catégories qui portent réellement un budget : une parente « globale »
- * compte pour elle-même, une parente « détaillée » s'efface derrière ses
- * sous-catégories. Une parente sans sous-catégorie est toujours globale, quel
- * que soit son drapeau.
- *
- * C'est la seule définition de « poste » de l'écran : les compteurs d'en-tête,
- * le « N sans budget » et le bandeau « tout est budgété » en sortent tous, donc
- * ils ne peuvent pas se contredire.
- */
-export function budgetSlots(
-  tree: { id: number; children: { id: number }[] }[],
-  detailedIds: ReadonlySet<number>,
-): number[] {
-  return tree.flatMap((parent) =>
-    detailedIds.has(parent.id) && parent.children.length > 0
-      ? parent.children.map((child) => child.id)
-      : [parent.id],
-  );
 }
 
 /**
@@ -110,23 +83,16 @@ export async function budgetPlan(
   const { start, end } = historyWindow();
   const month = sql<string>`to_char(${transactions.bookingDate}, 'YYYY-MM')`;
 
-  const [nodes, saved, spend] = await Promise.all([
+  const [nodes, spend] = await Promise.all([
     db
-      .select({ id: categories.id, parentId: categories.parentId })
+      .select({
+        id: categories.id,
+        parentId: categories.parentId,
+        amount: categories.budgetAmount,
+      })
       .from(categories)
       .where(eq(categories.organizationId, organizationId))
       .orderBy(categories.id),
-    // `category_budgets` n'a pas de colonne d'espace : la ligne tient le sien
-    // de sa catégorie, comme une transaction le tient de son compte.
-    db
-      .select({
-        categoryId: categoryBudgets.categoryId,
-        amount: categoryBudgets.amount,
-        detailed: categoryBudgets.detailed,
-      })
-      .from(categoryBudgets)
-      .innerJoin(categories, eq(categories.id, categoryBudgets.categoryId))
-      .where(eq(categories.organizationId, organizationId)),
     db
       .select({
         categoryId: transactions.categoryId,
@@ -161,12 +127,10 @@ export async function budgetPlan(
   }
 
   // Série d'une parente = la sienne + celle de ses sous-catégories : c'est le
-  // même argent, et son budget global doit couvrir les deux.
-  const effective = new Map<number, Map<string, number>>();
-  for (const node of nodes) {
-    const months = new Map(own.get(node.id) ?? []);
-    effective.set(node.id, months);
-  }
+  // même argent, et son budget doit couvrir les deux.
+  const effective = new Map(
+    nodes.map((node) => [node.id, new Map(own.get(node.id) ?? [])]),
+  );
   for (const node of nodes) {
     if (node.parentId === null) continue;
     const parent = effective.get(node.parentId);
@@ -176,105 +140,47 @@ export async function budgetPlan(
     }
   }
 
-  const savedById = new Map(saved.map((b) => [b.categoryId, b]));
-  const rows: CategoryBudgetRow[] = nodes.map((node) => {
-    const row = savedById.get(node.id);
-    return {
-      categoryId: node.id,
-      amount: row?.amount == null ? null : Number(row.amount),
-      detailed: row?.detailed ?? false,
-      ...budgetProposal([...(effective.get(node.id)?.values() ?? [])]),
-    };
-  });
-
-  const tree = nodes
-    .filter((n) => n.parentId === null)
-    .map((parent) => ({
-      id: parent.id,
-      children: nodes.filter((n) => n.parentId === parent.id),
-    }));
-  const slots = budgetSlots(
-    tree,
-    new Set(saved.filter((b) => b.detailed).map((b) => b.categoryId)),
-  );
-  const amountById = new Map(rows.map((r) => [r.categoryId, r.amount]));
-  const amounts = slots.map((id) => amountById.get(id) ?? null);
+  const rows: CategoryBudgetRow[] = nodes.map((node) => ({
+    categoryId: node.id,
+    amount: node.amount === null ? null : Number(node.amount),
+    ...budgetProposal([...(effective.get(node.id)?.values() ?? [])]),
+  }));
 
   return {
     rows,
-    total: amounts.reduce((sum: number, a) => sum + (a ?? 0), 0),
-    budgeted: amounts.filter((a) => a !== null).length,
-    slots: slots.length,
+    total: rows.reduce((sum, r) => sum + (r.amount ?? 0), 0),
+    budgeted: rows.filter((r) => r.amount !== null).length,
+    slots: rows.length,
   };
 }
 
-// `amount` nul retire le budget sans effacer la ligne : elle peut encore porter
-// le mode « Détaillé » de la parente.
+// Le `WHERE` porte l'espace : un id venu du client et appartenant à un autre
+// foyer ne touche aucune ligne. Un `UPDATE` à zéro ligne ne lève pas, d'où le
+// `returning` — l'écran attend une confirmation.
 export async function setCategoryBudget(
   organizationId: string,
   categoryId: number,
   amount: number | null,
 ): Promise<void> {
-  await assertCategoryInOrg(organizationId, categoryId);
-  const value = amount === null ? null : amount.toFixed(2);
-  await db
-    .insert(categoryBudgets)
-    .values({ categoryId, amount: value })
-    .onConflictDoUpdate({
-      target: categoryBudgets.categoryId,
-      set: { amount: value },
-    });
-}
-
-export async function setCategoryDetailed(
-  organizationId: string,
-  categoryId: number,
-  detailed: boolean,
-): Promise<void> {
-  await assertCategoryInOrg(organizationId, categoryId);
-  await db
-    .insert(categoryBudgets)
-    .values({ categoryId, detailed })
-    .onConflictDoUpdate({
-      target: categoryBudgets.categoryId,
-      set: { detailed },
-    });
-}
-
-// « Tout vider » ne vide que l'espace courant. Le `IN` plutôt qu'une jointure :
-// `DELETE ... USING` ne se dit pas en Drizzle aussi simplement, et la liste des
-// catégories d'un foyer tient dans une sous-requête.
-export async function clearCategoryBudgets(
-  organizationId: string,
-): Promise<void> {
-  await db
-    .delete(categoryBudgets)
-    .where(
-      inArray(
-        categoryBudgets.categoryId,
-        db
-          .select({ id: categories.id })
-          .from(categories)
-          .where(eq(categories.organizationId, organizationId)),
-      ),
-    );
-}
-
-// Les budgets sont écrits par id de catégorie, venu du client : sans cette
-// vérification, un id d'un autre espace créerait une ligne de budget orpheline
-// dans son arborescence.
-async function assertCategoryInOrg(
-  organizationId: string,
-  categoryId: number,
-): Promise<void> {
-  const [row] = await db
-    .select({ id: categories.id })
-    .from(categories)
+  const updated = await db
+    .update(categories)
+    .set({ budgetAmount: amount === null ? null : amount.toFixed(2) })
     .where(
       and(
         eq(categories.id, categoryId),
         eq(categories.organizationId, organizationId),
       ),
-    );
-  if (!row) throw new Error("Catégorie introuvable.");
+    )
+    .returning({ id: categories.id });
+  if (updated.length === 0) throw new Error("Catégorie introuvable.");
+}
+
+// « Tout vider » ne vide que l'espace courant.
+export async function clearCategoryBudgets(
+  organizationId: string,
+): Promise<void> {
+  await db
+    .update(categories)
+    .set({ budgetAmount: null })
+    .where(eq(categories.organizationId, organizationId));
 }

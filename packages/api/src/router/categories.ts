@@ -7,7 +7,6 @@ import {
   budgetPlan,
   clearCategoryBudgets,
   setCategoryBudget,
-  setCategoryDetailed,
 } from "../categories/budgets";
 import {
   createCategory,
@@ -92,10 +91,9 @@ export const categoriesRouter = {
     .input(z.object({ id: categoryId }))
     .mutation(({ ctx, input }) => removeCategory(ctx.organizationId, input.id)),
 
-  // Onglet « Budgets » de /categories. Un budget est un montant mensuel posé
-  // sur une catégorie, sans dimension de mois : `set` écrase, il n'y a rien à
-  // versionner. `plan` porte aussi les compteurs d'en-tête — ils dépendent du
-  // découpage en postes (voir budgetSlots), qui n'a qu'une seule définition.
+  // Écran /budgets. Un budget est un montant mensuel posé sur une catégorie,
+  // sans dimension de mois : `set` écrase, il n'y a rien à versionner. `plan`
+  // porte aussi les compteurs d'en-tête — un poste y est une catégorie.
   budgets: {
     plan: orgProcedure.query(({ ctx }) => budgetPlan(ctx.organizationId)),
 
@@ -109,16 +107,6 @@ export const categoriesRouter = {
       )
       .mutation(({ ctx, input }) =>
         setCategoryBudget(ctx.organizationId, input.categoryId, input.amount),
-      ),
-
-    setDetailed: orgProcedure
-      .input(z.object({ categoryId, detailed: z.boolean() }))
-      .mutation(({ ctx, input }) =>
-        setCategoryDetailed(
-          ctx.organizationId,
-          input.categoryId,
-          input.detailed,
-        ),
       ),
 
     clear: orgProcedure.mutation(({ ctx }) =>

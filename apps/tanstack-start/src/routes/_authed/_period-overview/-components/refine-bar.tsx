@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ArrowLeftRightIcon, SearchIcon, TagIcon } from "lucide-react";
 
-import type { TransactionsSearch } from "@budget/shared";
+import type { TransactionsSearch } from "@budget/api/schemas";
 import { cn } from "@budget/ui";
 import { InputGroup, InputGroupAddon } from "@budget/ui/input-group";
 import { ToggleGroup, ToggleGroupItem } from "@budget/ui/toggle-group";

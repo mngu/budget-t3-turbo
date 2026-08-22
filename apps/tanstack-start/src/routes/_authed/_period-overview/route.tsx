@@ -4,7 +4,7 @@ import {
   stripSearchParams,
 } from "@tanstack/react-router";
 
-import { transactionsSearchSchema } from "@budget/shared";
+import { transactionsSearchSchema } from "@budget/api/schemas";
 
 import {
   defaultToCurrentMonth,

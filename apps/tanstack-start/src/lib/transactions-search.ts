@@ -1,4 +1,4 @@
-import type { TransactionsSearch } from "@budget/shared";
+import type { TransactionsSearch } from "@budget/api/schemas";
 
 import { monthBounds, monthStartDay } from "./date";
 
