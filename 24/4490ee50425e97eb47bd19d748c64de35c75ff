@@ -1,0 +1,100 @@
+packages/db/src/schema.ts
+  h_c1b75a3cdf5637 128
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/use-drill.ts
+  h_c1b75a3cdf5637 6-7
+packages/db/drizzle/0002_dashing_lake.sql
+  s_bd76a5fb391219::t_03e56e212f9e23 1-3
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/refine-bar.tsx
+  h_c1b75a3cdf5637 6
+packages/api/src/transactions/queries.test.ts
+  h_c1b75a3cdf5637 7
+apps/tanstack-start/src/routes/_authed/_period-overview/transactions.tsx
+  h_c1b75a3cdf5637 3
+packages/api/src/categories/budgets.test.ts
+  s_bd76a5fb391219::t_4cac8511434c8e 7
+apps/tanstack-start/src/lib/transactions-search.ts
+  h_c1b75a3cdf5637 1
+apps/tanstack-start/src/routes/_authed/_period-overview/route.tsx
+  h_c1b75a3cdf5637 7
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/overview-header.tsx
+  h_c1b75a3cdf5637 4
+packages/api/src/router/categories.ts
+  s_bd76a5fb391219::t_4cac8511434c8e 94-96
+apps/tanstack-start/src/lib/use-revue-search.ts
+  h_c1b75a3cdf5637 5
+apps/tanstack-start/src/routes/_authed/settings/budgets/-components/budget-tree.tsx
+  s_bd76a5fb391219::t_296e358bede05e 31,71,104,118,148-151,161,176-179,187
+packages/api/src/categories/budgets.ts
+  s_a9429611b6924e::t_1d67efc1269dcd 88
+  s_bd76a5fb391219::t_a2c9756c9135ef 1,3-8,10,39,41,86,90,130-133,143-147,151-153,157-159,165-167,169-171,173-175,178-179,182-185
+  h_c1b75a3cdf5637 89,91-92
+apps/tanstack-start/src/routes/_authed/_period-overview/-lib/breakdown.fixture.ts
+  h_c1b75a3cdf5637 4-5
+  h_c1b75a3cdf5637 1-3
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/kpi-band.tsx
+  h_c1b75a3cdf5637 1
+packages/api/package.json
+  h_c1b75a3cdf5637 9-12
+packages/api/src/transactions/queries.ts
+  s_bd76a5fb391219::t_ee89b28a9ce6fc 215-217
+  h_c1b75a3cdf5637 22,218,270
+  s_f267c3ee1d3d19::t_73d4c91b1048db 23-28,34
+  s_f267c3ee1d3d19::t_107e540c6a200a 188
+packages/api/src/router/transactions.ts
+  h_c1b75a3cdf5637 19
+apps/tanstack-start/src/routes/_authed/_period-overview/-lib/breakdown.ts
+  h_c1b75a3cdf5637 1
+apps/tanstack-start/src/routes/_authed/settings/budgets/index.tsx
+  s_bd76a5fb391219::t_ee89b28a9ce6fc 98-112
+  s_bd76a5fb391219::t_7cb022847c8b23 47,61-63,86
+  s_bd76a5fb391219::t_5d7c5a38d378b2 113-114
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/breakdown-list.tsx
+  h_c1b75a3cdf5637 3
+packages/api/src/transactions/schemas.ts
+  h_c1b75a3cdf5637 3
+turbo.json
+  h_c1b75a3cdf5637 3
+packages/api/src/schemas.ts
+  h_c1b75a3cdf5637 1
+packages/db/drizzle/meta/_journal.json
+  s_bd76a5fb391219::t_86b626a2f7e291 18-24
+packages/db/drizzle/meta/0002_snapshot.json
+  h_c1b75a3cdf5637 1-1357
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "244490ee50425e97eb47bd19d748c64de35c75ff",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_a9429611b6924e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "61224eda-075f-401f-83a8-73b228aef21d",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    },
+    "s_bd76a5fb391219": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a5ed295e-c4fe-4814-adf0-6cde12b7e72e",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    },
+    "s_f267c3ee1d3d19": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3635c93c-3ae0-4201-9135-93cf17396b2a",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
