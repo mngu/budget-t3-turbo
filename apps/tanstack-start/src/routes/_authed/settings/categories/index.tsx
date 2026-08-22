@@ -2,11 +2,11 @@ import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 
 import type { CategoryOverviewNode } from "@budget/api";
-import { CATEGORY_COLOR_PALETTE } from "@budget/shared";
 import { Button } from "@budget/ui/button";
 import { toast } from "@budget/ui/toast";
 
 import { Stat } from "~/component/stat";
+import { euro0 } from "~/lib/format";
 import { useTRPCClient } from "~/lib/trpc";
 import { AnalysisBanner } from "./-components/analysis-banner";
 import { CategoryDeleteDialog } from "./-components/category-delete-dialog";
@@ -24,32 +24,40 @@ import { useSuggestions } from "./-lib/use-suggestions";
 
 export const Route = createFileRoute("/_authed/settings/categories/")({
   loader: async ({ context }) => {
-    const { tree, uncategorizedCount } =
-      await context.trpcClient.categories.overview.query();
+    const [{ tree, uncategorizedCount }, budgets] = await Promise.all([
+      context.trpcClient.categories.overview.query(),
+      context.trpcClient.categories.budgets.plan.query(),
+    ]);
     const stats = computeStats(tree);
-    return { tree, uncategorizedCount, stats };
+    return { tree, uncategorizedCount, stats, budgets };
   },
   staticData: { title: "Catégories", aside: CategoriesAside },
   component: CategoriesPage,
 });
 
 function CategoriesAside() {
-  const { stats } = Route.useLoaderData();
+  const { stats, budgets } = Route.useLoaderData();
   return (
     <div className="ml-auto flex items-stretch">
       <Stat value={stats.parentCount} label="Parentes" />
       <Stat value={stats.childCount} label="Sous-catégories" />
+      <Stat value={euro0.format(budgets.total)} label="Budgété / mois" />
+      {/* Un seul compteur de budgets : « N / M » porte aussi le nombre de
+          postes sans budget. Pas d'ambre dessus — « tout est budgété » est un
+          état que personne n'atteint (les catégories de revenus n'ont pas de
+          budget), le signal serait allumé pour toujours. Le compteur des
+          teintes a laissé la place : une collision est déjà annoncée en toutes
+          lettres dans la rangée « Vos catégories ». */}
       <Stat
-        value={`${stats.colorsUsed} / ${CATEGORY_COLOR_PALETTE.length}`}
-        label="Teintes prises"
-        warn={stats.collisions > 0}
+        value={`${budgets.budgeted} / ${budgets.slots}`}
+        label="Postes budgétés"
       />
     </div>
   );
 }
 
 function CategoriesPage() {
-  const { tree, uncategorizedCount, stats } = Route.useLoaderData();
+  const { tree, uncategorizedCount, stats, budgets } = Route.useLoaderData();
   const trpcClient = useTRPCClient();
   const run = useRun();
 
@@ -84,9 +92,10 @@ function CategoriesPage() {
   return (
     <>
       <p className="text-muted-foreground text-control mt-2 max-w-160 text-pretty">
-        Les catégories qui rangent toutes vos transactions. La couleur et
-        l'icône d'une catégorie principale l'identifient partout ailleurs —
-        elles se choisissent ici, et nulle part ailleurs.
+        Les catégories qui rangent toutes vos transactions, et le budget mensuel
+        de chacune. La couleur et l'icône d'une catégorie principale
+        l'identifient partout ailleurs — elles se choisissent ici, et nulle part
+        ailleurs.
       </p>
 
       {analysis.panel === null && (
@@ -143,6 +152,20 @@ function CategoriesPage() {
               Tout replier / déplier
             </Button>
           )}
+          {budgets.budgeted > 0 && (
+            <Button
+              variant="outline"
+              size="xs"
+              onClick={() =>
+                void run(
+                  () => trpcClient.categories.budgets.clear.mutate(),
+                  "Échec de la remise à zéro.",
+                )
+              }
+            >
+              Tout vider les budgets
+            </Button>
+          )}
         </div>
       </div>
 
@@ -153,6 +176,24 @@ function CategoriesPage() {
         uncategorizedCount={uncategorizedCount}
         ownersByColor={stats.ownersByColor}
         pendingGhosts={analysis.pending}
+        budgetRows={new Map(budgets.rows.map((r) => [r.categoryId, r]))}
+        onSetAmount={(categoryId, amount) =>
+          void run(
+            () =>
+              trpcClient.categories.budgets.set.mutate({ categoryId, amount }),
+            "Échec de l'enregistrement du budget.",
+          )
+        }
+        onSetDetailed={(categoryId, detailed) =>
+          void run(
+            () =>
+              trpcClient.categories.budgets.setDetailed.mutate({
+                categoryId,
+                detailed,
+              }),
+            "Échec du changement de régime de budget.",
+          )
+        }
         expandAllSignal={expandAll}
         onAnalyze={analysis.generate}
         onRename={crud.onRename}
@@ -171,7 +212,10 @@ function CategoriesPage() {
         tuiles compactes. L'icône sert partout où il y a au moins 20 px :
         listes, sélecteurs, en-têtes de catégorie. Les sous-catégories n'ont ni
         l'une ni l'autre en propre : elles se lisent comme une famille de la
-        teinte du parent.
+        teinte du parent. Un budget se pose sur une catégorie, parente ou
+        sous-catégorie, et n'est pas reporté au mois suivant : la moyenne
+        proposée porte sur les 6 derniers mois complets, dépenses seules, et une
+        catégorie vue moins de 4 mois sur 6 n'en reçoit pas.
       </p>
 
       <CategoryIdentityDialog

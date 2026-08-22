@@ -1,10 +1,11 @@
-// Budgets mensuels par catégorie — écran /budgets.
+// Budgets mensuels par catégorie — écran /settings/categories.
 //
 // Un budget est un montant mensuel posé sur une catégorie, sans dimension de
-// mois : `set` écrase, rien à versionner. Depuis la suppression de
-// `category_budgets` (le montant vit dans `categories.budget_amount`), il n'y a
-// plus de mode « Détaillé » : chaque catégorie, parente ou non, est un poste et
-// porte son propre montant.
+// mois : `set` écrase, rien à versionner. Une parente peut être « détaillée » :
+// ce sont alors ses sous-catégories qui portent les montants et son budget
+// **est** leur somme — elle n'en garde aucun à elle (CHECK
+// `categories_detailed_no_amount`), ce qui rend l'invariant vrai par
+// construction plutôt que par un trigger.
 import { and, eq, gte, isNotNull, isNull, lt, sql } from "@budget/db";
 import { db } from "@budget/db/client";
 import { bankAccounts, categories, transactions } from "@budget/db/schema";
@@ -28,6 +29,8 @@ export interface CategoryBudgetRow {
   categoryId: number;
   /** Montant mensuel posé, ou `null` si la catégorie n'est pas budgétée. */
   amount: number | null;
+  /** Parente dont le budget est réparti sur ses sous-catégories. */
+  detailed: boolean;
   /** Dépense mensuelle moyenne sur les 6 mois complets, arrondie à 5 €. */
   average: number;
   /** Historique trop court pour proposer un montant (voir MIN_ACTIVE_MONTHS). */
@@ -38,9 +41,30 @@ export interface CategoryBudgetPlan {
   rows: CategoryBudgetRow[];
   /** Total mensuel budgété. */
   total: number;
-  /** Postes budgétés / postes en tout — un poste = une catégorie. */
+  /** Postes budgétés / postes en tout — « poste » au sens de `budgetSlots`. */
   budgeted: number;
   slots: number;
+}
+
+/**
+ * Les catégories qui portent réellement un budget : une parente « globale »
+ * compte pour elle-même, une parente « détaillée » s'efface derrière ses
+ * sous-catégories. Une parente sans sous-catégorie est toujours globale, quel
+ * que soit son drapeau — sinon son budget disparaîtrait de l'écran mais pas des
+ * compteurs.
+ *
+ * C'est la seule définition de « poste » : les compteurs d'en-tête en sortent
+ * tous, donc ils ne peuvent pas se contredire.
+ */
+export function budgetSlots(
+  tree: { id: number; children: { id: number }[] }[],
+  detailedIds: ReadonlySet<number>,
+): number[] {
+  return tree.flatMap((parent) =>
+    detailedIds.has(parent.id) && parent.children.length > 0
+      ? parent.children.map((child) => child.id)
+      : [parent.id],
+  );
 }
 
 /**
@@ -89,6 +113,7 @@ export async function budgetPlan(
         id: categories.id,
         parentId: categories.parentId,
         amount: categories.budgetAmount,
+        detailed: categories.budgetDetailed,
       })
       .from(categories)
       .where(eq(categories.organizationId, organizationId))
@@ -143,15 +168,60 @@ export async function budgetPlan(
   const rows: CategoryBudgetRow[] = nodes.map((node) => ({
     categoryId: node.id,
     amount: node.amount === null ? null : Number(node.amount),
+    detailed: node.detailed,
     ...budgetProposal([...(effective.get(node.id)?.values() ?? [])]),
   }));
 
+  // Les compteurs comptent des **postes**, pas des lignes : sous une parente
+  // détaillée, ce sont ses sous-catégories qui en sont, et son propre montant
+  // n'existe pas (il serait compté deux fois avec le leur).
+  const tree = nodes
+    .filter((n) => n.parentId === null)
+    .map((parent) => ({
+      id: parent.id,
+      children: nodes.filter((n) => n.parentId === parent.id),
+    }));
+  const amountById = new Map(rows.map((r) => [r.categoryId, r.amount]));
+  const amounts = budgetSlots(
+    tree,
+    new Set(nodes.filter((n) => n.detailed).map((n) => n.id)),
+  ).map((id) => amountById.get(id) ?? null);
+
   return {
     rows,
-    total: rows.reduce((sum, r) => sum + (r.amount ?? 0), 0),
-    budgeted: rows.filter((r) => r.amount !== null).length,
-    slots: rows.length,
+    total: amounts.reduce((sum: number, a) => sum + (a ?? 0), 0),
+    budgeted: amounts.filter((a) => a !== null).length,
+    slots: amounts.length,
   };
+}
+
+/**
+ * Bascule Global / Détaillé d'une parente. Passer en détaillé **efface** son
+ * montant global : le CHECK l'exige, et c'est ce qui garantit que son budget
+ * affiché est toujours la somme de ses enfants. L'aller-retour ne le rend donc
+ * pas — les montants des enfants, eux, dorment en base et reviennent.
+ *
+ * Le `parent_id IS NULL` a la même raison qu'`updateCategoryIcon` : le drapeau
+ * n'a aucun sens sur une sous-catégorie, et posé là il lui effacerait son
+ * montant.
+ */
+export async function setCategoryDetailed(
+  organizationId: string,
+  categoryId: number,
+  detailed: boolean,
+): Promise<void> {
+  const updated = await db
+    .update(categories)
+    .set({ budgetDetailed: detailed, ...(detailed && { budgetAmount: null }) })
+    .where(
+      and(
+        eq(categories.id, categoryId),
+        eq(categories.organizationId, organizationId),
+        isNull(categories.parentId),
+      ),
+    )
+    .returning({ id: categories.id });
+  if (updated.length === 0) throw new Error("Catégorie parente introuvable.");
 }
 
 // Le `WHERE` porte l'espace : un id venu du client et appartenant à un autre
@@ -162,9 +232,19 @@ export async function setCategoryBudget(
   categoryId: number,
   amount: number | null,
 ): Promise<void> {
+  const value = amount === null ? null : amount.toFixed(2);
   const updated = await db
     .update(categories)
-    .set({ budgetAmount: amount === null ? null : amount.toFixed(2) })
+    .set({
+      budgetAmount: value,
+      // Poser un montant sur une catégorie, c'est dire qu'elle porte son propre
+      // budget : le drapeau tombe avec. Sans ça une parente détaillée puis
+      // vidée de ses sous-catégories reste `detailed` en base alors que l'écran
+      // la rend globale — son champ accepte la saisie et le CHECK la refuse, et
+      // la bascule est hors de portée (l'entrée de menu est cachée sans
+      // sous-catégorie). Vider un montant, lui, ne dé-détaille rien.
+      ...(value !== null && { budgetDetailed: false }),
+    })
     .where(
       and(
         eq(categories.id, categoryId),
@@ -175,12 +255,14 @@ export async function setCategoryBudget(
   if (updated.length === 0) throw new Error("Catégorie introuvable.");
 }
 
-// « Tout vider » ne vide que l'espace courant.
+// « Tout vider » ne vide que l'espace courant, et remet les parentes en
+// « Global » : le drapeau sans montant n'est pas un état neutre, il afficherait
+// « somme de N sous-cat. » sur une somme vide.
 export async function clearCategoryBudgets(
   organizationId: string,
 ): Promise<void> {
   await db
     .update(categories)
-    .set({ budgetAmount: null })
+    .set({ budgetAmount: null, budgetDetailed: false })
     .where(eq(categories.organizationId, organizationId));
 }

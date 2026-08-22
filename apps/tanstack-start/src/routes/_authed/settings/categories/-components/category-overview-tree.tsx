@@ -6,6 +6,7 @@ import {
   ChevronRightIcon,
   EllipsisIcon,
   ListIcon,
+  ListTreeIcon,
   PaletteIcon,
   PlusIcon,
   TagsIcon,
@@ -14,7 +15,7 @@ import {
   XIcon,
 } from "lucide-react";
 
-import type { CategoryOverviewNode } from "@budget/api";
+import type { CategoryBudgetRow, CategoryOverviewNode } from "@budget/api";
 import { FALLBACK_CATEGORY_COLOR } from "@budget/shared";
 import { cn } from "@budget/ui";
 import { Button } from "@budget/ui/button";
@@ -47,6 +48,7 @@ import {
   softCategoryColor,
   useCategoryColor,
 } from "~/lib/category-color";
+import { euro0 } from "~/lib/format";
 
 // Au-delà de ce nombre de parentes, la liste s'ouvre repliée : passé une
 // dizaine de branches déployées, la page n'est plus lisible d'un coup d'œil.
@@ -83,6 +85,10 @@ interface CategoryOverviewTreeProps extends CategoryOverviewTreeActions {
   ownersByColor: Map<string, string[]>;
   /** En cours d'acceptation — clés de GhostBranch. */
   pendingGhosts: ReadonlySet<string>;
+  /** Montant posé et moyenne de référence, par catégorie. */
+  budgetRows: Map<number, CategoryBudgetRow>;
+  onSetAmount: (categoryId: number, amount: number | null) => void;
+  onSetDetailed: (categoryId: number, detailed: boolean) => void;
   expandAllSignal: boolean | null;
   onAnalyze: () => void;
 }
@@ -94,6 +100,9 @@ export function CategoryOverviewTree({
   uncategorizedCount,
   ownersByColor,
   pendingGhosts,
+  budgetRows,
+  onSetAmount,
+  onSetDetailed,
   expandAllSignal,
   onAnalyze,
   ...actions
@@ -167,6 +176,9 @@ export function CategoryOverviewTree({
             expanded={expanded}
             forcedOpen={ghosts.length > 0}
             pendingGhosts={pendingGhosts}
+            budgetRows={budgetRows}
+            onSetAmount={onSetAmount}
+            onSetDetailed={onSetDetailed}
             onToggle={() =>
               setFolds((f) => ({
                 ...f,
@@ -208,6 +220,9 @@ function ParentRow({
   expanded,
   forcedOpen,
   pendingGhosts,
+  budgetRows,
+  onSetAmount,
+  onSetDetailed,
   onToggle,
   onRename,
   onOpenIdentity,
@@ -225,12 +240,21 @@ function ParentRow({
   expanded: boolean;
   forcedOpen: boolean;
   pendingGhosts: ReadonlySet<string>;
+  budgetRows: Map<number, CategoryBudgetRow>;
+  onSetAmount: (categoryId: number, amount: number | null) => void;
+  onSetDetailed: (categoryId: number, detailed: boolean) => void;
   onToggle: () => void;
 } & Omit<CategoryOverviewTreeActions, "onAddParent">) {
   const resolve = useCategoryColor();
   const color = parent.color ?? FALLBACK_CATEGORY_COLOR;
   const hasIdentity = parent.color !== null || parent.icon !== null;
   const collapsible = parent.children.length > 0 || ghosts.length > 0;
+  // Une parente sans sous-catégorie porte toujours son budget elle-même, quel
+  // que soit le drapeau en base — même règle que `budgetSlots` côté API, sans
+  // quoi son budget disparaîtrait de l'écran mais pas des compteurs.
+  const detailed =
+    parent.children.length > 0 &&
+    (budgetRows.get(parent.id)?.detailed ?? false);
 
   const soft = softCategoryColor(resolve(color));
 
@@ -253,7 +277,7 @@ function ParentRow({
       onOpenChange={onToggle}
       render={<div className="border-b last:border-b-0" />}
     >
-      <div className="hover:bg-surface-2 grid min-h-11 grid-cols-[20px_32px_minmax(0,1fr)_auto_76px_28px] items-center gap-2 px-3">
+      <div className="hover:bg-surface-2 grid min-h-11 grid-cols-[20px_32px_minmax(0,1fr)_auto_76px_224px_28px] items-center gap-2 px-3">
         <CollapsibleTrigger
           disabled={forcedOpen || !collapsible}
           aria-label={expanded ? "Replier" : "Déplier"}
@@ -312,27 +336,10 @@ function ParentRow({
           )}
         </div>
 
+        {/* Le décompte de sous-catégories et ses pastilles de teinte ont laissé
+            la place à la colonne des budgets : ce qu'ils disaient se lit en
+            dépliant, une proposition non. */}
         <div className="flex flex-nowrap items-center gap-1.5">
-          {!expanded &&
-            parent.children.slice(0, 6).map((child, i) => (
-              <span
-                key={child.id}
-                title={`${child.name} · ${child.transactionCount}`}
-                className="size-2 rounded-full"
-                style={{
-                  background: shadeCategoryColor(
-                    resolve(color),
-                    i,
-                    Math.min(parent.children.length, 6),
-                  ),
-                }}
-              />
-            ))}
-          <span className="text-subtle text-meta whitespace-nowrap">
-            {parent.children.length > 0
-              ? `${parent.children.length} sous-cat.`
-              : "aucune sous-catégorie"}
-          </span>
           {ghosts.length > 0 && (
             <span className="text-primary bg-accent-soft border-primary text-meta rounded-full border px-2 font-semibold whitespace-nowrap">
               {ghosts.length} proposée{ghosts.length > 1 ? "s" : ""}
@@ -345,6 +352,17 @@ function ParentRow({
           onClick={previewParent}
           title="Voir les transactions directes"
         />
+
+        <div className="flex items-center justify-end gap-2">
+          {detailed ? (
+            <DetailedSum parent={parent} rows={budgetRows} />
+          ) : (
+            <BudgetAmount
+              row={budgetRows.get(parent.id)}
+              onSet={(amount) => onSetAmount(parent.id, amount)}
+            />
+          )}
+        </div>
 
         {/* Une entrée referme le menu d'elle-même : plus de `setMenuOpen(false)`
             en tête de chaque action. */}
@@ -373,6 +391,20 @@ function ParentRow({
               <ListIcon />
               Voir les transactions
             </DropdownMenuItem>
+            {/* Passer en détaillé **efface** le montant global de la parente :
+                elle n'a alors plus de montant à elle, son budget est la somme
+                de ses sous-catégories (CHECK en base). Sans confirmation —
+                c'est un nombre à retaper, la moyenne le repropose. */}
+            {parent.children.length > 0 && (
+              <DropdownMenuItem
+                onClick={() => onSetDetailed(parent.id, !detailed)}
+              >
+                <ListTreeIcon />
+                {detailed
+                  ? "Budget global pour la catégorie"
+                  : "Détailler le budget par sous-catégorie"}
+              </DropdownMenuItem>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem
               variant="destructive"
@@ -417,7 +449,7 @@ function ParentRow({
           return (
             <div
               key={child.id}
-              className="hover:bg-surface-2 grid min-h-9 grid-cols-[61px_8px_minmax(0,1fr)_74px_26px] items-center gap-2 px-3"
+              className="hover:bg-surface-2 grid min-h-11 grid-cols-[61px_8px_minmax(0,1fr)_76px_224px_28px] items-center gap-2 px-3"
             >
               <span />
               <span
@@ -446,6 +478,22 @@ function ParentRow({
                 }
                 className="text-control"
               />
+              <div className="flex items-center justify-end gap-2">
+                {detailed ? (
+                  <BudgetAmount
+                    row={budgetRows.get(child.id)}
+                    onSet={(amount) => onSetAmount(child.id, amount)}
+                  />
+                ) : (
+                  // Parente en budget global : la sous-catégorie n'a rien à
+                  // saisir, mais sa moyenne dit d'où vient la somme.
+                  <span className="num text-subtle text-meta whitespace-nowrap">
+                    {budgetRows.get(child.id)?.average
+                      ? `moy. ${euro0.format(budgetRows.get(child.id)?.average ?? 0)}`
+                      : "—"}
+                  </span>
+                )}
+              </div>
               <button
                 type="button"
                 aria-label={`Supprimer ${child.name}`}
@@ -677,5 +725,125 @@ function CountButton({
     >
       {count} txns
     </button>
+  );
+}
+
+/**
+ * Une parente détaillée n'a pas de montant à elle : elle affiche la somme de
+ * ses sous-catégories — la seule valeur qui existe, rien n'est stocké sur elle
+ * — et ce qui reste à y saisir.
+ */
+function DetailedSum({
+  parent,
+  rows,
+}: {
+  parent: CategoryOverviewNode;
+  rows: Map<number, CategoryBudgetRow>;
+}) {
+  const amounts = parent.children.map((c) => rows.get(c.id)?.amount ?? null);
+  const missing = amounts.filter((a) => a === null).length;
+
+  return (
+    <div className="flex flex-col items-end">
+      <span
+        className={cn(
+          "num text-meta font-medium",
+          missing > 0 && "text-muted-foreground",
+        )}
+      >
+        {euro0.format(amounts.reduce((sum: number, a) => sum + (a ?? 0), 0))}
+        /mois
+      </span>
+      <span className="text-subtle text-label whitespace-nowrap">
+        {missing > 0
+          ? `${missing} sous-cat. à remplir`
+          : `somme de ${parent.children.length} sous-cat.`}
+      </span>
+    </div>
+  );
+}
+
+/**
+ * Le montant d'un poste : le champ de saisie, précédé du raccourci de
+ * pré-remplissage tant que rien n'est posé. Le raccourci ne s'affiche que si la
+ * moyenne est une proposition défendable — une catégorie vue moins de 4 mois
+ * sur 6 arrive `irregular` et n'en reçoit pas (voir budgetProposal côté API).
+ */
+function BudgetAmount({
+  row,
+  onSet,
+}: {
+  row: CategoryBudgetRow | undefined;
+  onSet: (amount: number | null) => void;
+}) {
+  const proposal =
+    row?.amount === null && !row.irregular && row.average > 0
+      ? row.average
+      : null;
+
+  return (
+    <>
+      {proposal !== null && (
+        <button
+          type="button"
+          onClick={() => onSet(proposal)}
+          title={`Pré-remplir le budget avec ${euro0.format(proposal)} · moyenne 6 mois`}
+          className="num text-subtle hover:text-primary text-meta whitespace-nowrap"
+        >
+          Moyenne {euro0.format(proposal)} →
+        </button>
+      )}
+      <AmountInput value={row?.amount ?? null} onCommit={onSet} />
+    </>
+  );
+}
+
+// Saisie en euros entiers, commit au blur ou à Entrée. La valeur du serveur est
+// resynchronisée à la volée : le raccourci « Moyenne … » et le « Tout vider »
+// écrivent dans le même champ.
+function AmountInput({
+  value,
+  onCommit,
+}: {
+  value: number | null;
+  onCommit: (amount: number | null) => void;
+}) {
+  const [state, setState] = useState({ text: value?.toString() ?? "", value });
+  if (state.value !== value) setState({ text: value?.toString() ?? "", value });
+
+  const commit = () => {
+    const digits = state.text.replace(/\D/g, "").slice(0, 5);
+    const next = digits === "" ? null : Number(digits);
+    if (next !== value) onCommit(next);
+    setState({ text: digits, value });
+  };
+
+  return (
+    <span className="relative inline-flex items-center">
+      <input
+        value={state.text}
+        inputMode="numeric"
+        placeholder="—"
+        aria-label="Budget mensuel"
+        onChange={(e) =>
+          setState((s) => ({
+            ...s,
+            text: e.target.value.replace(/\D/g, "").slice(0, 5),
+          }))
+        }
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") e.currentTarget.blur();
+          if (e.key === "Escape") {
+            setState({ text: value?.toString() ?? "", value });
+            e.currentTarget.blur();
+          }
+        }}
+        className="num border-border-strong bg-background focus:border-primary text-meta h-7 w-24 rounded-lg border px-2 pr-5 text-right font-medium outline-none"
+      />
+      <span className="text-subtle text-meta pointer-events-none absolute right-2">
+        €
+      </span>
+    </span>
   );
 }

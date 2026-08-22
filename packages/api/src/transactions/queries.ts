@@ -215,7 +215,19 @@ const parentColor = sql`COALESCE((p).color, (c).color)`;
 // …et son budget est le sien. Un `COALESCE((p).budget_amount,
 // (c).budget_amount)` serait faux ici : sous une parente **sans** budget, il
 // ferait passer celui d'une sous-catégorie pour le budget du poste.
-const parentBudget = sql`CASE WHEN (p).name IS NULL THEN (c).budget_amount ELSE (p).budget_amount END`;
+//
+// Sauf quand le poste est **détaillé** : ce sont alors ses sous-catégories qui
+// portent les montants, et son budget est leur somme. Elle n'en stocke aucun à
+// elle (CHECK `categories_detailed_no_amount`), il n'y a donc rien à préférer —
+// la somme est la seule valeur qui existe.
+const posteId = sql`COALESCE((p).id, (c).id)`;
+const posteDetailed = sql`COALESCE((p).budget_detailed, (c).budget_detailed)`;
+const parentBudget = sql`CASE
+        WHEN ${posteDetailed}
+          THEN (SELECT SUM(k.budget_amount) FROM categories k WHERE k.parent_id = ${posteId})
+        WHEN (p).name IS NULL THEN (c).budget_amount
+        ELSE (p).budget_amount
+      END`;
 
 // Position d'une ligne dans l'arborescence, **établie** par Postgres plutôt que
 // déduite d'une comparaison de noms. `COALESCE((p).name, (c).name)` rend quatre
@@ -261,13 +273,18 @@ export async function breakdownByCategories(
       ${filterTransactions(organizationId, query)},
       leaves AS (
         SELECT
-          COALESCE((p).id, (c).id) AS poste_id,
+          ${posteId} AS poste_id,
           ${parentName} AS poste_name,
           ${parentIcon} AS poste_icon,
           ${parentColor} AS poste_color,
           ${parentBudget} AS poste_budget,
           (c).name AS child_name,
-          (c).budget_amount AS child_budget,
+          -- Une sous-catégorie ne porte un budget que sous une parente
+          -- **détaillée** : sous une parente globale son montant dort en base
+          -- (il n'a pas été effacé au retour en Global) et ne compte dans
+          -- aucun total. Le lire ici peindrait une jauge contre un chiffre qui
+          -- n'est pas dans l'enveloppe.
+          CASE WHEN ${posteDetailed} THEN (c).budget_amount END AS child_budget,
           ${nodeKind} AS child_kind,
           SUM((t).amount) AS total
         FROM filtered_transactions

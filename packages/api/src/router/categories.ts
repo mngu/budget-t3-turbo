@@ -7,6 +7,7 @@ import {
   budgetPlan,
   clearCategoryBudgets,
   setCategoryBudget,
+  setCategoryDetailed,
 } from "../categories/budgets";
 import {
   createCategory,
@@ -15,14 +16,9 @@ import {
   updateCategoryColor,
   updateCategoryIcon,
 } from "../categories/mutations";
-import {
-  categoriesOverview,
-  listCategoryTree,
-} from "../categories/queries";
+import { categoriesOverview, listCategoryTree } from "../categories/queries";
 import { generateSuggestions } from "../categories/suggestions/analyze";
-import {
-  acceptSuggestion,
-} from "../categories/suggestions/apply";
+import { acceptSuggestion } from "../categories/suggestions/apply";
 import {
   categorySuggestionChildSchema,
   categorySuggestionSchema,
@@ -107,6 +103,18 @@ export const categoriesRouter = {
       )
       .mutation(({ ctx, input }) =>
         setCategoryBudget(ctx.organizationId, input.categoryId, input.amount),
+      ),
+
+    // Bascule Global / Détaillé d'une parente. Efface son montant global au
+    // passage — voir setCategoryDetailed.
+    setDetailed: orgProcedure
+      .input(z.object({ categoryId, detailed: z.boolean() }))
+      .mutation(({ ctx, input }) =>
+        setCategoryDetailed(
+          ctx.organizationId,
+          input.categoryId,
+          input.detailed,
+        ),
       ),
 
     clear: orgProcedure.mutation(({ ctx }) =>
