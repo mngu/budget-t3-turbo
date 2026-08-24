@@ -16,7 +16,11 @@ import {
   updateCategoryColor,
   updateCategoryIcon,
 } from "../categories/mutations";
-import { categoriesOverview, listCategoryTree } from "../categories/queries";
+import {
+  categoriesOverview,
+  listCategoryTree,
+  newCategoriesOverview,
+} from "../categories/queries";
 import { generateSuggestions } from "../categories/suggestions/analyze";
 import { acceptSuggestion } from "../categories/suggestions/apply";
 import {
@@ -24,6 +28,7 @@ import {
   categorySuggestionSchema,
 } from "../categories/suggestions/schema";
 import { categorizeUncategorized } from "../categorization/run";
+import { transactionsSearchSchema } from "../transactions/schemas";
 import { orgProcedure } from "../trpc";
 
 const categoryId = z.number().int().positive();
@@ -34,6 +39,12 @@ export const categoriesRouter = {
   overview: orgProcedure.query(({ ctx }) =>
     categoriesOverview(ctx.organizationId),
   ),
+
+  newOverview: orgProcedure
+    .input(transactionsSearchSchema)
+    .query(({ ctx, input }) =>
+      newCategoriesOverview(ctx.organizationId, input),
+    ),
 
   // Catégorise les transactions sans catégorie avec les catégories déjà
   // existantes (pas de proposition de nouvelle arborescence, voir
