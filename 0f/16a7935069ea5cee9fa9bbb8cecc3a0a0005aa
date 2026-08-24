@@ -1,0 +1,40 @@
+packages/api/src/categories/budgets.ts
+  s_4e7de2d0757ca6::t_758bd0623f0c83 9,11
+packages/api/src/categories/queries.ts
+  s_4e7de2d0757ca6::t_c848bb9c493ec7 2,4,36
+packages/api/src/categorization/prompt.ts
+  s_4e7de2d0757ca6::t_44dbd5cb16a44a 20-23
+apps/tanstack-start/src/routes/_authed/settings/categories/-lib/use-category-crud.ts
+  s_4e7de2d0757ca6::t_ea5990846e3147 26
+apps/tanstack-start/src/routes/_authed/settings/categories/-lib/use-preview.tsx
+  s_4e7de2d0757ca6::t_eedc2d83820360 4,39,46
+apps/tanstack-start/src/routes/_authed/settings/categories/-components/transaction-preview-drawer.tsx
+  s_4e7de2d0757ca6::t_7c428485b6c1b6 12-14,21,58,73,75-77
+packages/api/src/router/categories.ts
+  s_4e7de2d0757ca6::t_c1d2e3639ee9b5 80-82
+packages/api/src/categories/mutations.ts
+  s_4e7de2d0757ca6::t_1d3294a2d83401 139-140
+packages/api/src/index.ts
+  s_4e7de2d0757ca6::t_320157858a6321 37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "0f16a7935069ea5cee9fa9bbb8cecc3a0a0005aa",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_4e7de2d0757ca6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "db04245e-00b5-4770-8c62-f313452f0efe",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
