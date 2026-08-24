@@ -1,7 +1,7 @@
 // Lectures de l'arborescence de catégories.
-import { and, count, eq, isNull, sql } from "@budget/db";
+import { eq, sql } from "@budget/db";
 import { db } from "@budget/db/client";
-import { bankAccounts, categories, transactions } from "@budget/db/schema";
+import { categories } from "@budget/db/schema";
 
 import type { TransactionsSearch } from "../transactions/schemas";
 import type {
@@ -24,24 +24,6 @@ export interface CategoryTreeNode extends CategoryOption {
   children: CategoryOption[];
 }
 
-export interface CategoryOverviewNode extends CategoryOption {
-  transactionCount: number;
-  // Transactions portées par la catégorie elle-même, hors sous-catégories.
-  // `transactionCount` est le total cumulé pour un parent : les deux chiffres
-  // ne disent pas la même chose et la page /categories affiche le direct
-  // (« le compteur d'une parente ne compte que ses transactions directes »).
-  directTransactionCount: number;
-  children: (CategoryOption & {
-    transactionCount: number;
-    directTransactionCount: number;
-  })[];
-}
-
-export interface CategoriesOverview {
-  tree: CategoryOverviewNode[];
-  uncategorizedCount: number;
-}
-
 const categoryColumns = {
   id: categories.id,
   name: categories.name,
@@ -51,8 +33,7 @@ const categoryColumns = {
 };
 
 // Reconstruit l'arborescence parents → enfants à partir d'une liste plate
-// (les catégories n'ont que 2 niveaux) — générique pour être réutilisé par
-// `listTree` (CategoryOption) et `overview` (CategoryOption & transactionCount).
+// (les catégories n'ont que 2 niveaux).
 function buildCategoryTree<T extends CategoryOption>(
   rows: T[],
 ): (T & { children: T[] })[] {
@@ -82,58 +63,6 @@ export async function listCategoryTree(
     .where(eq(categories.organizationId, organizationId))
     .orderBy(categories.id);
   return buildCategoryTree(rows);
-}
-
-// Arborescence + nombre de transactions par catégorie (page /categories).
-// Deux compteurs par nœud, à ne pas confondre : `transactionCount` est le
-// total cumulé (elle-même + sous-catégories) pour un parent, `directTransactionCount`
-// ne compte jamais que les transactions portées par la catégorie elle-même.
-// Ils coïncident sur une sous-catégorie, qui n'a pas d'enfant.
-// Part de `categories` (pas `transactions`, contrairement à
-// `transactions.breakdownByCategories`) pour ne perdre aucune catégorie à 0
-// transaction.
-export async function categoriesOverview(
-  organizationId: string,
-): Promise<CategoriesOverview> {
-  const [rows, [uncategorized]] = await Promise.all([
-    db
-      .select({
-        ...categoryColumns,
-        transactionCount: count(transactions.id),
-        // Même valeur que `transactionCount` à ce stade (le compte direct) ;
-        // seul `transactionCount` devient cumulé au niveau du parent, plus bas.
-        directTransactionCount: count(transactions.id),
-      })
-      .from(categories)
-      .leftJoin(transactions, eq(transactions.categoryId, categories.id))
-      .where(eq(categories.organizationId, organizationId))
-      .groupBy(categories.id)
-      .orderBy(categories.id),
-    db
-      .select({ total: count() })
-      .from(transactions)
-      // Compte des orphelines : elles n'ont aucune catégorie, l'espace ne peut
-      // donc venir que de leur compte.
-      .innerJoin(bankAccounts, eq(transactions.accountId, bankAccounts.id))
-      .where(
-        and(
-          eq(bankAccounts.organizationId, organizationId),
-          isNull(transactions.categoryId),
-        ),
-      ),
-  ]);
-
-  const tree = buildCategoryTree(rows).map((parent) => ({
-    ...parent,
-    // Seul `transactionCount` devient cumulé — `directTransactionCount` reste
-    // le compte direct issu de la requête, ce que `removeCategory` utilise
-    // pour avertir avant suppression et ce que la page /categories affiche.
-    transactionCount:
-      parent.transactionCount +
-      parent.children.reduce((sum, c) => sum + c.transactionCount, 0),
-  }));
-
-  return { tree, uncategorizedCount: uncategorized?.total ?? 0 };
 }
 
 export function filterTransactions(

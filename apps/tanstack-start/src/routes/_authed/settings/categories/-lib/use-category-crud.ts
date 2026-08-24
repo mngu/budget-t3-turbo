@@ -23,11 +23,7 @@ export interface IdentityTarget {
 
 /**
  * La gestion courante de l'arborescence : créer, renommer, supprimer, et
- * l'identité (teinte + icône) d'une parente. Rien ici ne dépend de l'analyse —
- * c'est la moitié de l'écran qui marche sans LLM.
- *
- * Les cinq premiers handlers portent le nom des props de
- * `CategoryOverviewTreeActions` : ils s'y branchent sans adaptateur.
+ * l'identité (teinte + icône) d'une parente.
  */
 export function useCategoryCrud() {
   const trpcClient = useTRPCClient();
