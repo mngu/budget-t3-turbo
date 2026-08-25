@@ -7,7 +7,7 @@ import {
   XIcon,
 } from "lucide-react";
 
-import type { NewCategoryOverviewType } from "@budget/api/schemas";
+import type { ManagedCategory } from "@budget/api/schemas";
 import { cn } from "@budget/ui";
 import {
   Accordion,
@@ -34,6 +34,7 @@ import {
   useCategoryColor,
 } from "~/lib/category-color";
 import { euro0 } from "~/lib/format";
+import { sumBy } from "~/lib/sum";
 import { useTRPCClient } from "~/lib/trpc";
 import { useRun } from "~/routes/_authed/settings/categories/-lib/use-run";
 import { useCategoryCrud } from "../-lib/use-category-crud";
@@ -43,7 +44,7 @@ import { CategoryIdentityDialog } from "./category-identity-dialog";
 import { TransactionPreviewDrawer } from "./transaction-preview-drawer";
 
 interface NewCategoryOverviewProps {
-  categoryOverview: NewCategoryOverviewType;
+  categoryOverview: ManagedCategory[];
   stats: ReturnType<typeof computeStats>;
 }
 
@@ -144,10 +145,9 @@ export function NewCategoryOverview({
                             <div className="flex flex-col items-end">
                               <span className={cn("num text-meta font-medium")}>
                                 {euro0.format(
-                                  childNodes.reduce(
-                                    (sum: number, a) =>
-                                      sum + (a.budgetAmount ?? 0),
-                                    0,
+                                  sumBy(
+                                    childNodes,
+                                    (child) => child.budgetAmount ?? 0,
                                   ),
                                 )}
                                 /mois

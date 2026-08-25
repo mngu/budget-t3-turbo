@@ -44,7 +44,7 @@ export const Route = createFileRoute("/_authed/_period-overview/")({
 function PeriodOverview() {
   // Les agrégats sont ceux du layout : l'anneau et la colonne des postes lisent
   // la même répartition, elle n'a pas à être chargée deux fois.
-  const { breakdownByCategories } = useLoaderData({
+  const { newOverview } = useLoaderData({
     from: "/_authed/_period-overview",
   });
 
@@ -55,7 +55,7 @@ function PeriodOverview() {
   // search entière parce que le niveau tient au poste ouvert **et** à la
   // période — un changement de mois joue donc la même animation qu'un clic sur
   // un poste, c'est la seule de l'anneau. Voir `useDrill`.
-  const drill = useDrill(search, breakdownByCategories);
+  const drill = useDrill(search, newOverview);
 
   const clear = () => {
     // Ne naviguer que s'il y a un filtre à retirer : `setSearch` relance le
@@ -86,7 +86,7 @@ function PeriodOverview() {
   // montrer au niveau du dessous, l'anneau y serait vide et le seul moyen d'en
   // ressortir serait le bouton du centre. Le bandeau, lui, continue de le
   // nommer — sur `/transactions` c'est un filtre parfaitement légitime.
-  const level = breakdownLevel(breakdownByCategories, search.category);
+  const level = breakdownLevel(newOverview, search.category);
   const selected = level.parent;
   const selectedColor = selected ? resolveColor(selected.color) : "";
 
@@ -152,8 +152,7 @@ function PeriodOverview() {
               ? undefined
               : (index) => {
                   const slice = level.slices[index];
-                  if (slice?.drillable)
-                    setSearch({ category: slice.filter });
+                  if (slice?.drillable) setSearch({ category: slice.filter });
                 }
           }
         >

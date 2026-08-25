@@ -49,52 +49,6 @@ export const transactionsSearchSchema = z.object({
 
 export type TransactionsSearch = z.infer<typeof transactionsSearchSchema>;
 
-const breakdownChildSchema = z.strictObject({
-  name: z.string().nullable(),
-  /**
-   * `sub` = une vraie sous-catégorie. `unallocated` = la dépense posée sur la
-   * parente elle-même : elle n'est plus signalée comme un défaut (le filtre
-   * « à classer » a été supprimé) mais elle reste une part à part entière,
-   * sans quoi la somme du niveau ouvert n'égalerait plus le total du poste.
-   */
-  kind: z.enum(["sub", "unallocated"]),
-  total: z.number(),
-  budget: z.number().nullable(),
-});
-
-// `strictObject` et non `object` : la requête construit ce nœud par
-// `to_jsonb(postes)`, qui émet **toutes** les colonnes de la CTE. Une colonne
-// ajoutée là passerait en silence dans un schéma permissif, et ce parse est
-// précisément le seul endroit où la requête et le type se rencontrent.
-const breakdownParentSchema = z.strictObject({
-  /** `null` sur le poste des transactions sans catégorie (`kind: "none"`). */
-  name: z.string().nullable(),
-  kind: z.enum(["parent", "none"]),
-  icon: z.string().nullable(),
-  color: z.string().nullable(),
-  total: z.number(),
-  budget: z.number().nullable(),
-  /**
-   * Trié par montant décroissant **dans le SQL**, reliquat compris. L'ordre
-   * n'est pas cosmétique : `shadeCategoryColor` dérive la nuance de chaque
-   * segment de son rang, donc le rang est de la donnée.
-   */
-  children: z.array(breakdownChildSchema),
-});
-
-export const breakdownSchema = z.object({
-  /** Total des sorties de la période, quel que soit le niveau affiché. */
-  expenses: z.number(),
-  /** Nombre de postes de dépense. Calculé ici pour que l'en-tête, qui l'affiche,
-   *  n'ait pas à le recompter — et ne puisse donc pas annoncer autre chose. */
-  postes: z.number(),
-  parents: z.array(breakdownParentSchema),
-});
-
-export type Breakdown = z.infer<typeof breakdownSchema>;
-export type BreakdownParent = z.infer<typeof breakdownParentSchema>;
-export type BreakdownChild = z.infer<typeof breakdownChildSchema>;
-
 export const budgetStatsSchema = z.object({
   totalBudget: z.coerce.number(),
   totalAmount: z.coerce.number(),

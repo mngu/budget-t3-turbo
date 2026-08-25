@@ -194,7 +194,8 @@ function CategoryCell({
   // Poser une transaction sur une parente plutôt que sur une de ses
   // sous-catégories n'est pas un défaut : la ligne se lit comme les autres.
   // Seule l'absence totale de catégorie est signalée.
-  const label = parentName === null ? "Sans catégorie" : (subName ?? parentName);
+  const label =
+    parentName === null ? "Sans catégorie" : (subName ?? parentName);
 
   return (
     <span className="flex min-w-0">

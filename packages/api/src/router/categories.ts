@@ -3,10 +3,7 @@ import { z } from "zod/v4";
 
 import { CATEGORY_COLOR_HEXES, CATEGORY_ICON_NAMES } from "@budget/shared";
 
-import {
-  setCategoryBudget,
-  setCategoryDetailed,
-} from "../categories/budgets";
+import { setCategoryBudget, setCategoryDetailed } from "../categories/budgets";
 import {
   createCategory,
   removeCategory,
@@ -14,20 +11,23 @@ import {
   updateCategoryColor,
   updateCategoryIcon,
 } from "../categories/mutations";
-import {
-  listCategoryTree,
-  newCategoriesOverview,
-} from "../categories/queries";
+import { listCategoryTree, newCategoriesOverview } from "../categories/queries";
 import { transactionsSearchSchema } from "../transactions/schemas";
 import { orgProcedure } from "../trpc";
 
 const categoryId = z.number().int().positive();
 
+// Chaque champ de `transactionsSearchSchema` porte un `.catch()`, donc `{}` se
+// résout en « tous les comptes, page 1 ». Fabriquer le défaut avec le schéma
+// lui-même évite de recopier ces valeurs — `.prefault({})` ne typecheck pas,
+// `.catch()` gardant le type d'entrée interne de chaque champ.
+const defaultSearch = transactionsSearchSchema.parse({});
+
 export const categoriesRouter = {
   tree: orgProcedure.query(({ ctx }) => listCategoryTree(ctx.organizationId)),
 
   newOverview: orgProcedure
-    .input(transactionsSearchSchema)
+    .input(transactionsSearchSchema.prefault(defaultSearch))
     .query(({ ctx, input }) =>
       newCategoriesOverview(ctx.organizationId, input),
     ),

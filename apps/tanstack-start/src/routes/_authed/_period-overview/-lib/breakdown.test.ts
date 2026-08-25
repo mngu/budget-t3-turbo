@@ -1,23 +1,40 @@
 import { describe, expect, it } from "vitest";
 
 import { breakdownLevel } from "./breakdown";
-import { parent, sub, tree, unallocated } from "./breakdown.fixture";
+import { poste, sub, tree } from "./breakdown.fixture";
 
-// Postgres rend l'arbre déjà groupé, trié et totalisé : ce qui se teste ici est
-// tout ce qui *reste* côté app — les libellés, les sentinelles d'URL et le
-// choix du niveau ouvert. Le regroupement et le tri, eux, se testeront contre
-// une vraie base.
+// `categories.newOverview` ne donne aucune ligne au reliquat — la dépense posée
+// sur la parente elle-même — alors que l'anneau en a besoin : sans lui la somme
+// des arcs n'égale plus le centre. Il se déduit du total de la parente, qui
+// couvre ses transactions directes *et* celles de ses enfants. C'est le seul
+// calcul de `breakdownLevel`, et donc l'essentiel de ce qui se teste ici.
 const rows = tree([
-  parent("Épargne", 200),
-  parent(
-    "Logement",
-    100,
-    [sub("Loyer", 60, 55), sub("Électricité", 30), unallocated("Logement", 10)],
-    100,
-  ),
-  parent("Santé", 20),
-  parent(null, 5),
+  poste("Logement", 100, [sub("Loyer", 60), sub("Électricité", 30)]),
+  poste("Vacances", null),
+  poste(null, 5),
 ]);
+
+describe("breakdownLevel — reliquat d'une parente", () => {
+  it("ajoute la part directe de la parente, sous son propre nom", () => {
+    expect(breakdownLevel(rows, "Logement").slices.at(-1)).toMatchObject({
+      name: "Logement",
+      filter: "Logement",
+      unallocated: true,
+      total: 10,
+    });
+  });
+
+  it("fait la somme des arcs égale au total du poste", () => {
+    const level = breakdownLevel(rows, "Logement");
+    const arcs = level.slices.reduce((total, slice) => total + slice.total, 0);
+    expect(arcs).toBeCloseTo(level.total, 6);
+  });
+
+  it("n'ajoute rien quand les enfants couvrent tout le poste", () => {
+    const exact = tree([poste("Courses", 50, [sub("Supermarché", 50)])]);
+    expect(breakdownLevel(exact, "Courses").slices).toHaveLength(1);
+  });
+});
 
 describe("breakdownLevel — niveau des parents", () => {
   const level = breakdownLevel(rows, undefined);
@@ -29,51 +46,8 @@ describe("breakdownLevel — niveau des parents", () => {
     });
   });
 
-  it("ne laisse descendre que les postes qui ont de vraies sous-catégories", () => {
-    expect(
-      Object.fromEntries(level.slices.map((s) => [s.name, s.drillable])),
-    ).toEqual({
-      Logement: true,
-      Épargne: false,
-      Santé: false,
-      "Sans catégorie": false,
-    });
-  });
-
-  it("reprend le total des sorties et le nombre de postes de la requête", () => {
-    expect(level.total).toBe(325);
-    expect(level.expenses).toBe(325);
-    expect(level.postes).toBe(4);
-  });
-});
-
-describe("breakdownLevel — poste ouvert", () => {
-  const level = breakdownLevel(rows, "Logement");
-
-  it("descend dans la parente et garde le total des sorties comme référence", () => {
-    expect(level.parent?.name).toBe("Logement");
-    expect(level.total).toBe(100);
-    expect(level.expenses).toBe(325);
-  });
-
-  it("donne au reliquat le nom de sa parente et le renvoie vers elle", () => {
-    expect(level.slices.find((s) => s.unallocated)).toMatchObject({
-      name: "Logement",
-      filter: "Logement",
-      total: 10,
-    });
-  });
-
-  it("porte le budget de chaque sous-catégorie, pas celui de la parente", () => {
-    expect(level.slices.find((s) => s.name === "Loyer")?.budget).toBe(55);
-    expect(level.slices.find((s) => s.name === "Électricité")?.budget).toBe(
-      null,
-    );
-  });
-
-  // La règle que « `category` est défini » ne rend pas : le param porte
-  // l'enfant, le niveau ouvert est sa parente.
-  it("descend aussi quand c'est une sous-catégorie qui est filtrée", () => {
-    expect(breakdownLevel(rows, "Loyer").parent?.name).toBe("Logement");
+  it("écarte les parentes sans mouvement sur la période", () => {
+    expect(level.slices.map((slice) => slice.name)).not.toContain("Vacances");
+    expect(level.postes).toBe(2);
   });
 });

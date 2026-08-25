@@ -20,6 +20,7 @@ import {
 } from "@budget/ui/dropdown-menu";
 import { toast } from "@budget/ui/toast";
 
+import { sumBy } from "~/lib/sum";
 import { toastSyncOutcome } from "~/lib/sync-toast";
 import { selectedBanks, toggleBank } from "~/lib/transactions-search";
 import { useTRPC, useTRPCClient } from "~/lib/trpc";
@@ -61,9 +62,10 @@ export function BankPicker() {
     selected.length === 0 || selected.includes(bank);
   const offCount = known.filter((bank) => !isOn(bank)).length;
 
-  const total = (counts ?? [])
-    .filter((entry) => isOn(entry.bank))
-    .reduce((acc, entry) => acc + entry.count, 0);
+  const total = sumBy(
+    (counts ?? []).filter((entry) => isOn(entry.bank)),
+    (entry) => entry.count,
+  );
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>

@@ -20,18 +20,8 @@ import {
 import { db } from "@budget/db/client";
 import { bankAccounts, categories, transactions } from "@budget/db/schema";
 
-import type {
-  Breakdown,
-  BudgetStats,
-  GlobalStats,
-  TransactionsSearch,
-} from "./schemas";
-import {
-  breakdownSchema,
-  budgetStatsSchema,
-  globalStatsSchema,
-  PAGE_SIZE,
-} from "./schemas";
+import type { BudgetStats, GlobalStats, TransactionsSearch } from "./schemas";
+import { budgetStatsSchema, globalStatsSchema, PAGE_SIZE } from "./schemas";
 
 // Nom de banque affiché : display_name choisi par l'utilisateur, sinon nom ASPSP.
 const bankLabel = sql<string>`coalesce(${bankAccounts.displayName}, ${bankAccounts.bankName})`;
@@ -157,7 +147,10 @@ export interface TransactionRow {
 // aux alias `t` / `ba` de la CTE ci-dessous. Le libellé reste celui du sélecteur
 // de comptes (`coalesce(display_name, bank_name)`), jamais `account_id` : deux
 // comptes partageant un libellé sont indissociables dans l'UI.
-function bankFilter(bank: TransactionsSearch["bank"], table: "ba" | "twa") {
+export function bankFilter(
+  bank: TransactionsSearch["bank"],
+  table: "ba" | "twa",
+) {
   const banks = Array.isArray(bank) ? bank : bank ? [bank] : [];
   // Une liste vide vaut « tous les comptes », comme `undefined` — même lecture
   // que `selectedBanks` côté client.
@@ -210,8 +203,6 @@ export function filterTransactions(
 // `GROUP BY (p).name` rassemble toutes les racines — et les transactions sans
 // catégorie du tout — dans un seul seau `null`.
 const parentName = sql`COALESCE((p).name, (c).name)`;
-const parentIcon = sql`COALESCE((p).icon, (c).icon)`;
-const parentColor = sql`COALESCE((p).color, (c).color)`;
 // …et son budget est le sien. Un `COALESCE((p).budget_amount,
 // (c).budget_amount)` serait faux ici : sous une parente **sans** budget, il
 // ferait passer celui d'une sous-catégorie pour le budget du poste.
@@ -228,109 +219,6 @@ const parentBudget = sql`CASE
         WHEN (p).name IS NULL THEN (c).budget_amount
         ELSE (p).budget_amount
       END`;
-
-// Position d'une ligne dans l'arborescence, **établie** par Postgres plutôt que
-// déduite d'une comparaison de noms. `COALESCE((p).name, (c).name)` rend quatre
-// situations indiscernables — une sous-catégorie, le reliquat d'une parente qui
-// a des enfants, une racine qui n'en a pas, et une transaction sans catégorie :
-// les trois dernières produisent toutes une ligne dont les deux noms sont
-// égaux. `parent_id` et l'existence d'enfants les séparent sans ambiguïté.
-const nodeKind = sql`CASE
-        WHEN (c).id IS NULL THEN 'none'
-        WHEN (p).id IS NOT NULL THEN 'sub'
-        WHEN EXISTS (SELECT 1 FROM categories child WHERE child.parent_id = (c).id)
-          THEN 'unallocated'
-        ELSE 'parent'
-      END`;
-
-/**
- * La répartition des sorties : l'arbre entier, groupé, trié et totalisé par
- * Postgres. **Seule** source du niveau affiché par la revue — l'anneau, la
- * colonne des postes, l'en-tête et le forage en sortent tous, et c'est ce qui
- * les empêche de se contredire.
- *
- * Le sens `debit` est forcé côté SQL, comme la maquette : sans lui un seul mois
- * de salaires écrase l'échelle et tous les postes de dépense s'affaissent à un
- * moignon indistinct (mesuré : `Revenus` à 4 000 € contre 99 € pour le plus
- * gros poste de sortie).
- *
- * Trois choses descendent ici et ne doivent pas remonter côté app :
- * — le **tri** des enfants, parce que `shadeCategoryColor` dérive la nuance
- *   d'un segment de son rang : le rang est donc de la donnée, pas de la mise en
- *   forme ;
- * — `expenses` et `postes`, que l'en-tête affiche et qu'il recompterait sinon —
- *   deux définitions du même chiffre finissent par diverger ;
- * — `kind`, voir `nodeKind` ci-dessus.
- *
- * Ce qui **reste** côté app : les libellés français, les sentinelles d'URL et
- * le choix du niveau ouvert (`-lib/breakdown.ts`).
- */
-export async function breakdownByCategories(
-  organizationId: string,
-  query: TransactionsSearch,
-): Promise<Breakdown> {
-  const result = await db.execute(sql`
-      ${filterTransactions(organizationId, query)},
-      leaves AS (
-        SELECT
-          ${posteId} AS poste_id,
-          ${parentName} AS poste_name,
-          ${parentIcon} AS poste_icon,
-          ${parentColor} AS poste_color,
-          ${parentBudget} AS poste_budget,
-          (c).name AS child_name,
-          -- Une sous-catégorie ne porte un budget que sous une parente
-          -- **détaillée** : sous une parente globale son montant dort en base
-          -- (il n'a pas été effacé au retour en Global) et ne compte dans
-          -- aucun total. Le lire ici peindrait une jauge contre un chiffre qui
-          -- n'est pas dans l'enveloppe.
-          CASE WHEN ${posteDetailed} THEN (c).budget_amount END AS child_budget,
-          ${nodeKind} AS child_kind,
-          SUM((t).amount) AS total
-        FROM filtered_transactions
-        WHERE (t).direction = 'debit'
-        -- Par ordinaux : les colonnes 1 à 8 sont des expressions, les répéter
-        -- ici laisserait deux définitions du même poste diverger.
-        GROUP BY 1, 2, 3, 4, 5, 6, 7, 8
-      ),
-      postes AS (
-        SELECT
-          poste_name AS name,
-          CASE WHEN poste_id IS NULL THEN 'none' ELSE 'parent' END AS kind,
-          poste_icon AS icon,
-          poste_color AS color,
-          poste_budget::float8 AS budget,
-          SUM(total)::float8 AS total,
-          -- Une racine sans sous-catégorie ne produit que des lignes 'parent' :
-          -- le FILTER lui laisse un tableau vide, et c'est ce vide qui dit à
-          -- l'app qu'elle n'ouvre aucun niveau. Le reliquat, lui, est un enfant
-          -- comme un autre — il a cessé d'être une alerte, il reste une part,
-          -- sans quoi la somme du niveau ouvert n'égalerait plus son poste.
-          COALESCE(
-            json_agg(
-              json_build_object(
-                'name', child_name,
-                'kind', child_kind,
-                'total', total::float8,
-                'budget', child_budget::float8
-              ) ORDER BY total DESC
-            ) FILTER (WHERE child_kind IN ('sub', 'unallocated')),
-            '[]'::json
-          ) AS children
-        FROM leaves
-        GROUP BY poste_id, poste_name, poste_icon, poste_color, poste_budget
-      )
-      SELECT
-        COALESCE(SUM(total), 0)::float8 AS expenses,
-        COUNT(*)::int AS postes,
-        COALESCE(json_agg(to_jsonb(postes) ORDER BY total DESC), '[]'::json)
-          AS parents
-      FROM postes
-    `);
-  // Le SELECT final n'est qu'agrégats, sans GROUP BY : il rend toujours une
-  // ligne, y compris sur une période vide.
-  return breakdownSchema.parse(result.rows[0]);
-}
 
 export async function budgetStats(
   organizationId: string,

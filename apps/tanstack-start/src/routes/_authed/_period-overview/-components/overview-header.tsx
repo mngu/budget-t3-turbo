@@ -1,26 +1,37 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { ArrowLeftIcon, ArrowRightIcon, LayersIcon } from "lucide-react";
 
-import type { Breakdown } from "@budget/api/schemas";
+import type { NewCategoryOverviewType } from "@budget/api/schemas";
 import { cn } from "@budget/ui";
 
 import { CategoryIcon } from "~/component/category-icon";
 import { softCategoryColor, useCategoryColor } from "~/lib/category-color";
 import { sharePercent } from "~/lib/format";
+import { sumBy } from "~/lib/sum";
 import { useRevueSearch } from "~/lib/use-revue-search";
-import { breakdownLevel } from "~/routes/_authed/_period-overview/-lib/breakdown";
+import { openParent } from "../-lib/breakdown";
 
 interface OverviewHeaderProps {
-  breakdownByCategories: Breakdown;
+  newOverview: NewCategoryOverviewType;
 }
 
-export function OverviewHeader({ breakdownByCategories }: OverviewHeaderProps) {
+export function OverviewHeader({ newOverview }: OverviewHeaderProps) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { search } = useRevueSearch();
   const resolveColor = useCategoryColor();
-  const level = breakdownLevel(breakdownByCategories, search.category);
-  const selected = level.parent;
+  const selected = openParent(newOverview, search.category);
+  // `resolveColor` retombe déjà sur la teinte par défaut sur `null`.
   const selectedColor = selected ? resolveColor(selected.color) : "";
+
+  const subCount = selected?.children?.length ?? 0;
+  // Le dénominateur sort de **la même** source que le numérateur. Pris
+  // ailleurs (`globalStats.debit`), il porterait le filtre de comptes et
+  // écarterait les virements internes, que `categories.newOverview` ignore
+  // tous les deux : la part pourrait alors dépasser 100 %.
+  const expenses = sumBy(newOverview, (cat) => cat.totalAmount ?? 0);
+  // Les postes **de dépense** : `newOverview` liste toutes les parentes de
+  // l'espace, y compris celles sans aucun mouvement sur la période.
+  const postes = newOverview.filter((cat) => cat.totalAmount !== null).length;
 
   return (
     <div className="flex min-w-0 flex-none items-center gap-3">
@@ -50,8 +61,8 @@ export function OverviewHeader({ breakdownByCategories }: OverviewHeaderProps) {
       </span>
       <span className="text-subtle text-control flex-none whitespace-nowrap">
         {selected
-          ? `${level.slices.length} sous-catégorie${level.slices.length > 1 ? "s" : ""} · ${sharePercent(level.total, level.expenses)} des sorties`
-          : `${level.postes} poste${level.postes > 1 ? "s" : ""} de dépense`}
+          ? `${subCount} sous-catégorie${subCount > 1 ? "s" : ""} · ${sharePercent(selected.totalAmount ?? 0, expenses)} des sorties`
+          : `${postes} poste${postes > 1 ? "s" : ""} de dépense`}
       </span>
 
       {pathname === "/transactions" ? (

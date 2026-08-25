@@ -11,8 +11,8 @@ import {
   SEARCH_DEFAULTS,
   wholePeriod,
 } from "~/lib/transactions-search";
-import { BreakdownList } from "./-components/breakdown-list";
 import { KpiBand } from "./-components/kpi-band";
+import { NewBreakdownList } from "./-components/new-breakdown-list";
 import { OverviewHeader } from "./-components/overview-header";
 
 /**
@@ -36,8 +36,8 @@ import { OverviewHeader } from "./-components/overview-header";
  * Le périmètre est `wholePeriod` : `category` et la recherche en
  * sont retirés, sinon filtrer un poste le porterait à 100 % de sa propre
  * répartition et il n'y aurait plus de quoi naviguer. Ne restent que la période
- * et les comptes ; le sens de `/transactions` ne commande rien non plus, les
- * agrégats forçant leur propre sens (`breakdownByCategories`).
+ * et les comptes ; le sens de `/transactions` ne commande rien non plus, la
+ * répartition forçant le sien (`debit`).
  *
  * La search vit sur ce layout et non plus sur chaque route : c'est ce qui permet
  * au `loaderDeps` ci-dessous d'exister, donc au loader de porter les agrégats
@@ -53,63 +53,60 @@ export const Route = createFileRoute("/_authed/_period-overview")({
   loaderDeps: ({ search }) => search,
   loader: async ({ deps, context }) => {
     const period = wholePeriod(deps);
-    const [breakdownByCategories, globalStats, budgetStats] = await Promise.all(
-      [
-        // La répartition des sorties : une ligne par couple (parente, catégorie),
-        // budgets compris. C'est la **seule** source du niveau affiché — l'anneau
-        // de `/`, la colonne des postes et le forage en sortent tous, par
-        // `breakdownLevel`. Le sens `debit` est forcé côté SQL, comme la maquette :
-        // sans lui un seul mois de salaires écrase l'échelle et tous les postes de
-        // dépense s'affaissent à un moignon indistinct (mesuré : `Revenus` à
-        // 4 000 € contre 99 € pour le plus gros poste de sortie).
-        //
-        // `wholePeriod` et non `deps` : le périmètre de la revue est la période et
-        // les comptes, jamais le poste filtré — sinon l'anneau porterait le poste
-        // ouvert à 100 % de sa propre répartition.
-        context.trpcClient.transactions.breakdownByCategories.query(period),
-        context.trpcClient.transactions.globalStats.query(period),
-        context.trpcClient.transactions.budgetStats.query(period),
+    const [globalStats, budgetStats, newOverview] = await Promise.all([
+      context.trpcClient.transactions.globalStats.query(period),
+      context.trpcClient.transactions.budgetStats.query(period),
+      // `wholePeriod` et non `deps` : le périmètre de la revue est la
+      // période et les comptes, jamais le poste filtré — sinon l'anneau
+      // porterait le poste ouvert à 100 % de sa propre répartition. La
+      // requête ignore `category` et `q` aujourd'hui, mais c'est un accident
+      // et non une propriété : maintenant qu'elle est la seule source de
+      // l'anneau, le périmètre se pose ici.
+      //
+      // Le sens `debit` est forcé : sans lui un seul mois de salaires écrase
+      // l'échelle et tous les postes de dépense s'affaissent à un moignon
+      // indistinct (mesuré : `Revenus` à 4 000 € contre 99 € pour le plus
+      // gros poste de sortie).
+      context.trpcClient.categories.newOverview.query({
+        ...period,
+        direction: "debit",
+      }),
 
-        // Ceux-ci n'alimentent que le cache react-query dont se servent
-        // l'en-tête (sélecteur de comptes) et les routes filles.
-        //
-        // L'arborescence est **obligatoire** ici, et pas seulement pour éviter
-        // une requête de plus : elle est lue par `useParentCategories`
-        // (`useQuery`, non suspensif) *et* par `CategoryPathPicker`
-        // (`useSuspenseQuery`), sur la même clé. Sans préchargement, le rendu
-        // serveur peint la `RefineBar` sur un cache vide — donc la pastille
-        // creuse de `CategoryIcon` — puis la requête suspensive de la table
-        // remplit le cache, qui part déshydraté vers le client : celui-ci rend
-        // la vraie icône et l'hydratation casse. Le préchargement met les deux
-        // côtés d'accord dès la première image.
-        context.queryClient.fetchQuery({
-          ...context.trpc.categories.tree.queryOptions(),
-          staleTime: 0,
-        }),
-        context.queryClient.fetchQuery({
-          ...context.trpc.transactions.bankCounts.queryOptions(deps),
-          staleTime: 0,
-        }),
-        context.queryClient.fetchQuery({
-          ...context.trpc.transactions.banks.queryOptions(),
-          staleTime: 0,
-        }),
-      ],
-    );
+      // Ceux-ci n'alimentent que le cache react-query dont se servent
+      // l'en-tête (sélecteur de comptes) et les routes filles.
+      //
+      // L'arborescence est **obligatoire** ici, et pas seulement pour éviter
+      // une requête de plus : elle est lue par `useParentCategories`
+      // (`useQuery`, non suspensif) *et* par `CategoryPathPicker`
+      // (`useSuspenseQuery`), sur la même clé. Sans préchargement, le rendu
+      // serveur peint la `RefineBar` sur un cache vide — donc la pastille
+      // creuse de `CategoryIcon` — puis la requête suspensive de la table
+      // remplit le cache, qui part déshydraté vers le client : celui-ci rend
+      // la vraie icône et l'hydratation casse. Le préchargement met les deux
+      // côtés d'accord dès la première image.
+      context.queryClient.fetchQuery({
+        ...context.trpc.categories.tree.queryOptions(),
+        staleTime: 0,
+      }),
+      context.queryClient.fetchQuery({
+        ...context.trpc.transactions.bankCounts.queryOptions(deps),
+        staleTime: 0,
+      }),
+      context.queryClient.fetchQuery({
+        ...context.trpc.transactions.banks.queryOptions(),
+        staleTime: 0,
+      }),
+    ]);
 
     return {
-      breakdownByCategories,
       globalStats,
       budgetStats,
+      newOverview,
     };
   },
   errorComponent: ({ error }) => (
     <main className="p-8">
       <p>❌ Impossible de charger la revue du mois.</p>
-      <p className="text-muted-foreground text-body">
-        Vérifiez que PostgreSQL tourne (docker compose up -d) et que l'import a
-        été fait (bouton Synchroniser).
-      </p>
       <pre className="text-subtle text-control mt-4">{error.message}</pre>
     </main>
   ),
@@ -117,8 +114,7 @@ export const Route = createFileRoute("/_authed/_period-overview")({
 });
 
 function RevueLayout() {
-  const { breakdownByCategories, globalStats, budgetStats } =
-    Route.useLoaderData();
+  const { globalStats, budgetStats, newOverview } = Route.useLoaderData();
 
   return (
     <div className="flex w-full gap-4">
@@ -134,12 +130,12 @@ function RevueLayout() {
 
         {/* Chaque écran rend son contenu **et** sa colonne des postes. */}
         <div className="mt-3 flex min-h-0 flex-1 flex-col gap-2">
-          <OverviewHeader breakdownByCategories={breakdownByCategories} />
+          <OverviewHeader newOverview={newOverview} />
           <Outlet />
         </div>
       </div>
       <div className="w-80">
-        <BreakdownList breakdownByCategories={breakdownByCategories} />
+        <NewBreakdownList newOverview={newOverview} />
       </div>
     </div>
   );

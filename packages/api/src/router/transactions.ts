@@ -7,7 +7,6 @@ import {
 } from "../transactions/internal-transfers";
 import {
   bankCounts,
-  breakdownByCategories,
   budgetStats,
   earliestTransactionDate,
   globalStats,
@@ -30,12 +29,6 @@ export const transactionsRouter = {
     )
     .query(({ ctx, input }) =>
       listTransactions(ctx.organizationId, input, input.limit),
-    ),
-
-  breakdownByCategories: orgProcedure
-    .input(transactionsSearchSchema)
-    .query(({ ctx, input }) =>
-      breakdownByCategories(ctx.organizationId, input),
     ),
 
   globalStats: orgProcedure

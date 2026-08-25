@@ -1,9 +1,14 @@
-import type { Breakdown, BreakdownParent } from "@budget/api/schemas";
+import type {
+  NewCategoryOverviewElementType,
+  NewCategoryOverviewType,
+} from "@budget/api/schemas";
 import { FALLBACK_CATEGORY_COLOR } from "@budget/shared";
+
+import { sumBy } from "~/lib/sum";
 
 /**
  * Le niveau que la revue affiche, dérivé de l'arbre rendu par
- * `transactions.breakdownByCategories`.
+ * `categories.newOverview`.
  *
  * **Seule** définition de ce niveau : l'anneau de `/`, la colonne des postes,
  * l'en-tête et le forage (`useDrill`) en sortent tous, et c'est ce qui les
@@ -17,7 +22,7 @@ import { FALLBACK_CATEGORY_COLOR } from "@budget/shared";
  */
 
 /** Libellé du poste sans rattachement, et sentinelle de son search param. */
-const NO_CATEGORY = "Sans catégorie";
+export const NO_CATEGORY = "Sans catégorie";
 const NO_CATEGORY_FILTER = "none";
 
 export interface BreakdownSlice {
@@ -64,77 +69,116 @@ export interface BreakdownLevel {
   postes: number;
 }
 
-const hasSub = (parent: BreakdownParent) =>
-  parent.children.some((child) => child.kind === "sub");
-
-function parentSlice(parent: BreakdownParent): BreakdownSlice {
-  return {
-    name: parent.name ?? NO_CATEGORY,
-    filter: parent.name ?? NO_CATEGORY_FILTER,
-    unallocated: false,
-    total: parent.total,
-    color: parent.color ?? FALLBACK_CATEGORY_COLOR,
-    icon: parent.icon,
-    budget: parent.budget,
-    drillable: hasSub(parent),
-  };
-}
-
-function childSlices(parent: BreakdownParent): BreakdownSlice[] {
-  return parent.children.map((child) => ({
-    // Un enfant `unallocated` porte déjà le nom de sa parente — sa catégorie
-    // *est* la parente. La ligne se lit donc « Logement » sous Logement, et son
-    // filtre retombe naturellement sur la parente, ce qu'il montre de plus
-    // précis : aucune valeur de `category` ne désigne ce reliquat seul.
-    name: child.name ?? NO_CATEGORY,
-    filter: child.name ?? NO_CATEGORY_FILTER,
-    unallocated: child.kind === "unallocated",
-    total: child.total,
-    // Une sous-catégorie n'a pas de teinte propre : c'est un palier de celle de
-    // sa parente, dérivé du rang au rendu (`shadeCategoryColor`).
-    color: parent.color ?? FALLBACK_CATEGORY_COLOR,
-    icon: null,
-    budget: child.budget,
-    drillable: false,
-  }));
-}
-
 /**
- * La parente ouverte pour un filtre donné, ou `null`.
+ * La parente ouverte pour un filtre donné, ou `null`. **Seule** définition du
+ * niveau ouvert : l'anneau, la colonne des postes, l'en-tête et le forage en
+ * sortent tous, et c'est ce qui les empêche de se contredire.
  *
- * Ce n'est **pas** « `category` est défini » — deux cas s'en écartent, et les
- * deux sont à l'écran : surligner une *sous*-catégorie pose le param sans
- * changer de niveau (c'est sa parente qui est ouverte), et une parente **sans
- * sous-catégorie** n'ouvre aucun niveau. `use-drill.test.ts` les verrouille.
+ * Ce n'est **pas** « `category` est défini », ni un `find` par nom — deux cas
+ * s'en écartent et les deux sont à l'écran : filtrer une *sous*-catégorie pose
+ * le param sans changer de niveau (c'est sa parente qui est ouverte, cas vivant
+ * sur `/transactions` où l'on filtre aux deux niveaux), et une parente **sans
+ * sous-catégorie** n'ouvre aucun niveau — l'anneau y serait vide et le seul
+ * moyen d'en ressortir serait le bouton du centre. `use-drill.test.ts` les
+ * verrouille.
  *
  * Un nom ne peut désigner qu'une parente *ou* une enfant (`categories.name` est
  * unique dans l'espace), l'ordre des deux recherches est donc indifférent.
  */
 export function openParent(
-  tree: Breakdown,
+  tree: NewCategoryOverviewType,
   category: string | undefined,
-): BreakdownParent | null {
+): NewCategoryOverviewElementType | null {
   if (category === undefined) return null;
   return (
-    tree.parents.find(
+    tree.find(
       (parent) =>
-        hasSub(parent) &&
+        (parent.children?.length ?? 0) > 0 &&
         (parent.name === category ||
-          parent.children.some((child) => child.name === category)),
+          (parent.children?.some((child) => child.name === category) ?? false)),
     ) ?? null
   );
 }
 
+function parentSlice(parent: NewCategoryOverviewElementType): BreakdownSlice {
+  return {
+    // `name` est null sur le poste des transactions sans catégorie : la requête
+    // ne descend aucun libellé, ils se posent ici.
+    name: parent.name ?? NO_CATEGORY,
+    filter: parent.name ?? NO_CATEGORY_FILTER,
+    unallocated: false,
+    total: parent.totalAmount ?? 0,
+    color: parent.color ?? FALLBACK_CATEGORY_COLOR,
+    icon: parent.icon,
+    budget: parent.budgetAmount,
+    drillable: (parent.children?.length ?? 0) > 0,
+  };
+}
+
+function childSlices(parent: NewCategoryOverviewElementType): BreakdownSlice[] {
+  const children = parent.children ?? [];
+  const slices: BreakdownSlice[] = children.map((child) => ({
+    name: child.name,
+    filter: child.name,
+    unallocated: false,
+    total: child.totalAmount ?? 0,
+    // Une sous-catégorie n'a pas de teinte propre : palier de celle de sa
+    // parente, dérivé du rang au rendu.
+    color: parent.color ?? FALLBACK_CATEGORY_COLOR,
+    icon: null,
+    budget: child.budgetAmount,
+    drillable: false,
+  }));
+
+  // Le reliquat — la dépense posée sur la parente elle-même. `newOverview` ne
+  // lui donne aucune ligne (`children` ne contient que de vraies
+  // sous-catégories), mais son montant s'en **déduit exactement** : le total
+  // d'une parente couvre ses transactions directes *et* celles de ses enfants.
+  // Sans lui la somme des arcs n'égalerait plus le centre de l'anneau.
+  //
+  // Il se range en dernier, là où l'ancien arbre le laissait trier par
+  // Postgres : c'est une part d'une autre nature, pas un enfant de plus.
+  const residual =
+    (parent.totalAmount ?? 0) -
+    sumBy(children, (child) => child.totalAmount ?? 0);
+  // Au centime près : un résidu d'arrondi flottant peindrait un arc fantôme
+  // sur chaque parente.
+  if (Math.round(residual * 100) !== 0) {
+    slices.push({
+      name: parent.name ?? NO_CATEGORY,
+      filter: parent.name ?? NO_CATEGORY_FILTER,
+      unallocated: true,
+      total: residual,
+      color: parent.color ?? FALLBACK_CATEGORY_COLOR,
+      icon: null,
+      budget: null,
+      drillable: false,
+    });
+  }
+  return slices;
+}
+
+/**
+ * Le niveau affiché, dérivé de l'arbre de `categories.newOverview`.
+ *
+ * Deux traitements tiennent à ce que la requête ne rend pas, et non à un choix :
+ * elle liste **toutes** les parentes de l'espace, y compris celles sans
+ * mouvement sur la période — écartées ici, un poste sans dépense n'ayant pas
+ * d'arc — et le **reliquat** d'une parente n'a pas de ligne non plus, mais se
+ * déduit exactement (voir `childSlices`).
+ */
 export function breakdownLevel(
-  tree: Breakdown,
+  tree: NewCategoryOverviewType,
   category: string | undefined,
 ): BreakdownLevel {
   const open = openParent(tree, category);
+  const moved = tree.filter((parent) => parent.totalAmount !== null);
+  const expenses = sumBy(moved, (parent) => parent.totalAmount ?? 0);
   return {
     parent: open && parentSlice(open),
-    slices: open ? childSlices(open) : tree.parents.map(parentSlice),
-    total: open ? open.total : tree.expenses,
-    expenses: tree.expenses,
-    postes: tree.postes,
+    slices: open ? childSlices(open) : moved.map(parentSlice),
+    total: open ? (open.totalAmount ?? 0) : expenses,
+    expenses,
+    postes: moved.length,
   };
 }

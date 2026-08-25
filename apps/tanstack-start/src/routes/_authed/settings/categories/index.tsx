@@ -1,7 +1,10 @@
 import { createFileRoute, stripSearchParams } from "@tanstack/react-router";
 
-import type { NewCategoryOverviewType } from "@budget/api/schemas";
-import { transactionsSearchSchema } from "@budget/api/schemas";
+import type { ManagedCategory } from "@budget/api/schemas";
+import {
+  isManagedCategory,
+  transactionsSearchSchema,
+} from "@budget/api/schemas";
 
 import { Stat } from "~/component/stat";
 import { euro0 } from "~/lib/format";
@@ -17,9 +20,11 @@ export const Route = createFileRoute("/_authed/settings/categories/")({
     middlewares: [stripSearchParams(SEARCH_DEFAULTS), defaultToCurrentMonth],
   },
   loaderDeps: ({ search }) => search,
-  loader: async ({ deps, context }) => {
-    const newOverview =
-      await context.trpcClient.categories.newOverview.query(deps);
+  loader: async ({ context }) => {
+    const overview = await context.trpcClient.categories.newOverview.query();
+    // Le poste des transactions sans catégorie appartient à la revue, pas aux
+    // réglages : cet écran ne montre que ce qui se gère.
+    const newOverview = overview.filter(isManagedCategory);
     const stats = computeStats(newOverview);
     return { newOverview, stats };
   },
@@ -63,7 +68,7 @@ function CategoriesPage() {
 // prises » compte les teintes *distinctes* : à 13 teintes pour un nombre
 // illimité de parentes, la collision est un état normal — signalée, jamais
 // interdite (voir CategoryIdentityDialog).
-export function computeStats(tree: NewCategoryOverviewType) {
+export function computeStats(tree: ManagedCategory[]) {
   const ownersByColor = new Map<string, string[]>();
   const usageByIcon = new Map<string, number>();
 
