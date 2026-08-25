@@ -1,0 +1,20 @@
+packages/db/drizzle/meta/0000_snapshot.json
+  h_c1b75a3cdf5637 1
+packages/db/drizzle/meta/0001_snapshot.json
+  h_c1b75a3cdf5637 1
+packages/db/drizzle/meta/0002_snapshot.json
+  h_c1b75a3cdf5637 1
+packages/db/drizzle/meta/0003_snapshot.json
+  h_c1b75a3cdf5637 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "2626fa68e2fab8c12cc280f33b7c4e0343f47686",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
