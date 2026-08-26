@@ -1,3 +1,5 @@
+import type { ConsentBadge } from "./domain";
+
 // Gestion des connexions bancaires Enable Banking (sessions PSD2 en DB).
 import { randomUUID } from "node:crypto";
 
@@ -20,7 +22,6 @@ import {
   transactions,
 } from "@budget/db/schema";
 
-import type { ConsentBadge } from "./domain";
 import { appJwt, ebApi, getAllAspsps, requireSettings } from "./client";
 import {
   clampValidUntil,

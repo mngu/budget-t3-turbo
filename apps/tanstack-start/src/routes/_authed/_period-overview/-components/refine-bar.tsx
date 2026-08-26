@@ -1,16 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import { SearchIcon, TagIcon } from "lucide-react";
-
 import type { TransactionsSearch } from "@budget/api/schemas";
+
+import { SearchIcon, TagIcon } from "lucide-react";
+import { useState } from "react";
+
 import { cn } from "@budget/ui";
 import { InputGroup, InputGroupAddon } from "@budget/ui/input-group";
 import { ToggleGroup, ToggleGroupItem } from "@budget/ui/toggle-group";
-
 import { CategoryIcon } from "~/component/category-icon";
 import { SearchInput } from "~/component/search-input";
 import { useRevueSearch } from "~/lib/use-revue-search";
+
 import { useParentCategories } from "../-lib/category-lookup";
 import { CategoryPathPicker } from "./category-path-picker";
 

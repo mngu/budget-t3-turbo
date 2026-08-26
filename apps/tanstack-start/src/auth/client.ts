@@ -1,4 +1,7 @@
-import { magicLinkClient, organizationClient } from "better-auth/client/plugins";
+import {
+  magicLinkClient,
+  organizationClient,
+} from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
 // `organizationClient` donne l'espace courant et la bascule d'un espace à

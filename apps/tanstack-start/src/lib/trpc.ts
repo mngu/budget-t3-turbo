@@ -10,7 +10,6 @@ import { createTRPCContext } from "@trpc/tanstack-react-query";
 import SuperJSON from "superjson";
 
 import * as Api from "@budget/api";
-
 import { auth } from "~/auth/server";
 import { getBaseUrl } from "~/lib/url";
 

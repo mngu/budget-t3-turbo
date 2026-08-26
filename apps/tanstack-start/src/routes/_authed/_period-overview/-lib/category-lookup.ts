@@ -1,10 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 
 import { FALLBACK_CATEGORY_COLOR } from "@budget/shared";
-
 import { useCategoryColor } from "~/lib/category-color";
 import { useTRPC } from "~/lib/trpc";
 

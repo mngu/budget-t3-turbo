@@ -1,15 +1,14 @@
-import { describe, expect, it, vi } from "vitest";
-
 import type { BankCodeParentCount, SimilarTxn } from "./similar";
+
+import { describe, expect, it, vi } from "vitest";
 
 // Mock explicite : importer le vrai module chargerait @budget/db/client
 // (POSTGRES_URL requise) — voir pipeline.test.ts. Seules les fonctions pures
 // sont testées ici, les requêtes le sont en bout de chaîne.
 vi.mock("@budget/db/client", () => ({ db: {} }));
 
-const { mergeSimilarCandidates, selectDiscriminativeBankCodes } = await import(
-  "./similar"
-);
+const { mergeSimilarCandidates, selectDiscriminativeBankCodes } =
+  await import("./similar");
 
 const row = (
   bankCode: string,

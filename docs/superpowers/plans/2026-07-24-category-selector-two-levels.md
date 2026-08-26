@@ -21,9 +21,11 @@
 ### Task 1: Composant partagé `CategoryTreeSelectItems`
 
 **Files:**
+
 - Create: `apps/tanstack-start/src/component/category-tree-select-items.tsx`
 
 **Interfaces:**
+
 - Consumes: `CategoryTreeNode` from `@budget/api` (`{ id: number; name: string; color: string | null; parentId: number | null; children: CategoryOption[] }`), `SelectItem` from `@budget/ui/select`.
 - Produces: `CategoryTreeSelectItems({ categories: CategoryTreeNode[] })` — a component rendering a flat `<>...</>` fragment of `SelectItem`s (one per root, indented ones for each child), for use directly inside a `SelectContent`. Consumed by Task 2 and Task 3.
 
@@ -74,9 +76,11 @@ git commit -m "feat(tanstack-start): add shared 2-level category select items re
 ### Task 2: `index.tsx` — charger l'arbre, brancher `CategoryCell` et `TransactionsFilters`
 
 **Files:**
+
 - Modify: `apps/tanstack-start/src/routes/_authed/index.tsx:74` (loader), `:155-164` (column def, unchanged), `:219-222` (`TransactionsFilters` call), `:309-354` (`CategoryCell`)
 
 **Interfaces:**
+
 - Consumes: `CategoryTreeSelectItems` from Task 1; `categories.tree` tRPC procedure (already exists, returns `CategoryTreeNode[]`).
 - Produces: `categories` loader data becomes `CategoryTreeNode[]` (was `CategoryOption[]`) — Task 3 (`TransactionsFilters`) receives this same shape as its `categories` prop.
 
@@ -85,39 +89,39 @@ git commit -m "feat(tanstack-start): add shared 2-level category select items re
 In the `loader` (around line 62-82), replace:
 
 ```ts
-      const [result, expensesByCategory, revenuesByCategory, banks, categories] =
-        await Promise.all([
-          context.trpcClient.transactions.list.query(deps),
-          context.trpcClient.transactions.byCategory.query({
-            ...deps,
-            direction: "debit",
-          }),
-          context.trpcClient.transactions.byCategory.query({
-            ...deps,
-            direction: "credit",
-          }),
-          context.trpcClient.transactions.banks.query(),
-          context.trpcClient.categories.list.query(),
-        ]);
+const [result, expensesByCategory, revenuesByCategory, banks, categories] =
+  await Promise.all([
+    context.trpcClient.transactions.list.query(deps),
+    context.trpcClient.transactions.byCategory.query({
+      ...deps,
+      direction: "debit",
+    }),
+    context.trpcClient.transactions.byCategory.query({
+      ...deps,
+      direction: "credit",
+    }),
+    context.trpcClient.transactions.banks.query(),
+    context.trpcClient.categories.list.query(),
+  ]);
 ```
 
 with:
 
 ```ts
-      const [result, expensesByCategory, revenuesByCategory, banks, categories] =
-        await Promise.all([
-          context.trpcClient.transactions.list.query(deps),
-          context.trpcClient.transactions.byCategory.query({
-            ...deps,
-            direction: "debit",
-          }),
-          context.trpcClient.transactions.byCategory.query({
-            ...deps,
-            direction: "credit",
-          }),
-          context.trpcClient.transactions.banks.query(),
-          context.trpcClient.categories.tree.query(),
-        ]);
+const [result, expensesByCategory, revenuesByCategory, banks, categories] =
+  await Promise.all([
+    context.trpcClient.transactions.list.query(deps),
+    context.trpcClient.transactions.byCategory.query({
+      ...deps,
+      direction: "debit",
+    }),
+    context.trpcClient.transactions.byCategory.query({
+      ...deps,
+      direction: "credit",
+    }),
+    context.trpcClient.transactions.banks.query(),
+    context.trpcClient.categories.tree.query(),
+  ]);
 ```
 
 - [ ] **Step 2: Update the `CategoryOption` import to `CategoryTreeNode`**
@@ -153,16 +157,13 @@ import { CategoryTreeSelectItems } from "~/component/category-tree-select-items"
 Line 219-222, replace:
 
 ```tsx
-      <TransactionsFilters
-        banks={banks}
-        categories={categories.map((c) => c.name)}
-      />
+<TransactionsFilters banks={banks} categories={categories.map((c) => c.name)} />
 ```
 
 with:
 
 ```tsx
-      <TransactionsFilters banks={banks} categories={categories} />
+<TransactionsFilters banks={banks} categories={categories} />
 ```
 
 - [ ] **Step 4: Update `CategoryCell` to accept the tree and render 2 levels**
@@ -231,9 +232,11 @@ git commit -m "feat(tanstack-start): load category tree and render 2-level assig
 ### Task 3: `TransactionsFilters` — filtre de liste sur 2 niveaux
 
 **Files:**
+
 - Modify: `apps/tanstack-start/src/routes/_authed/-components/transactions-filters.tsx`
 
 **Interfaces:**
+
 - Consumes: `CategoryTreeSelectItems` from Task 1, `CategoryTreeNode` from `@budget/api`.
 - Produces: `TransactionsFilters({ banks: string[]; categories: CategoryTreeNode[] })` — prop type change from `categories: string[]`. This is the final consumer for this prop shape (no downstream task depends on it further).
 
@@ -273,21 +276,21 @@ export function TransactionsFilters({
 Lines 84-90, replace:
 
 ```tsx
-        <SelectContent>
-          {categories.map((c) => (
-            <SelectItem key={c} value={c}>
-              {c}
-            </SelectItem>
-          ))}
-        </SelectContent>
+<SelectContent>
+  {categories.map((c) => (
+    <SelectItem key={c} value={c}>
+      {c}
+    </SelectItem>
+  ))}
+</SelectContent>
 ```
 
 with:
 
 ```tsx
-        <SelectContent>
-          <CategoryTreeSelectItems categories={categories} />
-        </SelectContent>
+<SelectContent>
+  <CategoryTreeSelectItems categories={categories} />
+</SelectContent>
 ```
 
 - [ ] **Step 3: Typecheck**
@@ -307,9 +310,11 @@ git commit -m "feat(tanstack-start): render 2-level category tree in the list fi
 ### Task 4: Filtre serveur — un parent filtre aussi ses sous-catégories
 
 **Files:**
+
 - Modify: `packages/api/src/router/transactions.ts:1-24` (imports), `:53-78` (`transactionsFilterQuery`), `:94-122` (`list` query joins), `:130-142` (`byCategory` query joins)
 
 **Interfaces:**
+
 - Consumes: `alias` from `@budget/db` (already re-exported, see `packages/db/src/index.ts:2`).
 - Produces: no new exports — internal filter behavior only. Nothing downstream depends on new names from this task.
 
@@ -350,23 +355,21 @@ const parentCategories = alias(categories, "parent_categories");
 Lines 60-63, replace:
 
 ```ts
-  if (query.category === "none")
-    conditions.push(isNull(transactions.categoryId));
-  else if (query.category) conditions.push(eq(categories.name, query.category));
+if (query.category === "none") conditions.push(isNull(transactions.categoryId));
+else if (query.category) conditions.push(eq(categories.name, query.category));
 ```
 
 with:
 
 ```ts
-  if (query.category === "none")
-    conditions.push(isNull(transactions.categoryId));
-  else if (query.category) {
-    const categoryFilter = or(
-      eq(categories.name, query.category),
-      eq(parentCategories.name, query.category),
-    );
-    if (categoryFilter) conditions.push(categoryFilter);
-  }
+if (query.category === "none") conditions.push(isNull(transactions.categoryId));
+else if (query.category) {
+  const categoryFilter = or(
+    eq(categories.name, query.category),
+    eq(parentCategories.name, query.category),
+  );
+  if (categoryFilter) conditions.push(categoryFilter);
+}
 ```
 
 - [ ] **Step 3: Add the parent-category join to `list`**
@@ -440,6 +443,7 @@ git commit -m "fix(api): make category filter match sub-categories of a selected
 ### Task 5: Mettre à jour le commentaire du schéma `parent_id`
 
 **Files:**
+
 - Modify: `packages/db/src/schema.ts:72-78`
 
 **Interfaces:** none (comment-only change).

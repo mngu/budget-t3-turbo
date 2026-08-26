@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import type { TransactionRow } from "@budget/api";
+
 import { useRouter } from "@tanstack/react-router";
 import { EyeOffIcon } from "lucide-react";
+import { useState } from "react";
 
-import type { TransactionRow } from "@budget/api";
 import { cn } from "@budget/ui";
 import { Button } from "@budget/ui/button";
 import {
@@ -14,7 +15,6 @@ import {
   DialogTitle,
 } from "@budget/ui/dialog";
 import { toast } from "@budget/ui/toast";
-
 import { signedEuro } from "~/lib/format";
 import { useTRPCClient } from "~/lib/trpc";
 

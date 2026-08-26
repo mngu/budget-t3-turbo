@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo } from "react";
-import { useSuspenseQuery } from "@tanstack/react-query";
-
 import type { CategoryTreeNode } from "@budget/api";
+
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
+
 import { FALLBACK_CATEGORY_COLOR } from "@budget/shared";
 import {
   CommandDialog,
@@ -13,7 +14,6 @@ import {
   CommandItem,
   CommandList,
 } from "@budget/ui/command";
-
 import { CategoryIcon } from "~/component/category-icon";
 import { shadeCategoryColor, useCategoryColor } from "~/lib/category-color";
 import { useTRPC } from "~/lib/trpc";

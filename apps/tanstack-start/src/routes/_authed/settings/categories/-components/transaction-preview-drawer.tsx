@@ -1,5 +1,8 @@
 "use client";
 
+import type { PreviewBadge } from "../-lib/use-preview";
+import type { TransactionRow } from "@budget/api";
+
 import {
   Dialog,
   DialogContent,
@@ -8,10 +11,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@budget/ui/dialog";
-
-import type { TransactionRow } from "@budget/api";
-
-import type { PreviewBadge } from "../-lib/use-preview";
 import { dateFr, euro } from "~/lib/format";
 
 interface TransactionPreviewDrawerProps {

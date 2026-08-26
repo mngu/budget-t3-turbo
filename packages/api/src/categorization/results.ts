@@ -1,8 +1,8 @@
 // Exploitation de la réponse du LLM — pur, testable sans DB ni API.
 
-import { z } from "zod/v4";
-
 import type { SimilarTxn } from "./similar";
+
+import { z } from "zod/v4";
 
 // Ne valide que la forme (id + categorie) : un z.enum(categoryNames) ferait
 // planter le parsing structured-output de tout le lot dès qu'une réponse cite

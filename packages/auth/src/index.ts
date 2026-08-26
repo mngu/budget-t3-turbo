@@ -1,5 +1,7 @@
-import { randomUUID } from "node:crypto";
 import type { BetterAuthOptions, BetterAuthPlugin } from "better-auth";
+
+import { randomUUID } from "node:crypto";
+
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { magicLink, organization } from "better-auth/plugins";

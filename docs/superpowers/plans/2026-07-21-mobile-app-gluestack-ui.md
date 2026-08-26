@@ -26,6 +26,7 @@
 ### Task 1: Installer et configurer gluestack-ui dans apps/expo
 
 **Files:**
+
 - Modify: `apps/expo/package.json` (nouvelles dépendances, bump `nativewind`/`react-native-css`)
 - Modify: `pnpm-workspace.yaml` (bump catalogue `tailwindcss`/`@tailwindcss/postcss` si nécessaire — voir étape 2)
 - Create (par le CLI gluestack-ui): `apps/expo/gluestack-ui.config.json`
@@ -34,6 +35,7 @@
 - Modify: `apps/expo/src/app/_layout.tsx` (enveloppe `GluestackUIProvider`)
 
 **Interfaces:**
+
 - Produces: `GluestackUIProvider` importable depuis `~/components/ui/gluestack-ui-provider`, utilisable par toutes les tâches suivantes. `useToast` importable depuis `~/components/ui/toast` (Task 7).
 
 - [ ] **Step 1: Vérifier la version de tailwindcss actuellement résolue**
@@ -128,6 +130,7 @@ export default function RootLayout() {
 
 Run: `pnpm -F @budget/expo dev`
 Ouvrir dans Expo Go ou un simulateur. Vérifier :
+
 - L'app démarre sans erreur de build/console liée à Tailwind ou NativeWind.
 - L'écran de login s'affiche identique à avant (mêmes couleurs `bg-background`/`bg-primary`), pas de flash de style incorrect.
 - Basculer le thème système clair/sombre et vérifier que les couleurs suivent toujours (héritées de `@budget/tailwind-config/theme`).
@@ -144,6 +147,7 @@ git commit -m "feat(expo): installe gluestack-ui (NativeWind v5, thème partagé
 ### Task 2: Navigation par onglets (Transactions / Banques)
 
 **Files:**
+
 - Modify: `apps/expo/package.json` (ajoute `lucide-react-native`)
 - Modify: `apps/expo/src/app/index.tsx` (redirige vers les onglets si connecté, retire le placeholder)
 - Create: `apps/expo/src/app/(tabs)/_layout.tsx`
@@ -151,6 +155,7 @@ git commit -m "feat(expo): installe gluestack-ui (NativeWind v5, thème partagé
 - Create: `apps/expo/src/app/(tabs)/banques.tsx` (placeholder Banques, rempli en Task 7)
 
 **Interfaces:**
+
 - Consumes: `authClient` depuis `~/utils/auth` (existant).
 - Produces: route `/(tabs)` avec deux écrans enfants `index` et `banques`, atteignable après connexion.
 
@@ -312,6 +317,7 @@ export default function BanquesScreen() {
 
 Run: `pnpm -F @budget/expo dev`
 Se connecter avec un compte existant. Vérifier :
+
 - Redirection automatique vers l'écran à onglets après connexion.
 - Les deux onglets "Transactions" et "Banques" sont visibles avec leurs icônes, la navigation entre les deux fonctionne.
 - Se déconnecter puis relancer l'app ramène bien au formulaire de login (pas de boucle de redirection).
@@ -328,12 +334,14 @@ git commit -m "feat(expo): navigation par onglets Transactions/Banques"
 ### Task 3: Liste des transactions avec défilement infini
 
 **Files:**
+
 - Modify: `apps/expo/package.json` (ajoute `@budget/validators`)
 - Modify: `apps/expo/src/utils/api.tsx` (exporte le client tRPC brut `trpcClient`)
 - Create: `apps/expo/src/components/transaction-list-item.tsx`
 - Modify: `apps/expo/src/app/(tabs)/index.tsx` (liste réelle, remplace le placeholder)
 
 **Interfaces:**
+
 - Consumes: `trpc`, `queryClient` depuis `~/utils/api` (existant) ; `PAGE_SIZE`, `transactionsSearchSchema` type `TransactionsSearch` depuis `@budget/validators` ; type `TransactionRow` depuis `@budget/api`.
 - Produces: `trpcClient` exporté depuis `~/utils/api` (utilisé par Task 4, 6, 7 pour les mutations). Composant `TransactionListItem({ transaction, onPress }: { transaction: TransactionRow; onPress: () => void })` réutilisé par Task 4.
 
@@ -567,6 +575,7 @@ Note : `queryKey` utilisé littéralement plutôt que la clé générée par le 
 
 Run: `pnpm -F @budget/expo dev`
 Vérifier dans l'app :
+
 - La liste des transactions se charge et s'affiche (description, date, banque, catégorie si présente, montant coloré selon débit/crédit).
 - Faire défiler jusqu'en bas déclenche le chargement de la page suivante (indicateur de chargement visible), jusqu'à ce que toutes les transactions soient chargées (plus de déclenchement au-delà de `total`).
 - Avec un compte n'ayant aucune transaction (ou en filtrant côté DB), l'état vide "Aucune transaction." s'affiche.
@@ -583,10 +592,12 @@ git commit -m "feat(expo): liste des transactions avec défilement infini"
 ### Task 4: Édition de la catégorie d'une transaction
 
 **Files:**
+
 - Create: `apps/expo/src/components/category-picker-sheet.tsx`
 - Modify: `apps/expo/src/app/(tabs)/index.tsx` (état de sélection + branchement du sheet)
 
 **Interfaces:**
+
 - Consumes: `TransactionListItem` (Task 3), `trpc`/`trpcClient`/`queryClient` depuis `~/utils/api`, type `CategoryOption` depuis `@budget/api`.
 - Produces: `CategoryPickerSheet({ transactionId, categories, onClose }: { transactionId: number | null; categories: CategoryOption[]; onClose: () => void })`.
 
@@ -631,7 +642,8 @@ export function CategoryPickerSheet({
 
   const updateCategory = useMutation({
     mutationFn: (category: string) => {
-      if (transactionId === null) throw new Error("Aucune transaction sélectionnée");
+      if (transactionId === null)
+        throw new Error("Aucune transaction sélectionnée");
       return trpcClient.transactions.updateCategory.mutate({
         id: transactionId,
         category,
@@ -695,7 +707,9 @@ export function getNextTransactionsPageParam(
 export default function TransactionsScreen() {
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
-  const { data: categories = [] } = useQuery(trpc.categories.list.queryOptions());
+  const { data: categories = [] } = useQuery(
+    trpc.categories.list.queryOptions(),
+  );
 
   const { data, isPending, isError, fetchNextPage, isFetchingNextPage } =
     useInfiniteQuery({
@@ -772,6 +786,7 @@ export default function TransactionsScreen() {
 
 Run: `pnpm -F @budget/expo dev`
 Vérifier :
+
 - Toucher une transaction ouvre le sheet avec la liste des catégories existantes.
 - Sélectionner une catégorie ferme le sheet et met à jour la catégorie affichée sur la ligne concernée (badge) sans recharger l'app.
 - Vérifier en base ou via l'app web que `category_source` passe bien à `manual` pour la transaction modifiée (comportement déjà garanti par `updateCategory`, non modifié).
@@ -788,10 +803,12 @@ git commit -m "feat(expo): édition de la catégorie d'une transaction"
 ### Task 5: Filtres des transactions (feuille modale)
 
 **Files:**
+
 - Create: `apps/expo/src/components/transaction-filters-sheet.tsx`
 - Modify: `apps/expo/src/app/(tabs)/index.tsx` (état des filtres, bouton d'ouverture, branchement à la requête)
 
 **Interfaces:**
+
 - Consumes: type `TransactionsSearch` depuis `@budget/validators`, `trpc.transactions.banks`/`trpc.categories.list` (existants).
 - Produces: `TransactionFiltersSheet({ isOpen, value, banks, categories, onClose, onApply }: { isOpen: boolean; value: TransactionFilters; banks: string[]; categories: CategoryOption[]; onClose: () => void; onApply: (next: TransactionFilters) => void })`, type `TransactionFilters = Pick<TransactionsSearch, "bank" | "category" | "dateFrom" | "dateTo" | "q">`.
 
@@ -931,7 +948,9 @@ export default function TransactionsScreen() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [filters, setFilters] = useState<TransactionFilters>({});
 
-  const { data: categories = [] } = useQuery(trpc.categories.list.queryOptions());
+  const { data: categories = [] } = useQuery(
+    trpc.categories.list.queryOptions(),
+  );
 
   const { data, isPending, isError, fetchNextPage, isFetchingNextPage } =
     useInfiniteQuery({
@@ -971,9 +990,7 @@ export default function TransactionsScreen() {
   return (
     <SafeAreaView className="bg-background flex-1">
       <View className="flex-row items-center justify-between px-4 py-2">
-        <Text className="text-foreground text-lg font-bold">
-          Transactions
-        </Text>
+        <Text className="text-foreground text-lg font-bold">Transactions</Text>
         <Pressable onPress={() => setFiltersOpen(true)}>
           <SlidersHorizontalIcon className="text-foreground" />
         </Pressable>
@@ -1026,6 +1043,7 @@ Note : `queryKey` inclut désormais `filters`, ce qui invalide et relance nature
 
 Run: `pnpm -F @budget/expo dev`
 Vérifier :
+
 - Le bouton de filtres ouvre le sheet, pré-rempli avec les filtres actifs.
 - Appliquer un filtre (ex: texte de recherche présent dans une transaction connue) réduit bien la liste en conséquence, et le défilement infini recharge correctement depuis la page 1.
 - "Réinitialiser" vide les filtres et réaffiche toutes les transactions.
@@ -1042,12 +1060,14 @@ git commit -m "feat(expo): filtres des transactions (feuille modale)"
 ### Task 6: KPIs et répartition par catégorie
 
 **Files:**
+
 - Modify: `apps/expo/package.json` (ajoute `react-native-gifted-charts`)
 - Create: `apps/expo/src/lib/category-breakdown.ts`
 - Create: `apps/expo/src/components/category-breakdown-chart.tsx`
 - Modify: `apps/expo/src/app/(tabs)/index.tsx` (ajoute KPIs + graphique au-dessus de la liste)
 
 **Interfaces:**
+
 - Consumes: type `CategoryBreakdownItem` depuis `@budget/api`, `trpc.transactions.byCategory` (existant), `TransactionFilters` (Task 5).
 - Produces: `toPieChartData(items: CategoryBreakdownItem[]): { value: number; color: string; text: string }[]` (testé unitairement), `CategoryBreakdownChart({ title, items }: { title: string; items: CategoryBreakdownItem[] })`.
 
@@ -1070,9 +1090,7 @@ export interface PieSlice {
   text: string;
 }
 
-export function toPieChartData(
-  items: CategoryBreakdownItem[],
-): PieSlice[] {
+export function toPieChartData(items: CategoryBreakdownItem[]): PieSlice[] {
   return items
     .filter((item) => item.total > 0)
     .map((item) => ({
@@ -1169,8 +1187,14 @@ Puis, dans le rendu, insérer avant le `<LegendList ...>` (ou avant le bloc `row
 
 ```tsx
 <View className="flex-row gap-4">
-  <CategoryBreakdownChart title="Dépenses par catégorie" items={expensesByCategory} />
-  <CategoryBreakdownChart title="Revenus par catégorie" items={revenuesByCategory} />
+  <CategoryBreakdownChart
+    title="Dépenses par catégorie"
+    items={expensesByCategory}
+  />
+  <CategoryBreakdownChart
+    title="Revenus par catégorie"
+    items={revenuesByCategory}
+  />
 </View>
 ```
 
@@ -1178,6 +1202,7 @@ Puis, dans le rendu, insérer avant le `<LegendList ...>` (ou avant le bloc `row
 
 Run: `pnpm -F @budget/expo dev`
 Vérifier :
+
 - Les deux graphiques (dépenses/revenus) s'affichent au-dessus de la liste, avec un total en euros cohérent avec les données affichées côté web (`apps/tanstack-start`) pour la même période.
 - Changer les filtres (Task 5) met aussi à jour les graphiques (même `filters` que la liste).
 - Avec un filtre ne retournant aucune transaction, le message "Aucune donnée pour cette période." s'affiche à la place du graphique.
@@ -1194,10 +1219,12 @@ git commit -m "feat(expo): KPIs et répartition par catégorie"
 ### Task 7: Écran Banques (connexions + synchronisation)
 
 **Files:**
+
 - Create: `apps/expo/src/components/connection-card.tsx`
 - Modify: `apps/expo/src/app/(tabs)/banques.tsx` (remplace le placeholder)
 
 **Interfaces:**
+
 - Consumes: `trpc.connections.list`, `trpcClient.sync.run` (existants), type `ConnectionSummary` depuis `@budget/api`, `useToast` depuis `~/components/ui/toast` (installé en Task 1), `authClient` depuis `~/utils/auth`.
 - Produces: `ConnectionCard({ connection }: { connection: ConnectionSummary })`.
 
@@ -1297,7 +1324,12 @@ import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { LogOutIcon, RefreshCwIcon } from "lucide-react-native";
 
 import { ConnectionCard } from "~/components/connection-card";
-import { Toast, ToastDescription, ToastTitle, useToast } from "~/components/ui/toast";
+import {
+  Toast,
+  ToastDescription,
+  ToastTitle,
+  useToast,
+} from "~/components/ui/toast";
 import { authClient } from "~/utils/auth";
 import { trpc, trpcClient } from "~/utils/api";
 
@@ -1305,15 +1337,21 @@ export default function BanquesScreen() {
   const toast = useToast();
   const [syncing, setSyncing] = useState(false);
 
-  const { data: connections = [], isPending, isError, refetch } = useQuery(
-    trpc.connections.list.queryOptions(),
-  );
+  const {
+    data: connections = [],
+    isPending,
+    isError,
+    refetch,
+  } = useQuery(trpc.connections.list.queryOptions());
 
   const showToast = (description: string, isErrorToast: boolean) => {
     toast.show({
       placement: "top",
       render: ({ id }) => (
-        <Toast nativeID={`toast-${id}`} action={isErrorToast ? "error" : "success"}>
+        <Toast
+          nativeID={`toast-${id}`}
+          action={isErrorToast ? "error" : "success"}
+        >
           <ToastTitle>{isErrorToast ? "Échec" : "Synchronisation"}</ToastTitle>
           <ToastDescription>{description}</ToastDescription>
         </Toast>
@@ -1386,6 +1424,7 @@ export default function BanquesScreen() {
 
 Run: `pnpm -F @budget/expo dev`
 Vérifier :
+
 - L'onglet Banques affiche les connexions existantes avec leur statut (badge cohérent avec ce qui est affiché sur `/banques` côté web pour le même compte).
 - Le bouton de synchronisation déclenche `sync.run`, affiche un toast de résultat, et rafraîchit la liste des connexions.
 - Le bouton de déconnexion ramène bien à l'écran de login (`index.tsx`).

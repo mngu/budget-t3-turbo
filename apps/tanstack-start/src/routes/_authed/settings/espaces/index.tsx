@@ -1,4 +1,12 @@
-import { useState } from "react";
+import type { SpaceDialogSpec } from "./-components/space-dialog";
+import type {
+  IncomingInvitation,
+  Space,
+  SpaceInvitation,
+  SpaceMember,
+  SpaceRole,
+} from "@budget/api";
+
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import {
   LockIcon,
@@ -11,21 +19,14 @@ import {
   UserMinusIcon,
   UsersIcon,
 } from "lucide-react";
+import { useState } from "react";
 
-import type {
-  IncomingInvitation,
-  Space,
-  SpaceInvitation,
-  SpaceMember,
-  SpaceRole,
-} from "@budget/api";
 import { Button } from "@budget/ui/button";
 import { toast } from "@budget/ui/toast";
-
-import type { SpaceDialogSpec } from "./-components/space-dialog";
 import { authClient } from "~/auth/client";
 import { sumBy } from "~/lib/sum";
 import { useTRPCClient } from "~/lib/trpc";
+
 import { SpaceCard } from "./-components/space-card";
 import { SpaceDialog } from "./-components/space-dialog";
 

@@ -1,5 +1,4 @@
 import { cn } from "@budget/ui";
-
 import { CategoryIcon } from "~/component/category-icon";
 import { euro } from "~/lib/format";
 import { Gauge } from "~/routes/_authed/_period-overview/-components/gauge";

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
 import { ChevronDownIcon, RefreshCwIcon } from "lucide-react";
+import { useState } from "react";
 
 import { cn } from "@budget/ui";
 import { Button } from "@budget/ui/button";
@@ -19,7 +19,6 @@ import {
   DropdownMenuTrigger,
 } from "@budget/ui/dropdown-menu";
 import { toast } from "@budget/ui/toast";
-
 import { sumBy } from "~/lib/sum";
 import { toastSyncOutcome } from "~/lib/sync-toast";
 import { selectedBanks, toggleBank } from "~/lib/transactions-search";

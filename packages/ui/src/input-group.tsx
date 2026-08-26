@@ -2,6 +2,7 @@
 
 import type { VariantProps } from "class-variance-authority";
 import type * as React from "react";
+
 import { cva } from "class-variance-authority";
 
 import { cn } from "@budget/ui";
@@ -25,7 +26,7 @@ function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
 }
 
 const inputGroupAddonVariants = cva(
-  "text-muted-foreground flex h-auto cursor-text items-center justify-center text-control gap-2 py-1.5 font-medium select-none group-data-[disabled=true]/input-group:opacity-50 [&>kbd]:rounded-sm [&>svg:not([class*='size-'])]:size-4",
+  "text-muted-foreground text-control flex h-auto cursor-text items-center justify-center gap-2 py-1.5 font-medium select-none group-data-[disabled=true]/input-group:opacity-50 [&>kbd]:rounded-sm [&>svg:not([class*='size-'])]:size-4",
   {
     variants: {
       align: {
@@ -74,8 +75,7 @@ const inputGroupButtonVariants = cva(
       size: {
         xs: "h-6 gap-1 rounded-md px-1.5 [&>svg:not([class*='size-'])]:size-3.5",
         sm: "",
-        "icon-xs":
-          "size-6 rounded-md p-0 has-[>svg]:p-0",
+        "icon-xs": "size-6 rounded-md p-0 has-[>svg]:p-0",
         "icon-sm": "size-8 p-0 has-[>svg]:p-0",
       },
     },

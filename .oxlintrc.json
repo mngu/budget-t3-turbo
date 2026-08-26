@@ -1,0 +1,125 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": [
+    "typescript",
+    "unicorn",
+    "oxc",
+    "import",
+    "react",
+    "jsx-a11y",
+    "vitest"
+  ],
+  "categories": { "correctness": "error" },
+  "jsPlugins": ["eslint-plugin-turbo"],
+  "ignorePatterns": [
+    "**/routeTree.gen.ts",
+    "**/*.config.*",
+    "design_handoff_budget/**"
+  ],
+  "rules": {
+    "turbo/no-undeclared-env-vars": "error",
+    "typescript/no-unused-vars": [
+      "error",
+      { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }
+    ],
+    "typescript/consistent-type-imports": [
+      "warn",
+      { "prefer": "type-imports", "fixStyle": "separate-type-imports" }
+    ],
+    "typescript/no-non-null-assertion": "error",
+    "import/consistent-type-specifier-style": ["error", "prefer-top-level"],
+    "react/react-in-jsx-scope": "off",
+    "vitest/require-mock-type-parameters": "off",
+    "vitest/require-to-throw-message": "off"
+  },
+  "overrides": [
+    {
+      "files": ["apps/tanstack-start/src/**"],
+      "rules": {
+        "no-restricted-properties": [
+          "error",
+          {
+            "object": "process",
+            "property": "env",
+            "message": "Use `import { env } from '~/env'` instead to ensure validated types."
+          }
+        ],
+        "no-restricted-imports": [
+          "error",
+          {
+            "name": "process",
+            "importNames": ["env"],
+            "message": "Use `import { env } from '~/env'` instead to ensure validated types."
+          }
+        ]
+      }
+    },
+    {
+      "files": ["**/env.ts"],
+      "rules": {
+        "no-restricted-properties": "off",
+        "no-restricted-imports": "off"
+      }
+    },
+    {
+      "files": ["apps/tanstack-start/src/routes/**/*.{ts,tsx}"],
+      "rules": {
+        "typescript/only-throw-error": [
+          "error",
+          {
+            "allow": [
+              {
+                "from": "package",
+                "package": "@tanstack/router-core",
+                "name": "Redirect"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "apps/tanstack-start/src/routes/_authed/settings/espaces/-components/space-dialog.tsx"
+      ],
+      "rules": { "jsx-a11y/no-autofocus": "off" }
+    },
+    {
+      "files": [
+        "packages/ui/src/spinner.tsx",
+        "packages/ui/src/field.tsx",
+        "packages/ui/src/input-group.tsx",
+        "packages/ui/src/label.tsx"
+      ],
+      "rules": {
+        "jsx-a11y/prefer-tag-over-role": "off",
+        "jsx-a11y/label-has-associated-control": "off",
+        "jsx-a11y/click-events-have-key-events": "off",
+        "jsx-a11y/no-noninteractive-element-interactions": "off"
+      }
+    },
+    {
+      "files": [
+        "packages/api/src/banking/**/*.ts",
+        "packages/api/src/transactions/import.ts"
+      ],
+      "rules": {
+        "typescript/no-unsafe-assignment": "off",
+        "typescript/no-unsafe-member-access": "off",
+        "typescript/no-unsafe-argument": "off",
+        "typescript/no-unsafe-call": "off",
+        "typescript/no-explicit-any": "off",
+        "typescript/prefer-nullish-coalescing": "off",
+        "typescript/non-nullable-type-assertion-style": "off",
+        "typescript/restrict-template-expressions": "off"
+      }
+    },
+    {
+      "files": ["packages/ui/src/aurora.tsx"],
+      "rules": {
+        "typescript/no-unsafe-member-access": "off",
+        "prefer-const": "off"
+      }
+    }
+  ]
+}

@@ -1,17 +1,18 @@
+import type { ManagedCategory } from "@budget/api/schemas";
+
 import { createFileRoute, stripSearchParams } from "@tanstack/react-router";
 
-import type { ManagedCategory } from "@budget/api/schemas";
 import {
   isManagedCategory,
   transactionsSearchSchema,
 } from "@budget/api/schemas";
-
 import { Stat } from "~/component/stat";
 import { euro0 } from "~/lib/format";
 import {
   defaultToCurrentMonth,
   SEARCH_DEFAULTS,
 } from "~/lib/transactions-search";
+
 import { NewCategoryOverview } from "./-components/new-category-overview";
 
 export const Route = createFileRoute("/_authed/settings/categories/")({

@@ -1,13 +1,14 @@
-import { useState } from "react";
+import type { ConnectionSummary } from "@budget/api";
+
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { UnlinkIcon } from "lucide-react";
+import { useState } from "react";
 
-import type { ConnectionSummary } from "@budget/api";
 import { Button } from "@budget/ui/button";
 import { toast } from "@budget/ui/toast";
-
 import { sumBy } from "~/lib/sum";
 import { useTRPCClient } from "~/lib/trpc";
+
 import { ConnectionCard } from "./-components/connection-card";
 import { ConsentAlert } from "./-components/consent-alert";
 import { Onboarding } from "./-components/onboarding";

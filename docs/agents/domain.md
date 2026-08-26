@@ -2,14 +2,14 @@
 
 How the engineering skills should consume this repo's domain documentation when exploring the codebase.
 
-**Layout: single-context.** One `CONTEXT.md` + `docs/adr/` at the repo root. The repo is a pnpm/Turborepo monorepo, but the packages are *layers* of one domain (personal finance for one household), not separate bounded contexts: `@budget/db` holds the schema, `@budget/api` the business pipeline, `apps/tanstack-start` the screens — all speaking of the same transactions, catégories, espaces and budgets. Splitting them into per-package contexts would duplicate one glossary five times. Revisit only if a package starts owning vocabulary the others don't share.
+**Layout: single-context.** One `CONTEXT.md` + `docs/adr/` at the repo root. The repo is a pnpm/Turborepo monorepo, but the packages are _layers_ of one domain (personal finance for one household), not separate bounded contexts: `@budget/db` holds the schema, `@budget/api` the business pipeline, `apps/tanstack-start` the screens — all speaking of the same transactions, catégories, espaces and budgets. Splitting them into per-package contexts would duplicate one glossary five times. Revisit only if a package starts owning vocabulary the others don't share.
 
 ## Before exploring, read these
 
 - **`CLAUDE.md`** at the repo root — the standing architecture and decision record for this project, and by far the densest source. Read it first; much of what an ADR would say already lives there.
 - **`CONTEXT.md`** at the repo root, if it exists — the glossary.
 - **`docs/adr/`** — read ADRs that touch the area you're about to work in.
-- **`docs/superpowers/specs/`** — long-form design specs and Claude Design briefs, dated in their filenames. Not decisions in the ADR sense, but they carry the *why* behind the screens.
+- **`docs/superpowers/specs/`** — long-form design specs and Claude Design briefs, dated in their filenames. Not decisions in the ADR sense, but they carry the _why_ behind the screens.
 
 If any of these files don't exist, **proceed silently**. Don't flag their absence; don't suggest creating them upfront. The `/domain-modeling` skill creates them lazily when terms or decisions actually get resolved.
 

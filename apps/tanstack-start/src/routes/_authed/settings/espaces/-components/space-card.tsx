@@ -1,5 +1,12 @@
 "use client";
 
+import type {
+  Space,
+  SpaceInvitation,
+  SpaceMember,
+  SpaceRole,
+} from "@budget/api";
+
 import {
   EllipsisIcon,
   KeyRoundIcon,
@@ -12,12 +19,6 @@ import {
   UsersIcon,
 } from "lucide-react";
 
-import type {
-  Space,
-  SpaceInvitation,
-  SpaceMember,
-  SpaceRole,
-} from "@budget/api";
 import { cn } from "@budget/ui";
 import { Badge } from "@budget/ui/badge";
 import { Button } from "@budget/ui/button";

@@ -1,6 +1,7 @@
+import type { EbTransaction } from "./normalize";
+
 import { describe, expect, it } from "vitest";
 
-import type { EbTransaction } from "./normalize";
 import { normalizeTransaction } from "./normalize";
 
 const base: EbTransaction = {

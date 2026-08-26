@@ -51,7 +51,7 @@ Le mode Fusion n'est pas concerné par les étapes 2-3 (pas de suppression) ni p
 
 ## Cas limites
 
-- **Deux catégories existantes convergent vers un même nom proposé** (ex. "Courses" et "Supermarché" fusionnées en "Courses" dans la proposition) : la première trouvée par nom est réutilisée/reparentée ; la seconde est supprimée si vide de corrections manuelles, ou conservée à part si elle en contient. Ses transactions manuelles ne sont **pas** migrées vers la catégorie fusionnée — limite connue, assumée (fusionner le contenu de deux catégories est hors scope ; ce design ne fait que remplacer la *structure*).
+- **Deux catégories existantes convergent vers un même nom proposé** (ex. "Courses" et "Supermarché" fusionnées en "Courses" dans la proposition) : la première trouvée par nom est réutilisée/reparentée ; la seconde est supprimée si vide de corrections manuelles, ou conservée à part si elle en contient. Ses transactions manuelles ne sont **pas** migrées vers la catégorie fusionnée — limite connue, assumée (fusionner le contenu de deux catégories est hors scope ; ce design ne fait que remplacer la _structure_).
 - **Sélection cochée vide en mode Remplacer** : bouton "Appliquer" désactivé, comme le comportement actuel du mode Fusion (`payload.length === 0`).
 - **Échec partiel** : la transaction DB garantit que la suppression + l'upsert des catégories sont tout-ou-rien. Seule la recatégorisation finale (`runCategorize`) garde son comportement non-bloquant existant.
 - **Nouvelles transactions arrivées depuis l'analyse** : même bandeau d'avertissement qu'aujourd'hui (`newTransactionsCount`), aucune logique spécifique au mode Remplacer.

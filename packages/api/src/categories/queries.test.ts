@@ -1,6 +1,7 @@
+import type { SQL } from "@budget/db";
+
 import { describe, expect, it, vi } from "vitest";
 
-import type { SQL } from "@budget/db";
 import { PgDialect } from "@budget/db";
 
 import { transactionsSearchSchema } from "../transactions/schemas";

@@ -146,11 +146,11 @@
      posé n'a qu'un filet de 1 px, l'ombre est réservée à ce qui flotte. Le
      niveau 3 (verre) porte en plus `backdrop-filter`, qui n'entre pas dans un
      jeton d'ombre — il reste à écrire au site, avec `bg-glass`. */
-  --shadow-floating: 0 1px 2px oklch(0 0 0 / 0.06), 0 20px 44px -18px
-    oklch(0 0 0 / 0.34); /* menu, popover */
+  --shadow-floating:
+    0 1px 2px oklch(0 0 0 / 0.06), 0 20px 44px -18px oklch(0 0 0 / 0.34); /* menu, popover */
   --shadow-modal: 0 28px 56px -20px oklch(0 0 0 / 0.45); /* dialogue sur voile */
-  --shadow-glass: 0 1px 2px oklch(0 0 0 / 0.05), 0 22px 44px -22px
-    oklch(0.25 0.03 265 / 0.4); /* carte de verre */
+  --shadow-glass:
+    0 1px 2px oklch(0 0 0 / 0.05), 0 22px 44px -22px oklch(0.25 0.03 265 / 0.4); /* carte de verre */
 }
 
 /* Palette de la maquette « Revue du mois » (Claude Design). Le jeu shadcn est

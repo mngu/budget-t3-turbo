@@ -1,6 +1,6 @@
-import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { CircleAlertIcon, MailCheckIcon } from "lucide-react";
+import { useState } from "react";
 import { z } from "zod/v4";
 
 import { cn } from "@budget/ui";
@@ -9,7 +9,6 @@ import { Button } from "@budget/ui/button";
 import { Field, FieldLabel } from "@budget/ui/field";
 import { Input } from "@budget/ui/input";
 import { Spinner } from "@budget/ui/spinner";
-
 import { authClient } from "~/auth/client";
 import { GradientWavesBg } from "~/component/gradient-waves-bg";
 

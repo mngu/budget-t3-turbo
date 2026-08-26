@@ -1,4 +1,5 @@
 import type { VariantProps } from "class-variance-authority";
+
 import { Button as ButtonPrimitive } from "@base-ui/react/button";
 import { cva } from "class-variance-authority";
 
@@ -16,7 +17,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground font-semibold hover:bg-primary/80",
+          "bg-primary text-primary-foreground hover:bg-primary/80 font-semibold",
         // Secondaire : contour marqué sur fond transparent, survol *teinté*
         // (`--tint`) et non neutre — c'est le seul bouton que la maquette
         // teinte au survol, le tertiaire prenant le survol de ligne.
@@ -31,7 +32,7 @@ const buttonVariants = cva(
         // que sur une destruction confirmée » : c'est donc au dialogue de
         // confirmation de le porter, pas à un bouton de liste.
         destructive:
-          "bg-destructive text-primary-foreground focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 font-semibold hover:bg-destructive/90",
+          "bg-destructive text-primary-foreground focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 hover:bg-destructive/90 font-semibold",
         link: "text-primary font-medium underline-offset-4 hover:underline",
       },
       size: {

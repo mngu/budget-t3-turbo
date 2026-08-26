@@ -1,3 +1,5 @@
+import type { SpaceRole } from "./queries";
+
 // Écritures de l'écran « Espaces ».
 //
 // Ces mutations écrivent directement les tables du plugin `organization`
@@ -13,7 +15,6 @@ import { and, eq, gt, ne, sql } from "@budget/db";
 import { db } from "@budget/db/client";
 import { invitation, member, organization, user } from "@budget/db/schema";
 
-import type { SpaceRole } from "./queries";
 import { hasRole, membershipGuards } from "./queries";
 
 /** Durée de vie d'un lien d'invitation. Annoncée à l'écran, à garder alignée. */

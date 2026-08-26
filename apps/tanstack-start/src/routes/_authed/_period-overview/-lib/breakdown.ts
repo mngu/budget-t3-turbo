@@ -2,8 +2,8 @@ import type {
   NewCategoryOverviewElementType,
   NewCategoryOverviewType,
 } from "@budget/api/schemas";
-import { FALLBACK_CATEGORY_COLOR } from "@budget/shared";
 
+import { FALLBACK_CATEGORY_COLOR } from "@budget/shared";
 import { sumBy } from "~/lib/sum";
 
 /**

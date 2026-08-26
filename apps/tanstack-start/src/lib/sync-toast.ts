@@ -1,4 +1,5 @@
 import type { SyncOutcome } from "@budget/api";
+
 import { toast } from "@budget/ui/toast";
 
 // Toast de fin de synchronisation, commun au bouton Sync et au wizard.
