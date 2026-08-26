@@ -43,7 +43,6 @@ export const SEARCH_DEFAULTS = {
   page: 1,
   sort: "date",
   order: "desc",
-  internes: "toutes",
 } as const;
 
 // Banques explicitement retenues, sous forme de liste. Vide = aucun filtre,
@@ -90,8 +89,4 @@ export const wholePeriod = <T extends TransactionsSearch>(search: T) => ({
   page: 1,
   category: undefined,
   q: undefined,
-  // Les agrégats écartent les virements internes d'eux-mêmes, quelle que soit
-  // la valeur du param : le laisser passer donnerait trois clés react-query
-  // pour trois réponses identiques, rechargées à chaque bascule de la puce.
-  internes: "toutes" as const,
 });

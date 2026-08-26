@@ -43,24 +43,14 @@ describe("transactionsFilterQuery — exclusions manuelles", () => {
 
 // Le périmètre des agrégats de la revue. Il ne passe pas par
 // `transactionsFilterQuery` — c'est du SQL brut, sur des tables aliasées — et
-// porte donc ses deux conditions à la main. C'est exactement le défaut que ce
-// test verrouille : elles ont manqué à la première écriture, et rien à l'écran
-// ne les réclame (un agrégat sans elles affiche des chiffres, juste faux).
+// porte donc ses conditions à la main. C'est exactement le défaut que ce test
+// verrouille : le filtre de comptes a manqué à la première écriture, et rien à
+// l'écran ne le réclame (un agrégat sans lui affiche des chiffres, juste faux).
 describe("filterTransactions — périmètre des agrégats", () => {
-  it("écarte les virements internes dont les deux jambes sont dans le périmètre", () => {
-    const rendered = render(filterTransactions("org_1", search));
-    expect(rendered).toContain("NOT EXISTS");
-    expect(rendered).toContain("tw.id = t.transfer_pair_id");
-  });
-
-  it("applique le filtre de comptes à la transaction *et* à sa jumelle", () => {
-    const rendered = render(
-      filterTransactions("org_1", { ...search, bank: ["Revolut"] }),
-    );
-    expect(rendered).toContain("coalesce(ba.display_name, ba.bank_name)");
-    // Sans elle, une paire dont une seule jambe est affichée serait neutralisée
-    // et le solde cesserait d'égaler la variation des comptes affichés.
-    expect(rendered).toContain("coalesce(twa.display_name, twa.bank_name)");
+  it("applique le filtre de comptes", () => {
+    expect(
+      render(filterTransactions("org_1", { ...search, bank: ["Revolut"] })),
+    ).toContain("coalesce(ba.display_name, ba.bank_name)");
   });
 
   it("ne pose aucun filtre de comptes quand tous sont affichés", () => {

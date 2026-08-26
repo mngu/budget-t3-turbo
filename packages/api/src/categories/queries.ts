@@ -75,9 +75,6 @@ export async function listCategoryTree(
  * à l'écran ne le réclame — sans lui la revue décrit tous les comptes sous une
  * sélection, donc affiche des chiffres, juste faux.
  *
- * Les virements internes ne sont **pas** traités ici, contrairement aux
- * agrégats de `transactions/queries.ts` : `transactions.excluded` suffit pour
- * l'instant, une ligne qui ne compte pas s'écarte à la main.
  */
 export function filterTransactions(
   organizationId: string,
@@ -107,7 +104,7 @@ export function filterTransactions(
         ${directionCondition}
       AND t.excluded = 'false'
       AND ba.organization_id = ${organizationId}
-      ${bankFilter(query.bank, "ba")}
+      ${bankFilter(query.bank)}
     )
   `;
 }
