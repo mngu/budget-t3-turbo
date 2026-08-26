@@ -1,18 +1,16 @@
 import { describe, expect, it } from "vitest";
 
-import { parent, sub, tree, unallocated } from "../-lib/breakdown.fixture";
+import { poste, sub, tree } from "../-lib/breakdown.fixture";
 import { levelKey } from "./use-drill";
 
 const rows = tree([
-  parent("Logement", 100, [
-    sub("Loyer", 60),
-    sub("Électricité", 30),
-    unallocated("Logement", 10),
-  ]),
-  // Une catégorie racine sans enfant : le SQL lui laisse un `children` vide,
-  // et c'est ce vide qui l'empêche d'ouvrir un niveau.
-  parent("Épargne", 40),
-  parent(null, 5),
+  poste("Logement", 100, [sub("Loyer", 60), sub("Électricité", 30)]),
+  // Une catégorie racine sans enfant : c'est ce vide qui l'empêche d'ouvrir un
+  // niveau, l'anneau y serait vide.
+  poste("Épargne", 40),
+  // Le poste des transactions sans catégorie, tel que la branche UNION ALL de
+  // la requête l'émet : `name` null, aucun enfant.
+  poste(null, 5),
 ]);
 
 // Le niveau que l'anneau affiche, et donc ce qui le replie : c'est *cette*

@@ -9,14 +9,16 @@ import {
   DialogTitle,
 } from "@budget/ui/dialog";
 
-import type { PreviewableTransaction, PreviewBadge } from "../-lib/use-preview";
+import type { TransactionRow } from "@budget/api";
+
+import type { PreviewBadge } from "../-lib/use-preview";
 import { dateFr, euro } from "~/lib/format";
 
 interface TransactionPreviewDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
-  transactions: PreviewableTransaction[];
+  transactions: TransactionRow[];
   description?: string;
   badge?: PreviewBadge;
   footer?: string;
@@ -31,8 +33,6 @@ export function TransactionPreviewDrawer({
   badge,
   footer,
 }: TransactionPreviewDrawerProps) {
-  const withDate = transactions.some((txn) => txn.bookingDate !== undefined);
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -55,8 +55,7 @@ export function TransactionPreviewDrawer({
             </DialogTitle>
           </div>
           <DialogDescription className="text-muted-foreground text-control mt-1.5 text-pretty">
-            {description ??
-              `${transactions.length} transaction${transactions.length > 1 ? "s" : ""} de l'échantillon analysé.`}
+            {description}
           </DialogDescription>
         </DialogHeader>
 
@@ -71,19 +70,11 @@ export function TransactionPreviewDrawer({
               return (
                 <div
                   key={txn.id}
-                  className={`hover:bg-surface-2 grid items-center gap-2.5 border-b px-4 py-2.5 last:border-b-0 ${
-                    withDate
-                      ? "grid-cols-[78px_minmax(0,1fr)_88px]"
-                      : "grid-cols-[minmax(0,1fr)_88px]"
-                  }`}
+                  className="hover:bg-surface-2 grid grid-cols-[78px_minmax(0,1fr)_88px] items-center gap-2.5 border-b px-4 py-2.5 last:border-b-0"
                 >
-                  {withDate && (
-                    <span className="text-subtle text-control whitespace-nowrap">
-                      {txn.bookingDate
-                        ? dateFr.format(new Date(txn.bookingDate))
-                        : ""}
-                    </span>
-                  )}
+                  <span className="text-subtle text-control whitespace-nowrap">
+                    {dateFr.format(new Date(txn.bookingDate))}
+                  </span>
                   <div className="min-w-0">
                     <div className="num text-control truncate">
                       {txn.description}

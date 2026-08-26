@@ -17,11 +17,10 @@ export interface TxnForLlm {
 // Le prompt ne s'appuie QUE sur les catégories réellement présentes en base :
 // aucun nom de catégorie codé en dur ici (une règle citant une catégorie
 // absente de la liste faisait répondre le LLM hors liste, et la transaction
-// n'était jamais catégorisée). Combler les trous de l'arborescence est le rôle
-// du process de suggestion (categories/suggestions/) — attention, son
-// échantillon est celui des transactions récentes, catégorisées ou non
-// (sampleTransactions ne filtre que sur bookingDate) : les transactions
-// laissées sans catégorie y figurent sans être priorisées.
+// n'était jamais catégorisée). Combler les trous de l'arborescence n'est plus
+// automatisé : une transaction qu'aucune catégorie ne décrit reste sans
+// catégorie, et c'est à l'écran /settings/categories qu'on crée la branche
+// manquante.
 export function buildSystemPrompt(categoryNames: string[]): string {
   return `Tu catégorises des transactions bancaires personnelles pour le budget d'un ménage français.
 Chaque transaction porte sa banque et sa contrepartie : aucune identité n'est codée ici.

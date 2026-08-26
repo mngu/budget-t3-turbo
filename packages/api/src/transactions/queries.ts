@@ -13,25 +13,14 @@ import {
   inArray,
   isNull,
   lte,
-  not,
   or,
   sql,
 } from "@budget/db";
 import { db } from "@budget/db/client";
 import { bankAccounts, categories, transactions } from "@budget/db/schema";
 
-import type {
-  Breakdown,
-  BudgetStats,
-  GlobalStats,
-  TransactionsSearch,
-} from "./schemas";
-import {
-  breakdownSchema,
-  budgetStatsSchema,
-  globalStatsSchema,
-  PAGE_SIZE,
-} from "./schemas";
+import type { BudgetStats, GlobalStats, TransactionsSearch } from "./schemas";
+import { budgetStatsSchema, globalStatsSchema, PAGE_SIZE } from "./schemas";
 
 // Nom de banque affiché : display_name choisi par l'utilisateur, sinon nom ASPSP.
 const bankLabel = sql<string>`coalesce(${bankAccounts.displayName}, ${bankAccounts.bankName})`;
@@ -39,14 +28,6 @@ const bankLabel = sql<string>`coalesce(${bankAccounts.displayName}, ${bankAccoun
 // Utilisé pour matcher une transaction dont la sous-catégorie appartient
 // au parent choisi dans le filtre (categories.tree, 2 niveaux).
 const parentCategories = alias(categories, "parent_categories");
-
-// L'autre jambe d'un virement interne, et son compte. Deux jeux d'alias : le
-// premier vit dans le `EXISTS` corrélé des filtres, le second dans la jointure
-// du relevé. Les confondre ferait déclarer deux fois le même alias dès qu'un
-// écran filtre *et* affiche le compte de la jumelle — Postgres le refuse.
-const twin = alias(transactions, "transfer_twin");
-const twinAccount = alias(bankAccounts, "transfer_twin_account");
-const twinBankLabel = sql<string>`coalesce(${twinAccount.displayName}, ${twinAccount.bankName})`;
 
 const listTwin = alias(transactions, "list_transfer_twin");
 const listTwinAccount = alias(bankAccounts, "list_transfer_twin_account");
@@ -64,50 +45,6 @@ function bankCondition(
   if (Array.isArray(bank))
     return bank.length > 0 ? inArray(label, bank) : undefined;
   return bank ? eq(label, bank) : undefined;
-}
-
-/**
- * « La jumelle de cette transaction est elle aussi dans les comptes affichés. »
- *
- * C'est la règle du périmètre, et elle est le cœur du traitement des virements
- * internes : une paire n'est neutralisée que si ses **deux** jambes sont dans
- * la sélection. Le jumeau hors sélection, la ligne redevient une vraie entrée
- * ou une vraie sortie — parce qu'elle en est vraiment une pour le périmètre
- * regardé. C'est ce qui garantit, quelle que soit la sélection, que le solde
- * affiché égale la variation réelle des comptes affichés ; l'exclure toujours
- * ferait afficher à un compte isolé des sorties sans les entrées qui les ont
- * financées.
- *
- * Deux points à ne pas éroder :
- * — **seul `bank` est ré-appliqué à la jumelle**. Les dates surtout doivent
- *   rester dehors : les paires vont jusqu'à 3 jours d'écart, donc à cheval sur
- *   deux mois. Avec la période dans le périmètre, juillet afficherait −2 000 et
- *   août +2 000 — l'artefact qu'on supprime, déplacé sur la frontière de mois.
- * — la condition reprend le libellé du sélecteur de comptes
- *   (`coalesce(display_name, bank_name)`), pas `account_id` : deux comptes
- *   partageant un libellé sont indissociables dans l'UI, la condition doit dire
- *   la même chose que le filtre.
- */
-function twinWithinScope(
-  organizationId: string,
-  query: TransactionsSearch,
-): SQL {
-  return exists(
-    db
-      .select({ one: sql`1` })
-      .from(twin)
-      .innerJoin(twinAccount, eq(twin.accountId, twinAccount.id))
-      .where(
-        and(
-          eq(twin.id, transactions.transferPairId),
-          // Redondant tant que la détection n'apparie que dans un espace, et
-          // gardé pour ça : c'est la seule ligne qui rend le périmètre vrai
-          // même si une paire inter-espaces apparaissait un jour en base.
-          eq(twinAccount.organizationId, organizationId),
-          bankCondition(query.bank, twinBankLabel),
-        ),
-      ),
-  );
 }
 
 export interface TransactionRow {
@@ -157,7 +94,10 @@ export interface TransactionRow {
 // aux alias `t` / `ba` de la CTE ci-dessous. Le libellé reste celui du sélecteur
 // de comptes (`coalesce(display_name, bank_name)`), jamais `account_id` : deux
 // comptes partageant un libellé sont indissociables dans l'UI.
-function bankFilter(bank: TransactionsSearch["bank"], table: "ba" | "twa") {
+export function bankFilter(
+  bank: TransactionsSearch["bank"],
+  table: "ba" | "twa",
+) {
   const banks = Array.isArray(bank) ? bank : bank ? [bank] : [];
   // Une liste vide vaut « tous les comptes », comme `undefined` — même lecture
   // que `selectedBanks` côté client.
@@ -210,110 +150,22 @@ export function filterTransactions(
 // `GROUP BY (p).name` rassemble toutes les racines — et les transactions sans
 // catégorie du tout — dans un seul seau `null`.
 const parentName = sql`COALESCE((p).name, (c).name)`;
-const parentIcon = sql`COALESCE((p).icon, (c).icon)`;
-const parentColor = sql`COALESCE((p).color, (c).color)`;
 // …et son budget est le sien. Un `COALESCE((p).budget_amount,
 // (c).budget_amount)` serait faux ici : sous une parente **sans** budget, il
 // ferait passer celui d'une sous-catégorie pour le budget du poste.
-const parentBudget = sql`CASE WHEN (p).name IS NULL THEN (c).budget_amount ELSE (p).budget_amount END`;
-
-// Position d'une ligne dans l'arborescence, **établie** par Postgres plutôt que
-// déduite d'une comparaison de noms. `COALESCE((p).name, (c).name)` rend quatre
-// situations indiscernables — une sous-catégorie, le reliquat d'une parente qui
-// a des enfants, une racine qui n'en a pas, et une transaction sans catégorie :
-// les trois dernières produisent toutes une ligne dont les deux noms sont
-// égaux. `parent_id` et l'existence d'enfants les séparent sans ambiguïté.
-const nodeKind = sql`CASE
-        WHEN (c).id IS NULL THEN 'none'
-        WHEN (p).id IS NOT NULL THEN 'sub'
-        WHEN EXISTS (SELECT 1 FROM categories child WHERE child.parent_id = (c).id)
-          THEN 'unallocated'
-        ELSE 'parent'
+//
+// Sauf quand le poste est **détaillé** : ce sont alors ses sous-catégories qui
+// portent les montants, et son budget est leur somme. Elle n'en stocke aucun à
+// elle (CHECK `categories_detailed_no_amount`), il n'y a donc rien à préférer —
+// la somme est la seule valeur qui existe.
+const posteId = sql`COALESCE((p).id, (c).id)`;
+const posteDetailed = sql`COALESCE((p).budget_detailed, (c).budget_detailed)`;
+const parentBudget = sql`CASE
+        WHEN ${posteDetailed}
+          THEN (SELECT SUM(k.budget_amount) FROM categories k WHERE k.parent_id = ${posteId})
+        WHEN (p).name IS NULL THEN (c).budget_amount
+        ELSE (p).budget_amount
       END`;
-
-/**
- * La répartition des sorties : l'arbre entier, groupé, trié et totalisé par
- * Postgres. **Seule** source du niveau affiché par la revue — l'anneau, la
- * colonne des postes, l'en-tête et le forage en sortent tous, et c'est ce qui
- * les empêche de se contredire.
- *
- * Le sens `debit` est forcé côté SQL, comme la maquette : sans lui un seul mois
- * de salaires écrase l'échelle et tous les postes de dépense s'affaissent à un
- * moignon indistinct (mesuré : `Revenus` à 4 000 € contre 99 € pour le plus
- * gros poste de sortie).
- *
- * Trois choses descendent ici et ne doivent pas remonter côté app :
- * — le **tri** des enfants, parce que `shadeCategoryColor` dérive la nuance
- *   d'un segment de son rang : le rang est donc de la donnée, pas de la mise en
- *   forme ;
- * — `expenses` et `postes`, que l'en-tête affiche et qu'il recompterait sinon —
- *   deux définitions du même chiffre finissent par diverger ;
- * — `kind`, voir `nodeKind` ci-dessus.
- *
- * Ce qui **reste** côté app : les libellés français, les sentinelles d'URL et
- * le choix du niveau ouvert (`-lib/breakdown.ts`).
- */
-export async function breakdownByCategories(
-  organizationId: string,
-  query: TransactionsSearch,
-): Promise<Breakdown> {
-  const result = await db.execute(sql`
-      ${filterTransactions(organizationId, query)},
-      leaves AS (
-        SELECT
-          COALESCE((p).id, (c).id) AS poste_id,
-          ${parentName} AS poste_name,
-          ${parentIcon} AS poste_icon,
-          ${parentColor} AS poste_color,
-          ${parentBudget} AS poste_budget,
-          (c).name AS child_name,
-          (c).budget_amount AS child_budget,
-          ${nodeKind} AS child_kind,
-          SUM((t).amount) AS total
-        FROM filtered_transactions
-        WHERE (t).direction = 'debit'
-        -- Par ordinaux : les colonnes 1 à 8 sont des expressions, les répéter
-        -- ici laisserait deux définitions du même poste diverger.
-        GROUP BY 1, 2, 3, 4, 5, 6, 7, 8
-      ),
-      postes AS (
-        SELECT
-          poste_name AS name,
-          CASE WHEN poste_id IS NULL THEN 'none' ELSE 'parent' END AS kind,
-          poste_icon AS icon,
-          poste_color AS color,
-          poste_budget::float8 AS budget,
-          SUM(total)::float8 AS total,
-          -- Une racine sans sous-catégorie ne produit que des lignes 'parent' :
-          -- le FILTER lui laisse un tableau vide, et c'est ce vide qui dit à
-          -- l'app qu'elle n'ouvre aucun niveau. Le reliquat, lui, est un enfant
-          -- comme un autre — il a cessé d'être une alerte, il reste une part,
-          -- sans quoi la somme du niveau ouvert n'égalerait plus son poste.
-          COALESCE(
-            json_agg(
-              json_build_object(
-                'name', child_name,
-                'kind', child_kind,
-                'total', total::float8,
-                'budget', child_budget::float8
-              ) ORDER BY total DESC
-            ) FILTER (WHERE child_kind IN ('sub', 'unallocated')),
-            '[]'::json
-          ) AS children
-        FROM leaves
-        GROUP BY poste_id, poste_name, poste_icon, poste_color, poste_budget
-      )
-      SELECT
-        COALESCE(SUM(total), 0)::float8 AS expenses,
-        COUNT(*)::int AS postes,
-        COALESCE(json_agg(to_jsonb(postes) ORDER BY total DESC), '[]'::json)
-          AS parents
-      FROM postes
-    `);
-  // Le SELECT final n'est qu'agrégats, sans GROUP BY : il rend toujours une
-  // ligne, y compris sur une période vide.
-  return breakdownSchema.parse(result.rows[0]);
-}
 
 export async function budgetStats(
   organizationId: string,
@@ -370,13 +222,7 @@ export function transactionsFilterQuery(
   // `bank` accepte une banque ou une liste (voir @budget/shared).
   const bank = bankCondition(query.bank, bankLabel);
   if (bank) conditions.push(bank);
-  // Virements internes. `masquer` et `seulement` sont exactement complémentaires
-  // — leur réunion est `toutes` — pour que l'écran d'audit montre ce que les
-  // totaux ont écarté, ni plus ni moins.
-  if (query.internes === "masquer")
-    conditions.push(not(twinWithinScope(organizationId, query)));
-  else if (query.internes === "seulement")
-    conditions.push(twinWithinScope(organizationId, query));
+
   if (query.direction)
     conditions.push(eq(transactions.direction, query.direction));
   if (query.status) conditions.push(eq(transactions.status, query.status));

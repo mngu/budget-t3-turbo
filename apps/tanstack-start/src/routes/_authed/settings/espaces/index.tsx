@@ -24,6 +24,7 @@ import { toast } from "@budget/ui/toast";
 
 import type { SpaceDialogSpec } from "./-components/space-dialog";
 import { authClient } from "~/auth/client";
+import { sumBy } from "~/lib/sum";
 import { useTRPCClient } from "~/lib/trpc";
 import { SpaceCard } from "./-components/space-card";
 import { SpaceDialog } from "./-components/space-dialog";
@@ -34,7 +35,7 @@ export const Route = createFileRoute("/_authed/settings/espaces/")({
       context.trpcClient.spaces.list.query(),
       context.trpcClient.spaces.incoming.query(),
     ]);
-    const members = spaces.reduce((n, s) => n + s.counts.members, 0);
+    const members = sumBy(spaces, (space) => space.counts.members);
     return { spaces, incoming, members };
   },
   staticData: { title: "Espaces", aside: EspacesAside },

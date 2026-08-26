@@ -1,14 +1,10 @@
 import type { ReactNode } from "react";
 import { useState } from "react";
-import { TriangleAlertIcon } from "lucide-react";
 
-import type { TxnForAnalysis } from "@budget/api";
+import type { TransactionRow } from "@budget/api";
 
-import type { GhostBranch } from "./suggestions";
 import { CategoryIcon } from "~/component/category-icon";
-import { softCategoryColor, useCategoryColor } from "~/lib/category-color";
 import { useTRPCClient } from "~/lib/trpc";
-import { ghostTransactions } from "./suggestions";
 
 /**
  * Ce que le panneau d'aperçu a besoin de savoir de la ligne cliquée : son nom,
@@ -30,28 +26,6 @@ export interface PreviewRequest {
   icon: string | null;
 }
 
-// Sous-ensemble minimal commun à TxnForAnalysis (échantillon LLM) et
-// TransactionRow (données réelles de la table transactions) — le drawer ne
-// lit que ces champs, pas besoin de caster l'un ou l'autre.
-//
-// Les trois derniers sont optionnels parce que l'échantillon d'analyse ne les
-// porte pas : `TxnForAnalysis` est sérialisé tel quel dans `buildAnalysisPrompt`
-// (`JSON.stringify(txns)`), y ajouter une date pour la seule vitrine changerait
-// un prompt calibré. La colonne de date disparaît alors au lieu de laisser une
-// cellule vide, qui se lirait comme une ligne cassée.
-export interface PreviewableTransaction {
-  id: number;
-  description: string;
-  counterparty: string | null;
-  bankName: string;
-  amount: string | number;
-  direction: "debit" | "credit";
-  bookingDate?: string;
-  /** Chemin affiché « Parent › Enfant », ou la feuille seule. */
-  categoryPath?: string | null;
-  category?: string | null;
-}
-
 /** Teinte + icône de ce que le panneau montre, reprises de la ligne cliquée. */
 export interface PreviewBadge {
   color: string;
@@ -62,22 +36,16 @@ export interface PreviewBadge {
 export interface PreviewState {
   title: string;
   description: string;
-  txns: PreviewableTransaction[];
+  txns: TransactionRow[];
   badge: PreviewBadge;
   footer: string;
 }
 
 const PREVIEW_FOOTER = "Aperçu limité aux 25 transactions les plus récentes.";
 
-/**
- * Le panneau d'aperçu et ses trois entrées : une catégorie existante, les
- * transactions sans catégorie, une branche proposée. Elles ne partagent que
- * leur destination — d'où un hook plutôt que trois helpers, dont l'un devait
- * jusqu'ici recevoir `setPreview` en paramètre.
- */
+/** Le panneau d'aperçu : les transactions d'une catégorie, les 25 plus récentes. */
 export function usePreview() {
   const trpcClient = useTRPCClient();
-  const resolveColor = useCategoryColor();
   const [preview, setPreview] = useState<PreviewState | null>(null);
 
   const openCategory = async ({
@@ -103,48 +71,10 @@ export function usePreview() {
     });
   };
 
-  const openUncategorized = async (total: number) => {
-    const result = await trpcClient.transactions.list.query({
-      page: 1,
-      sort: "date",
-      order: "desc",
-      internes: "toutes",
-      category: "none",
-    });
-    setPreview({
-      title: "Sans catégorie",
-      description: `${total} transaction(s) qu'aucune branche ne décrit — aperçu des ${result.rows.length} plus récentes.`,
-      txns: result.rows,
-      // Pas de catégorie, donc pas de teinte : c'est le seul aperçu qui porte
-      // l'avertissement plutôt qu'une famille de couleur.
-      badge: {
-        color: "var(--warn)",
-        soft: "var(--warn-soft)",
-        icon: <TriangleAlertIcon className="size-3.5" />,
-      },
-      footer: "Une transaction sans catégorie signale une branche manquante.",
-    });
-  };
-
-  const openGhost = (ghost: GhostBranch, sample: TxnForAnalysis[]) => {
-    const color = resolveColor(ghost.parentColor);
-    setPreview({
-      title: `${ghost.parent} › ${ghost.name}`,
-      description: `${ghost.txnIds.length} transaction(s) sans catégorie qui se ressemblent — aperçu.`,
-      txns: ghostTransactions(ghost, sample),
-      // Une branche proposée n'a pas encore d'icône : la pastille creuse dans
-      // la teinte de sa parente est exactement l'état « aucune icône choisie ».
-      badge: categoryBadge(color, softCategoryColor(color), null),
-      footer: "Proposition : elles seraient rangées ici.",
-    });
-  };
-
   return {
     preview,
     close: () => setPreview(null),
     openCategory,
-    openUncategorized,
-    openGhost,
   };
 }
 

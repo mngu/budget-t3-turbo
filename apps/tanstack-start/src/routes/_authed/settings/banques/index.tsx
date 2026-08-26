@@ -6,6 +6,7 @@ import type { ConnectionSummary } from "@budget/api";
 import { Button } from "@budget/ui/button";
 import { toast } from "@budget/ui/toast";
 
+import { sumBy } from "~/lib/sum";
 import { useTRPCClient } from "~/lib/trpc";
 import { ConnectionCard } from "./-components/connection-card";
 import { ConsentAlert } from "./-components/consent-alert";
@@ -187,7 +188,7 @@ function importTotals(
   connections: ConnectionSummary[],
   orphans: { transactionCount: number }[],
 ) {
-  let total = orphans.reduce((n, o) => n + o.transactionCount, 0);
+  let total = sumBy(orphans, (orphan) => orphan.transactionCount);
   let lastImportedAt: string | null = null;
 
   for (const connection of connections) {

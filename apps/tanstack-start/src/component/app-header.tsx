@@ -4,7 +4,6 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import {
   LandmarkIcon,
   LogOutIcon,
-  PiggyBankIcon,
   SettingsIcon,
   TagsIcon,
   UsersIcon,
@@ -51,12 +50,6 @@ const SETTINGS_PAGES = [
     Icon: TagsIcon,
   },
   {
-    page: "budgets",
-    to: "/settings/budgets",
-    title: "Budgets",
-    Icon: PiggyBankIcon,
-  },
-  {
     page: "banques",
     to: "/settings/banques",
     title: "Banques",
@@ -76,7 +69,7 @@ const SETTINGS_PAGES = [
  *
  * Il remplace les *deux* barres précédentes : celle de la revue et celle des
  * réglages (`SettingsHeader`, supprimée). C'est le sens de la maquette, qui
- * traite `categories` et `banques` comme deux valeurs de son `page` (`budgets`
+ * traite `categories` et `banques` comme deux valeurs de son `page` (`espaces`
  * s'y est ajoutée depuis, d'où `SETTINGS_PAGES` plutôt qu'un ternaire) : la rangée
  * de marque et d'utilitaires ne bouge plus d'un écran à l'autre, seul le milieu
  * change — période et comptes sur la revue, intitulé « Réglages › … » ailleurs.
@@ -109,7 +102,7 @@ export function AppHeader({ title }: { title?: string }) {
       {/* La marque *est* le retour à la revue. C'est le seul lien de la barre
           depuis que la rangée de navigation en est partie : les liens entre les
           deux écrans de la revue vivent maintenant dans la zone centrale, mais
-          les quatre écrans de réglages n'ont rien d'autre pour rentrer. La
+          les trois écrans de réglages n'ont rien d'autre pour rentrer. La
           search est intégralement conservée — c'est le même périmètre. */}
       <Link
         to="/"

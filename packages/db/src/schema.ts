@@ -1,6 +1,8 @@
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 import {
   boolean,
+  check,
   date,
   index,
   integer,
@@ -126,8 +128,20 @@ export const categories = pgTable(
     // inclut aussi ses sous-catégories (voir transactionsFilterQuery).
     parentId: integer("parent_id").references((): AnyPgColumn => categories.id),
     budgetAmount: numeric("budget_amount", { precision: 12, scale: 2 }),
+    // Parente dont le budget est réparti sur ses sous-catégories : ce sont
+    // elles qui portent les montants, et son budget **est** leur somme. Elle
+    // n'en garde donc aucun à elle — c'est ce que verrouille le CHECK
+    // ci-dessous, et c'est ce qui rend l'invariant « parente = somme des
+    // enfants » vrai par construction : il n'existe aucune seconde valeur qui
+    // pourrait en diverger. Un CHECK ne voyant qu'une ligne, c'est la seule
+    // forme de la règle qui tienne en base sans trigger.
+    budgetDetailed: boolean("budget_detailed").notNull().default(false),
   },
   (t) => [
+    check(
+      "categories_detailed_no_amount",
+      sql`NOT ${t.budgetDetailed} OR ${t.budgetAmount} IS NULL`,
+    ),
     // Le nom est unique *dans l'espace*, plus sur toute la table. Deux espaces
     // ont chacun leur « Alimentation » sans se voir. Tout ce qui résout une
     // catégorie par son nom (`upsertCategory`, `setTransactionCategory`, le

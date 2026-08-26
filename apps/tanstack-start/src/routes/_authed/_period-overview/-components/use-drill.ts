@@ -3,7 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "@tanstack/react-router";
 
-import type { Breakdown, TransactionsSearch } from "@budget/api/schemas";
+import type {
+  NewCategoryOverviewType,
+  TransactionsSearch,
+} from "@budget/api/schemas";
 import { transactionsSearchSchema } from "@budget/api/schemas";
 
 import { defaultToCurrentMonth } from "~/lib/transactions-search";
@@ -78,7 +81,7 @@ function periodKey(search: unknown) {
  * aucun niveau (même expression que `selected`, côté écran) — replier l'anneau
  * dans ces deux cas ferait clignoter la répartition pour rien.
  */
-export function levelKey(search: unknown, rows: Breakdown) {
+export function levelKey(search: unknown, rows: NewCategoryOverviewType) {
   const parent = openParent(rows, PERIOD.parse(search).category ?? undefined);
   return parent?.name ?? "";
 }
@@ -115,7 +118,7 @@ const reducedMotion = () =>
  */
 export function useDrill(
   search: Pick<TransactionsSearch, "category" | "dateFrom" | "dateTo">,
-  rows: Breakdown,
+  rows: NewCategoryOverviewType,
 ): Drill {
   const [phase, setPhase] = useState<DrillPhase>(null);
   const [dir, setDir] = useState<1 | -1>(1);

@@ -4,6 +4,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./accordion": "./src/accordion.tsx",
     "./alert": "./src/alert.tsx",
     "./alert-dialog": "./src/alert-dialog.tsx",
     "./badge": "./src/badge.tsx",

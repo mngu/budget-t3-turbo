@@ -22,6 +22,13 @@
       "when": 1787301802311,
       "tag": "0002_dashing_lake",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1787396101716,
+      "tag": "0003_category_budget_detailed",
+      "breakpoints": true
     }
   ]
 }

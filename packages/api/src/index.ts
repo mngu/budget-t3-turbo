@@ -34,20 +34,7 @@ export type {
   MonthlyCategoryTotal,
   TransactionRow,
 } from "./transactions/queries";
-export type {
-  CategoriesOverview,
-  CategoryOption,
-  CategoryOverviewNode,
-  CategoryTreeNode,
-} from "./categories/queries";
-export type {
-  CategoryBudgetPlan,
-  CategoryBudgetRow,
-} from "./categories/budgets";
-export type {
-  CategorySuggestion,
-  CategorySuggestionChild,
-} from "./categories/suggestions/schema";
+export type { CategoryOption, CategoryTreeNode } from "./categories/queries";
 export type {
   IncomingInvitation,
   InvitationDetail,
@@ -56,7 +43,3 @@ export type {
   SpaceMember,
   SpaceRole,
 } from "./spaces/queries";
-export type {
-  SuggestionsRun,
-  TxnForAnalysis,
-} from "./categories/suggestions/analyze";

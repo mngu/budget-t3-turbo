@@ -21,7 +21,6 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as AuthedPeriodOverviewTransactionsRouteImport } from './routes/_authed/_period-overview/transactions'
 import { Route as AuthedSettingsEspacesIndexRouteImport } from './routes/_authed/settings/espaces/index'
 import { Route as AuthedSettingsCategoriesIndexRouteImport } from './routes/_authed/settings/categories/index'
-import { Route as AuthedSettingsBudgetsIndexRouteImport } from './routes/_authed/settings/budgets/index'
 import { Route as AuthedSettingsBanquesIndexRouteImport } from './routes/_authed/settings/banques/index'
 import { Route as AuthedSettingsBanquesAjouterRouteImport } from './routes/_authed/settings/banques/ajouter'
 
@@ -88,12 +87,6 @@ const AuthedSettingsCategoriesIndexRoute =
     path: '/categories/',
     getParentRoute: () => AuthedSettingsRouteRoute,
   } as any)
-const AuthedSettingsBudgetsIndexRoute =
-  AuthedSettingsBudgetsIndexRouteImport.update({
-    id: '/budgets/',
-    path: '/budgets/',
-    getParentRoute: () => AuthedSettingsRouteRoute,
-  } as any)
 const AuthedSettingsBanquesIndexRoute =
   AuthedSettingsBanquesIndexRouteImport.update({
     id: '/banques/',
@@ -118,7 +111,6 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthedPeriodOverviewIndexRoute
   '/settings/banques/ajouter': typeof AuthedSettingsBanquesAjouterRoute
   '/settings/banques': typeof AuthedSettingsBanquesIndexRoute
-  '/settings/budgets': typeof AuthedSettingsBudgetsIndexRoute
   '/settings/categories': typeof AuthedSettingsCategoriesIndexRoute
   '/settings/espaces': typeof AuthedSettingsEspacesIndexRoute
 }
@@ -133,7 +125,6 @@ export interface FileRoutesByTo {
   '/': typeof AuthedPeriodOverviewIndexRoute
   '/settings/banques/ajouter': typeof AuthedSettingsBanquesAjouterRoute
   '/settings/banques': typeof AuthedSettingsBanquesIndexRoute
-  '/settings/budgets': typeof AuthedSettingsBudgetsIndexRoute
   '/settings/categories': typeof AuthedSettingsCategoriesIndexRoute
   '/settings/espaces': typeof AuthedSettingsEspacesIndexRoute
 }
@@ -151,7 +142,6 @@ export interface FileRoutesById {
   '/_authed/_period-overview/': typeof AuthedPeriodOverviewIndexRoute
   '/_authed/settings/banques/ajouter': typeof AuthedSettingsBanquesAjouterRoute
   '/_authed/settings/banques/': typeof AuthedSettingsBanquesIndexRoute
-  '/_authed/settings/budgets/': typeof AuthedSettingsBudgetsIndexRoute
   '/_authed/settings/categories/': typeof AuthedSettingsCategoriesIndexRoute
   '/_authed/settings/espaces/': typeof AuthedSettingsEspacesIndexRoute
 }
@@ -168,7 +158,6 @@ export interface FileRouteTypes {
     | '/'
     | '/settings/banques/ajouter'
     | '/settings/banques'
-    | '/settings/budgets'
     | '/settings/categories'
     | '/settings/espaces'
   fileRoutesByTo: FileRoutesByTo
@@ -183,7 +172,6 @@ export interface FileRouteTypes {
     | '/'
     | '/settings/banques/ajouter'
     | '/settings/banques'
-    | '/settings/budgets'
     | '/settings/categories'
     | '/settings/espaces'
   id:
@@ -200,7 +188,6 @@ export interface FileRouteTypes {
     | '/_authed/_period-overview/'
     | '/_authed/settings/banques/ajouter'
     | '/_authed/settings/banques/'
-    | '/_authed/settings/budgets/'
     | '/_authed/settings/categories/'
     | '/_authed/settings/espaces/'
   fileRoutesById: FileRoutesById
@@ -299,13 +286,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedSettingsCategoriesIndexRouteImport
       parentRoute: typeof AuthedSettingsRouteRoute
     }
-    '/_authed/settings/budgets/': {
-      id: '/_authed/settings/budgets/'
-      path: '/budgets'
-      fullPath: '/settings/budgets'
-      preLoaderRoute: typeof AuthedSettingsBudgetsIndexRouteImport
-      parentRoute: typeof AuthedSettingsRouteRoute
-    }
     '/_authed/settings/banques/': {
       id: '/_authed/settings/banques/'
       path: '/banques'
@@ -343,7 +323,6 @@ const AuthedPeriodOverviewRouteRouteWithChildren =
 interface AuthedSettingsRouteRouteChildren {
   AuthedSettingsBanquesAjouterRoute: typeof AuthedSettingsBanquesAjouterRoute
   AuthedSettingsBanquesIndexRoute: typeof AuthedSettingsBanquesIndexRoute
-  AuthedSettingsBudgetsIndexRoute: typeof AuthedSettingsBudgetsIndexRoute
   AuthedSettingsCategoriesIndexRoute: typeof AuthedSettingsCategoriesIndexRoute
   AuthedSettingsEspacesIndexRoute: typeof AuthedSettingsEspacesIndexRoute
 }
@@ -351,7 +330,6 @@ interface AuthedSettingsRouteRouteChildren {
 const AuthedSettingsRouteRouteChildren: AuthedSettingsRouteRouteChildren = {
   AuthedSettingsBanquesAjouterRoute: AuthedSettingsBanquesAjouterRoute,
   AuthedSettingsBanquesIndexRoute: AuthedSettingsBanquesIndexRoute,
-  AuthedSettingsBudgetsIndexRoute: AuthedSettingsBudgetsIndexRoute,
   AuthedSettingsCategoriesIndexRoute: AuthedSettingsCategoriesIndexRoute,
   AuthedSettingsEspacesIndexRoute: AuthedSettingsEspacesIndexRoute,
 }

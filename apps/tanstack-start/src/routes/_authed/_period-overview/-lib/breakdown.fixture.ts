@@ -1,56 +1,47 @@
-import type {
-  Breakdown,
-  BreakdownChild,
-  BreakdownParent,
-} from "@budget/api/schemas";
+import type { NewCategoryOverviewType } from "@budget/api/schemas";
 
 /**
- * L'arbre rendu par `transactions.breakdownByCategories`. Partagé par les tests
- * de `breakdown` et de `useDrill`, qui décrivent le même niveau vu de deux
- * places.
+ * L'arbre rendu par `categories.newOverview`. Partagé par les tests de
+ * `breakdownLevel` et de `levelKey` : les deux dérivent le même niveau et
+ * doivent le faire dire la même chose.
  *
- * Le tri et les totaux viennent de Postgres : les fixtures les posent donc
- * telles que la requête les rendrait, sans quoi elles testeraient un
- * regroupement que le TS ne fait plus.
+ * Deux formes comptent et sont faciles à oublier en écrivant un cas à la main :
+ * une parente **sans** sous-catégorie (`children: []`), qui n'ouvre aucun
+ * niveau, et le poste des transactions sans catégorie, dont `name` est `null` —
+ * la requête ne descend aucun libellé.
  */
+type Element = NewCategoryOverviewType[number];
+type Child = NonNullable<Element["children"]>[number];
+
 export const sub = (
   name: string,
-  total: number,
-  budget: number | null = null,
-): BreakdownChild => ({ name, kind: "sub", total, budget });
-
-/**
- * Le reliquat porté par la parente : sa catégorie *est* la parente, il en porte
- * donc le nom — c'est ce que rend le SQL, et ce dont dépend son `filter`.
- */
-export const unallocated = (
-  parentName: string,
-  total: number,
-  budget: number | null = null,
-): BreakdownChild => ({
-  name: parentName,
-  kind: "unallocated",
-  total,
-  budget,
+  totalAmount: number | null,
+  budgetAmount: number | null = null,
+): Child => ({
+  id: name.length,
+  name,
+  budgetAmount,
+  transactionCount: totalAmount === null ? 0 : 1,
+  totalAmount,
 });
 
-export const parent = (
+export const poste = (
   name: string | null,
-  total: number,
-  children: BreakdownChild[] = [],
-  budget: number | null = null,
-): BreakdownParent => ({
+  totalAmount: number | null,
+  children: Child[] = [],
+  budgetAmount: number | null = null,
+  budgetDetailed = false,
+): Element => ({
+  id: (name ?? "sans").length,
+  organization_id: "org_1",
   name,
-  kind: name === null ? "none" : "parent",
+  color: "#123456",
   icon: null,
-  color: null,
-  total,
-  budget,
+  budgetAmount,
+  budgetDetailed,
+  transactionCount: totalAmount === null ? 0 : 1,
+  totalAmount,
   children,
 });
 
-export const tree = (parents: BreakdownParent[]): Breakdown => ({
-  expenses: parents.reduce((sum, p) => sum + p.total, 0),
-  postes: parents.length,
-  parents,
-});
+export const tree = (postes: Element[]): NewCategoryOverviewType => postes;

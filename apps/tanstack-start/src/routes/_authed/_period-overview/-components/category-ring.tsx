@@ -8,6 +8,7 @@ import { cn } from "@budget/ui";
 
 import type { Drill } from "./use-drill";
 import { CategoryIcon } from "~/component/category-icon";
+import { sumBy } from "~/lib/sum";
 import { DRILL } from "./use-drill";
 
 export interface RingSlice {
@@ -65,7 +66,7 @@ function buildArcs(
   activeIndex: number | null,
   hover: string | null,
 ): Arc[] {
-  const sum = slices.reduce((acc, slice) => acc + slice.total, 0);
+  const sum = sumBy(slices, (slice) => slice.total);
   const arcs: Arc[] = [];
   let offset = 0;
   for (const [index, slice] of slices.entries()) {

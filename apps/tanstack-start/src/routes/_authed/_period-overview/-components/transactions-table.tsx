@@ -13,7 +13,6 @@ import { useParentCategories } from "../-lib/category-lookup";
 import { useSetCategory } from "../-lib/use-set-category";
 import { CategoryPathPicker } from "./category-path-picker";
 import { ExcludeBadge } from "./exclude-badge";
-import { TransferBadge } from "./transfer-badge";
 
 /**
  * Une seule définition de gabarit pour l'en-tête et les lignes : deux grilles
@@ -144,7 +143,6 @@ function Row({
 
       <span className="flex min-w-0 items-center gap-1.5">
         <span className="text-body truncate">{row.description}</span>
-        <TransferBadge row={row} />
         <ExcludeBadge row={row} />
       </span>
 
@@ -194,7 +192,8 @@ function CategoryCell({
   // Poser une transaction sur une parente plutôt que sur une de ses
   // sous-catégories n'est pas un défaut : la ligne se lit comme les autres.
   // Seule l'absence totale de catégorie est signalée.
-  const label = parentName === null ? "Sans catégorie" : (subName ?? parentName);
+  const label =
+    parentName === null ? "Sans catégorie" : (subName ?? parentName);
 
   return (
     <span className="flex min-w-0">
