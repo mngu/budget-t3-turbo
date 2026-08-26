@@ -4,7 +4,6 @@ import { syncBanks } from "./banking/fetch-transactions";
 import { categorizeUncategorized } from "./categorization/run";
 import { performImport, performSync } from "./pipeline";
 import { importTransactions } from "./transactions/import";
-import { detectInternalTransfers } from "./transactions/internal-transfers";
 
 // Mocks explicites (avec factory) plutôt que l'automock de vi.mock(path) seul :
 // l'automock importerait le vrai module pour en inspecter la forme, ce qui
@@ -19,14 +18,12 @@ vi.mock("./transactions/internal-transfers", () => ({
 const syncMock = vi.mocked(syncBanks);
 const runImportMock = vi.mocked(importTransactions);
 const runCategorizeMock = vi.mocked(categorizeUncategorized);
-const detectTransfersMock = vi.mocked(detectInternalTransfers);
 
 const ORG = "org-1";
 const OTHER_ORG = "org-2";
 
 beforeEach(() => {
   vi.clearAllMocks();
-  detectTransfersMock.mockResolvedValue({ pairs: 0, updated: 0 });
 });
 
 describe("performSync", () => {
@@ -138,23 +135,6 @@ describe("performSync", () => {
 
     await expect(performSync(ORG)).rejects.toThrow("Échec de l'import");
     expect(runCategorizeMock).not.toHaveBeenCalled();
-    expect(detectTransfersMock).not.toHaveBeenCalled();
-  });
-
-  it("apparie les virements internes après l'import et avant la catégorisation", async () => {
-    syncMock.mockResolvedValue({ expired: [], rateLimited: [] });
-    runImportMock.mockResolvedValue(false);
-    runCategorizeMock.mockResolvedValue({ categorized: 0, remaining: 0 });
-
-    await performSync(ORG);
-
-    expect(detectTransfersMock).toHaveBeenCalledTimes(1);
-    expect(detectTransfersMock.mock.invocationCallOrder[0]).toBeGreaterThan(
-      runImportMock.mock.invocationCallOrder[0] ?? 0,
-    );
-    expect(detectTransfersMock.mock.invocationCallOrder[0]).toBeLessThan(
-      runCategorizeMock.mock.invocationCallOrder[0] ?? 0,
-    );
   });
 
   it("n'échoue pas si l'appariement échoue (best-effort)", async () => {
@@ -163,7 +143,6 @@ describe("performSync", () => {
     syncMock.mockResolvedValue({ expired: [], rateLimited: [] });
     runImportMock.mockResolvedValue(false);
     runCategorizeMock.mockResolvedValue({ categorized: 0, remaining: 0 });
-    detectTransfersMock.mockRejectedValue(new Error("boom appariement"));
 
     await expect(performSync(ORG)).resolves.toEqual({
       expired: [],

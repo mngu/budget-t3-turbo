@@ -4,7 +4,6 @@ import { syncBanks } from "./banking/fetch-transactions";
 import { categorizeUncategorized } from "./categorization/run";
 import { withSingleFlight } from "./lib/single-flight";
 import { importTransactions } from "./transactions/import";
-import { detectInternalTransfers } from "./transactions/internal-transfers";
 
 // Un seul verrou pour tout ce qui alimente `transactions` : un import ne doit
 // pas s'intercaler dans une synchronisation en cours (et réciproquement).
@@ -29,17 +28,6 @@ async function importAndCategorize(
   const hadImportError = await importTransactions(organizationId);
   if (hadImportError) {
     throw new Error("Échec de l'import (voir les logs serveur).");
-  }
-
-  // Repasse sur *toute* la table, pas seulement sur les lignes importées à
-  // l'instant : la moyenne de référence de la revue porte sur 12 mois, et
-  // n'apparier que les nouveautés comparerait un mois propre à des mois passés
-  // gonflés. Idempotente, elle ne coûte qu'une lecture de la table.
-  try {
-    const { pairs } = await detectInternalTransfers(organizationId);
-    console.log(`🔁 ${pairs} virement(s) interne(s) apparié(s).`);
-  } catch (err) {
-    console.error("⚠️  Détection des virements internes échouée :", err);
   }
 
   try {

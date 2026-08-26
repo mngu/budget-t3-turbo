@@ -1,13 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeftRightIcon, SearchIcon, TagIcon } from "lucide-react";
+import { SearchIcon, TagIcon } from "lucide-react";
 
 import type { TransactionsSearch } from "@budget/api/schemas";
 import { cn } from "@budget/ui";
 import { InputGroup, InputGroupAddon } from "@budget/ui/input-group";
 import { ToggleGroup, ToggleGroupItem } from "@budget/ui/toggle-group";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@budget/ui/tooltip";
 
 import { CategoryIcon } from "~/component/category-icon";
 import { SearchInput } from "~/component/search-input";
@@ -24,28 +23,6 @@ const SENSES = [
   { value: "tous", label: "Tous" },
   { value: "debit", label: "Débits" },
   { value: "credit", label: "Crédits" },
-];
-
-// Les trois états des virements entre comptes suivis. « Seulement » est le
-// complément exact de « Masquer » côté serveur : il montre précisément ce que
-// les totaux ont écarté, ce qui en fait l'écran d'audit de la détection.
-const INTERNES = [
-  {
-    value: "toutes" as const,
-    label: "Afficher",
-    title: "Le relevé complet, virements internes compris",
-  },
-  {
-    value: "masquer" as const,
-    label: "Masquer",
-    title:
-      "Retirer les virements dont les deux jambes sont dans les comptes affichés",
-  },
-  {
-    value: "seulement" as const,
-    label: "Seulement",
-    title: "N'afficher que ce que les totaux ont écarté",
-  },
 ];
 
 // Filtres de *contenu* : ceux que les barres ci-dessous posent et retirent. La
@@ -81,7 +58,6 @@ function Divider() {
 export function RefineBar({
   label,
   sens,
-  internes,
   searchField,
   right,
   className,
@@ -193,49 +169,6 @@ export function RefineBar({
         >
           ✕
         </button>
-      )}
-
-      {internes && (
-        <>
-          <Divider />
-          {/* Trois états plutôt qu'une bascule : « Seulement » n'est pas un
-              filtre de confort, c'est l'écran d'audit de la détection — c'est
-              là qu'on vérifie une paire et qu'on écarte un faux positif. */}
-          <Tooltip>
-            <TooltipTrigger className="text-subtle text-meta flex flex-none items-center gap-1.5">
-              <ArrowLeftRightIcon className="size-3" />
-              Internes
-            </TooltipTrigger>
-            <TooltipContent className="max-w-70">
-              Virements entre deux comptes suivis : ils sont écartés de tous les
-              totaux, mais restent listés ici
-            </TooltipContent>
-          </Tooltip>
-          <ToggleGroup
-            size="sm"
-            aria-label="Virements internes"
-            className="flex-none"
-            value={[search.internes]}
-            onValueChange={([value]) =>
-              setSearch({
-                // Pas de cast : au décochage `value` est bien `undefined`, et
-                // c'est la table qui dit ce qui est une valeur légitime.
-                internes:
-                  INTERNES.find((i) => i.value === value)?.value ?? "toutes",
-                page: 1,
-              })
-            }
-          >
-            {INTERNES.map((item) => (
-              <Tooltip key={item.value}>
-                <TooltipTrigger render={<ToggleGroupItem value={item.value} />}>
-                  {item.label}
-                </TooltipTrigger>
-                <TooltipContent>{item.title}</TooltipContent>
-              </Tooltip>
-            ))}
-          </ToggleGroup>
-        </>
       )}
 
       {dirty && (

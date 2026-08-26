@@ -31,7 +31,7 @@ export function KpiBand({ budgetStats, globalStats }: KpiBandProps) {
         </div>
       </div>
 
-      <div className="flex-1">
+      <div className="w-1/2">
         <KpiBar
           label="Entrées"
           value={credit}

@@ -59,9 +59,7 @@ export function NewBreakdownList({ newOverview }: NewBreakdownListProps) {
         // `null` sur le poste des transactions sans catégorie.
         label: cat.name ?? NO_CATEGORY,
         value: cat.totalAmount ?? 0,
-        budget: cat.budgetDetailed
-          ? sumBy(cat.children ?? [], (child) => child.budgetAmount ?? 0)
-          : cat.budgetAmount,
+        budget: cat.budgetAmount,
         iconName: cat.icon,
         color: resolveColor(cat.color),
         drillable: (cat.children?.length ?? 0) > 0,
@@ -73,6 +71,7 @@ export function NewBreakdownList({ newOverview }: NewBreakdownListProps) {
   // Une parente détaillée n'a pas de montant propre (CHECK
   // `categories_detailed_no_amount`) : son budget est la somme de ses enfants.
   // Une parente globale porte le sien, et ceux de ses enfants sont dormants.
+  const selectedCategoryBudget = selectedCategory?.budgetAmount ?? null
   const totalBudget = selectedCategory
     ? selectedCategory.budgetDetailed
       ? sumBy(rows, (row) => row.budget ?? 0)
@@ -86,7 +85,7 @@ export function NewBreakdownList({ newOverview }: NewBreakdownListProps) {
   const max = Math.max(totalAmount, totalBudget ?? 0);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex h-full flex-col gap-4">
       <div className="h-28 px-2">
         {selectedCategory ? (
           <BudgetGauge
@@ -98,7 +97,7 @@ export function NewBreakdownList({ newOverview }: NewBreakdownListProps) {
             label={selectedCategory.name}
             iconName={selectedCategory.icon}
             color={resolveColor(selectedCategory.color)}
-            budget={totalBudget}
+            budget={selectedCategoryBudget}
             valueSize="xl"
           />
         ) : (

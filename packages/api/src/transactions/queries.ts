@@ -13,7 +13,6 @@ import {
   inArray,
   isNull,
   lte,
-  not,
   or,
   sql,
 } from "@budget/db";
@@ -29,14 +28,6 @@ const bankLabel = sql<string>`coalesce(${bankAccounts.displayName}, ${bankAccoun
 // Utilisé pour matcher une transaction dont la sous-catégorie appartient
 // au parent choisi dans le filtre (categories.tree, 2 niveaux).
 const parentCategories = alias(categories, "parent_categories");
-
-// L'autre jambe d'un virement interne, et son compte. Deux jeux d'alias : le
-// premier vit dans le `EXISTS` corrélé des filtres, le second dans la jointure
-// du relevé. Les confondre ferait déclarer deux fois le même alias dès qu'un
-// écran filtre *et* affiche le compte de la jumelle — Postgres le refuse.
-const twin = alias(transactions, "transfer_twin");
-const twinAccount = alias(bankAccounts, "transfer_twin_account");
-const twinBankLabel = sql<string>`coalesce(${twinAccount.displayName}, ${twinAccount.bankName})`;
 
 const listTwin = alias(transactions, "list_transfer_twin");
 const listTwinAccount = alias(bankAccounts, "list_transfer_twin_account");
@@ -54,50 +45,6 @@ function bankCondition(
   if (Array.isArray(bank))
     return bank.length > 0 ? inArray(label, bank) : undefined;
   return bank ? eq(label, bank) : undefined;
-}
-
-/**
- * « La jumelle de cette transaction est elle aussi dans les comptes affichés. »
- *
- * C'est la règle du périmètre, et elle est le cœur du traitement des virements
- * internes : une paire n'est neutralisée que si ses **deux** jambes sont dans
- * la sélection. Le jumeau hors sélection, la ligne redevient une vraie entrée
- * ou une vraie sortie — parce qu'elle en est vraiment une pour le périmètre
- * regardé. C'est ce qui garantit, quelle que soit la sélection, que le solde
- * affiché égale la variation réelle des comptes affichés ; l'exclure toujours
- * ferait afficher à un compte isolé des sorties sans les entrées qui les ont
- * financées.
- *
- * Deux points à ne pas éroder :
- * — **seul `bank` est ré-appliqué à la jumelle**. Les dates surtout doivent
- *   rester dehors : les paires vont jusqu'à 3 jours d'écart, donc à cheval sur
- *   deux mois. Avec la période dans le périmètre, juillet afficherait −2 000 et
- *   août +2 000 — l'artefact qu'on supprime, déplacé sur la frontière de mois.
- * — la condition reprend le libellé du sélecteur de comptes
- *   (`coalesce(display_name, bank_name)`), pas `account_id` : deux comptes
- *   partageant un libellé sont indissociables dans l'UI, la condition doit dire
- *   la même chose que le filtre.
- */
-function twinWithinScope(
-  organizationId: string,
-  query: TransactionsSearch,
-): SQL {
-  return exists(
-    db
-      .select({ one: sql`1` })
-      .from(twin)
-      .innerJoin(twinAccount, eq(twin.accountId, twinAccount.id))
-      .where(
-        and(
-          eq(twin.id, transactions.transferPairId),
-          // Redondant tant que la détection n'apparie que dans un espace, et
-          // gardé pour ça : c'est la seule ligne qui rend le périmètre vrai
-          // même si une paire inter-espaces apparaissait un jour en base.
-          eq(twinAccount.organizationId, organizationId),
-          bankCondition(query.bank, twinBankLabel),
-        ),
-      ),
-  );
 }
 
 export interface TransactionRow {
@@ -275,13 +222,7 @@ export function transactionsFilterQuery(
   // `bank` accepte une banque ou une liste (voir @budget/shared).
   const bank = bankCondition(query.bank, bankLabel);
   if (bank) conditions.push(bank);
-  // Virements internes. `masquer` et `seulement` sont exactement complémentaires
-  // — leur réunion est `toutes` — pour que l'écran d'audit montre ce que les
-  // totaux ont écarté, ni plus ni moins.
-  if (query.internes === "masquer")
-    conditions.push(not(twinWithinScope(organizationId, query)));
-  else if (query.internes === "seulement")
-    conditions.push(twinWithinScope(organizationId, query));
+
   if (query.direction)
     conditions.push(eq(transactions.direction, query.direction));
   if (query.status) conditions.push(eq(transactions.status, query.status));
