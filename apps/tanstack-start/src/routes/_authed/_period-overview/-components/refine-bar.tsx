@@ -32,9 +32,6 @@ const SENSES = [
 const CONTEXT_FILTERS = {
   direction: undefined,
   category: undefined,
-  // Valeur par défaut et non `undefined` : `internes` n'est pas optionnel, le
-  // relevé montre tout tant qu'on ne lui demande rien.
-  internes: "toutes",
 } satisfies Partial<TransactionsSearch>;
 
 /**
@@ -69,12 +66,6 @@ export function RefineBar({
   /** Sélecteur Tous / Débit / Crédit. */
   sens?: boolean;
   /**
-   * Sélecteur des virements entre comptes suivis. Réservé à `/transactions` :
-   * c'est le seul écran où ces lignes sont visibles — partout ailleurs elles
-   * sont écartées d'office, et un sélecteur n'y commanderait rien.
-   */
-  internes?: boolean;
-  /**
    * Champ de recherche `q`. Il vivait dans l'en-tête tant que celui-ci portait
    * les filtres des quatre écrans ; le nouvel en-tête n'en a plus, et
    * `Transactions.dc.html` le pose dans cette barre — c'est un outil de table,
@@ -95,8 +86,7 @@ export function RefineBar({
     ? parents.get(search.category)
     : undefined;
 
-  const dirty =
-    !!(search.direction ?? search.category) || search.internes !== "toutes";
+  const dirty = !!(search.direction ?? search.category);
 
   return (
     <div

@@ -20,9 +20,8 @@ const withSyncLock = <T>(organizationId: string, run: () => Promise<T>) =>
     run,
   );
 
-// Import des data/*.json présents, appariement des virements internes, puis
-// catégorisation. Les deux dernières étapes sont best-effort : leur échec ne
-// doit jamais invalider un import réussi.
+// Import des data/*.json présents, puis catégorisation. La catégorisation est
+// best-effort : son échec ne doit jamais invalider un import réussi.
 async function importAndCategorize(
   organizationId: string,
 ): Promise<CategorizeResult | null> {

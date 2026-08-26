@@ -19,9 +19,6 @@ const search = transactionsSearchSchema.parse({});
 // Le filtre de comptes a manqué à la première écriture, et rien à l'écran ne le
 // réclame — la revue affichait des chiffres, juste faux : ceux de tous les
 // comptes sous une sélection.
-//
-// Les virements internes ne sont volontairement pas traités ici (voir la
-// docstring) : `excluded` tient ce rôle pour l'instant.
 describe("filterTransactions (catégories) — périmètre", () => {
   it("écarte les lignes exclues à la main", () => {
     expect(render(filterTransactions("org_1", search))).toContain("excluded");

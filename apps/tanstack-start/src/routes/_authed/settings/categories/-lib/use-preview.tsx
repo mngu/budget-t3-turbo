@@ -59,7 +59,6 @@ export function usePreview() {
       page: 1,
       sort: "date",
       order: "desc",
-      internes: "toutes",
       category: name,
     });
     setPreview({

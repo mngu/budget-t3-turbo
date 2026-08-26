@@ -11,9 +11,6 @@ import { importTransactions } from "./transactions/import";
 vi.mock("./banking/fetch-transactions", () => ({ syncBanks: vi.fn() }));
 vi.mock("./transactions/import", () => ({ importTransactions: vi.fn() }));
 vi.mock("./categorization/run", () => ({ categorizeUncategorized: vi.fn() }));
-vi.mock("./transactions/internal-transfers", () => ({
-  detectInternalTransfers: vi.fn(),
-}));
 
 const syncMock = vi.mocked(syncBanks);
 const runImportMock = vi.mocked(importTransactions);

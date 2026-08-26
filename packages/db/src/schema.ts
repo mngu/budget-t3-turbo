@@ -177,21 +177,9 @@ export const transactions = pgTable(
     categorySource: text("category_source", {
       enum: ["llm", "manual", "auto"],
     }),
-    // L'autre jambe d'un virement entre deux comptes suivis : les deux lignes
-    // se pointent mutuellement. Une paire n'est neutralisée dans les agrégats
-    // que si ses *deux* jambes sont dans les comptes sélectionnés — voir
-    // `internalTransferOutOfScope` (transactions/queries.ts).
-    transferPairId: integer("transfer_pair_id").references(
-      (): AnyPgColumn => transactions.id,
-    ),
-    // Même contrat que `category_source` : 'manual' n'est jamais écrasé par la
-    // détection. Un `transfer_pair_id` nul avec une source 'manual' est un
-    // « ce n'est pas un virement interne » — la paire ne sera plus reformée.
-    transferSource: text("transfer_source", { enum: ["auto", "manual"] }),
     // « Cette ligne ne me concerne pas » : posé à la main, jamais par un
-    // traitement. Voisin des virements internes dans son effet (la ligne sort
-    // des agrégats et reste dans le relevé), mais **inconditionnel** : un
-    // virement interne dépend des comptes affichés, une exclusion non.
+    // traitement. C'est le seul moyen aujourd'hui de sortir une ligne des
+    // agrégats en la laissant dans le relevé.
     excluded: boolean("excluded").notNull().default(false),
     raw: jsonb("raw").notNull(),
     importedAt: timestamp("imported_at", { withTimezone: true })
@@ -207,7 +195,6 @@ export const transactions = pgTable(
     index("transactions_direction_idx").on(t.direction),
     index("transactions_status_idx").on(t.status),
     index("transactions_category_id_idx").on(t.categoryId),
-    index("transactions_transfer_pair_id_idx").on(t.transferPairId),
   ],
 );
 

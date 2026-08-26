@@ -30,15 +30,10 @@ const bankLabel = sql<string>`coalesce(${bankAccounts.displayName}, ${bankAccoun
 // au parent choisi dans le filtre (categories.tree, 2 niveaux).
 const parentCategories = alias(categories, "parent_categories");
 
-const listTwin = alias(transactions, "list_transfer_twin");
-const listTwinAccount = alias(bankAccounts, "list_transfer_twin_account");
-const listTwinBankLabel = sql<string>`coalesce(${listTwinAccount.displayName}, ${listTwinAccount.bankName})`;
-
-// Le filtre de comptes, appliqué à la transaction courante ou à sa jumelle.
-// Une liste vide vaut « pas de filtre », comme `undefined` : c'est la lecture
-// que fait déjà `selectedBanks` côté client, et le panneau de comptes refuse de
-// décocher le dernier — les deux doivent dire la même chose d'une URL bricolée
-// à la main.
+// Le filtre de comptes. Une liste vide vaut « pas de filtre », comme
+// `undefined` : c'est la lecture que fait déjà `selectedBanks` côté client, et
+// le panneau de comptes refuse de décocher le dernier — les deux doivent dire
+// la même chose d'une URL bricolée à la main.
 function bankCondition(
   bank: TransactionsSearch["bank"],
   label: SQL<string>,
@@ -73,52 +68,27 @@ export interface TransactionRow {
   categoryPath: string | null;
   /** Couleur de la catégorie *parente* : les lignes se lisent par famille. */
   categoryColor: string | null;
-  /**
-   * Compte de l'autre jambe, quand la transaction est un virement entre deux
-   * comptes suivis. `null` sinon.
-   */
-  transferTwinBank: string | null;
-  /**
-   * La jumelle est-elle dans les comptes affichés ? Seul ce cas est neutralisé
-   * dans les totaux, d'où deux badges distincts : « ⇄ interne » (la ligne ne
-   * compte pas) et « ⇄ vers <compte> » (elle compte, la jumelle étant hors
-   * périmètre). Calculé ici plutôt que côté client pour que le badge et la
-   * mention des tuiles ne puissent pas diverger.
-   */
-  transferInScope: boolean;
   /** Exclue à la main des agrégats — elle reste dans ce relevé, et là seulement. */
   excluded: boolean;
 }
 
-// Le filtre de comptes, en SQL brut : `twinWithinScope` et `bankCondition`
-// s'écrivent sur les tables Drizzle non aliasées, ils ne peuvent pas se corréler
-// aux alias `t` / `ba` de la CTE ci-dessous. Le libellé reste celui du sélecteur
-// de comptes (`coalesce(display_name, bank_name)`), jamais `account_id` : deux
-// comptes partageant un libellé sont indissociables dans l'UI.
-export function bankFilter(
-  bank: TransactionsSearch["bank"],
-  table: "ba" | "twa",
-) {
+// Le filtre de comptes, en SQL brut : `bankCondition` s'écrit sur les tables
+// Drizzle non aliasées, il ne peut pas se corréler à l'alias `ba` des CTE
+// ci-dessous. Le libellé reste celui du sélecteur de comptes
+// (`coalesce(display_name, bank_name)`), jamais `account_id` : deux comptes
+// partageant un libellé sont indissociables dans l'UI.
+export function bankFilter(bank: TransactionsSearch["bank"]) {
   const banks = Array.isArray(bank) ? bank : bank ? [bank] : [];
   // Une liste vide vaut « tous les comptes », comme `undefined` — même lecture
   // que `selectedBanks` côté client.
   if (banks.length === 0) return sql``;
-  const label = sql.raw(`coalesce(${table}.display_name, ${table}.bank_name)`);
+  const label = sql.raw("coalesce(ba.display_name, ba.bank_name)");
   return sql` AND ${inArray(label, banks)}`;
 }
 
 /**
- * Le périmètre des agrégats de la revue : la période, les comptes affichés, ni
- * les lignes exclues à la main, ni les virements internes.
- *
- * Ces derniers sortent **en dur**, sans consulter le param `internes` (qui ne
- * gouverne que le relevé), et selon la règle de `twinWithinScope` : une paire
- * n'est neutralisée que si ses **deux** jambes sont dans les comptes affichés —
- * la jumelle hors sélection, la ligne redevient une vraie sortie, parce qu'elle
- * en est vraiment une pour le périmètre regardé. Seul `bank` est ré-appliqué à
- * la jumelle : les paires vont jusqu'à 3 jours d'écart, donc à cheval sur deux
- * mois, et mettre les dates dans le périmètre déplacerait l'artefact sur la
- * frontière de mois au lieu de le supprimer.
+ * Le périmètre des agrégats de la revue : la période, les comptes affichés, et
+ * jamais les lignes exclues à la main.
  */
 export function filterTransactions(
   organizationId: string,
@@ -134,14 +104,7 @@ export function filterTransactions(
       WHERE t.booking_date BETWEEN ${query.dateFrom} AND ${query.dateTo}
       AND t.excluded = 'false'
       AND ba.organization_id = ${organizationId}
-      ${bankFilter(query.bank, "ba")}
-      AND NOT EXISTS (
-        SELECT 1 FROM transactions tw
-        JOIN bank_accounts twa ON tw.account_id = twa.id
-        WHERE tw.id = t.transfer_pair_id
-        AND twa.organization_id = ${organizationId}
-        ${bankFilter(query.bank, "twa")}
-      )
+      ${bankFilter(query.bank)}
     )
   `;
 }
@@ -264,14 +227,6 @@ export async function listTransactions(
     includeExcluded: true,
   });
 
-  // Même règle de périmètre que `twinWithinScope`, sur la jumelle jointe : la
-  // jointure est déjà là pour afficher son compte, un `EXISTS` de plus serait
-  // une seconde formulation de la même condition.
-  const twinBankInScope = bankCondition(input.bank, listTwinBankLabel);
-  const twinInListScope = sql<boolean>`${listTwin.id} is not null${
-    twinBankInScope ? sql` and ${twinBankInScope}` : sql``
-  }`;
-
   const signedAmount = sql`case when ${transactions.direction} = 'debit' then -${transactions.amount} else ${transactions.amount} end`;
   const sortColumn =
     input.sort === "amount" ? signedAmount : transactions.bookingDate;
@@ -302,16 +257,12 @@ export async function listTransactions(
         categoryColor: sql<
           string | null
         >`coalesce(${parentCategories.color}, ${categories.color})`,
-        transferTwinBank: listTwinBankLabel,
-        transferInScope: twinInListScope,
         excluded: transactions.excluded,
       })
       .from(transactions)
       .innerJoin(bankAccounts, eq(transactions.accountId, bankAccounts.id))
       .leftJoin(categories, eq(transactions.categoryId, categories.id))
       .leftJoin(parentCategories, eq(categories.parentId, parentCategories.id))
-      .leftJoin(listTwin, eq(listTwin.id, transactions.transferPairId))
-      .leftJoin(listTwinAccount, eq(listTwin.accountId, listTwinAccount.id))
       .where(where)
       .orderBy(...orderBy)
       .limit(limit)
@@ -400,18 +351,11 @@ export async function bankCounts(
   organizationId: string,
   input: TransactionsSearch,
 ): Promise<{ bank: string; count: number }[]> {
-  // Seul agrégat à *ne pas* écarter les virements internes, et c'est délibéré :
-  // il compte des lignes, pas de l'argent, et il annonce ce que la table
-  // affichera une fois le compte coché. Les écarter ici mentirait deux fois —
-  // son périmètre est « tous les comptes » (`bank` neutralisé, voir ci-dessus)
-  // alors que le clic restreindra la sélection, si bien que des paires
-  // aujourd'hui neutralisées cesseront de l'être : la pastille annoncerait 2
-  // pour une table qui en listerait 3.
   const where = transactionsFilterQuery(
     organizationId,
-    { ...input, bank: undefined, internes: "toutes" },
-    // Même raison que `internes: "toutes"` ci-dessus : la pastille annonce des
-    // lignes, et la table affiche les exclues.
+    { ...input, bank: undefined },
+    // La pastille annonce des lignes, pas de l'argent : elle doit compter ce que
+    // la table affichera une fois le compte coché, exclusions comprises.
     { includeExcluded: true },
   );
   const rows = await db

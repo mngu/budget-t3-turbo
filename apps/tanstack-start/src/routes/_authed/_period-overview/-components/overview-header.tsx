@@ -26,9 +26,8 @@ export function OverviewHeader({ newOverview }: OverviewHeaderProps) {
 
   const subCount = selected?.children?.length ?? 0;
   // Le dénominateur sort de **la même** source que le numérateur. Pris
-  // ailleurs (`globalStats.debit`), il porterait le filtre de comptes et
-  // écarterait les virements internes, que `categories.newOverview` ignore
-  // tous les deux : la part pourrait alors dépasser 100 %.
+  // ailleurs (`globalStats.debit`), il porterait le filtre de comptes, que
+  // `categories.newOverview` ignore : la part pourrait alors dépasser 100 %.
   const expenses = sumBy(newOverview, (cat) => cat.totalAmount ?? 0);
   // Les postes **de dépense** : `newOverview` liste toutes les parentes de
   // l'espace, y compris celles sans aucun mouvement sur la période.
