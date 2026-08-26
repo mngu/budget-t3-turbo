@@ -1,0 +1,26 @@
+pnpm-workspace.yaml
+  s_210dc624f1332c::t_fbd610a0d73b8f 29
+tooling/typescript/compiled-package.json
+  s_210dc624f1332c::t_f9020ba12db37b 10,15
+  s_210dc624f1332c::t_cb0a20cee20407 11-14
+.oxlintrc.json
+  s_210dc624f1332c::t_cb0a20cee20407 3-7,17-21,41,43-44,50,79-81,100,107-113,128-133,149-153
+pnpm-lock.yaml
+  s_210dc624f1332c::t_6da2f28437b9cc 40-41,70,94,121,139,142,145,172,209,215,236,249,261,277,302,315,352,2716-2835,5847-5849,7878,7881-7882,8235,8237-8238,8240,8242,8244,8247-8248,8251,8267,8277,8403-8462,9054,9061,11239,11250,11550,11564,11568,11570,11633-11654,11746,11748,11757,11761
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "1d75b65419d16f0d1908c0b04bcaf376eba0dae8",
+  "prompts": {},
+  "sessions": {
+    "s_210dc624f1332c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d6691835-6a1d-434c-8d3b-80cab713823e",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
