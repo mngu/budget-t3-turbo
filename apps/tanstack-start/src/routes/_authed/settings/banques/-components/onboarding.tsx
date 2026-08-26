@@ -1,17 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import type { SetupStatus } from "@budget/api";
+
 import { useRouter } from "@tanstack/react-router";
 import { KeyRoundIcon } from "lucide-react";
+import { useEffect, useState } from "react";
 
-import type { SetupStatus } from "@budget/api";
 import { cn } from "@budget/ui";
 import { Button } from "@budget/ui/button";
 import { Field, FieldDescription, FieldLabel } from "@budget/ui/field";
 import { Input } from "@budget/ui/input";
 import { Spinner } from "@budget/ui/spinner";
 import { toast } from "@budget/ui/toast";
-
 import { useTRPCClient } from "~/lib/trpc";
 
 export function Onboarding({ setup }: { setup: SetupStatus }) {

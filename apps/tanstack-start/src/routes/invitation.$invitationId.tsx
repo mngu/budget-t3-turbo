@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   CircleCheckIcon,
@@ -8,6 +7,7 @@ import {
   UserPlusIcon,
   UsersIcon,
 } from "lucide-react";
+import { useState } from "react";
 
 import { cn } from "@budget/ui";
 import { Button } from "@budget/ui/button";
@@ -15,7 +15,6 @@ import { Field, FieldLabel } from "@budget/ui/field";
 import { Input } from "@budget/ui/input";
 import { Spinner } from "@budget/ui/spinner";
 import { toast } from "@budget/ui/toast";
-
 import { authClient } from "~/auth/client";
 import { useTRPCClient } from "~/lib/trpc";
 

@@ -1,5 +1,7 @@
+import type { BudgetStats, GlobalStats, TransactionsSearch } from "./schemas";
 // Lectures et corrections manuelles sur la table des transactions.
 import type { SQL } from "@budget/db";
+
 import {
   alias,
   and,
@@ -19,7 +21,6 @@ import {
 import { db } from "@budget/db/client";
 import { bankAccounts, categories, transactions } from "@budget/db/schema";
 
-import type { BudgetStats, GlobalStats, TransactionsSearch } from "./schemas";
 import { budgetStatsSchema, globalStatsSchema, PAGE_SIZE } from "./schemas";
 
 // Nom de banque affiché : display_name choisi par l'utilisateur, sinon nom ASPSP.

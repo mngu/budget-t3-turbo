@@ -1,6 +1,7 @@
 import type { VariantProps } from "class-variance-authority";
-import { useMemo } from "react";
+
 import { cva } from "class-variance-authority";
+import { useMemo } from "react";
 
 import { cn } from "@budget/ui";
 
@@ -30,7 +31,7 @@ function FieldLegend({
       data-slot="field-legend"
       data-variant={variant}
       className={cn(
-        "mb-1.5 font-medium data-[variant=label]:text-control data-[variant=legend]:text-subheading",
+        "data-[variant=label]:text-control data-[variant=legend]:text-subheading mb-1.5 font-medium",
         className,
       )}
       {...props}

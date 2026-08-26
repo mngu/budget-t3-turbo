@@ -1,15 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter } from "@tanstack/react-router";
-
 import type {
   NewCategoryOverviewType,
   TransactionsSearch,
 } from "@budget/api/schemas";
-import { transactionsSearchSchema } from "@budget/api/schemas";
 
+import { useRouter } from "@tanstack/react-router";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+import { transactionsSearchSchema } from "@budget/api/schemas";
 import { defaultToCurrentMonth } from "~/lib/transactions-search";
+
 import { openParent } from "../-lib/breakdown";
 
 /**

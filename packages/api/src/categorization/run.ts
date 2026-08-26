@@ -1,3 +1,6 @@
+import type { TxnForLlm } from "./prompt";
+import type { SimilarTxn } from "./similar";
+
 // Catégorisation LLM des transactions non catégorisées (category_id IS NULL).
 // Best-effort : sans clé API ou en cas d'erreur API, avertissement et retour
 // normal — l'import ne doit jamais échouer à cause de la catégorisation.
@@ -8,8 +11,6 @@ import { and, count, eq, isNull } from "@budget/db";
 import { db } from "@budget/db/client";
 import { bankAccounts, categories, transactions } from "@budget/db/schema";
 
-import type { TxnForLlm } from "./prompt";
-import type { SimilarTxn } from "./similar";
 import { withSingleFlight } from "../lib/single-flight";
 import { buildFewShotUserMessage, buildSystemPrompt } from "./prompt";
 import {

@@ -1,5 +1,7 @@
 "use client";
 
+import type { ConsentAlert as ConsentAlertData } from "../-lib/consent";
+
 import { ClockAlertIcon, TriangleAlertIcon, UnplugIcon } from "lucide-react";
 
 import {
@@ -11,7 +13,6 @@ import {
 import { Button } from "@budget/ui/button";
 import { Spinner } from "@budget/ui/spinner";
 
-import type { ConsentAlert as ConsentAlertData } from "../-lib/consent";
 import { TONE_VARIANT } from "../-lib/consent";
 import { useRenewConnection } from "../-lib/use-renew";
 

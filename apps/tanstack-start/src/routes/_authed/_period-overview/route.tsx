@@ -5,12 +5,12 @@ import {
 } from "@tanstack/react-router";
 
 import { transactionsSearchSchema } from "@budget/api/schemas";
-
 import {
   defaultToCurrentMonth,
   SEARCH_DEFAULTS,
   wholePeriod,
 } from "~/lib/transactions-search";
+
 import { KpiBand } from "./-components/kpi-band";
 import { NewBreakdownList } from "./-components/new-breakdown-list";
 import { OverviewHeader } from "./-components/overview-header";

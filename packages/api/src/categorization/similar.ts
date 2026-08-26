@@ -1,11 +1,11 @@
+import type { TxnForLlm } from "./prompt";
 // Recherche de transactions déjà catégorisées similaires à une transaction donnée,
 // pour enrichir le prompt de catégorisation par des exemples concrets (few-shot).
 import type { Transaction } from "@budget/db/schema";
+
 import { and, desc, eq, isNotNull, ne, sql } from "@budget/db";
 import { db } from "@budget/db/client";
 import { bankAccounts, categories, transactions } from "@budget/db/schema";
-
-import type { TxnForLlm } from "./prompt";
 
 export interface SimilarTxn {
   id: number;

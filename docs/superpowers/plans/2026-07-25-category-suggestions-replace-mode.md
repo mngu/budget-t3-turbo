@@ -23,10 +23,12 @@
 ### Task 1: `computeReplacePlan` — logique pure de calcul du diff
 
 **Files:**
+
 - Create: `packages/api/src/lib/category-replace-plan.ts`
 - Test: `packages/api/src/lib/category-replace-plan.test.ts`
 
 **Interfaces:**
+
 - Produces: `ExistingCategoryForReplace { id: number; name: string; parentId: number | null; manualTransactionCount: number }`, `ReplacePlan { idsToDelete: number[]; namesToDelete: string[]; namesKept: string[] }`, `computeReplacePlan(existing: ExistingCategoryForReplace[], proposedNames: Set<string>): ReplacePlan`, `flattenProposedNames(suggestions: CategorySuggestion[]): Set<string>`. Consommé par Task 2 (exécution serveur `applySuggestionsCore`) et Task 3 (procédure `previewReplace`) — **jamais** par le frontend directement (voir Architecture).
 
 - [ ] **Step 1: Write the failing tests**
@@ -36,14 +38,22 @@
 import { describe, expect, it } from "vitest";
 
 import type { ExistingCategoryForReplace } from "./category-replace-plan";
-import { computeReplacePlan, flattenProposedNames } from "./category-replace-plan";
+import {
+  computeReplacePlan,
+  flattenProposedNames,
+} from "./category-replace-plan";
 
 const cat = (
   id: number,
   name: string,
   parentId: number | null,
   manualTransactionCount = 0,
-): ExistingCategoryForReplace => ({ id, name, parentId, manualTransactionCount });
+): ExistingCategoryForReplace => ({
+  id,
+  name,
+  parentId,
+  manualTransactionCount,
+});
 
 describe("computeReplacePlan", () => {
   it("supprime une catégorie absente de la proposition sans transaction manuelle", () => {
@@ -63,7 +73,10 @@ describe("computeReplacePlan", () => {
   });
 
   it("conserve un parent absent si un de ses enfants est protégé (bottom-up)", () => {
-    const existing = [cat(1, "Alimentation", null), cat(2, "Boulangerie", 1, 1)];
+    const existing = [
+      cat(1, "Alimentation", null),
+      cat(2, "Boulangerie", 1, 1),
+    ];
     const plan = computeReplacePlan(existing, new Set(["Nouvelle"]));
     expect(plan.idsToDelete).toEqual([]);
     expect(plan.namesKept).toEqual(["Alimentation", "Boulangerie"]);
@@ -99,11 +112,23 @@ describe("computeReplacePlan", () => {
 describe("flattenProposedNames", () => {
   it("aplatit parents et enfants en un seul Set de noms", () => {
     const names = flattenProposedNames([
-      { parent: "Alimentation", enfants: [{ name: "Courses", txnIds: [] }, { name: "Restaurants", txnIds: [] }] },
+      {
+        parent: "Alimentation",
+        enfants: [
+          { name: "Courses", txnIds: [] },
+          { name: "Restaurants", txnIds: [] },
+        ],
+      },
       { parent: "Transport", enfants: [{ name: "Essence", txnIds: [] }] },
     ]);
     expect(names).toEqual(
-      new Set(["Alimentation", "Courses", "Restaurants", "Transport", "Essence"]),
+      new Set([
+        "Alimentation",
+        "Courses",
+        "Restaurants",
+        "Transport",
+        "Essence",
+      ]),
     );
   });
 });
@@ -206,9 +231,11 @@ git commit -m "feat(api): add pure computeReplacePlan for category replace mode"
 ### Task 2: `applySuggestionsCore` — mode `replace`, transaction, reparentage
 
 **Files:**
+
 - Modify: `packages/api/src/lib/suggest-categories-core.ts:1-215`
 
 **Interfaces:**
+
 - Consumes: `computeReplacePlan`, `flattenProposedNames`, `ExistingCategoryForReplace`, `ReplacePlan` from Task 1 (`./category-replace-plan`).
 - Produces: `ApplyMode = "merge" | "replace"`, `ApplySuggestionsResult { categoriesCreated: number; categoriesReused: number; categoriesDeleted: number; categoriesKept: number }`, `applySuggestionsCore(suggestions: CategorySuggestion[], mode?: ApplyMode): Promise<ApplySuggestionsResult>` (mode par défaut `"merge"`, signature rétrocompatible), `previewReplaceCore(suggestions: CategorySuggestion[]): Promise<ReplacePlan>`. Toutes deux consommées par Task 3 (routeur tRPC).
 
@@ -229,8 +256,14 @@ import { count, desc, eq, gte, inArray, sql } from "@budget/db";
 Ajouter, juste après l'import de `categorySuggestionsSchema` :
 
 ```ts
-import type { ExistingCategoryForReplace, ReplacePlan } from "./category-replace-plan";
-import { computeReplacePlan, flattenProposedNames } from "./category-replace-plan";
+import type {
+  ExistingCategoryForReplace,
+  ReplacePlan,
+} from "./category-replace-plan";
+import {
+  computeReplacePlan,
+  flattenProposedNames,
+} from "./category-replace-plan";
 ```
 
 - [ ] **Step 2: Refactorer `upsertCategory` (accepte `tx`, flag de reparentage) et ajouter les deux helpers de remplacement**
@@ -340,9 +373,7 @@ async function deleteCategoriesInPlan(
   if (plan.idsToDelete.length === 0) return;
 
   const toDelete = existing.filter((c) => plan.idsToDelete.includes(c.id));
-  const childIds = toDelete
-    .filter((c) => c.parentId !== null)
-    .map((c) => c.id);
+  const childIds = toDelete.filter((c) => c.parentId !== null).map((c) => c.id);
   const parentIds = toDelete
     .filter((c) => c.parentId === null)
     .map((c) => c.id);
@@ -477,9 +508,7 @@ export async function applySuggestionsCore(
     }
 
     const after = await tx.select({ id: categories.id }).from(categories);
-    const categoriesCreated = after.filter(
-      (c) => !beforeIds.has(c.id),
-    ).length;
+    const categoriesCreated = after.filter((c) => !beforeIds.has(c.id)).length;
     const totalUpserts = suggestions.reduce(
       (n, s) => n + 1 + s.enfants.length,
       0,
@@ -533,10 +562,12 @@ git commit -m "feat(api): add replace mode + previewReplaceCore to applySuggesti
 ### Task 3: Routeur tRPC — `mode` sur `apply`, nouvelle query `previewReplace`
 
 **Files:**
+
 - Modify: `packages/api/src/router/categories.ts:188-199`
 - Modify: `packages/api/src/index.ts` (export du type `ReplacePlan`)
 
 **Interfaces:**
+
 - Consumes: `applySuggestionsCore(suggestions, mode)`, `previewReplaceCore(suggestions)` from Task 2.
 - Produces: mutation `categories.suggestions.apply` gagne `mode: "merge" | "replace"` (défaut `"merge"`) ; nouvelle query `categories.suggestions.previewReplace({ suggestions }): ReplacePlan`. Consommées par Task 4 (frontend).
 
@@ -635,11 +666,13 @@ git commit -m "feat(api): expose mode on suggestions.apply and add suggestions.p
 ### Task 4: UI — toggle de mode, aperçu serveur, confirmation destructive
 
 **Files:**
+
 - Modify: `apps/tanstack-start/src/component/category-suggestions.tsx` (fichier entier)
 
 Pas de changement dans `apps/tanstack-start/src/routes/_authed/categories.tsx` : `SuggestionsWorkspace` garde exactement sa signature actuelle (`{ data: ReadyStatus }`), l'aperçu vient d'une query dédiée, pas d'une prop supplémentaire à faire descendre depuis la route.
 
 **Interfaces:**
+
 - Consumes: `ReplacePlan` from `@budget/api` (type-only) ; `trpcClient.categories.suggestions.previewReplace.query({ suggestions })` et `trpcClient.categories.suggestions.apply.mutate({ suggestions, mode })` (Task 3).
 
 - [ ] **Step 1: Réécrire `category-suggestions.tsx`**
@@ -648,7 +681,11 @@ Pas de changement dans `apps/tanstack-start/src/routes/_authed/categories.tsx` :
 import { useEffect, useState } from "react";
 import { Loader2Icon } from "lucide-react";
 
-import type { CategorySuggestion, ReplacePlan, TxnForAnalysis } from "@budget/api";
+import type {
+  CategorySuggestion,
+  ReplacePlan,
+  TxnForAnalysis,
+} from "@budget/api";
 import { Button } from "@budget/ui/button";
 import { ButtonGroup } from "@budget/ui/button-group";
 import {
@@ -841,8 +878,8 @@ export function SuggestionsWorkspace({ data }: { data: ReadyStatus }) {
               {payload.reduce((n, p) => n + p.enfants.length, 0)}{" "}
               sous-catégorie(s) seront{" "}
               {mode === "replace" ? "créées ou réutilisées" : "créées"}. Les
-              transactions catégorisées automatiquement seront reclassées
-              dans cette nouvelle arborescence.
+              transactions catégorisées automatiquement seront reclassées dans
+              cette nouvelle arborescence.
               {mode === "replace" && previewLoading && (
                 <> Calcul de l'impact en cours…</>
               )}
@@ -861,7 +898,8 @@ export function SuggestionsWorkspace({ data }: { data: ReadyStatus }) {
                       {" "}
                       {replacePreview.namesKept.length} catégorie(s) seront
                       conservées malgré tout car elles contiennent des
-                      corrections manuelles : {replacePreview.namesKept.join(", ")}.
+                      corrections manuelles :{" "}
+                      {replacePreview.namesKept.join(", ")}.
                     </>
                   )}
                 </>
@@ -920,6 +958,7 @@ Expected: no TypeScript errors.
 Run: `pnpm -F @budget/tanstack-start dev` (nécessite `docker compose up -d` et `POSTGRES_URL` déjà configurés, voir CLAUDE.md).
 
 Sur `http://localhost:3000/categories` :
+
 1. Générer une suggestion ("Suggérer des catégories"), vérifier que le toggle "Fusionner / Remplacer" s'affiche, "Fusionner" actif par défaut.
 2. Cliquer "Remplacer" : le bandeau d'avertissement destructif apparaît, le bouton principal passe en style destructif et son libellé devient "Remplacer".
 3. Ouvrir la confirmation : vérifier "Calcul de l'impact en cours…" bref puis la liste des catégories supprimées/conservées (comparer avec `CategoryOverviewTree` plus bas sur la même page — en particulier une catégorie qui a des transactions corrigées manuellement doit apparaître dans "conservées", pas "supprimées").

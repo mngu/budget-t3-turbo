@@ -1,5 +1,7 @@
 "use client";
 
+import type { DeleteTarget } from "../-lib/use-category-crud";
+
 import { TriangleAlertIcon } from "lucide-react";
 
 import {
@@ -15,8 +17,6 @@ import {
 } from "@budget/ui/alert-dialog";
 import { Badge } from "@budget/ui/badge";
 import { Spinner } from "@budget/ui/spinner";
-
-import type { DeleteTarget } from "../-lib/use-category-crud";
 
 export function CategoryDeleteDialog({
   target,

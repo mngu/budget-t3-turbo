@@ -1,11 +1,10 @@
-import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod/v4";
 
 import { Button } from "@budget/ui/button";
 import { Spinner } from "@budget/ui/spinner";
 import { toast } from "@budget/ui/toast";
-
 import { useTRPCClient } from "~/lib/trpc";
 
 // Cible de la redirection Enable Banking (déclarée dans le Control Panel).

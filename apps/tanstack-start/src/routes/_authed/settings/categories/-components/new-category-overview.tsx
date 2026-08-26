@@ -1,4 +1,6 @@
-import { useState } from "react";
+import type { computeStats } from "..";
+import type { ManagedCategory } from "@budget/api/schemas";
+
 import {
   EllipsisIcon,
   ListTreeIcon,
@@ -6,8 +8,8 @@ import {
   Trash2Icon,
   XIcon,
 } from "lucide-react";
+import { useState } from "react";
 
-import type { ManagedCategory } from "@budget/api/schemas";
 import { cn } from "@budget/ui";
 import {
   Accordion,
@@ -25,8 +27,6 @@ import {
   DropdownMenuTrigger,
 } from "@budget/ui/dropdown-menu";
 import { Input } from "@budget/ui/input";
-
-import type { computeStats } from "..";
 import { CategoryIcon } from "~/component/category-icon";
 import {
   shadeCategoryColor,
@@ -37,6 +37,7 @@ import { euro0 } from "~/lib/format";
 import { sumBy } from "~/lib/sum";
 import { useTRPCClient } from "~/lib/trpc";
 import { useRun } from "~/routes/_authed/settings/categories/-lib/use-run";
+
 import { useCategoryCrud } from "../-lib/use-category-crud";
 import { usePreview } from "../-lib/use-preview";
 import { CategoryDeleteDialog } from "./category-delete-dialog";

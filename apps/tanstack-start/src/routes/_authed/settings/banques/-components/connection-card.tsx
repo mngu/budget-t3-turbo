@@ -1,6 +1,7 @@
 "use client";
 
 import type { AccountSummary, ConnectionSummary } from "@budget/api";
+
 import { cn } from "@budget/ui";
 import { Badge } from "@budget/ui/badge";
 import { Button } from "@budget/ui/button";

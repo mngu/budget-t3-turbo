@@ -1,6 +1,7 @@
+import type { SimilarTxn } from "./similar";
+
 import { describe, expect, it } from "vitest";
 
-import type { SimilarTxn } from "./similar";
 import {
   buildCategorizationOutputSchema,
   partitionResults,

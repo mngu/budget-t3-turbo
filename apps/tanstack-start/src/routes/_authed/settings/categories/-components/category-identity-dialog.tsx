@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import type { IdentityTarget } from "../-lib/use-category-crud";
+
 import { InfoIcon } from "lucide-react";
+import { useState } from "react";
 
 import {
   CATEGORY_COLOR_PALETTE,
@@ -18,8 +20,6 @@ import {
   DialogTitle,
 } from "@budget/ui/dialog";
 import { Input } from "@budget/ui/input";
-
-import type { IdentityTarget } from "../-lib/use-category-crud";
 import { CategoryIcon } from "~/component/category-icon";
 import { softCategoryColor, useCategoryColor } from "~/lib/category-color";
 

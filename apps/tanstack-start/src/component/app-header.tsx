@@ -22,7 +22,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@budget/ui/dropdown-menu";
-
 import { authClient } from "~/auth/client";
 import { BankPicker } from "~/component/bank-picker";
 import { PeriodPicker } from "~/component/period-picker";

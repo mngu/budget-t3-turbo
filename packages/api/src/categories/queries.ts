@@ -1,13 +1,14 @@
-// Lectures de l'arborescence de catégories.
-import { eq, sql } from "@budget/db";
-import { db } from "@budget/db/client";
-import { categories } from "@budget/db/schema";
-
 import type { TransactionsSearch } from "../transactions/schemas";
 import type {
   NewCategoryOverviewElementType,
   NewCategoryOverviewType,
 } from "./schemas";
+
+// Lectures de l'arborescence de catégories.
+import { eq, sql } from "@budget/db";
+import { db } from "@budget/db/client";
+import { categories } from "@budget/db/schema";
+
 import { bankFilter } from "../transactions/queries";
 import { newCategoryOverviewSchema } from "./schemas";
 

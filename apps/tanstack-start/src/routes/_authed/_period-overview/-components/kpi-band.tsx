@@ -1,8 +1,9 @@
 import type { BudgetStats, GlobalStats } from "@budget/api/schemas";
-import { cn } from "@budget/ui";
 
+import { cn } from "@budget/ui";
 import { useCategoryColor } from "~/lib/category-color";
 import { euro0, signedEuro0 } from "~/lib/format";
+
 import { Gauge } from "./gauge";
 
 interface KpiBandProps {

@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useDebounce } from "@uidotdev/usehooks";
+import { useEffect, useRef, useState } from "react";
 
 import { InputGroupInput } from "@budget/ui/input-group";
 

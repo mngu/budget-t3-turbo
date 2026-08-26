@@ -1,4 +1,5 @@
 import type { TRPCRouterRecord } from "@trpc/server";
+
 import { z } from "zod/v4";
 
 import {
@@ -60,5 +61,4 @@ export const transactionsRouter = {
     .mutation(({ ctx, input }) =>
       setTransactionExcluded(ctx.organizationId, input.id, input.excluded),
     ),
-
 } satisfies TRPCRouterRecord;

@@ -1,10 +1,10 @@
 "use client";
 
+import type { ConnectionSummary } from "@budget/api";
+
 import { useState } from "react";
 
-import type { ConnectionSummary } from "@budget/api";
 import { toast } from "@budget/ui/toast";
-
 import { useTRPCClient } from "~/lib/trpc";
 
 /**

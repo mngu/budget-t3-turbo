@@ -26,22 +26,22 @@
 
 À appliquer à chaque fichier copié depuis SOURCE (seuls les imports changent, le corps du code reste identique sauf mention explicite) :
 
-| Import source | Import cible |
-| --- | --- |
-| `from "zod"` | `from "zod/v4"` |
-| `from "../db/client"` ou `from "@/db/client"` | `from "@budget/db/client"` |
-| `from "../db/schema"`, `from "../src/db/schema"`, `from "@/db/schema"` | `from "@budget/db/schema"` |
-| `from "drizzle-orm"` | `from "@budget/db"` (le package ré-exporte `drizzle-orm/sql` + `alias`) |
-| `from "./eb-domain.server"` | `from "./eb-domain"` (même motif pour tous les `*.server`) |
-| `from "../src/db/client"` (scripts) | `from "@budget/db/client"` |
-| `from "@/components/ui/<x>"` | `from "@budget/ui/<x>"` (`sonner` → `@budget/ui/toast`) |
-| `from "@/lib/utils"` (cn) | `from "@budget/ui"` |
-| `from "@/lib/date"` | `from "~/lib/date"` |
-| `from "@/lib/sync-toast"` | `from "~/lib/sync-toast"` |
-| `from "@/components/search-input"` | `from "~/component/search-input"` |
-| `from "@/components/range-picker/range-picker"` | `from "~/component/range-picker"` |
-| `from "@/server/transactions"` | schéma/constantes → `@budget/validators` ; types lignes → `RouterOutputs` de `@budget/api` (détail en Task 10) |
-| `from "@/server/categories"` etc. | procédures → client tRPC ; types → exports de `@budget/api` (détail en Tasks 10–11) |
+| Import source                                                          | Import cible                                                                                                   |
+| ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `from "zod"`                                                           | `from "zod/v4"`                                                                                                |
+| `from "../db/client"` ou `from "@/db/client"`                          | `from "@budget/db/client"`                                                                                     |
+| `from "../db/schema"`, `from "../src/db/schema"`, `from "@/db/schema"` | `from "@budget/db/schema"`                                                                                     |
+| `from "drizzle-orm"`                                                   | `from "@budget/db"` (le package ré-exporte `drizzle-orm/sql` + `alias`)                                        |
+| `from "./eb-domain.server"`                                            | `from "./eb-domain"` (même motif pour tous les `*.server`)                                                     |
+| `from "../src/db/client"` (scripts)                                    | `from "@budget/db/client"`                                                                                     |
+| `from "@/components/ui/<x>"`                                           | `from "@budget/ui/<x>"` (`sonner` → `@budget/ui/toast`)                                                        |
+| `from "@/lib/utils"` (cn)                                              | `from "@budget/ui"`                                                                                            |
+| `from "@/lib/date"`                                                    | `from "~/lib/date"`                                                                                            |
+| `from "@/lib/sync-toast"`                                              | `from "~/lib/sync-toast"`                                                                                      |
+| `from "@/components/search-input"`                                     | `from "~/component/search-input"`                                                                              |
+| `from "@/components/range-picker/range-picker"`                        | `from "~/component/range-picker"`                                                                              |
+| `from "@/server/transactions"`                                         | schéma/constantes → `@budget/validators` ; types lignes → `RouterOutputs` de `@budget/api` (détail en Task 10) |
+| `from "@/server/categories"` etc.                                      | procédures → client tRPC ; types → exports de `@budget/api` (détail en Tasks 10–11)                            |
 
 L'alias de chemin du template web est `~/` (pas `@/`).
 
@@ -50,10 +50,12 @@ L'alias de chemin du template web est `~/` (pas `@/`).
 ### Task 1 : Renommage `@acme` → `@budget` et suppression d'apps/nextjs
 
 **Files:**
+
 - Delete: `apps/nextjs/`
 - Modify: tous les fichiers contenant `@acme/` (package.json, sources, tooling), `package.json` racine
 
 **Interfaces:**
+
 - Produces: packages `@budget/db`, `@budget/api`, `@budget/auth`, `@budget/ui`, `@budget/validators`, apps `@budget/tanstack-start`, `@budget/expo` — noms utilisés par toutes les tâches suivantes.
 
 - [ ] **Step 1 : Supprimer l'app Next.js**
@@ -77,11 +79,13 @@ Dans `package.json` racine : supprimer le script `dev:next` (référence l'app s
 ```bash
 grep -r '@acme' --exclude-dir=node_modules --exclude=pnpm-lock.yaml . ; echo "exit=$?"
 ```
+
 Expected: aucun résultat, `exit=1`.
 
 ```bash
 pnpm install && pnpm typecheck
 ```
+
 Expected: install OK (lockfile mis à jour), typecheck PASS sur tous les packages.
 
 - [ ] **Step 5 : Commit**
@@ -95,10 +99,12 @@ git add -A && git commit -m "chore: renomme le scope @acme en @budget et supprim
 ### Task 2 : Infra locale — docker-compose, .env, base `budget_t3`
 
 **Files:**
+
 - Create: `docker-compose.yml`
 - Modify: `.env`, `.env.example`, `.gitignore`
 
 **Interfaces:**
+
 - Produces: base PostgreSQL `budget_t3` joignable via `POSTGRES_URL=postgres://budget:budget@localhost:5436/budget_t3` — utilisée par toutes les tâches DB.
 
 - [ ] **Step 1 : Créer `docker-compose.yml`**
@@ -132,6 +138,7 @@ volumes:
 ```bash
 docker compose up -d && docker compose exec -T db psql -U budget -d postgres -c 'CREATE DATABASE budget_t3'
 ```
+
 Expected: `CREATE DATABASE` (ou erreur « already exists » si relance — acceptable).
 
 - [ ] **Step 3 : Mettre à jour `.env` et `.env.example`**
@@ -165,6 +172,7 @@ data/
 ```bash
 docker compose exec -T db psql -U budget -d budget_t3 -c 'SELECT 1'
 ```
+
 Expected: `1`.
 
 - [ ] **Step 6 : Commit**
@@ -178,10 +186,12 @@ git add docker-compose.yml .env.example .gitignore && git commit -m "chore: dock
 ### Task 3 : `@budget/db` — schéma budget, driver pg, purge du feature post
 
 **Files:**
+
 - Modify: `packages/db/src/schema.ts`, `packages/db/src/client.ts`, `packages/db/package.json`, `packages/api/src/root.ts`, `apps/tanstack-start/src/routes/index.tsx`, `apps/expo/src/app/index.tsx`
 - Delete: `packages/api/src/router/post.ts`, `apps/expo/src/app/post/[id].tsx`
 
 **Interfaces:**
+
 - Consumes: base `budget_t3` (Task 2).
 - Produces: `@budget/db/schema` exporte `appSettings`, `bankConnections`, `authRequests`, `accounts`, `categories`, `transactions`, types `NewAccount`, `NewTransaction`, `NewCategory`, `AppSettingsRow`, `BankConnection`, `AuthRequest` + tables Better Auth (`user`, `session`, `account`, `verification`). `@budget/db/client` exporte `db` (drizzle + pg Pool).
 
@@ -291,11 +301,13 @@ export default function Index() {
 ```bash
 grep 'POSTGRES_URL' .env
 ```
+
 Expected: l'URL se termine par `/budget_t3` — **sinon STOP**.
 
 ```bash
 pnpm db:push
 ```
+
 Expected: création des tables `app_settings`, `bank_connections`, `auth_requests`, `accounts`, `categories`, `transactions`, `user`, `session`, `account`, `verification` dans `budget_t3` (base vierge, pas de prompt destructif).
 
 - [ ] **Step 6 : Vérifier**
@@ -304,6 +316,7 @@ Expected: création des tables `app_settings`, `bank_connections`, `auth_request
 docker compose exec -T db psql -U budget -d budget_t3 -c '\dt'
 pnpm typecheck
 ```
+
 Expected: les 10 tables listées ; typecheck PASS.
 
 - [ ] **Step 7 : Commit**
@@ -317,10 +330,12 @@ git add -A && git commit -m "feat(db): schéma budget porté sur pg, purge du fe
 ### Task 4 : `@budget/auth` — email + mot de passe, retrait de Discord
 
 **Files:**
+
 - Modify: `packages/auth/src/index.ts`, `packages/auth/env.ts`, `packages/auth/script/auth-cli.ts`, `apps/tanstack-start/src/auth/server.ts`
 - Delete: `apps/tanstack-start/src/component/auth-showcase.tsx`
 
 **Interfaces:**
+
 - Consumes: `@budget/db/client` (adapter drizzle).
 - Produces: `initAuth(options: { baseUrl: string; secret: string | undefined; extraPlugins?: BetterAuthPlugin[] })`, types `Auth`, `Session` — consommés par l'app web (Task 9), Expo (Task 12) et le contexte tRPC (inchangé).
 
@@ -426,6 +441,7 @@ export const auth = initAuth({
 ```bash
 git rm apps/tanstack-start/src/component/auth-showcase.tsx
 ```
+
 (Plus aucun import ne la référence depuis le placeholder de Task 3 — vérifier avec `grep -r auth-showcase apps`.)
 
 - [ ] **Step 6 : Vérifier que le schéma auth généré est inchangé**
@@ -433,6 +449,7 @@ git rm apps/tanstack-start/src/component/auth-showcase.tsx
 ```bash
 pnpm auth:generate && git diff --stat packages/db/src/auth-schema.ts
 ```
+
 Expected: aucun diff (email/password utilise les mêmes tables user/session/account/verification).
 
 - [ ] **Step 7 : Typecheck + commit**
@@ -447,10 +464,12 @@ git add -A && git commit -m "feat(auth): Better Auth en email/mot de passe, retr
 ### Task 5 : `@budget/api` — logique Enable Banking (lib) + Vitest
 
 **Files:**
+
 - Create: `packages/api/src/lib/eb-domain.ts`, `eb-client.ts`, `connections-core.ts`, `settings-core.ts`, `eb-sync.ts`, `sync-core.ts`, `data-dir.ts`, `eb-domain.test.ts`, `sync-core.test.ts`, `packages/api/vitest.config.ts`
 - Modify: `packages/api/package.json`, `turbo.json`, `package.json` (racine)
 
 **Interfaces:**
+
 - Consumes: `@budget/db/client` (`db`), `@budget/db/schema`, `@budget/db` (opérateurs SQL).
 - Produces (signatures identiques à la source, consommées par les routers en Task 7) :
   - `eb-domain` : `makeJwt(applicationId, privateKeyPem, now?)`, `clampValidUntil(...)`, `consentBadge(validUntil, now)`, `parseSessionAccounts(raw)`, `reconcileAccounts(...)`, constantes `CONSENT_DAYS`, `CONSENT_WARNING_DAYS`, types `ConsentBadge`, `DiscoveredAccount`, `ExistingAccount`, `AccountReconciliation`
@@ -540,6 +559,7 @@ export default defineConfig({
 ```bash
 pnpm install && pnpm -F @budget/api test
 ```
+
 Expected: suites `eb-domain.test.ts` et `sync-core.test.ts` PASS (si `sync-core.test.ts` échoue sur la résolution des scripts absents, le noter et re-vérifier en fin de Task 6).
 
 - [ ] **Step 6 : Commit**
@@ -553,10 +573,12 @@ git add -A && git commit -m "feat(api): logique Enable Banking portée dans @bud
 ### Task 6 : `@budget/api` — scripts CLI (import, categorize, sync)
 
 **Files:**
+
 - Create: `packages/api/scripts/import.ts`, `normalize.ts`, `normalize.test.ts`, `categorize.ts`, `categorize-core.ts`, `categorize-core.test.ts`, `slug.ts`, `sync.ts`
 - Modify: `packages/api/package.json`, `package.json` (racine)
 
 **Interfaces:**
+
 - Consumes: `@budget/db/client`, `@budget/db/schema`, `DATA_DIR` (`../src/lib/data-dir`), `performSync` (`../src/lib/sync-core`).
 - Produces: `main(): Promise<boolean>` (import.ts), `main(): Promise<void>` (categorize.ts) — consommés par `sync-core.ts` ; commandes `pnpm import`, `pnpm categorize`, `pnpm sync` à la racine.
 
@@ -588,6 +610,7 @@ const DATA = DATA_DIR;
 ```
 
 (et purger les imports `resolve`/`dirname`/`fileURLToPath` devenus inutiles).
+
 - `normalize.ts` : `import type { NewTransaction } from "../src/db/schema"` → `from "@budget/db/schema"`.
 - `categorize.ts` : imports db → `@budget/db/client` / `@budget/db/schema` ; `drizzle-orm` → `@budget/db`.
 - `sync.ts` : `../src/server/sync-core.server` → `../src/lib/sync-core`.
@@ -596,6 +619,7 @@ const DATA = DATA_DIR;
 - [ ] **Step 3 : Dépendances et scripts du package**
 
 `packages/api/package.json` :
+
 - `dependencies` : ajouter `"@anthropic-ai/sdk": "^0.111.0"`.
 - `devDependencies` : ajouter `"tsx": "^4.23.0"`, `"dotenv-cli": "^10.0.0"`.
 - `scripts` : ajouter
@@ -620,6 +644,7 @@ const DATA = DATA_DIR;
 ```bash
 pnpm install && pnpm -F @budget/api test && pnpm typecheck
 ```
+
 Expected: les 4 suites (`eb-domain`, `sync-core`, `normalize`, `categorize-core`) PASS ; typecheck PASS (les imports de `sync-core.ts` vers les scripts sont maintenant résolus).
 
 - [ ] **Step 5 : Vérifier l'import à vide (sans données, sans effet)**
@@ -627,6 +652,7 @@ Expected: les 4 suites (`eb-domain`, `sync-core`, `normalize`, `categorize-core`
 ```bash
 mkdir -p data && pnpm import
 ```
+
 Expected: le script tourne, ne trouve aucun fichier `transactions-*.json`, se termine sans erreur ; `categorize` ne trouve rien à catégoriser et sort proprement (nécessite `ANTHROPIC_API_KEY` présent dans `.env` — il ne fait aucun appel LLM s'il n'y a aucune transaction). **Ne pas lancer `pnpm sync`.**
 
 - [ ] **Step 6 : Commit**
@@ -640,10 +666,12 @@ git add -A && git commit -m "feat(api): scripts import/categorize/sync portés d
 ### Task 7 : `@budget/api` — routers tRPC + `@budget/validators`
 
 **Files:**
+
 - Create: `packages/api/src/router/transactions.ts`, `categories.ts`, `connections.ts`, `settings.ts`, `sync.ts`
 - Modify: `packages/api/src/root.ts`, `packages/api/src/trpc.ts`, `packages/api/src/index.ts`, `packages/validators/src/index.ts`
 
 **Interfaces:**
+
 - Consumes: fonctions core de Task 5, `protectedProcedure`/`createTRPCRouter` du template.
 - Produces:
   - `@budget/validators` : `transactionsSearchSchema`, `TransactionsSearch`, `PAGE_SIZE = 25`, `FALLBACK_CATEGORY_COLOR = "#94a3b8"`.
@@ -694,12 +722,12 @@ export type TransactionsSearch = z.infer<typeof transactionsSearchSchema>;
 Dans `packages/api/src/trpc.ts`, fonction `createTRPCContext`, ajouter `headers` à l'objet retourné :
 
 ```ts
-  return {
-    authApi,
-    session,
-    db,
-    headers: opts.headers,
-  };
+return {
+  authApi,
+  session,
+  db,
+  headers: opts.headers,
+};
 ```
 
 - [ ] **Step 3 : `packages/api/src/router/transactions.ts`**
@@ -767,11 +795,13 @@ const transactionsFilterQuery = (
   if (query.direction)
     conditions.push(eq(transactions.direction, query.direction));
   if (query.status) conditions.push(eq(transactions.status, query.status));
-  if (query.category === "none") conditions.push(isNull(transactions.categoryId));
+  if (query.category === "none")
+    conditions.push(isNull(transactions.categoryId));
   else if (query.category) conditions.push(eq(categories.name, query.category));
   if (query.dateFrom)
     conditions.push(gte(transactions.bookingDate, query.dateFrom));
-  if (query.dateTo) conditions.push(lte(transactions.bookingDate, query.dateTo));
+  if (query.dateTo)
+    conditions.push(lte(transactions.bookingDate, query.dateTo));
   if (query.q) {
     conditions.push(
       or(
@@ -897,16 +927,15 @@ export interface CategoryOption {
 }
 
 export const categoriesRouter = {
-  list: protectedProcedure.query(
-    async ({ ctx }): Promise<CategoryOption[]> =>
-      ctx.db
-        .select({
-          id: categories.id,
-          name: categories.name,
-          color: categories.color,
-        })
-        .from(categories)
-        .orderBy(categories.id),
+  list: protectedProcedure.query(async ({ ctx }): Promise<CategoryOption[]> =>
+    ctx.db
+      .select({
+        id: categories.id,
+        name: categories.name,
+        color: categories.color,
+      })
+      .from(categories)
+      .orderBy(categories.id),
   ),
 } satisfies TRPCRouterRecord;
 ```
@@ -1072,6 +1101,7 @@ export type { CategoryOption } from "./router/categories";
 ```bash
 pnpm -F @budget/api test && pnpm typecheck && pnpm lint
 ```
+
 Expected: PASS partout.
 
 - [ ] **Step 10 : Commit**
@@ -1085,6 +1115,7 @@ git add -A && git commit -m "feat(api): routers tRPC transactions/categories/con
 ### Task 8 : `@budget/ui` — composants Base UI portés
 
 **Files:**
+
 - Create (copies depuis `SOURCE/src/components/ui/`): `packages/ui/src/badge.tsx`, `button-group.tsx`, `calendar.tsx`, `card.tsx`, `popover.tsx`, `select.tsx`, `table.tsx`
 - Overwrite (versions source Base UI remplacent les versions template Radix) : `packages/ui/src/button.tsx`, `field.tsx`, `input.tsx`, `label.tsx`, `separator.tsx`, `toast.tsx` (← contenu de `SOURCE/src/components/ui/sonner.tsx`)
 - Delete: `packages/ui/src/dropdown-menu.tsx`
@@ -1092,6 +1123,7 @@ git add -A && git commit -m "feat(api): routers tRPC transactions/categories/con
 - Keep: `packages/ui/src/theme.tsx`, `packages/ui/src/index.ts`
 
 **Interfaces:**
+
 - Produces: exports `@budget/ui` (cn), `@budget/ui/badge`, `button`, `button-group`, `calendar`, `card`, `field`, `input`, `label`, `popover`, `select`, `separator`, `table`, `theme`, `toast` — consommés par toutes les pages web (Tasks 9–11).
 
 - [ ] **Step 1 : Copier les composants**
@@ -1140,11 +1172,13 @@ Dans chaque fichier copié : `import { cn } from "@/lib/utils"` → `import { cn
 ```bash
 grep -rn 'radix' packages/ui/src ; echo "exit=$?"
 ```
+
 Expected: aucun résultat (`exit=1`).
 
 ```bash
 pnpm install && pnpm -F @budget/ui typecheck
 ```
+
 Expected: PASS. Si un composant copié importe un module manquant (ex. `date-fns` dans calendar), ajouter la dépendance dans `packages/ui/package.json` avec la version exacte de `SOURCE/package.json` et relancer.
 
 - [ ] **Step 5 : Commit**
@@ -1158,12 +1192,14 @@ git add -A && git commit -m "feat(ui): composants Base UI portés depuis budget-
 ### Task 9 : App web — styles, racine, contexte trpcClient, login et layout authentifié
 
 **Files:**
+
 - Overwrite: `apps/tanstack-start/src/styles.css` (← `SOURCE/src/styles.css`)
 - Modify: `apps/tanstack-start/src/routes/__root.tsx`, `apps/tanstack-start/src/router.tsx`, `apps/tanstack-start/src/lib/trpc.ts`, `apps/tanstack-start/package.json`
 - Create: `apps/tanstack-start/src/routes/login.tsx`, `apps/tanstack-start/src/routes/_authed.tsx`
 - Move: `apps/tanstack-start/src/routes/index.tsx` → `apps/tanstack-start/src/routes/_authed/index.tsx`
 
 **Interfaces:**
+
 - Consumes: `authClient` (`~/auth/client`), router `auth.getSession` (template), `TRPCClient<AppRouter>`.
 - Produces: contexte router `{ queryClient, trpc, trpcClient }` (le champ `trpcClient` est utilisé par tous les loaders des Tasks 10–11) ; hook `useTRPCClient` ; routes protégées sous `_authed` (URLs inchangées).
 
@@ -1263,7 +1299,9 @@ import { toast } from "@budget/ui/toast";
 import { authClient } from "~/auth/client";
 
 export const Route = createFileRoute("/login")({
-  validateSearch: z.object({ redirect: z.string().optional().catch(undefined) }),
+  validateSearch: z.object({
+    redirect: z.string().optional().catch(undefined),
+  }),
   component: LoginPage,
 });
 
@@ -1350,11 +1388,13 @@ function LoginPage() {
 ```bash
 pnpm typecheck
 ```
+
 Expected: PASS (le routeTree se régénère au dev/build).
 
 ```bash
 pnpm -F @budget/tanstack-start dev
 ```
+
 Expected (manuel) : `http://localhost:3000/` redirige vers `/login` ; « Créer le compte » avec un email + mot de passe crée l'utilisateur puis affiche le placeholder ; re-login OK. Arrêter le serveur ensuite.
 
 - [ ] **Step 7 : Commit**
@@ -1368,10 +1408,12 @@ git add -A && git commit -m "feat(web): styles portés, login email/mot de passe
 ### Task 10 : App web — page transactions (/)
 
 **Files:**
+
 - Overwrite: `apps/tanstack-start/src/routes/_authed/index.tsx` (← `SOURCE/src/routes/index.tsx`)
 - Create (copies) : `apps/tanstack-start/src/routes/_authed/-components/transactions-filters.tsx`, `calendar-filter.tsx` (← `SOURCE/src/routes/-components/`), `apps/tanstack-start/src/component/search-input.tsx` (← `SOURCE/src/components/search-input.tsx`), `apps/tanstack-start/src/component/range-picker.tsx` (← `SOURCE/src/components/range-picker/range-picker.tsx`), `apps/tanstack-start/src/lib/sync-toast.ts`, `apps/tanstack-start/src/lib/date.ts` (← `SOURCE/src/lib/`)
 
 **Interfaces:**
+
 - Consumes: `context.trpcClient` (loaders), `useTRPCClient()` (handlers), `transactionsSearchSchema`/`PAGE_SIZE`/`FALLBACK_CATEGORY_COLOR` (`@budget/validators`), types `TransactionRow`, `CategoryBreakdownItem`, `CategoryOption`, `SyncOutcome` (`@budget/api`).
 - Produces: route `/` fonctionnelle (table, filtres, tri, pagination, breakdown par catégorie, édition de catégorie, bouton Sync).
 
@@ -1402,7 +1444,11 @@ Conversions exactes, dans l'ordre du fichier :
    - `import { getBanks, getTransactions, updateTransactionCategory, getTransactionsByCategory, transactionsSearchSchema, PAGE_SIZE, FALLBACK_CATEGORY_COLOR, type TransactionRow, ... } from "@/server/transactions"` → constantes/schéma depuis `@budget/validators`, types depuis `@budget/api` :
 
    ```ts
-   import type { CategoryOption, SyncOutcome, TransactionRow } from "@budget/api";
+   import type {
+     CategoryOption,
+     SyncOutcome,
+     TransactionRow,
+   } from "@budget/api";
    import {
      FALLBACK_CATEGORY_COLOR,
      PAGE_SIZE,
@@ -1413,6 +1459,7 @@ Conversions exactes, dans l'ordre du fichier :
 
    (Adapter la liste réelle des symboles importés à ce que le fichier utilise effectivement — la source importe aussi `type CategoryBreakdownItem` le cas échéant.)
    - `import { getCategories, type CategoryOption } from "@/server/categories"` → supprimé (type déjà couvert ci-dessus).
+
 3. Loader — remplacer les cinq appels :
 
    ```ts
@@ -1429,6 +1476,7 @@ Conversions exactes, dans l'ordre du fichier :
    ```
 
    (La source destructure ces cinq résultats — garder ses noms de variables et sa valeur de retour.)
+
 4. Dans le composant, ajouter en tête : `const trpcClient = useTRPCClient();`.
 5. `await updateTransactionCategory({ data: { id, category: value } })` → `await trpcClient.transactions.updateCategory.mutate({ id, category: value })` (le commentaire « Le loader n'a pas été invalidé... » et le `router.invalidate()` environnants restent identiques).
 6. `const outcome = await runSync()` → `const outcome = await trpcClient.sync.run.mutate()`.
@@ -1442,11 +1490,13 @@ Conversions exactes, dans l'ordre du fichier :
 ```bash
 pnpm typecheck && pnpm lint
 ```
+
 Expected: PASS.
 
 ```bash
 pnpm -F @budget/tanstack-start dev
 ```
+
 Expected (manuel) : `/` affiche la table vide (aucune donnée importée encore), filtres et tri manipulables sans erreur console. **Ne pas cliquer sur Sync.** Arrêter le serveur.
 
 - [ ] **Step 6 : Commit**
@@ -1460,9 +1510,11 @@ git add -A && git commit -m "feat(web): page transactions portée sur tRPC"
 ### Task 11 : App web — pages banques, wizard et callback OAuth
 
 **Files:**
+
 - Create (copies) : `apps/tanstack-start/src/routes/_authed/banques/index.tsx`, `banques/ajouter.tsx`, `banques/-components/connection-card.tsx`, `banques/-components/onboarding.tsx` (← `SOURCE/src/routes/banques/`), `apps/tanstack-start/src/routes/_authed/callback.tsx` (← `SOURCE/src/routes/callback.tsx`)
 
 **Interfaces:**
+
 - Consumes: `context.trpcClient` (loaders), `useTRPCClient()` (handlers), types `ConnectionSummary`, `AccountSummary`, `AspspOption`, `SetupStatus` (`@budget/api`).
 - Produces: routes `/banques`, `/banques/ajouter`, `/callback` (URLs identiques à la source — le layout `_authed` est sans segment ; l'URL de redirection Enable Banking `http://localhost:3000/callback` reste valable).
 
@@ -1483,19 +1535,19 @@ Dans chaque fichier : imports R1. `createFileRoute("/banques/")` → `createFile
 
 - [ ] **Step 3 : Convertir les appels de données**
 
-| Fichier | Appel source | Remplacement |
-| --- | --- | --- |
-| `banques/index.tsx` (loader) | `await getSetupStatus()` | `await context.trpcClient.settings.status.query()` |
-| `banques/index.tsx` (loader) | `await getConnections()` | `await context.trpcClient.connections.list.query()` |
-| `banques/ajouter.tsx` (loader) | `await getConnectionAccounts({ data: { connectionId: deps.connexion } })` | `await context.trpcClient.connections.accounts.query({ connectionId: deps.connexion })` |
-| `banques/ajouter.tsx` (loader) | `await searchAspsps({ data: { q: deps.q } })` | `await context.trpcClient.connections.searchAspsps.query({ q: deps.q })` |
-| `banques/ajouter.tsx` (handler) | `await startAuth({ data: { name: aspsp.name, country: aspsp.country } })` | `await trpcClient.connections.start.mutate({ name: aspsp.name, country: aspsp.country })` |
-| `banques/ajouter.tsx` (handler) | `await updateAccounts({ data: {...} })` | `await trpcClient.connections.updateAccounts.mutate({...})` (même payload) |
-| `banques/ajouter.tsx` (handler) | `await runSync()` | `await trpcClient.sync.run.mutate()` |
-| `connection-card.tsx` (handlers) | `await startAuth({ data: {...} })` | `await trpcClient.connections.start.mutate({...})` |
-| `connection-card.tsx` (handlers) | `await revokeConnection({ data: { connectionId: connection.id } })` | `await trpcClient.connections.revoke.mutate({ connectionId: connection.id })` |
-| `onboarding.tsx` (handler) | `await saveSettings({ data: { applicationId, privateKeyPem, redirectUrl } })` | `await trpcClient.settings.save.mutate({ applicationId, privateKeyPem, redirectUrl })` |
-| `callback.tsx` (effet) | `completeAuth({ data: { code, state } })` | `trpcClient.connections.complete.mutate({ code, state })` |
+| Fichier                          | Appel source                                                                  | Remplacement                                                                              |
+| -------------------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `banques/index.tsx` (loader)     | `await getSetupStatus()`                                                      | `await context.trpcClient.settings.status.query()`                                        |
+| `banques/index.tsx` (loader)     | `await getConnections()`                                                      | `await context.trpcClient.connections.list.query()`                                       |
+| `banques/ajouter.tsx` (loader)   | `await getConnectionAccounts({ data: { connectionId: deps.connexion } })`     | `await context.trpcClient.connections.accounts.query({ connectionId: deps.connexion })`   |
+| `banques/ajouter.tsx` (loader)   | `await searchAspsps({ data: { q: deps.q } })`                                 | `await context.trpcClient.connections.searchAspsps.query({ q: deps.q })`                  |
+| `banques/ajouter.tsx` (handler)  | `await startAuth({ data: { name: aspsp.name, country: aspsp.country } })`     | `await trpcClient.connections.start.mutate({ name: aspsp.name, country: aspsp.country })` |
+| `banques/ajouter.tsx` (handler)  | `await updateAccounts({ data: {...} })`                                       | `await trpcClient.connections.updateAccounts.mutate({...})` (même payload)                |
+| `banques/ajouter.tsx` (handler)  | `await runSync()`                                                             | `await trpcClient.sync.run.mutate()`                                                      |
+| `connection-card.tsx` (handlers) | `await startAuth({ data: {...} })`                                            | `await trpcClient.connections.start.mutate({...})`                                        |
+| `connection-card.tsx` (handlers) | `await revokeConnection({ data: { connectionId: connection.id } })`           | `await trpcClient.connections.revoke.mutate({ connectionId: connection.id })`             |
+| `onboarding.tsx` (handler)       | `await saveSettings({ data: { applicationId, privateKeyPem, redirectUrl } })` | `await trpcClient.settings.save.mutate({ applicationId, privateKeyPem, redirectUrl })`    |
+| `callback.tsx` (effet)           | `completeAuth({ data: { code, state } })`                                     | `trpcClient.connections.complete.mutate({ code, state })`                                 |
 
 Chaque composant utilisant `trpcClient` dans un handler/effet ajoute `const trpcClient = useTRPCClient();` (import `~/lib/trpc`). Les loaders utilisent `context.trpcClient` (ajouter `context` à la signature du loader si absent). Les imports de types (`ConnectionSummary`, `SetupStatus`, `AspspOption`, `AccountSummary`) viennent de `@budget/api`.
 
@@ -1504,11 +1556,13 @@ Chaque composant utilisant `trpcClient` dans un handler/effet ajoute `const trpc
 ```bash
 pnpm typecheck && pnpm lint
 ```
+
 Expected: PASS.
 
 ```bash
 pnpm -F @budget/tanstack-start dev
 ```
+
 Expected (manuel) : `/banques` affiche l'onboarding Enable Banking (base vierge → non configuré) ; `/banques/ajouter` affiche le wizard (recherche ASPSP indisponible tant que l'onboarding n'est pas fait — état géré comme dans la source). Arrêter le serveur.
 
 - [ ] **Step 5 : Commit**
@@ -1522,9 +1576,11 @@ git add -A && git commit -m "feat(web): pages banques, wizard et callback porté
 ### Task 12 : Expo — placeholder + login email/mot de passe
 
 **Files:**
+
 - Modify: `apps/expo/src/app/index.tsx`, `apps/expo/src/app/_layout.tsx` (si l'écran supprimé `post/[id]` y est référencé)
 
 **Interfaces:**
+
 - Consumes: `authClient` (`~/utils/auth`, inchangé — provider-agnostique), tRPC `~/utils/api`.
 - Produces: app Expo qui typecheck, écran unique avec login/logout. Hors périmètre : écrans budget.
 
@@ -1622,6 +1678,7 @@ export default function Index() {
 ```bash
 pnpm -F @budget/expo typecheck && grep -rn 'signIn.social\|/post' apps/expo/src ; echo "exit=$?"
 ```
+
 Expected: typecheck PASS ; grep sans résultat (`exit=1`).
 
 - [ ] **Step 3 : Commit**
@@ -1635,9 +1692,11 @@ git add -A && git commit -m "feat(expo): placeholder avec login email/mot de pas
 ### Task 13 : CLAUDE.md du monorepo
 
 **Files:**
+
 - Create: `CLAUDE.md`
 
 **Interfaces:**
+
 - Produces: documentation projet pour les sessions futures.
 
 - [ ] **Step 1 : Écrire `CLAUDE.md`**
@@ -1655,9 +1714,11 @@ git add CLAUDE.md && git commit -m "docs: CLAUDE.md du monorepo"
 ### Task 14 : Récupération des données (comptes + transactions + catégorisation)
 
 **Files:**
+
 - Create: `data/` (JSON copiés — non commités, dossier gitignoré en Task 2)
 
 **Interfaces:**
+
 - Consumes: base `budget_t3` (schéma poussé en Task 3), scripts Task 6.
 - Produces: comptes, transactions et catégories reconstruits en base.
 
@@ -1671,6 +1732,7 @@ cp /Users/max/WebstormProjects/budget-tracker/data/transactions-*.json data/
 rm data/transactions-af18410a-3a49-46e8-b059-45cb7b1176db.json
 ls data/
 ```
+
 Expected: 5 fichiers `transactions-*.json`.
 
 - [ ] **Step 2 : Recréer les comptes**
@@ -1688,6 +1750,7 @@ INSERT INTO accounts (uid, bank_name, iban, enabled) VALUES
 ON CONFLICT (uid) DO NOTHING;
 SQL
 ```
+
 Expected: `INSERT 0 5`. (`ab5bf9c2` = carte Visa SG, fichier vide aujourd'hui mais le compte doit exister pour les prochains syncs ; `connection_id` reste NULL = « compte historique pré-wizard », déjà géré par l'app.)
 
 - [ ] **Step 3 : Importer et catégoriser**
@@ -1695,6 +1758,7 @@ Expected: `INSERT 0 5`. (`ab5bf9c2` = carte Visa SG, fichier vide aujourd'hui ma
 ```bash
 pnpm import
 ```
+
 Expected: import des 5 fichiers (≈ 190 + ~450 + ~85 + 0 transactions selon les tailles), puis catégorisation LLM des transactions sans catégorie (consomme des tokens Anthropic — c'est la récupération validée par l'utilisateur). En cas d'échec du LLM, `pnpm categorize` est relançable (idempotent, garde `IS NULL`).
 
 - [ ] **Step 4 : Vérifier en base**
@@ -1705,6 +1769,7 @@ docker compose exec -T db psql -U budget -d budget_t3 -c \
     FROM accounts a LEFT JOIN transactions t ON t.account_id = a.id
    GROUP BY a.bank_name ORDER BY a.bank_name"
 ```
+
 Expected: ~700+ transactions réparties sur les 3 banques, quasi toutes catégorisées.
 
 - [ ] **Step 5 : Pas de commit de données**
@@ -1722,6 +1787,7 @@ Expected: ~700+ transactions réparties sur les 3 banques, quasi toutes catégor
 ```bash
 pnpm typecheck && pnpm lint && pnpm test && pnpm build
 ```
+
 Expected: PASS partout.
 
 - [ ] **Step 2 : Parcours manuel (avec l'utilisateur)**
@@ -1729,7 +1795,9 @@ Expected: PASS partout.
 ```bash
 pnpm -F @budget/tanstack-start dev
 ```
+
 Checklist à dérouler dans le navigateur :
+
 1. `/` sans session → redirection `/login` ; connexion OK.
 2. Table des transactions : données réelles visibles, pagination (25/page), tri date/montant, filtres banque/direction/statut/catégorie/période/recherche, breakdown par catégorie (débits + crédits).
 3. Édition de la catégorie d'une transaction → persiste après rechargement (`category_source = 'manual'`).

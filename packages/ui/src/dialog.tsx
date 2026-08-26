@@ -1,6 +1,7 @@
 "use client";
 
 import type * as React from "react";
+
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { XIcon } from "lucide-react";
 
@@ -66,7 +67,7 @@ function DialogContent({
         data-slot="dialog-content"
         data-variant={variant}
         className={cn(
-          "bg-popover text-popover-foreground fixed z-50 flex flex-col shadow-modal duration-150",
+          "bg-popover text-popover-foreground shadow-modal fixed z-50 flex flex-col duration-150",
           padded && "gap-4 p-6",
           variant === "drawer"
             ? "data-open:animate-in data-open:slide-in-from-right data-closed:animate-out data-closed:slide-out-to-right inset-y-0 right-0 h-full w-full max-w-md border-l"
@@ -115,7 +116,7 @@ function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="dialog-footer"
       className={cn(
-        "bg-sunken text-subtle flex flex-none items-center gap-2.5 text-meta border-t px-4 py-2.5",
+        "bg-sunken text-subtle text-meta flex flex-none items-center gap-2.5 border-t px-4 py-2.5",
         className,
       )}
       {...props}

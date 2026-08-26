@@ -1,8 +1,9 @@
 "use client";
 
+import type { ConnectionSummary } from "@budget/api";
+
 import { TriangleAlertIcon } from "lucide-react";
 
-import type { ConnectionSummary } from "@budget/api";
 import {
   AlertDialog,
   AlertDialogAction,

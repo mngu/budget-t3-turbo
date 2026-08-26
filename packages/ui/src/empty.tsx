@@ -1,4 +1,5 @@
 import type { VariantProps } from "class-variance-authority";
+
 import { cva } from "class-variance-authority";
 
 import { cn } from "@budget/ui";
@@ -88,7 +89,7 @@ function EmptyContent({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="empty-content"
       className={cn(
-        "flex w-full max-w-sm min-w-0 flex-col items-center gap-2.5 text-control text-balance",
+        "text-control flex w-full max-w-sm min-w-0 flex-col items-center gap-2.5 text-balance",
         className,
       )}
       {...props}

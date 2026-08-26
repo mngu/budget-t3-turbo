@@ -1,5 +1,6 @@
 import type { SyncOutcome } from "./banking/fetch-transactions";
 import type { CategorizeResult } from "./categorization/run";
+
 import { syncBanks } from "./banking/fetch-transactions";
 import { categorizeUncategorized } from "./categorization/run";
 import { withSingleFlight } from "./lib/single-flight";

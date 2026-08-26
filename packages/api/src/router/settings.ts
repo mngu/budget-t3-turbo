@@ -1,4 +1,5 @@
 import type { TRPCRouterRecord } from "@trpc/server";
+
 import { z } from "zod/v4";
 
 import { getSetupStatus, saveSettings } from "../banking/settings";

@@ -46,7 +46,7 @@ Pas de groupe de routes protégées façon `_authed` (comme sur le web) : le pat
 
 - **Liste** : `trpc.transactions.list` (déjà existant, réutilisé tel quel) en défilement infini via `useInfiniteQuery` (React Query), en incrémentant le paramètre `page` existant côté API (pas de vrai curseur à ajouter côté serveur). Rendu avec `@legendapp/list` (dépendance déjà présente dans `apps/expo`).
 - **Filtres** (banque/catégorie/période/recherche — équivalent de `transactions-filters.tsx` et `calendar-filter.tsx` côté web) : regroupés dans une feuille modale (Actionsheet gluestack-ui) plutôt qu'une barre inline, pour économiser l'espace écran.
-- **Édition de catégorie** : `trpc.categories.list` pour les options, `trpcClient.transactions.updateCategory.mutate()` à la sélection, puis `queryClient.invalidateQueries()` pour rafraîchir la liste (équivalent mobile de `router.invalidate()`, qui n'a pas de sens ici — pas de *loader* côté mobile).
+- **Édition de catégorie** : `trpc.categories.list` pour les options, `trpcClient.transactions.updateCategory.mutate()` à la sélection, puis `queryClient.invalidateQueries()` pour rafraîchir la liste (équivalent mobile de `router.invalidate()`, qui n'a pas de sens ici — pas de _loader_ côté mobile).
 - **KPIs + répartition par catégorie** : `trpc.transactions.byCategory` (directions debit/credit, déjà existant), rendu avec `react-native-gifted-charts` (SVG, sans dépendance Skia) à la place de `recharts` (non compatible React Native).
 
 ### Onglet Banques
@@ -57,7 +57,7 @@ Pas de groupe de routes protégées façon `_authed` (comme sur le web) : le pat
 
 ## Gestion des erreurs et états vides
 
-Pas de *loader*/`errorComponent` façon TanStack Router côté mobile : chaque écran gère directement les états `isPending`/`isError`/données vides de React Query (spinner gluestack-ui pendant le chargement, message + action "réessayer" en cas d'erreur, état vide textuel si liste vide — même esprit que le web). Erreur de mutation (sync, changement de catégorie) : Toast d'erreur, sans bloquer l'UI — même logique que les `catch` déjà présents dans `SyncButton`/`CategoryCell` côté web.
+Pas de _loader_/`errorComponent` façon TanStack Router côté mobile : chaque écran gère directement les états `isPending`/`isError`/données vides de React Query (spinner gluestack-ui pendant le chargement, message + action "réessayer" en cas d'erreur, état vide textuel si liste vide — même esprit que le web). Erreur de mutation (sync, changement de catégorie) : Toast d'erreur, sans bloquer l'UI — même logique que les `catch` déjà présents dans `SyncButton`/`CategoryCell` côté web.
 
 ## Tests et validation
 

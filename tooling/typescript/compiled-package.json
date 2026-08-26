@@ -7,6 +7,11 @@
     "declarationMap": true,
     "emitDeclarationOnly": true,
     "noEmit": false,
-    "outDir": "${configDir}/dist"
+    "outDir": "${configDir}/dist",
+    /**
+     * TS 7 (TS5011) : le `rootDir` déduit n'est plus toléré à l'émission. Les
+     * trois packages compilés ont tous leurs sources sous `src/`.
+     */
+    "rootDir": "${configDir}/src"
   }
 }

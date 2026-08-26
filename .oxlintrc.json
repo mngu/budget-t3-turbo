@@ -1,0 +1,161 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  // Config unique pour tout le monorepo : oxlint parcourt les 222 fichiers en
+  // moins d'une seconde, il n'y a donc rien à gagner à refaire le fan-out par
+  // package que demandait eslint. ATTENTION : les globs des `overrides` sont
+  // résolus par rapport au dossier de CE fichier — le déplacer désactive
+  // silencieusement toutes les exceptions ci-dessous.
+  "plugins": [
+    "typescript",
+    "unicorn",
+    "oxc",
+    "import",
+    "react",
+    "jsx-a11y",
+    "vitest"
+  ],
+  // ponytail: `correctness` seul. Les règles type-aware (no-floating-promises,
+  // no-unsafe-*, no-misused-promises) qu'apportait typescript-eslint exigent le
+  // binaire `oxlint-tsgolint` (preview) + un `pnpm -r build` préalable — passer
+  // à la parité = `pnpm add -Dw oxlint-tsgolint`, `"options": {"typeAware": true}`,
+  // et réactiver les règles des `overrides` marqués « type-aware ».
+  "categories": { "correctness": "error" },
+  "jsPlugins": ["eslint-plugin-turbo"],
+  "ignorePatterns": [
+    "**/routeTree.gen.ts",
+    "**/*.config.*",
+    "design_handoff_budget/**"
+  ],
+  "rules": {
+    "turbo/no-undeclared-env-vars": "error",
+    "typescript/no-unused-vars": [
+      "error",
+      { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }
+    ],
+    "typescript/consistent-type-imports": [
+      "warn",
+      { "prefer": "type-imports", "fixStyle": "separate-type-imports" }
+    ],
+    "typescript/no-non-null-assertion": "error",
+    "import/consistent-type-specifier-style": ["error", "prefer-top-level"],
+    // Transform JSX automatique (React 19) : jamais de `React` en scope.
+    "react/react-in-jsx-scope": "off",
+    // Opinions que l'ancienne config eslint n'appliquait pas et que les tests
+    // n'ont aucune raison de subir aujourd'hui.
+    "vitest/require-mock-type-parameters": "off",
+    "vitest/require-to-throw-message": "off"
+  },
+  "overrides": [
+    {
+      // Interdit `process.env` hors du module qui le valide.
+      "files": ["apps/tanstack-start/src/**"],
+      "rules": {
+        "no-restricted-properties": [
+          "error",
+          {
+            "object": "process",
+            "property": "env",
+            "message": "Use `import { env } from '~/env'` instead to ensure validated types."
+          }
+        ],
+        "no-restricted-imports": [
+          "error",
+          {
+            "name": "process",
+            "importNames": ["env"],
+            "message": "Use `import { env } from '~/env'` instead to ensure validated types."
+          }
+        ]
+      }
+    },
+    {
+      "files": ["**/env.ts"],
+      "rules": {
+        "no-restricted-properties": "off",
+        "no-restricted-imports": "off"
+      }
+    },
+    {
+      // type-aware — inactif tant que tsgolint n'est pas installé.
+      // TanStack Router : `redirect()`/`notFound()` renvoient une valeur basée
+      // sur `Response` (pas une `Error`) que les routes doivent `throw`.
+      "files": ["apps/tanstack-start/src/routes/**/*.{ts,tsx}"],
+      "rules": {
+        "typescript/only-throw-error": [
+          "error",
+          {
+            "allow": [
+              {
+                "from": "package",
+                "package": "@tanstack/router-core",
+                "name": "Redirect"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        // Dialogue de création d'espace : le focus initial sur le champ est voulu.
+        "apps/tanstack-start/src/routes/_authed/settings/espaces/-components/space-dialog.tsx"
+      ],
+      "rules": { "jsx-a11y/no-autofocus": "off" }
+    },
+    {
+      "files": [
+        // Primitives Base UI : `role="group"` / `role="status"` sont posés par la
+        // librairie sur des `div`, et `Label` est un wrapper dont le `htmlFor`
+        // vient de l'appelant — `prefer-tag-over-role` et
+        // `label-has-associated-control` n'y voient que la coquille.
+        // Dans `input-group`, le `onClick` ne fait que renvoyer le focus vers
+        // l'input : aucune fonction n'est inaccessible au clavier, on tabule
+        // directement dessus.
+        "packages/ui/src/spinner.tsx",
+        "packages/ui/src/field.tsx",
+        "packages/ui/src/input-group.tsx",
+        "packages/ui/src/label.tsx"
+      ],
+      "rules": {
+        "jsx-a11y/prefer-tag-over-role": "off",
+        "jsx-a11y/label-has-associated-control": "off",
+        "jsx-a11y/click-events-have-key-events": "off",
+        "jsx-a11y/no-noninteractive-element-interactions": "off"
+      }
+    },
+    {
+      "files": [
+        // type-aware — inactif tant que tsgolint n'est pas installé.
+        // Code porté iso-fonctionnel depuis budget-tracker (ebApi non typé) — ne
+        // pas durcir sans refactor dédié. Fichiers nommés un par un, jamais un
+        // glob de dossier : l'exception ne doit couvrir que le code qui manipule
+        // les réponses brutes d'Enable Banking, pas tout ce qui viendra s'ajouter
+        // à côté (une requête Drizzle n'a aucune raison d'y échapper).
+        "packages/api/src/banking/**/*.ts",
+        "packages/api/src/transactions/import.ts"
+      ],
+      "rules": {
+        "typescript/no-unsafe-assignment": "off",
+        "typescript/no-unsafe-member-access": "off",
+        "typescript/no-unsafe-argument": "off",
+        "typescript/no-unsafe-call": "off",
+        "typescript/no-explicit-any": "off",
+        "typescript/prefer-nullish-coalescing": "off",
+        "typescript/non-nullable-type-assertion-style": "off",
+        "typescript/restrict-template-expressions": "off"
+      }
+    },
+    {
+      // Composant WebGL repris tel quel de reactbits : `ogl` ne type pas
+      // `Program.uniforms`, et `program` est déclaré avant d'être assigné parce
+      // que `resize()` le referme — ce que le flux de TypeScript ne voit pas.
+      // Le laisser en l'état permet de le resynchroniser depuis l'amont.
+      // Même discipline qu'`@budget/api` : le fichier est nommé, jamais un glob.
+      "files": ["packages/ui/src/aurora.tsx"],
+      "rules": {
+        "typescript/no-unsafe-member-access": "off",
+        "prefer-const": "off"
+      }
+    }
+  ]
+}

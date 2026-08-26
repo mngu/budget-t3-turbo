@@ -1,12 +1,13 @@
+import type { NewCategoryOverviewType } from "@budget/api/schemas";
+
 import { LayersIcon } from "lucide-react";
 
-import type { NewCategoryOverviewType } from "@budget/api/schemas";
 import { Toolbar } from "@budget/ui/toolbar";
-
 import { shadeCategoryColor, useCategoryColor } from "~/lib/category-color";
 import { euro } from "~/lib/format";
 import { sumBy } from "~/lib/sum";
 import { useRevueSearch } from "~/lib/use-revue-search";
+
 import { NO_CATEGORY, openParent } from "../-lib/breakdown";
 import { BudgetGauge } from "./budget-gauge";
 
@@ -71,7 +72,7 @@ export function NewBreakdownList({ newOverview }: NewBreakdownListProps) {
   // Une parente détaillée n'a pas de montant propre (CHECK
   // `categories_detailed_no_amount`) : son budget est la somme de ses enfants.
   // Une parente globale porte le sien, et ceux de ses enfants sont dormants.
-  const selectedCategoryBudget = selectedCategory?.budgetAmount ?? null
+  const selectedCategoryBudget = selectedCategory?.budgetAmount ?? null;
   const totalBudget = selectedCategory
     ? selectedCategory.budgetDetailed
       ? sumBy(rows, (row) => row.budget ?? 0)

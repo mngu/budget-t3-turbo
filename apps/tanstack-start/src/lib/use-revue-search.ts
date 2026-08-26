@@ -1,8 +1,8 @@
 "use client";
 
-import { useNavigate, useSearch } from "@tanstack/react-router";
-
 import type { TransactionsSearch } from "@budget/api/schemas";
+
+import { useNavigate, useSearch } from "@tanstack/react-router";
 
 /**
  * Search partagée par les quatre écrans de la revue (revue du mois, « À revoir »,

@@ -1,14 +1,15 @@
 "use client";
 
+import type { Drill } from "./use-drill";
 import type { CSSProperties, ReactNode } from "react";
-import { useState } from "react";
+
 import { ArrowLeftIcon } from "lucide-react";
+import { useState } from "react";
 
 import { cn } from "@budget/ui";
-
-import type { Drill } from "./use-drill";
 import { CategoryIcon } from "~/component/category-icon";
 import { sumBy } from "~/lib/sum";
+
 import { DRILL } from "./use-drill";
 
 export interface RingSlice {

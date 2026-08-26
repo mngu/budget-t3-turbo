@@ -1,6 +1,7 @@
+import type { ThemeMode } from "@budget/ui/theme";
+
 import { Monitor, Moon, Sun } from "lucide-react";
 
-import type { ThemeMode } from "@budget/ui/theme";
 import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,

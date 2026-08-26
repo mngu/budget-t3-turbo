@@ -1,9 +1,10 @@
+import type { EbSettings } from "./client";
+
 // Onboarding Enable Banking : vérification de la configuration et sauvegarde.
 // Source de vérité unique : la table app_settings (pas de fallback fichiers).
 import { db } from "@budget/db/client";
 import { appSettings } from "@budget/db/schema";
 
-import type { EbSettings } from "./client";
 import { ebApi, loadSettings } from "./client";
 import { makeJwt } from "./domain";
 

@@ -1,3 +1,5 @@
+import type { EbTransaction } from "./normalize";
+
 // Import idempotent des JSON Enable Banking (data/) vers PostgreSQL.
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -6,7 +8,6 @@ import { eq, sql } from "@budget/db";
 import { db } from "@budget/db/client";
 import { bankAccounts, transactions } from "@budget/db/schema";
 
-import type { EbTransaction } from "./normalize";
 import { orgDataDir } from "../lib/data-dir";
 import { normalizeTransaction } from "./normalize";
 

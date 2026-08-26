@@ -1,3 +1,5 @@
+import type { Auth } from "@budget/auth";
+
 /**
  * YOU PROBABLY DON'T NEED TO EDIT THIS FILE, UNLESS:
  * 1. You want to modify request context (see Part 1)
@@ -10,7 +12,6 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { z, ZodError } from "zod/v4";
 
-import type { Auth } from "@budget/auth";
 import { and, eq } from "@budget/db";
 import { db } from "@budget/db/client";
 import { member } from "@budget/db/schema";

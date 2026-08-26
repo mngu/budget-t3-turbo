@@ -1,11 +1,13 @@
-import { useEffect } from "react";
-import { createFileRoute, useLoaderData } from "@tanstack/react-router";
-
 import type { RingSlice } from "./-components/category-ring";
+
+import { createFileRoute, useLoaderData } from "@tanstack/react-router";
+import { useEffect } from "react";
+
 import { CategoryIcon } from "~/component/category-icon";
 import { shadeCategoryColor, useCategoryColor } from "~/lib/category-color";
 import { euro0, sharePercent } from "~/lib/format";
 import { useRevueSearch } from "~/lib/use-revue-search";
+
 import { CategoryRing, RingBackButton } from "./-components/category-ring";
 import { useDrill } from "./-components/use-drill";
 import { breakdownLevel } from "./-lib/breakdown";

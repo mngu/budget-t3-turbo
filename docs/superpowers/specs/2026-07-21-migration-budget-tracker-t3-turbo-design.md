@@ -39,14 +39,14 @@ Perdu :
 
 ## Décisions de cadrage
 
-| Sujet | Décision |
-| --- | --- |
-| Apps conservées | `tanstack-start` (cible de la migration) + `expo` (squelette, écrans budget ultérieurs). `apps/nextjs` supprimée. |
-| Auth | Better Auth conservé, **email + mot de passe** (Discord OAuth retiré). Nécessaire car le serveur sera joignable depuis le mobile. |
+| Sujet           | Décision                                                                                                                                                                                                                            |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Apps conservées | `tanstack-start` (cible de la migration) + `expo` (squelette, écrans budget ultérieurs). `apps/nextjs` supprimée.                                                                                                                   |
+| Auth            | Better Auth conservé, **email + mot de passe** (Discord OAuth retiré). Nécessaire car le serveur sera joignable depuis le mobile.                                                                                                   |
 | Base de données | Postgres local docker (compose repris de budget-tracker, port 5436). **Nouvelle base `budget_t3`** dans la même instance pour ne plus jamais pousser un schéma sur la base d'un autre projet. Données ré-importées depuis les JSON. |
-| Périmètre | Iso-fonctionnel. Pas d'approche B, pas d'écrans mobiles. |
-| Scope packages | Renommage global `@acme/*` → `@budget/*`. |
-| Couche serveur | **Option A : tout en tRPC** dans `@budget/api`. Seule exception : `/callback` (redirection navigateur OAuth) reste une route HTTP de l'app web. |
+| Périmètre       | Iso-fonctionnel. Pas d'approche B, pas d'écrans mobiles.                                                                                                                                                                            |
+| Scope packages  | Renommage global `@acme/*` → `@budget/*`.                                                                                                                                                                                           |
+| Couche serveur  | **Option A : tout en tRPC** dans `@budget/api`. Seule exception : `/callback` (redirection navigateur OAuth) reste une route HTTP de l'app web.                                                                                     |
 
 ## Architecture cible
 
@@ -78,13 +78,13 @@ budget-t3-turbo/
 
 Cinq routers tRPC, transposition des server functions existantes :
 
-| Router | Source | Procédures |
-| --- | --- | --- |
-| `transactions` | `server/transactions.ts` | liste filtrée (période, recherche, compte, catégorie), mise à jour de catégorie |
-| `categories` | `server/categories.ts` | liste, création, édition |
-| `connections` | `server/connections.ts` + `connections-core.server.ts` | liste, ASPSPs, démarrage d'auth, finalisation de session, suppression/renouvellement |
-| `settings` | `server/settings.ts` + `settings-core.server.ts` | lecture/écriture config Enable Banking (onboarding) |
-| `sync` | `server/sync.ts` + `sync-core.server.ts` + `eb-sync.server.ts` | déclenchement du pipeline complet |
+| Router         | Source                                                         | Procédures                                                                           |
+| -------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `transactions` | `server/transactions.ts`                                       | liste filtrée (période, recherche, compte, catégorie), mise à jour de catégorie      |
+| `categories`   | `server/categories.ts`                                         | liste, création, édition                                                             |
+| `connections`  | `server/connections.ts` + `connections-core.server.ts`         | liste, ASPSPs, démarrage d'auth, finalisation de session, suppression/renouvellement |
+| `settings`     | `server/settings.ts` + `settings-core.server.ts`               | lecture/écriture config Enable Banking (onboarding)                                  |
+| `sync`         | `server/sync.ts` + `sync-core.server.ts` + `eb-sync.server.ts` | déclenchement du pipeline complet                                                    |
 
 - Logique pure dans `packages/api/src/lib/` : `eb-client`, `eb-domain`, `sync-core`,
   `connections-core`, `settings-core` + leurs tests Vitest (config Vitest minimale ajoutée au package).
@@ -129,10 +129,10 @@ Cinq routers tRPC, transposition des server functions existantes :
 
 `.env` unique à la racine :
 
-| Variable | Usage |
-| --- | --- |
-| `POSTGRES_URL` | `postgres://budget:budget@localhost:5436/budget_t3` |
-| `AUTH_SECRET` | Better Auth |
+| Variable            | Usage                                                           |
+| ------------------- | --------------------------------------------------------------- |
+| `POSTGRES_URL`      | `postgres://budget:budget@localhost:5436/budget_t3`             |
+| `AUTH_SECRET`       | Better Auth                                                     |
 | `ANTHROPIC_API_KEY` | script `categorize` uniquement (optionnelle dans le schéma env) |
 
 Variables Discord supprimées. `env.ts` de l'app web mis à jour en conséquence.

@@ -1,7 +1,8 @@
-import { describe, expect, it } from "vitest";
-
 import type { TxnForLlm } from "./prompt";
 import type { SimilarTxn } from "./similar";
+
+import { describe, expect, it } from "vitest";
+
 import {
   buildFewShotPrompt,
   buildFewShotUserMessage,

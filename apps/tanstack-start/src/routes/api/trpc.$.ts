@@ -3,7 +3,6 @@ import { getRequestIP } from "@tanstack/react-start/server";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
 import { appRouter, createTRPCContext } from "@budget/api";
-
 import { auth } from "~/auth/server";
 import { corsPreflight, withCors } from "~/lib/cors";
 

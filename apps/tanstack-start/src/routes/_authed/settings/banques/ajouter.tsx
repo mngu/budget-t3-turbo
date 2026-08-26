@@ -1,9 +1,10 @@
-import { useState } from "react";
+import type { AccountSummary, AspspOption } from "@budget/api";
+
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ExternalLinkIcon, RefreshCwIcon, SearchIcon } from "lucide-react";
+import { useState } from "react";
 import { z } from "zod/v4";
 
-import type { AccountSummary, AspspOption } from "@budget/api";
 import { cn } from "@budget/ui";
 import { Button } from "@budget/ui/button";
 import { Checkbox } from "@budget/ui/checkbox";
@@ -11,10 +12,10 @@ import { Input } from "@budget/ui/input";
 import { InputGroup, InputGroupAddon } from "@budget/ui/input-group";
 import { Spinner } from "@budget/ui/spinner";
 import { toast } from "@budget/ui/toast";
-
 import { SearchInput } from "~/component/search-input";
 import { toastSyncOutcome } from "~/lib/sync-toast";
 import { useTRPCClient } from "~/lib/trpc";
+
 import { BankLogo } from "./-components/bank-logo";
 
 const wizardSearchSchema = z.object({
