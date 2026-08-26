@@ -1,0 +1,279 @@
+apps/tanstack-start/package.json
+  s_210dc624f1332c::t_cba9c21112c470 57
+packages/api/src/spaces/mutations.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 1-2
+apps/tanstack-start/src/routes/_authed/_period-overview/-lib/use-set-category.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 4
+turbo/generators/config.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 3
+  s_210dc624f1332c::t_cba9c21112c470 82
+  s_210dc624f1332c::t_fa1097a1626654 4
+turbo/generators/templates/tsconfig.json.hbs
+  s_210dc624f1332c::t_f4baf0bd726efc 1-2
+apps/tanstack-start/src/routes/_authed/settings/categories/-lib/use-category-crud.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 5
+packages/api/src/categorization/prompt.test.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 3-5
+packages/ui/src/command.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 4,133,163
+apps/tanstack-start/src/routes/_authed/settings/banques/-components/consent-alert.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 3-4
+packages/api/package.json
+  s_210dc624f1332c::t_cba9c21112c470 36
+apps/tanstack-start/src/routes/_authed/settings/categories/index.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 1-2,15
+apps/tanstack-start/src/routes/_authed/settings/espaces/-components/space-card.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 3-9
+packages/ui/src/tooltip.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 56
+apps/tanstack-start/src/component/period-picker.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 18
+apps/tanstack-start/src/styles.css
+  s_210dc624f1332c::t_f4baf0bd726efc 149-150,152-153
+docs/superpowers/specs/2026-07-21-mobile-app-gluestack-ui-design.md
+  s_210dc624f1332c::t_f4baf0bd726efc 49,60
+packages/api/src/banking/domain.test.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 2
+packages/api/src/transactions/normalize.test.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 1-2
+apps/tanstack-start/src/routes/_authed/settings/categories/-lib/use-preview.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 1,4
+packages/ui/src/empty.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 2,92
+packages/api/src/categorization/similar.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 1,5
+packages/api/src/categorization/results.test.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 1-2
+packages/api/src/index.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 2
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/category-path-picker.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 3-4,6
+apps/tanstack-start/src/routes/_authed/settings/categories/-components/category-identity-dialog.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 3-4,6
+packages/ui/src/toggle-group.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 4,7
+packages/api/src/router/categories.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 2
+apps/tanstack-start/src/lib/sync-toast.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 2
+packages/shared/package.json
+  s_210dc624f1332c::t_cba9c21112c470 24
+docs/superpowers/specs/2026-07-25-category-suggestions-replace-mode-design.md
+  s_210dc624f1332c::t_f4baf0bd726efc 54
+packages/ui/src/toggle.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 4
+docs/agents/domain.md
+  s_210dc624f1332c::t_f4baf0bd726efc 5,12
+docs/superpowers/plans/2026-07-21-migration-budget-tracker.md
+  s_210dc624f1332c::t_f4baf0bd726efc 29-44,53,58,82,88,102,107,141,175,189,194,304,310,319,333,338,444,452,467,472,562,576,581,613,622,647,655,669,674,725-730,798-799,803-804,930-938,1104,1118,1126,1175,1181,1195,1202,1302-1304,1391,1397,1411,1416,1447-1451,1462,1479,1493,1499,1513,1517,1538-1550,1559,1565,1579,1583,1681,1695,1699,1717,1721,1735,1753,1761,1772,1790,1798,1800
+.vscode/settings.json
+  s_210dc624f1332c::t_6bedfd654498b0 3
+packages/ui/src/card.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 1,3,15-16,20,29,33,42,46,53,56,65,69,79,87-88,92,103
+apps/tanstack-start/src/routes/invitation.$invitationId.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 10
+packages/api/src/banking/connections.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 1-2
+apps/tanstack-start/src/routes/_authed/_period-overview/-lib/category-lookup.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 4
+packages/api/src/router/settings.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 2
+packages/api/src/transactions/queries.test.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 1-2
+.vscode/extensions.json
+  s_210dc624f1332c::t_6bedfd654498b0 3
+apps/tanstack-start/src/routes/__root.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 1,6
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/category-ring.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 3,5,7,12
+packages/ui/src/button.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 2,20,35
+packages/ui/src/popover.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 4,41
+apps/tanstack-start/src/component/search-input.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 5
+apps/tanstack-start/CLAUDE.md
+  s_210dc624f1332c::t_f4baf0bd726efc 48
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/overview-header.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 1-2,12
+package.json
+  s_210dc624f1332c::t_53c4ee82397bb4 35
+  s_210dc624f1332c::t_c00bb9d868e301 37-38
+  s_210dc624f1332c::t_da09a7613ca796 18-21
+  s_210dc624f1332c::t_cba9c21112c470 41
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/use-drill.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 8-11,13
+packages/db/src/schema.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 2
+apps/tanstack-start/src/vite-env.d.ts
+  s_210dc624f1332c::t_edb601d2ca3a01 1
+packages/db/package.json
+  s_210dc624f1332c::t_cba9c21112c470 40
+packages/api/src/router/spaces.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 2
+apps/tanstack-start/src/component/bank-picker.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 6
+packages/ui/src/field.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 2,4,34
+packages/api/src/router/transactions.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 2
+packages/api/src/categories/schemas.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 54-56
+apps/tanstack-start/src/routes/_authed/settings/categories/-components/new-category-overview.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 1-3,11,40
+packages/ui/src/calendar.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 4,10,74,217
+apps/tanstack-start/src/routes/_authed/settings/banques/index.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 1-2,5,11
+.hermes/plans/2026-07-22_073000-categories-intelligentes.md
+  s_210dc624f1332c::t_f4baf0bd726efc 20,32,77,87-93,102,104,110,117,119,129,131,137,139,145,147,153,155,161,163,167,172,174,184,186,192,194,200,202,208,210,220,226,228,234,236,242,244,250,258,260,266,268,278,280,285,287,296-310
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/refine-bar.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 3-4,6,14
+apps/tanstack-start/src/routes/_authed/settings/banques/-components/sync-status.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 5
+packages/ui/package.json
+  s_210dc624f1332c::t_cba9c21112c470 61
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/new-breakdown-list.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 1-2,10,75
+packages/api/src/categorization/run.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 1-3
+packages/auth/src/index.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 2-4
+packages/ui/src/alert.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 3
+apps/tanstack-start/src/lib/use-revue-search.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 5
+  s_210dc624f1332c::t_777a0b6cc27de3 6
+packages/ui/src/badge.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 2
+packages/api/src/trpc.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 1-2
+packages/api/src/banking/settings.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 1-2
+apps/tanstack-start/src/routes/_authed/settings/banques/-components/revoke-dialog.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 3-4
+apps/tanstack-start/src/routes/_authed/_period-overview/-lib/breakdown.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 6
+docs/superpowers/plans/2026-07-21-mobile-app-gluestack-ui.md
+  s_210dc624f1332c::t_f4baf0bd726efc 29,38,133,150,158,320,337,344,578,595,600,645-646,710-712,789,806,811,951-953,993,1046,1063,1070,1093,1190-1197,1205,1222,1227,1327-1332,1340-1345,1351-1354,1427
+packages/api/src/categories/queries.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 6-11
+packages/api/src/categorization/results.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 5
+  s_210dc624f1332c::t_e1a9ae0adeb644 6
+packages/api/src/router/connections.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 2
+apps/tanstack-start/src/router.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 8
+turbo/generators/templates/package.json.hbs
+  s_210dc624f1332c::t_f4baf0bd726efc 1-5
+packages/auth/package.json
+  s_210dc624f1332c::t_cba9c21112c470 27
+apps/tanstack-start/src/routes/_authed/settings/banques/-components/onboarding.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 3-4,7
+packages/api/src/pipeline.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 3
+apps/tanstack-start/src/routes/_authed/callback.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 2
+apps/tanstack-start/src/routes/_authed/settings/espaces/index.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 1-9,22,29
+packages/ui/src/alert-dialog.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 4
+CLAUDE.md
+  s_210dc624f1332c::t_f4baf0bd726efc 22
+apps/tanstack-start/src/routes/_authed/settings/banques/-lib/use-renew.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 3-4
+apps/tanstack-start/src/routes/_authed/settings/route.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 2
+apps/tanstack-start/src/component/theme-picker.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 1-2
+docs/superpowers/plans/2026-07-24-category-selector-two-levels.md
+  s_210dc624f1332c::t_f4baf0bd726efc 24,28,79,83,92-105,111-124,160,166,235,239,279-285,291-293,313,317,358-359,365-372,446
+packages/api/src/categories/queries.test.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 1-2
+pnpm-workspace.yaml
+  s_210dc624f1332c::t_f4baf0bd726efc 7-9,19-26,35-36,43,47
+apps/tanstack-start/src/routes/_authed/settings/banques/ajouter.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 1-2,5,18
+apps/tanstack-start/src/routes/_authed/settings/categories/-components/category-delete-dialog.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 3-4
+docs/superpowers/plans/2026-07-25-category-suggestions-replace-mode.md
+  s_210dc624f1332c::t_f4baf0bd726efc 26,31,41-44,51-56,76-79,115-121,125-131,234,238,259-266,376,511,565,570,669,675,684-688,881-882,901-902,961
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/exclude-badge.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 3-4,7
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/transactions-table.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 3-5,12
+apps/tanstack-start/src/component/category-icon.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 2
+apps/tanstack-start/vite.config.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 2
+packages/ui/src/toast.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 3
+apps/tanstack-start/src/routes/login.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 3
+apps/tanstack-start/src/routes/_authed/_period-overview/route.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 13
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/kpi-band.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 3,6
+apps/tanstack-start/src/routes/_authed/settings/banques/-components/connection-card.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 4
+packages/api/src/transactions/import.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 1-2
+packages/ui/src/input-group.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 5,29,78
+.oxfmtrc.json
+  s_210dc624f1332c::t_a00752a3c5609e 1-5,7
+  s_210dc624f1332c::t_4db7e4092f091a 6,8,10,15-16,21
+  s_210dc624f1332c::t_8696abbe20d8f2 9,11-14,17-20
+packages/ui/src/dialog.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 4,70,119
+packages/api/CLAUDE.md
+  s_210dc624f1332c::t_f4baf0bd726efc 34
+packages/ui/src/input.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 2,18
+knip.json
+  s_210dc624f1332c::t_f4baf0bd726efc 3
+apps/tanstack-start/src/auth/client.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 1-4
+apps/tanstack-start/src/routes/_authed/settings/categories/-components/transaction-preview-drawer.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 3-5
+packages/api/src/transactions/queries.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 1,4
+packages/ui/src/dropdown-menu.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 4,50
+apps/tanstack-start/src/routes/_authed/_period-overview/index.tsx
+  s_210dc624f1332c::t_f4baf0bd726efc 1-2,4,10
+docs/superpowers/specs/2026-07-21-migration-budget-tracker-t3-turbo-design.md
+  s_210dc624f1332c::t_f4baf0bd726efc 42-45,47-49,81-87,132-135
+packages/api/src/categorization/similar.test.ts
+  s_210dc624f1332c::t_f4baf0bd726efc 3-4,10-11
+.oxlintrc.json
+  s_210dc624f1332c::t_c5751c225da241 21-22,24-26,28-29,63-64,99-101,106-117
+  s_210dc624f1332c::t_8fbae2c55185d4 31
+  s_210dc624f1332c::t_f4baf0bd726efc 3-11,14-18,59-62,71-75,82-84,88-93,102-105,119-122
+  s_210dc624f1332c::t_049c95d8b207cf 12-13,20,23,27,30,32-33,37,51,58,65,79-81,85-87,94-98,118,125
+  s_210dc624f1332c::t_ea3fa74f42c978 1-2,19,34-36,38-50,52-57,66-70,76-78,123-124
+pnpm-lock.yaml
+  s_210dc624f1332c::t_66bfbc1452a532 44,77-79,83-88,121,181,224,242,261,267,289,308,358,597,1734-1738,1740-1744,1746-1750,1752-1756,1758-1762,1764-1768,1770-1774,1776-1780,1782-1786,1788-1792,1794-1798,1800-1804,1806-1810,1812-1816,1818-1822,1824-1828,1830-1834,1836-1840,1842-2074,3742,4798-4827,5477,5606-5609,6146,6151,6448-6449,6454-6455,6464,6509,7335-7466,7758,7763,8256,8258-8260,8262,8264-8265,8267,8269,8271,8273,8275,8277,8279-8281,8519,9044,9054,9672-9673,10459-10515,11344-11345
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "c20cbc08181ec40341d499b99f958fa92cb7cd5c",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_210dc624f1332c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d6691835-6a1d-434c-8d3b-80cab713823e",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
