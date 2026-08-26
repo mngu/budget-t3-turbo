@@ -1,0 +1,45 @@
+apps/tanstack-start/src/routes/_authed/settings/banques/ajouter.tsx
+  s_c7b6a3c8b91d50::t_545adfcae2c8a9 231
+packages/api/src/transactions/queries.ts
+  s_c7b6a3c8b91d50::t_9ad1c0f9fa19f4 33,75-80,90-91,107,356-358
+  s_c7b6a3c8b91d50::t_86d033343410c1 34-36,85
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/refine-bar.tsx
+  s_c7b6a3c8b91d50::t_545adfcae2c8a9 89
+packages/db/src/schema.ts
+  s_c7b6a3c8b91d50::t_b755bf234ff90c 181-182
+packages/api/src/pipeline.ts
+  s_c7b6a3c8b91d50::t_550a6f23156d60 23-24
+packages/api/CLAUDE.md
+  s_c7b6a3c8b91d50::t_4abf1aff5b379f 32
+  s_c7b6a3c8b91d50::t_734f8820f6459a 8-10
+apps/tanstack-start/CLAUDE.md
+  s_c7b6a3c8b91d50::t_1381d02126cad0 16,26
+packages/api/src/transactions/queries.test.ts
+  s_c7b6a3c8b91d50::t_550a6f23156d60 46-48,50-53
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/overview-header.tsx
+  s_c7b6a3c8b91d50::t_545adfcae2c8a9 29-30
+packages/api/src/categories/queries.ts
+  s_c7b6a3c8b91d50::t_9ad1c0f9fa19f4 107
+packages/db/drizzle/0004_drop_transfer_pairing.sql
+  s_c7b6a3c8b91d50::t_607b0d35f1aef0 1-5
+packages/db/drizzle/meta/0004_snapshot.json
+  s_c7b6a3c8b91d50::t_f6c2af3b7c3011 1
+packages/db/drizzle/meta/_journal.json
+  s_c7b6a3c8b91d50::t_7ced9e680736ab 32-38
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "b2535d37da2c55515171a81a0839042b1a519adf",
+  "prompts": {},
+  "sessions": {
+    "s_c7b6a3c8b91d50": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "df7ce48f-b705-4731-a5d7-9f05c9d3f031",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
