@@ -240,7 +240,8 @@ function EspacesPage() {
       }
       case "switch":
         // Même geste que la bascule de l'en-tête : l'espace vit dans la
-        // session, react-query servirait sinon le cache de l'espace quitté.
+        // session, le cache des loaders du routeur servirait sinon celui de
+        // l'espace quitté.
         setBusy(true);
         await authClient.organization.setActive({
           organizationId: action.space.id,

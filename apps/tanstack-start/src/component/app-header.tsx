@@ -1,6 +1,6 @@
 "use client";
 
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useMatches, useNavigate } from "@tanstack/react-router";
 import {
   LandmarkIcon,
   LogOutIcon,
@@ -82,15 +82,24 @@ const SETTINGS_PAGES = [
 export function AppHeader({ title }: { title?: string }) {
   const isSettings = title !== undefined;
 
-  // Appelé inconditionnellement (règle des hooks) mais lu seulement hors des
-  // écrans de réglages : là-bas, `useSearch({ strict: false })` renvoie la
-  // search de *cette* route, qui n'est pas une `TransactionsSearch`.
+  // **Garde positive, et elle doit le rester.** L'absence de titre a longtemps
+  // servi de « je suis sur la revue » ; c'est faux sur `/callback`, qui vit
+  // sous `_authed` sans en poser un. Les deux sélecteurs s'y montaient donc
+  // hors du layout `_period-overview` — sans conséquence tant qu'ils lisaient
+  // un cache react-query, mais ils lisent désormais le loader de ce layout,
+  // et `useLoaderData` lève quand le match n'existe pas.
+  const isRevue = useMatches({
+    select: (m) => m.some((x) => x.routeId === "/_authed/_period-overview"),
+  });
+
+  // Appelé inconditionnellement (règle des hooks) mais lu seulement sur la
+  // revue : ailleurs, `useSearch({ strict: false })` renvoie la search de
+  // *cette* route, qui n'est pas une `TransactionsSearch`.
   const { search } = useRevueSearch();
-  // Sur les écrans de réglages, la search en vigueur n'est pas celle de la
-  // revue : les liens de la rangée repartent donc des défauts, que
-  // `stripSearchParams` retire de l'URL et que `defaultToCurrentMonth` complète
-  // par le mois courant.
-  const linkSearch = isSettings ? SEARCH_DEFAULTS : search;
+  // Hors de la revue, la search en vigueur n'est pas la sienne : les liens de
+  // la rangée repartent donc des défauts, que `stripSearchParams` retire de
+  // l'URL et que `defaultToCurrentMonth` complète par le mois courant.
+  const linkSearch = isRevue ? search : SEARCH_DEFAULTS;
 
   return (
     <header
@@ -124,15 +133,15 @@ export function AppHeader({ title }: { title?: string }) {
         </div>
       )}
 
-      {!isSettings && <PeriodPicker />}
+      {isRevue && <PeriodPicker />}
 
       <div
         className={cn(
           "flex items-center gap-3",
-          isSettings ? "ml-auto" : "ml-1",
+          isRevue ? "ml-1" : "ml-auto",
         )}
       >
-        {!isSettings && <BankPicker />}
+        {isRevue && <BankPicker />}
         <SettingsMenu page={title} />
       </div>
     </header>
@@ -230,10 +239,12 @@ function SettingsMenu({ page }: { page?: string }) {
  * partent donc pas au rendu de chaque page.
  *
  * Le changement d'espace **recharge le document**. Le périmètre ne vit pas dans
- * l'URL mais dans la session : sans rechargement, react-query servirait les
- * transactions déjà en cache pour les mêmes clés, c'est-à-dire celles de
- * l'espace qu'on vient de quitter. Même geste qu'à la connexion et à la
- * déconnexion, pour la même raison.
+ * l'URL mais dans la session : sans rechargement, les loaders resteraient sur
+ * leurs matches déjà chargés — mêmes route, params et `loaderDeps`, donc les
+ * transactions de l'espace qu'on vient de quitter. Même geste qu'à la connexion
+ * et à la déconnexion, pour la même raison. (La justification visait react-query
+ * jusqu'au 2026-08-28 ; elle vaut à l'identique pour le cache du routeur, qui
+ * est désormais le seul.)
  */
 function SpacePicker() {
   const { data: spaces } = authClient.useListOrganizations();

@@ -53,7 +53,15 @@ export const Route = createFileRoute("/_authed/_period-overview")({
   loaderDeps: ({ search }) => search,
   loader: async ({ deps, context }) => {
     const period = wholePeriod(deps);
-    const [globalStats, budgetStats, newOverview] = await Promise.all([
+    const [
+      globalStats,
+      budgetStats,
+      newOverview,
+      categoryTree,
+      bankCounts,
+      banks,
+      earliestDate,
+    ] = await Promise.all([
       context.trpcClient.transactions.globalStats.query(period),
       context.trpcClient.transactions.budgetStats.query(period),
       // `wholePeriod` et non `deps` : le périmètre de la revue est la
@@ -72,36 +80,27 @@ export const Route = createFileRoute("/_authed/_period-overview")({
         direction: "debit",
       }),
 
-      // Ceux-ci n'alimentent que le cache react-query dont se servent
-      // l'en-tête (sélecteur de comptes) et les routes filles.
-      //
-      // L'arborescence est **obligatoire** ici, et pas seulement pour éviter
-      // une requête de plus : elle est lue par `useParentCategories`
-      // (`useQuery`, non suspensif) *et* par `CategoryPathPicker`
-      // (`useSuspenseQuery`), sur la même clé. Sans préchargement, le rendu
-      // serveur peint la `RefineBar` sur un cache vide — donc la pastille
-      // creuse de `CategoryIcon` — puis la requête suspensive de la table
-      // remplit le cache, qui part déshydraté vers le client : celui-ci rend
-      // la vraie icône et l'hydratation casse. Le préchargement met les deux
-      // côtés d'accord dès la première image.
-      context.queryClient.fetchQuery({
-        ...context.trpc.categories.tree.queryOptions(),
-        staleTime: 0,
-      }),
-      context.queryClient.fetchQuery({
-        ...context.trpc.transactions.bankCounts.queryOptions(deps),
-        staleTime: 0,
-      }),
-      context.queryClient.fetchQuery({
-        ...context.trpc.transactions.banks.queryOptions(),
-        staleTime: 0,
-      }),
+      // Les quatre suivants n'alimentent pas cet écran mais l'en-tête et les
+      // cellules de la table, montés au-dessus ou en dessous de l'`Outlet`.
+      // Ils passaient par le cache react-query jusqu'au 2026-08-28 ; ce
+      // layout étant le seul endroit d'où leurs trois consommateurs sont
+      // montés (`PeriodPicker`, `BankPicker`, `useParentCategories`), le
+      // loader les porte directement — un cache de moins, et la panne
+      // d'hydratation que le préchargement rattrapait ne peut plus exister.
+      context.trpcClient.categories.tree.query(),
+      context.trpcClient.transactions.bankCounts.query(deps),
+      context.trpcClient.transactions.banks.query(),
+      context.trpcClient.transactions.earliestDate.query(),
     ]);
 
     return {
       globalStats,
       budgetStats,
       newOverview,
+      categoryTree,
+      bankCounts,
+      banks,
+      earliestDate,
     };
   },
   errorComponent: ({ error }) => (

@@ -16,11 +16,18 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
  * silencieusement l'en-tête.
  *
  * Depuis le portage du nouvel en-tête, `AppHeader` est aussi monté **hors** de
- * ce layout (`/categories`, `/banques`), où le cast est donc faux : la search
- * rendue est celle de ces routes-là. Il l'appelle quand même — un hook ne se
- * conditionne pas — mais n'en lit la valeur que sur les écrans de la revue, et
- * n'y monte ni `PeriodPicker` ni `BankPicker`, les deux seuls consommateurs.
- * Toute nouvelle lecture dans l'en-tête doit passer par la même garde.
+ * ce layout (`/categories`, `/banques`, `/callback`), où le cast est donc faux :
+ * la search rendue est celle de ces routes-là. Il l'appelle quand même — un hook
+ * ne se conditionne pas — mais n'en lit la valeur que derrière la garde
+ * `isRevue` d'`AppHeader`, qui teste la **présence du match**
+ * `/_authed/_period-overview`. Toute nouvelle lecture dans l'en-tête doit passer
+ * par cette garde.
+ *
+ * Elle est positive depuis le 2026-08-28, et doit le rester : l'absence de titre
+ * en tenait lieu jusque-là, ce qui rangeait `/callback` — sous `_authed`, sans
+ * titre — du côté de la revue et y montait les deux sélecteurs hors de leur
+ * layout. Sans conséquence tant qu'ils lisaient un cache client ; ils lisent
+ * maintenant le loader de ce layout, et `useLoaderData` lève sans le match.
  */
 export function useRevueSearch() {
   const search: TransactionsSearch = useSearch({ strict: false });

@@ -1,7 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "@tanstack/react-router";
+import { useLoaderData, useRouter } from "@tanstack/react-router";
 import { ChevronDownIcon, RefreshCwIcon } from "lucide-react";
 import { useState } from "react";
 
@@ -22,7 +21,7 @@ import { toast } from "@budget/ui/toast";
 import { sumBy } from "~/lib/sum";
 import { toastSyncOutcome } from "~/lib/sync-toast";
 import { selectedBanks, toggleBank } from "~/lib/transactions-search";
-import { useTRPC, useTRPCClient } from "~/lib/trpc";
+import { useTRPCClient } from "~/lib/trpc";
 import { useRevueSearch } from "~/lib/use-revue-search";
 
 /**
@@ -46,23 +45,23 @@ import { useRevueSearch } from "~/lib/use-revue-search";
  * contrôlée parce que la synchronisation referme le menu quand elle aboutit.
  */
 export function BankPicker() {
-  const trpc = useTRPC();
   const [open, setOpen] = useState(false);
   const { search, setSearch } = useRevueSearch();
 
-  const { data: banks } = useQuery(trpc.transactions.banks.queryOptions());
-  const { data: counts } = useQuery(
-    trpc.transactions.bankCounts.queryOptions(search),
-  );
+  // Chargés par le loader du layout de la revue, seul endroit d'où l'en-tête
+  // monte ce sélecteur (voir la garde `isRevue` d'`AppHeader`).
+  const { banks, bankCounts } = useLoaderData({
+    from: "/_authed/_period-overview",
+  });
 
-  const known = banks ?? [];
+  const known = banks;
   const selected = selectedBanks(search);
   const isOn = (bank: string) =>
     selected.length === 0 || selected.includes(bank);
   const offCount = known.filter((bank) => !isOn(bank)).length;
 
   const total = sumBy(
-    (counts ?? []).filter((entry) => isOn(entry.bank)),
+    bankCounts.filter((entry) => isOn(entry.bank)),
     (entry) => entry.count,
   );
 
@@ -109,7 +108,7 @@ export function BankPicker() {
             >
               {bank}
               <DropdownMenuShortcut>
-                {counts?.find((entry) => entry.bank === bank)?.count ?? 0}
+                {bankCounts.find((entry) => entry.bank === bank)?.count ?? 0}
               </DropdownMenuShortcut>
             </DropdownMenuCheckboxItem>
           ))}

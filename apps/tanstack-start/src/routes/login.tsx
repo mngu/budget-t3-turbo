@@ -47,8 +47,8 @@ function LoginPage() {
 
   // Le lien reçu par email ramène sur `redirect` : c'est une navigation de
   // document complète, donc le rechargement que `reloadDocument` assurait
-  // autrefois — l'espace actif vit dans la session, react-query servirait
-  // sinon le cache d'avant la connexion.
+  // autrefois — l'espace actif vit dans la session, le cache des loaders du
+  // routeur servirait sinon celui d'avant la connexion.
   const requestLink = async (e: React.FormEvent) => {
     e.preventDefault();
     setPending(true);

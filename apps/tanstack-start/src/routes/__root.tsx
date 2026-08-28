@@ -1,7 +1,5 @@
 import type { AppRouter } from "@budget/api";
-import type { QueryClient } from "@tanstack/react-query";
 import type { TRPCClient } from "@trpc/client";
-import type { TRPCOptionsProxy } from "@trpc/tanstack-react-query";
 import type * as React from "react";
 
 import {
@@ -19,8 +17,6 @@ import { TooltipProvider } from "@budget/ui/tooltip";
 import appCss from "~/styles.css?url";
 
 export const Route = createRootRouteWithContext<{
-  queryClient: QueryClient;
-  trpc: TRPCOptionsProxy<AppRouter>;
   trpcClient: TRPCClient<AppRouter>;
 }>()({
   head: () => ({

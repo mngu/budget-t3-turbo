@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useLoaderData } from "@tanstack/react-router";
 import {
   addDays,
   differenceInCalendarDays,
@@ -29,7 +29,6 @@ import {
   toISODate,
 } from "~/lib/date";
 import { dateFr, dayMonthFr } from "~/lib/format";
-import { useTRPC } from "~/lib/trpc";
 import { useRevueSearch } from "~/lib/use-revue-search";
 
 const monthFr = new Intl.DateTimeFormat("fr-FR", {
@@ -107,7 +106,6 @@ function buildPresets(anchor: Date, startDay: number): Preset[] {
  * de composer.
  */
 export function PeriodPicker() {
-  const trpc = useTRPC();
   const { search, setSearch } = useRevueSearch();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<Date | null>(null);
@@ -122,12 +120,13 @@ export function PeriodPicker() {
 
   // Bornes du sélecteur. La haute est aujourd'hui — il n'y a rien à regarder
   // après. La basse est la première transaction de l'espace, et son absence
-  // (requête en vol, ou espace encore vide) vaut « pas de borne basse » plutôt
-  // que « rien n'est cliquable » : un calendrier libre pendant 200 ms est
-  // préférable à un calendrier mort.
-  const { data: earliest } = useQuery(
-    trpc.transactions.earliestDate.queryOptions(),
-  );
+  // (espace encore vide) vaut « pas de borne basse » plutôt que « rien n'est
+  // cliquable ». Elle vient du loader du layout de la revue, seul endroit d'où
+  // l'en-tête monte ce sélecteur (garde `isRevue` d'`AppHeader`) : elle est
+  // donc là dès la première image, il n'y a plus de fenêtre « requête en vol ».
+  const { earliestDate: earliest } = useLoaderData({
+    from: "/_authed/_period-overview",
+  });
   const today = new Date();
   const min = earliest ? parseISO(earliest) : undefined;
   // Comparé au *cycle* et non au jour : un mois est atteignable dès qu'il

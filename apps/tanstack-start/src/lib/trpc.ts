@@ -1,4 +1,5 @@
 import { createIsomorphicFn } from "@tanstack/react-start";
+import { useRouter } from "@tanstack/react-router";
 import { getRequestHeaders } from "@tanstack/react-start/server";
 import {
   createTRPCClient,
@@ -6,7 +7,6 @@ import {
   loggerLink,
   unstable_localLink,
 } from "@trpc/client";
-import { createTRPCContext } from "@trpc/tanstack-react-query";
 import SuperJSON from "superjson";
 
 import * as Api from "@budget/api";
@@ -49,5 +49,16 @@ export const makeTRPCClient = createIsomorphicFn()
     });
   });
 
-export const { useTRPC, useTRPCClient, TRPCProvider } =
-  createTRPCContext<Api.AppRouter>();
+/**
+ * Le client tRPC des composants. Il vit dans le contexte du routeur (voir
+ * `router.tsx`), qui est le seul endroit où il est construit une fois par
+ * requête — un singleton de module serait faux au SSR, où chaque rendu doit
+ * porter les en-têtes de *sa* requête (`unstable_localLink`).
+ *
+ * Remplace le hook homonyme de `@trpc/tanstack-react-query`, supprimé avec
+ * react-query : les lectures passent par les loaders, il ne restait de ce
+ * package que ce hook.
+ */
+export function useTRPCClient() {
+  return useRouter().options.context.trpcClient;
+}
