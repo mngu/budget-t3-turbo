@@ -1,0 +1,51 @@
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/category-selector/category-selector.tsx
+  s_85ee367a700eb2::t_c7437b767b0d9d 7
+  h_c1b75a3cdf5637 1-6,8-21,25-27,29-30,32-34,36-38,40,42-53,56-59
+  s_85ee367a700eb2::t_c4a0d6d2115910 22-24,28,31,35,39,41,54
+  s_85ee367a700eb2::t_9c8612c4052798 55
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/refine-bar.tsx
+  h_c1b75a3cdf5637 4-5,19,50-65,81,90,133,136,142
+  s_85ee367a700eb2::t_9c8612c4052798 16-18,41-44,46-49,134-135,137-141
+  h_c1b75a3cdf5637 3,6,8
+packages/api/src/categories/schemas.ts
+  h_c1b75a3cdf5637 16-19,35,37
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/transactions-table.tsx
+  h_c1b75a3cdf5637 10,177-190,192-197
+  h_c1b75a3cdf5637 146,167-168
+apps/tanstack-start/src/routes/_authed/_period-overview/transactions.tsx
+  h_c1b75a3cdf5637 1,29-32,40
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/category-selector/category-path-picker.tsx
+  h_c1b75a3cdf5637 3,15,17-23,30-33,42-44,48,50,54,56,58,62-79,81-83,86,91,93
+packages/api/src/transactions/queries.ts
+  h_c1b75a3cdf5637 71
+  s_a0de8903a75237::t_aa908e1bba95e1 254-256
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "ee692eb4fcb3cba615cc271b131937f647fb2b28",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_85ee367a700eb2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5e3961a3-5418-497b-b86f-1329680ed8b5",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    },
+    "s_a0de8903a75237": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1dd95761-666b-4360-9791-796a6e40a554",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
