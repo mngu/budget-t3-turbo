@@ -1,0 +1,14 @@
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/category-selector/category-path-picker.tsx
+  h_c1b75a3cdf5637 3-4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "354a5545290020e3d3ba4c103296480a14419553",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
