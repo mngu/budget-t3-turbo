@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useLoaderData } from "@tanstack/react-router";
 
 import { PAGE_SIZE } from "@budget/api/schemas";
 
@@ -26,6 +26,10 @@ export const Route = createFileRoute("/_authed/_period-overview/transactions")({
 
 function AllTransactions() {
   const { rows, total } = Route.useLoaderData();
+
+  const { newOverview } = useLoaderData({
+    from: "/_authed/_period-overview",
+  });
   const search = Route.useSearch();
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
@@ -33,6 +37,7 @@ function AllTransactions() {
     <div className="flex min-h-0 min-w-0 flex-1 flex-col">
       <RefineBar
         sens
+        newOverview={newOverview}
         searchField
         className="border-border bg-surface-2 mt-4 flex-none rounded-md border px-2.5 py-2"
       />

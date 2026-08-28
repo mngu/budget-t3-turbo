@@ -13,6 +13,10 @@ const newCategoryOverviewChildSchema = z.object({
   totalAmount: z.number().nullable(),
 });
 
+export interface NewCategoryOverviewChild extends z.infer<
+  typeof newCategoryOverviewChildSchema
+> {}
+
 const newCategoryOverviewElementSchema = z.object({
   id: z.number().int(),
   organization_id: z.string(),
@@ -28,9 +32,9 @@ const newCategoryOverviewElementSchema = z.object({
   totalAmount: z.number().nullable(),
 });
 
-export type NewCategoryOverviewElementType = z.infer<
+export interface NewCategoryOverviewElementType extends z.infer<
   typeof newCategoryOverviewElementSchema
->;
+> {}
 
 export const newCategoryOverviewSchema = z.array(
   newCategoryOverviewElementSchema,

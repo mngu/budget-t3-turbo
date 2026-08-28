@@ -1,19 +1,22 @@
 "use client";
 
-import type { TransactionsSearch } from "@budget/api/schemas";
+import type {
+  NewCategoryOverviewType,
+  TransactionsSearch,
+} from "@budget/api/schemas";
 
-import { SearchIcon, TagIcon } from "lucide-react";
-import { useState } from "react";
+import { SearchIcon } from "lucide-react";
 
 import { cn } from "@budget/ui";
 import { InputGroup, InputGroupAddon } from "@budget/ui/input-group";
 import { ToggleGroup, ToggleGroupItem } from "@budget/ui/toggle-group";
-import { CategoryIcon } from "~/component/category-icon";
 import { SearchInput } from "~/component/search-input";
 import { useRevueSearch } from "~/lib/use-revue-search";
 
-import { useParentCategories } from "../-lib/category-lookup";
-import { CategoryPathPicker } from "./category-path-picker";
+import {
+  CategorySelector,
+  SelectedCategory,
+} from "./category-selector/category-selector";
 
 // Au pluriel, comme les deux totaux qui les surplombent sur `/transactions` :
 // le bouton nomme un ensemble de lignes, pas le sens d'une transaction.
@@ -35,13 +38,31 @@ const CONTEXT_FILTERS = {
 } satisfies Partial<TransactionsSearch>;
 
 /**
- * `category` porte une sentinelle : `"none"` ne désigne pas une catégorie
- * nommée « none » mais l'absence de catégorie (`transactionsFilterQuery` la
- * traduit en `category_id is null`). Sans cette traduction à l'affichage, la
- * barre de filtres et le rappel des filtres en cours annonçaient « none ».
+ * Résout le nom porté par l'URL (`?category=`) en chemin de l'arborescence, pour
+ * que le bouton de filtre lise la même source que la table. Sans ça, l'état du
+ * bouton doublerait l'URL et divergerait d'elle au premier « ✕ » ou retour
+ * arrière.
  */
-export function categoryFilterLabel(category: string) {
-  return category === "none" ? "Sans catégorie" : category;
+export function selectedCategory(
+  newOverview: NewCategoryOverviewType,
+  category: string | undefined,
+): SelectedCategory | undefined {
+  let parentFound = newOverview.find((parent) => parent.name === category);
+  if (parentFound) {
+    return { parent: parentFound };
+  }
+  let childFound;
+  newOverview.forEach((parent) =>
+    parent.children?.forEach((child) => {
+      if (child.name === category) {
+        parentFound = parent;
+        childFound = child;
+      }
+    }),
+  );
+  if (childFound && parentFound) {
+    return { parent: parentFound, child: childFound };
+  }
 }
 
 // Séparateur vertical entre groupes de contrôles de la barre (maquette : 1×20).
@@ -57,6 +78,7 @@ export function RefineBar({
   label,
   sens,
   searchField,
+  newOverview,
   right,
   className,
 }: {
@@ -65,6 +87,7 @@ export function RefineBar({
   label?: string;
   /** Sélecteur Tous / Débit / Crédit. */
   sens?: boolean;
+  newOverview: NewCategoryOverviewType;
   /**
    * Champ de recherche `q`. Il vivait dans l'en-tête tant que celui-ci portait
    * les filtres des quatre écrans ; le nouvel en-tête n'en a plus, et
@@ -78,14 +101,6 @@ export function RefineBar({
   className?: string;
 }) {
   const { search, setSearch } = useRevueSearch();
-  const [catOpen, setCatOpen] = useState(false);
-  // Identité de la catégorie filtrée (icône + teinte), lue dans l'arborescence —
-  // la même source que le sélecteur, préchargée par le loader du layout.
-  const parents = useParentCategories();
-  const activeParent = search.category
-    ? parents.get(search.category)
-    : undefined;
-
   const dirty = !!(search.direction ?? search.category);
 
   return (
@@ -96,9 +111,6 @@ export function RefineBar({
 
       {sens && (
         <>
-          {/* Sélection unique : `multiple` vaut `false` par défaut. Décocher
-              l'actif rend un tableau vide, qui retombe sur « Tous » — c'est
-              exactement ce que veut dire « plus aucun sens choisi ». */}
           <ToggleGroup
             size="sm"
             aria-label="Sens des transactions"
@@ -118,37 +130,18 @@ export function RefineBar({
             ))}
           </ToggleGroup>
           <Divider />
+          <CategorySelector
+            value={selectedCategory(newOverview, search.category)}
+            onChange={(selected) =>
+              setSearch({
+                category: !selected
+                  ? undefined
+                  : (selected.child?.name ?? selected.parent.name ?? "none"),
+              })
+            }
+          />
         </>
       )}
-
-      <button
-        type="button"
-        onClick={() => setCatOpen(true)}
-        className={cn(
-          "text-control flex h-7 max-w-62 flex-none items-center gap-1.5 rounded-md border px-2.5",
-          search.category
-            ? "border-border-strong bg-card font-semibold"
-            : "text-muted-foreground hover:bg-card border-transparent",
-        )}
-      >
-        <span className="flex flex-none">
-          {search.category ? (
-            <CategoryIcon
-              name={activeParent?.icon ?? null}
-              className="size-3"
-              color={activeParent?.color ?? "var(--subtle)"}
-            />
-          ) : (
-            <TagIcon className="size-3" />
-          )}
-        </span>
-        <span className="min-w-0 truncate">
-          {search.category
-            ? categoryFilterLabel(search.category)
-            : "Toutes catégories"}
-        </span>
-        <span className="text-subtle text-label flex-none">▾</span>
-      </button>
 
       {search.category && (
         <button
@@ -194,18 +187,6 @@ export function RefineBar({
           />
         </InputGroup>
       )}
-
-      <CategoryPathPicker
-        open={catOpen}
-        onOpenChange={setCatOpen}
-        title="Filtrer par catégorie"
-        description="Choisissez la catégorie à isoler dans le relevé."
-        // En filtre, désigner une parente retient aussi ses sous-catégories :
-        // « Sans sous-catégorie » y serait faux (voir PARENT_SUB_LABEL).
-        parentLabel="Toute la catégorie"
-        current={search.category}
-        onPick={(category) => setSearch({ category })}
-      />
     </div>
   );
 }

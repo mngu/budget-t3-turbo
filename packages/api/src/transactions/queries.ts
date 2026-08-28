@@ -68,6 +68,7 @@ export interface TransactionRow {
   categoryPath: string | null;
   /** Couleur de la catégorie *parente* : les lignes se lisent par famille. */
   categoryColor: string | null;
+  categoryIcon: string | null;
   /** Exclue à la main des agrégats — elle reste dans ce relevé, et là seulement. */
   excluded: boolean;
 }
@@ -250,6 +251,9 @@ export async function listTransactions(
         status: transactions.status,
         category: categories.name,
         categorySource: transactions.categorySource,
+        categoryIcon: sql<
+          string | null
+        >`coalesce(${parentCategories.icon}, ${categories.icon})`,
         categoryPath: sql<
           string | null
         >`case when ${parentCategories.name} is null then ${categories.name}

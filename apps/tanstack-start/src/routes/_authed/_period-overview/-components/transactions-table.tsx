@@ -1,18 +1,13 @@
 "use client";
 
-import type { ParentCategory } from "../-lib/category-lookup";
 import type { TransactionRow } from "@budget/api";
 
-import { useState } from "react";
-
 import { cn } from "@budget/ui";
-import { CategoryIcon } from "~/component/category-icon";
 import { dayMonthFr, signedEuro, titleCase } from "~/lib/format";
 import { useRevueSearch } from "~/lib/use-revue-search";
 
-import { useParentCategories } from "../-lib/category-lookup";
 import { useSetCategory } from "../-lib/use-set-category";
-import { CategoryPathPicker } from "./category-path-picker";
+import { CategorySelector } from "./category-selector/category-selector";
 import { ExcludeBadge } from "./exclude-badge";
 
 /**
@@ -43,7 +38,6 @@ export function TransactionsTable({
   total: number;
 }) {
   const { search, setSearch } = useRevueSearch();
-  const parents = useParentCategories();
 
   // La maquette éteint la date des lignes qui répètent celle du dessus, pour
   // faire ressortir les ruptures de journée. Uniquement sous tri par date :
@@ -72,7 +66,6 @@ export function TransactionsTable({
         <Row
           key={row.id}
           row={row}
-          parents={parents}
           repeatsDate={
             grouped && rows[index - 1]?.bookingDate === row.bookingDate
           }
@@ -112,11 +105,9 @@ export function TransactionsTable({
 
 function Row({
   row,
-  parents,
   repeatsDate,
 }: {
   row: TransactionRow;
-  parents: Map<string, ParentCategory>;
   repeatsDate: boolean;
 }) {
   const signed = (row.direction === "debit" ? -1 : 1) * Number(row.amount);
@@ -152,7 +143,7 @@ function Row({
         {debtor && ` · ${titleCase(debtor)}`}
       </span>
 
-      <CategoryCell row={row} parents={parents} />
+      <CategoryCell row={row} />
 
       <span className={cn("num text-body text-right", signed > 0 && "text-ok")}>
         {signedEuro.format(signed)}
@@ -173,72 +164,37 @@ function Row({
  *   libellé nomme la parente pour dire dans laquelle ;
  * — posée sur une parente sans enfant : classée, rien à ajouter.
  */
-function CategoryCell({
-  row,
-  parents,
-}: {
-  row: TransactionRow;
-  parents: Map<string, ParentCategory>;
-}) {
-  const [picking, setPicking] = useState(false);
-  const { setCategory, pending } = useSetCategory();
+function CategoryCell({ row }: { row: TransactionRow }) {
+  const { setCategory } = useSetCategory();
 
   // `categoryPath` vaut « Parent › Enfant », ou le seul nom quand la
   // transaction est posée sur la parente.
   const path = row.categoryPath?.split(" › ") ?? [];
   const parentName = path[0] ?? null;
   const subName = path[1] ?? null;
-  const parent = parentName === null ? undefined : parents.get(parentName);
-
-  // Poser une transaction sur une parente plutôt que sur une de ses
-  // sous-catégories n'est pas un défaut : la ligne se lit comme les autres.
-  // Seule l'absence totale de catégorie est signalée.
-  const label =
-    parentName === null ? "Sans catégorie" : (subName ?? parentName);
 
   return (
-    <span className="flex min-w-0">
-      <button
-        type="button"
-        disabled={pending}
-        onClick={() => setPicking(true)}
-        title="Reclasser"
-        className="hover:border-border-strong hover:bg-card -ml-2 flex h-7 min-w-0 flex-1 items-center gap-2 rounded-md border border-transparent px-1.5 text-left"
-      >
-        <span className="flex flex-none">
-          <CategoryIcon
-            name={parent?.icon ?? null}
-            className="size-4"
-            color={parent?.color}
-          />
-        </span>
-        <span
-          className={cn(
-            "text-control min-w-0 truncate",
-            parentName === null ? "text-subtle" : "text-muted-foreground",
-          )}
-        >
-          {label}
-        </span>
-        {/* Corrigée à la main : `category_source = 'manual'` est la seule des
-            trois valeurs qui dise quelque chose au lecteur — llm et auto sont
-            le régime normal. */}
-        {row.categorySource === "manual" && (
-          <span
-            className="bg-primary size-1 flex-none rounded-full"
-            title="Catégorie corrigée à la main"
-          />
-        )}
-        <span className="text-subtle text-label ml-auto flex-none">▾</span>
-      </button>
-
-      <CategoryPathPicker
-        open={picking}
-        onOpenChange={setPicking}
-        subtitle={`${row.description}  ·  ${signedEuro.format((row.direction === "debit" ? -1 : 1) * Number(row.amount))}`}
-        current={row.category}
-        onPick={(name) => void setCategory(row.id, name)}
+    <span className="flex min-w-0 items-center gap-1">
+      <CategorySelector
+        value={{
+          parent: {
+            name: parentName,
+            color: row.categoryColor,
+            icon: row.categoryIcon,
+            id: row.id,
+          },
+          ...(subName && { child: { name: subName } }),
+        }}
+        onChange={(selected) =>
+          setCategory(row.id, selected.child?.name ?? selected.parent.name)
+        }
       />
+      {row.categorySource === "manual" && (
+        <span
+          className="bg-primary size-1 flex-none rounded-full"
+          title="Catégorie corrigée à la main"
+        />
+      )}
     </span>
   );
 }
