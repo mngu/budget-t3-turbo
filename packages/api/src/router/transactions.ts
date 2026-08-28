@@ -49,9 +49,14 @@ export const transactionsRouter = {
     .query(({ ctx, input }) => bankCounts(ctx.organizationId, input)),
 
   updateCategory: orgProcedure
-    .input(z.object({ id: z.number().int().positive(), category: z.string() }))
+    .input(
+      z.object({
+        id: z.number().int().positive(),
+        categoryId: z.number().int().positive().nullable(),
+      }),
+    )
     .mutation(({ ctx, input }) =>
-      setTransactionCategory(ctx.organizationId, input.id, input.category),
+      setTransactionCategory(ctx.organizationId, input.id, input.categoryId),
     ),
 
   // « Cette ligne ne me concerne pas » : la sort des agrégats, la laisse dans

@@ -183,10 +183,13 @@ function CategoryCell({ row }: { row: TransactionRow }) {
             icon: row.categoryIcon,
             id: row.id,
           },
-          ...(subName && { child: { name: subName } }),
+          ...(subName && { child: { id: row.categoryId, name: subName } }),
         }}
         onChange={(selected) =>
-          setCategory(row.id, selected.child?.name ?? selected.parent.name)
+          setCategory(
+            row.id,
+            selected?.child?.id ?? selected?.parent.id ?? null,
+          )
         }
       />
       {row.categorySource === "manual" && (

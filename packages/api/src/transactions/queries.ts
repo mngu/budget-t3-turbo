@@ -64,6 +64,7 @@ export interface TransactionRow {
    * normal et n'ont rien à dire au lecteur ; `null` = aucune catégorie.
    */
   categorySource: string | null;
+  categoryId: number | null;
   /** Chemin affiché : « Parent › Enfant », ou « Parent » seul. */
   categoryPath: string | null;
   /** Couleur de la catégorie *parente* : les lignes se lisent par famille. */
@@ -254,6 +255,9 @@ export async function listTransactions(
         categoryIcon: sql<
           string | null
         >`coalesce(${parentCategories.icon}, ${categories.icon})`,
+        categoryId: sql<
+          string | null
+        >`coalesce(${categories.id}, ${parentCategories.id})`,
         categoryPath: sql<
           string | null
         >`case when ${parentCategories.name} is null then ${categories.name}
@@ -384,22 +388,11 @@ export async function bankCounts(
 export async function setTransactionCategory(
   organizationId: string,
   id: number,
-  categoryName: string,
+  categoryId: number | null,
 ): Promise<void> {
-  const [match] = await db
-    .select({ id: categories.id })
-    .from(categories)
-    .where(
-      and(
-        eq(categories.organizationId, organizationId),
-        eq(categories.name, categoryName),
-      ),
-    );
-  if (!match) throw new Error(`Catégorie inconnue : ${categoryName}`);
-
   await db
     .update(transactions)
-    .set({ categoryId: match.id, categorySource: "manual" })
+    .set({ categoryId: categoryId, categorySource: "manual" })
     .where(and(eq(transactions.id, id), ownedByOrganization(organizationId)));
 }
 

@@ -19,10 +19,10 @@ export function useSetCategory() {
   const trpcClient = useTRPCClient();
   const [pending, setPending] = useState(false);
 
-  const setCategory = async (id: number, category: string) => {
+  const setCategory = async (id: number, categoryId: number | null) => {
     setPending(true);
     try {
-      await trpcClient.transactions.updateCategory.mutate({ id, category });
+      await trpcClient.transactions.updateCategory.mutate({ id, categoryId });
       await router.invalidate();
     } catch (err) {
       // Sans ce toast l'échec est invisible : le loader n'ayant pas été

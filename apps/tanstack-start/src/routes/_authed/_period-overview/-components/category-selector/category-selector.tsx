@@ -1,10 +1,11 @@
-import { TagIcon } from "lucide-react";
-import { useState } from "react";
-
-import {
+import type {
   NewCategoryOverviewChild,
   NewCategoryOverviewElementType,
 } from "@budget/api/schemas";
+
+import { TagIcon } from "lucide-react";
+import { useState } from "react";
+
 import { Button } from "@budget/ui/button";
 import { CategoryIcon } from "~/component/category-icon";
 
@@ -15,7 +16,7 @@ export type SelectedCategory = {
     NewCategoryOverviewElementType,
     "id" | "name" | "color" | "icon"
   >;
-  child?: Pick<NewCategoryOverviewChild, "name">;
+  child?: Pick<NewCategoryOverviewChild, "id" | "name">;
 };
 
 type CategorySelectorProps = {

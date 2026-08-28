@@ -6,7 +6,7 @@
 import { z } from "zod/v4";
 
 const newCategoryOverviewChildSchema = z.object({
-  id: z.number().int(),
+  id: z.number().int().nullable(),
   name: z.string(),
   budgetAmount: z.number().nullable(),
   transactionCount: z.number(),
