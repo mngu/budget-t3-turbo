@@ -1,0 +1,45 @@
+apps/tanstack-start/src/routes/login.tsx
+  s_9be4f8e94bfc9a::t_f70e87e549474a 50-51
+apps/tanstack-start/src/lib/trpc.ts
+  s_9be4f8e94bfc9a::t_0b03f7bc4a920c 2,52-64
+apps/tanstack-start/src/component/period-picker.tsx
+  s_9be4f8e94bfc9a::t_979b72c8471bee 123-129
+  s_9be4f8e94bfc9a::t_e0cd9c879e3554 3
+apps/tanstack-start/src/routes/_authed/_period-overview/route.tsx
+  s_9be4f8e94bfc9a::t_6414f646e88c5b 56-64,83-93,100-103
+apps/tanstack-start/src/router.tsx
+  s_9be4f8e94bfc9a::t_3b242719d5239a 3,10,12
+CLAUDE.md
+  s_9be4f8e94bfc9a::t_f70e87e549474a 43
+apps/tanstack-start/src/component/app-header.tsx
+  s_9be4f8e94bfc9a::t_96e8a72bf72e87 3,85-97,99-102,136,141,144
+  s_9be4f8e94bfc9a::t_f70e87e549474a 242-247
+apps/tanstack-start/src/lib/use-revue-search.ts
+  s_9be4f8e94bfc9a::t_86f0d35c012480 19-30
+apps/tanstack-start/src/component/bank-picker.tsx
+  s_9be4f8e94bfc9a::t_979b72c8471bee 3,24,51-55,57,64
+  s_9be4f8e94bfc9a::t_deff1cb119ebfc 111
+apps/tanstack-start/src/routes/_authed/settings/espaces/index.tsx
+  s_9be4f8e94bfc9a::t_f70e87e549474a 243-244
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "420bfc49ded08a0c5be2b3534d9fb4d4f2d0629c",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_9be4f8e94bfc9a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f6349dc1-20ee-4534-b2d0-1c343d1f158a",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
