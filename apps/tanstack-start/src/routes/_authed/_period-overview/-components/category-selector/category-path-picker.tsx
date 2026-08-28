@@ -1,5 +1,7 @@
 "use client";
 
+import type { SelectedCategory } from "./category-selector";
+
 import { useLoaderData } from "@tanstack/react-router";
 
 import {
@@ -11,8 +13,6 @@ import {
   CommandList,
 } from "@budget/ui/command";
 import { CategoryIcon } from "~/component/category-icon";
-
-import { SelectedCategory } from "./category-selector";
 
 type CategoryPathPickerProps = {
   open: boolean;
