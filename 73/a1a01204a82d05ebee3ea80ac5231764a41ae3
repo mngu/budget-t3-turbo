@@ -1,0 +1,25 @@
+apps/tanstack-start/src/routes/_authed/_period-overview/test/route.tsx
+  h_c1b75a3cdf5637 1-16
+apps/tanstack-start/package.json
+  h_c1b75a3cdf5637 52
+packages/ui/src/three/test.tsx
+  h_c1b75a3cdf5637 1-15
+packages/ui/package.json
+  h_c1b75a3cdf5637 27,56
+  h_c1b75a3cdf5637 44,50-51
+apps/tanstack-start/src/routeTree.gen.ts
+  h_c1b75a3cdf5637 22,79-84,115,130,148,165,180,197,288-294,327,334
+pnpm-lock.yaml
+  h_c1b75a3cdf5637 199-200,307-309,328-330,338-340,670-672,2197-2221,2629-2631,2694-2698,2702-2707,2717-2719,3123-3125,3990-3992,4440-4444,4683-4685,5324-5332,5441-5443,5692-5696,5728-5730,6085-6086,6299-6316,6797-6798,7843-7862,8346-8347,8436-8439,8444-8454,8463-8464,8842-8846,9692-9693,10142-10148,10347-10348,11141-11146,11274-11275,11545-11548,11585-11586,11849,12044-12049
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "73a1a01204a82d05ebee3ea80ac5231764a41ae3",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
