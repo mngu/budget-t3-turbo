@@ -1,0 +1,18 @@
+packages/ui/src/three/canvas-container.tsx
+  h_c1b75a3cdf5637 65-68
+  h_c1b75a3cdf5637 63-64,69
+packages/ui/src/three/segment.tsx
+  h_c1b75a3cdf5637 52-53
+  h_c1b75a3cdf5637 100-103
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "bb405ed56e09ac21a145652ff2aab5cdf6e9fc6b",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
