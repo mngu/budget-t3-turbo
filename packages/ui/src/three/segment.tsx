@@ -49,8 +49,8 @@ export function Segment({
   const { emissiveIntensity } = useSpring({
     // Au-delà de 1 la teinte sort de l'intervalle affichable et déborde dans le
     // `Bloom` du composeur : c'est ce qui fait le halo, pas l'éclaircissement.
-    emissiveIntensity: hovered ? 2 : 0,
-    config: config.wobbly,
+    emissiveIntensity: hovered ? 1 : 0,
+    config: config.gentle,
   });
   const { scale, rotateX, rotateY } = useSpring({
     from: { scale: 1.2, rotateX: Math.PI / 16, rotateY: Math.PI / 12 },
@@ -97,7 +97,10 @@ export function Segment({
           ]}
         >
           <sphereGeometry args={[TUBE_RADIUS, 24, 16]} />
-          <SegmentMaterial color={color} emissiveIntensity={emissiveIntensity} />
+          <SegmentMaterial
+            color={color}
+            emissiveIntensity={emissiveIntensity}
+          />
         </mesh>
       ))}
       {children}

@@ -60,7 +60,13 @@ export function CanvasContainer({ children }: Props) {
             survolé, poussé au-delà de 1, franchit la barre et déborde. Sans
             tone mapping (`flat`), rien d'autre ne monte aussi haut. */}
         <EffectComposer>
-          <Bloom mipmapBlur luminanceThreshold={0.9} intensity={1.2} />
+          <Bloom
+            mipmapBlur
+            luminanceThreshold={0.75}
+            luminanceSmoothing={0.3}
+            radius={0.6}
+            intensity={0.8}
+          />
         </EffectComposer>
       </Canvas>
     </div>
