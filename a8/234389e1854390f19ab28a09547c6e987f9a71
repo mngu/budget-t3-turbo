@@ -1,0 +1,69 @@
+packages/ui/src/three/canvas-container.tsx
+  s_73fefccb18799e::t_9724e33d3c37f5 35-46,48-52
+  s_73fefccb18799e::t_cfa89d25d6ea28 19-21,23-34
+  s_73fefccb18799e::t_52694d169d8186 10
+  s_73fefccb18799e::t_f3036bb2849560 57-64
+  h_c1b75a3cdf5637 1-8,11-14,16,22,47,53-56
+apps/tanstack-start/src/routes/_authed/_period-overview/test/route.tsx
+  h_c1b75a3cdf5637 1,3-8,15-22,24-29,32-40,42,44-49,51,53-55
+  s_1df676b83a56bf::t_53c061f67dd14c 41,50,52
+  s_1df676b83a56bf::t_bdb187b2ba3307 43
+  s_1df676b83a56bf::t_32af444bee51bc 30-31
+packages/ui/package.json
+  h_c1b75a3cdf5637 29,47
+  s_73fefccb18799e::t_8fcdad4618d7e6 49
+  s_73fefccb18799e::t_6e3b29c540c4d4 27-28,46
+packages/ui/src/three/point.tsx
+  s_1df676b83a56bf::t_b7b780e9998831 1-2,4,7-8,11,14-15
+  h_c1b75a3cdf5637 3,5-6,9-10,12-13,16-17
+apps/tanstack-start/vite.config.ts
+  s_130a704df9d8a3::t_6a955407689d53 42-63
+packages/api/src/categories/schemas.ts
+  h_c1b75a3cdf5637 58
+packages/ui/src/three/segment.tsx
+  h_c1b75a3cdf5637 2-7,13-16,22,40,48-49,53-60,64-70,72-77,86,104-106
+  s_73fefccb18799e::t_55af07e7ee0bac 1,8-12,17-21,23-39,61-63,71,78-85,87-102
+  s_1df676b83a56bf::t_a9bb7d70d2e946 41-47,103
+  s_73fefccb18799e::t_f7fedd9f61d3a6 50-52
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/refine-bar.tsx
+  h_c1b75a3cdf5637 3,17
+pnpm-lock.yaml
+  s_73fefccb18799e::t_aa07f37459517d 307-312,316-318,1280-1282,1293-1297,2214-2252,2278-2285,2723-2725,2747-2749,2917-2924,3159-3161,3242-3247,3449-3453,3588-3590,3650-3652,4088-4090,4250-4252,4311-4313,4368-4370,4490-4492,4645-4647,4774-4779,4805-4809,4872-4877,5329-5336,5365-5367,5758-5766,5881-5890,5950-5962,6012-6014,6241-6244,6369-6374,6488-6502,7413-7414,7437-7441,8054-8119,8140-8150,8678-8679,8704-8705,8822-8828,9081-9084,9193-9196,9439-9442,9538-9541,9597-9598,10009-10010,10198-10199,10253-10254,10318-10319,10428-10429,10558-10561,10662-10666,10683-10686,10745-10749,11347-11352,11384-11388,11837-11843,11948-11961,12012-12025,12075-12082,12235-12236,12360-12363,12450-12456
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "a8234389e1854390f19ab28a09547c6e987f9a71",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_130a704df9d8a3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3f68d772-c0fa-432f-96bc-2f77efa2f7c0",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    },
+    "s_1df676b83a56bf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b7c8d8a2-5006-42dd-a8af-67cc8593fbea",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    },
+    "s_73fefccb18799e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0b6f2a34-1d13-4b6f-8499-7ea85822610c",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
