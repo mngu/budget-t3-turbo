@@ -1,5 +1,6 @@
 "use client";
 
+import type { SelectedCategory } from "./category-selector/category-selector";
 import type {
   NewCategoryOverviewType,
   TransactionsSearch,
@@ -13,10 +14,7 @@ import { ToggleGroup, ToggleGroupItem } from "@budget/ui/toggle-group";
 import { SearchInput } from "~/component/search-input";
 import { useRevueSearch } from "~/lib/use-revue-search";
 
-import {
-  CategorySelector,
-  SelectedCategory,
-} from "./category-selector/category-selector";
+import { CategorySelector } from "./category-selector/category-selector";
 
 // Au pluriel, comme les deux totaux qui les surplombent sur `/transactions` :
 // le bouton nomme un ensemble de lignes, pas le sens d'une transaction.

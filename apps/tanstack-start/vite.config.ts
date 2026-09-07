@@ -39,6 +39,28 @@ export default defineConfig({
     // symptôme ne touchait que les routes, les composants ordinaires étant justes.
     codeInspectorPlugin({
       bundler: "vite",
+      // R3F lit le `-` comme un séparateur de propriétés « percées » :
+      // `material-color` vaut `mesh.material.color`. `data-insp-path` devient donc
+      // `mesh.data.insp.path`. Au montage, `mesh.data` n'existe pas : `resolve()`
+      // abandonne le perçage et écrit silencieusement `mesh.data = "<chemin>"`.
+      // Au remontage — donc au changement de page — la chaîne est là, le perçage
+      // repart, tombe sur une valeur non-objet et lève « R3F: Cannot set
+      // "data-insp-path" ». D'où une panne qui ne se voit jamais au premier
+      // chargement. Aucune perte à ne pas injecter : code-inspector intercepte des
+      // clics sur du DOM, or ces éléments ne vivent que dans le graphe WebGL — le
+      // canvas est un unique nœud DOM opaque.
+      // Le regex attrape les intrinsèques R3F camelCase (`torusGeometry`,
+      // `meshStandardMaterial`, `ambientLight`…) sans toucher une balise HTML,
+      // toutes en minuscules d'un bloc ; suivent les R3F tout en minuscules, puis
+      // les composants qui reversent leurs props dans un objet Three (`{...rest}`).
+      escapeTags: [
+        /^[a-z]+[A-Z]/,
+        "mesh",
+        "group",
+        "points",
+        "primitive",
+        "Segment",
+      ],
       // Sans ça, WebStorm ouvre `apps/tanstack-start` comme un projet à part au
       // lieu de sauter dans le monorepo déjà ouvert : code-inspector passe le
       // `root` de Vite (donc l'app) à launch-ide comme workspace, et ce workspace

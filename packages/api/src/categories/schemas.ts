@@ -55,6 +55,4 @@ export const isManagedCategory = (
   category: NewCategoryOverviewElementType,
 ): category is ManagedCategory => category.name !== null;
 
-export interface NewCategoryOverviewType extends z.infer<
-  typeof newCategoryOverviewSchema
-> {}
+export type NewCategoryOverviewType = z.infer<typeof newCategoryOverviewSchema>;
