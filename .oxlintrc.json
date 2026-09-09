@@ -146,6 +146,16 @@
       }
     },
     {
+      // `ParallaxCamera` écrit dans la caméra renvoyée par `useThree` : c'est
+      // l'idiome react-three-fiber, et il n'a pas d'équivalent « React ». La
+      // seule alternative que la règle accepterait — passer la position par
+      // `useState` — voudrait dire un re-rendu React à chaque image.
+      // Vaut pour ce fichier, mais vise `ParallaxCamera` seul : `CanvasContainer`
+      // en dessous est du JSX pur et n'a aucune raison d'en profiter.
+      "files": ["packages/ui/src/three/canvas-container.tsx"],
+      "rules": { "react/immutability": "off" }
+    },
+    {
       // Composant WebGL repris tel quel de reactbits : `ogl` ne type pas
       // `Program.uniforms`, et `program` est déclaré avant d'être assigné parce
       // que `resize()` le referme — ce que le flux de TypeScript ne voit pas.
