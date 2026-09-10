@@ -1,0 +1,32 @@
+packages/ui/src/three/segment-detail.tsx
+  h_c1b75a3cdf5637 1-11
+packages/ui/package.json
+  h_c1b75a3cdf5637 29,47
+packages/ui/src/three/canvas-container.tsx
+  h_c1b75a3cdf5637 127-129
+apps/tanstack-start/src/routes/_authed/_period-overview/test/route.tsx
+  h_c1b75a3cdf5637 1-2,4,8,10,12,19-22,29,36,38,41,43-45,52-54,57,65-71,74-88,90-101,104-108
+  h_c1b75a3cdf5637 23,42,46,61-64,72,89,102-103
+packages/ui/src/three/segment-label.tsx
+  h_c1b75a3cdf5637 1-3,19,22,63-65
+packages/ui/src/three/tuning.ts
+  h_c1b75a3cdf5637 37
+packages/api/src/categories/schemas.ts
+  h_c1b75a3cdf5637 35,37
+packages/ui/src/three/segment.tsx
+  h_c1b75a3cdf5637 24-25,56-58,87,89-91
+  h_c1b75a3cdf5637 52-55,59,88
+pnpm-lock.yaml
+  h_c1b75a3cdf5637 307-309
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "294d1608155a980ebe6a082128df127e9a731eef",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
