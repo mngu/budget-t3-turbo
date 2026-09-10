@@ -44,15 +44,15 @@ import { CategoryDeleteDialog } from "./category-delete-dialog";
 import { CategoryIdentityDialog } from "./category-identity-dialog";
 import { TransactionPreviewDrawer } from "./transaction-preview-drawer";
 
-interface NewCategoryOverviewProps {
+interface CategoryOverviewProps {
   categoryOverview: ManagedCategory[];
   stats: ReturnType<typeof computeStats>;
 }
 
-export function NewCategoryOverview({
+export function CategoryOverview({
   categoryOverview,
   stats,
-}: NewCategoryOverviewProps) {
+}: CategoryOverviewProps) {
   const trpcClient = useTRPCClient();
   const crud = useCategoryCrud();
   const preview = usePreview();

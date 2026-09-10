@@ -27,7 +27,7 @@ export const Route = createFileRoute("/_authed/_period-overview/transactions")({
 function AllTransactions() {
   const { rows, total } = Route.useLoaderData();
 
-  const { newOverview } = useLoaderData({
+  const { overview } = useLoaderData({
     from: "/_authed/_period-overview",
   });
   const search = Route.useSearch();
@@ -37,7 +37,7 @@ function AllTransactions() {
     <div className="flex min-h-0 min-w-0 flex-1 flex-col">
       <RefineBar
         sens
-        newOverview={newOverview}
+        overview={overview}
         searchField
         className="border-border bg-surface-2 mt-4 flex-none rounded-md border px-2.5 py-2"
       />

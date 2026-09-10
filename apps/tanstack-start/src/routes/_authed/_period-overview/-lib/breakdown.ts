@@ -1,6 +1,6 @@
 import type {
-  NewCategoryOverviewElementType,
-  NewCategoryOverviewType,
+  CategoryOverviewElementType,
+  CategoryOverviewType,
 } from "@budget/api/schemas";
 
 import { NO_CATEGORY_NAME } from "@budget/api/schemas";
@@ -9,7 +9,7 @@ import { sumBy } from "~/lib/sum";
 
 /**
  * Le niveau que la revue affiche, dérivé de l'arbre rendu par
- * `categories.newOverview`.
+ * `categories.overview`.
  *
  * **Seule** définition de ce niveau : l'anneau de `/`, la colonne des postes,
  * l'en-tête et le forage (`useDrill`) en sortent tous, et c'est ce qui les
@@ -87,9 +87,9 @@ export interface BreakdownLevel {
  * unique dans l'espace), l'ordre des deux recherches est donc indifférent.
  */
 export function openParent(
-  tree: NewCategoryOverviewType,
+  tree: CategoryOverviewType,
   category: string | undefined,
-): NewCategoryOverviewElementType | null {
+): CategoryOverviewElementType | null {
   if (category === undefined) return null;
   return (
     tree.find(
@@ -105,7 +105,7 @@ export function getCategoryLabel(name: string | null) {
   return name && name !== NO_CATEGORY_NAME ? name : NO_CATEGORY;
 }
 
-function parentSlice(parent: NewCategoryOverviewElementType): BreakdownSlice {
+function parentSlice(parent: CategoryOverviewElementType): BreakdownSlice {
   return {
     // `name` est null sur le poste des transactions sans catégorie : la requête
     // ne descend aucun libellé, ils se posent ici.
@@ -123,7 +123,7 @@ function parentSlice(parent: NewCategoryOverviewElementType): BreakdownSlice {
   };
 }
 
-function childSlices(parent: NewCategoryOverviewElementType): BreakdownSlice[] {
+function childSlices(parent: CategoryOverviewElementType): BreakdownSlice[] {
   const children = parent.children ?? [];
   const slices: BreakdownSlice[] = children.map((child) => ({
     name: child.name,
@@ -138,7 +138,7 @@ function childSlices(parent: NewCategoryOverviewElementType): BreakdownSlice[] {
     drillable: false,
   }));
 
-  // Le reliquat — la dépense posée sur la parente elle-même. `newOverview` ne
+  // Le reliquat — la dépense posée sur la parente elle-même. `overview` ne
   // lui donne aucune ligne (`children` ne contient que de vraies
   // sous-catégories), mais son montant s'en **déduit exactement** : le total
   // d'une parente couvre ses transactions directes *et* celles de ses enfants.
@@ -167,7 +167,7 @@ function childSlices(parent: NewCategoryOverviewElementType): BreakdownSlice[] {
 }
 
 /**
- * Le niveau affiché, dérivé de l'arbre de `categories.newOverview`.
+ * Le niveau affiché, dérivé de l'arbre de `categories.overview`.
  *
  * Deux traitements tiennent à ce que la requête ne rend pas, et non à un choix :
  * elle liste **toutes** les parentes de l'espace, y compris celles sans
@@ -176,7 +176,7 @@ function childSlices(parent: NewCategoryOverviewElementType): BreakdownSlice[] {
  * déduit exactement (voir `childSlices`).
  */
 export function breakdownLevel(
-  tree: NewCategoryOverviewType,
+  tree: CategoryOverviewType,
   category: string | undefined,
 ): BreakdownLevel {
   const open = openParent(tree, category);

@@ -2,7 +2,7 @@
 
 import type { SelectedCategory } from "./category-selector/category-selector";
 import type {
-  NewCategoryOverviewType,
+  CategoryOverviewType,
   TransactionsSearch,
 } from "@budget/api/schemas";
 
@@ -42,15 +42,15 @@ const CONTEXT_FILTERS = {
  * arrière.
  */
 export function selectedCategory(
-  newOverview: NewCategoryOverviewType,
+  overview: CategoryOverviewType,
   category: string | undefined,
 ): SelectedCategory | undefined {
-  let parentFound = newOverview.find((parent) => parent.name === category);
+  let parentFound = overview.find((parent) => parent.name === category);
   if (parentFound) {
     return { parent: parentFound };
   }
   let childFound;
-  newOverview.forEach((parent) =>
+  overview.forEach((parent) =>
     parent.children?.forEach((child) => {
       if (child.name === category) {
         parentFound = parent;
@@ -76,7 +76,7 @@ export function RefineBar({
   label,
   sens,
   searchField,
-  newOverview,
+  overview,
   right,
   className,
 }: {
@@ -85,7 +85,7 @@ export function RefineBar({
   label?: string;
   /** Sélecteur Tous / Débit / Crédit. */
   sens?: boolean;
-  newOverview: NewCategoryOverviewType;
+  overview: CategoryOverviewType;
   /**
    * Champ de recherche `q`. Il vivait dans l'en-tête tant que celui-ci portait
    * les filtres des quatre écrans ; le nouvel en-tête n'en a plus, et
@@ -129,7 +129,7 @@ export function RefineBar({
           </ToggleGroup>
           <Divider />
           <CategorySelector
-            value={selectedCategory(newOverview, search.category)}
+            value={selectedCategory(overview, search.category)}
             onChange={(selected) =>
               setSearch({
                 category: !selected

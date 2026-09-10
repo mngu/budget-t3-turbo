@@ -1,7 +1,4 @@
-import type {
-  NewCategoryOverviewChild,
-  NewCategoryOverviewElementType,
-} from "@budget/api/schemas";
+import type { CategoryOverviewElementType } from "@budget/api/schemas";
 
 import { TagIcon } from "lucide-react";
 import { useState } from "react";
@@ -12,11 +9,8 @@ import { CategoryIcon } from "~/component/category-icon";
 import { CategoryPathPicker } from "./category-path-picker";
 
 export type SelectedCategory = {
-  parent: Pick<
-    NewCategoryOverviewElementType,
-    "id" | "name" | "color" | "icon"
-  >;
-  child?: Pick<NewCategoryOverviewChild, "id" | "name">;
+  parent: Pick<CategoryOverviewElementType, "id" | "name" | "color" | "icon">;
+  child?: { id: number | null; name: string };
 };
 
 type CategorySelectorProps = {

@@ -1,4 +1,4 @@
-import type { NewCategoryOverviewType } from "@budget/api/schemas";
+import type { CategoryOverviewType } from "@budget/api/schemas";
 
 import { LayersIcon } from "lucide-react";
 
@@ -11,8 +11,8 @@ import { useRevueSearch } from "~/lib/use-revue-search";
 import { getCategoryLabel, openParent } from "../-lib/breakdown";
 import { BudgetGauge } from "./budget-gauge";
 
-interface NewBreakdownListProps {
-  newOverview: NewCategoryOverviewType;
+interface BreakdownListProps {
+  overview: CategoryOverviewType;
 }
 
 // Une ligne de la colonne, quel que soit le niveau affiché. Les deux niveaux
@@ -29,14 +29,14 @@ interface BreakdownRow {
   drillable: boolean;
 }
 
-export function NewBreakdownList({ newOverview }: NewBreakdownListProps) {
+export function BreakdownList({ overview }: BreakdownListProps) {
   const { search, setSearch } = useRevueSearch();
   const resolveColor = useCategoryColor();
   const { category } = search;
   // Même définition du niveau ouvert que `OverviewHeader` : sans elle, un
   // filtre posé sur une *sous*-catégorie ouvrait l'en-tête sur sa parente
   // pendant que la colonne restait à la racine.
-  const selectedCategory = openParent(newOverview, category);
+  const selectedCategory = openParent(overview, category);
   // `children` est nullable en base : le `json_array` d'une parente sans
   // sous-catégorie rend `null`, pas un tableau vide.
   const children = selectedCategory?.children ?? [];
@@ -56,7 +56,7 @@ export function NewBreakdownList({ newOverview }: NewBreakdownListProps) {
         ),
         drillable: false,
       }))
-    : newOverview.map((cat) => ({
+    : overview.map((cat) => ({
         // `null` sur le poste des transactions sans catégorie.
         label: getCategoryLabel(cat.name),
         value: cat.totalAmount ?? 0,
@@ -67,7 +67,7 @@ export function NewBreakdownList({ newOverview }: NewBreakdownListProps) {
       }));
 
   const totalAmount = sumBy(rows, (row) => row.value);
-  const childCount = sumBy(newOverview, (cat) => cat.children?.length ?? 0);
+  const childCount = sumBy(overview, (cat) => cat.children?.length ?? 0);
 
   // Une parente détaillée n'a pas de montant propre (CHECK
   // `categories_detailed_no_amount`) : son budget est la somme de ses enfants.
@@ -77,7 +77,7 @@ export function NewBreakdownList({ newOverview }: NewBreakdownListProps) {
     ? selectedCategory.budgetDetailed
       ? sumBy(rows, (row) => row.budget ?? 0)
       : selectedCategory.budgetAmount
-    : sumBy(newOverview, (cat) =>
+    : sumBy(overview, (cat) =>
         cat.budgetDetailed
           ? sumBy(cat.children ?? [], (child) => child.budgetAmount ?? 0)
           : (cat.budgetAmount ?? 0),
@@ -113,8 +113,8 @@ export function NewBreakdownList({ newOverview }: NewBreakdownListProps) {
               </strong>
             </div>
             <div className="text-subtle text-meta flex justify-end">
-              {newOverview.length} poste{newOverview.length > 1 ? "s" : ""} de
-              dépense · {childCount} sous-catégorie{childCount > 1 ? "s" : ""}
+              {overview.length} poste{overview.length > 1 ? "s" : ""} de dépense
+              · {childCount} sous-catégorie{childCount > 1 ? "s" : ""}
             </div>
           </div>
         )}

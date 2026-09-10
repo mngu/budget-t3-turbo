@@ -1,4 +1,4 @@
-import type { NewCategoryOverviewElementType } from "@budget/api/schemas";
+import type { CategoryOverviewElementType } from "@budget/api/schemas";
 
 import { createFileRoute, useLoaderData } from "@tanstack/react-router";
 import { useState } from "react";
@@ -18,26 +18,26 @@ export const Route = createFileRoute("/_authed/_period-overview/test")({
   component: RouteComponent,
 });
 
-type NewOverviewArc = NewCategoryOverviewElementType & {
+type OverviewArc = CategoryOverviewElementType & {
   rotationZ: number;
   arc: number;
 };
 
 function RouteComponent() {
-  const { newOverview } = useLoaderData({
+  const { overview } = useLoaderData({
     from: "/_authed/_period-overview",
   });
   const resolveColor = useCategoryColor();
   const [currentHover, setCurrentHover] = useState<string | null>(null);
-  const total = sumBy(newOverview, ({ totalAmount }) => totalAmount ?? 0);
+  const total = sumBy(overview, ({ totalAmount }) => totalAmount ?? 0);
 
   // Les arcs se placent bout à bout, donc chacun a besoin du cumul de ceux qui
   // le précèdent. L'accumulateur reste dans cette boucle plutôt que dans un
   // `map` : réassigner depuis un callback fait échouer `react/immutability`,
   // le compilateur ne pouvant pas prouver qu'il ne survit pas au rendu.
-  const overviewArcs: NewOverviewArc[] = [];
+  const overviewArcs: OverviewArc[] = [];
   let rotation = 0;
-  for (const { totalAmount, ...restOverview } of newOverview) {
+  for (const { totalAmount, ...restOverview } of overview) {
     if (!totalAmount) continue;
     const arc = (totalAmount / total) * 2 * Math.PI;
     overviewArcs.push({

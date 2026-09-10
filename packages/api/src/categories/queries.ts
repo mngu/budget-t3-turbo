@@ -1,7 +1,7 @@
 import type { TransactionsSearch } from "../transactions/schemas";
 import type {
-  NewCategoryOverviewElementType,
-  NewCategoryOverviewType,
+  CategoryOverviewElementType,
+  CategoryOverviewType,
 } from "./schemas";
 
 // Lectures de l'arborescence de catégories.
@@ -11,7 +11,7 @@ import { categories } from "@budget/db/schema";
 
 import { bankFilter } from "../transactions/queries";
 import { NO_CATEGORY_NAME } from "./schemas";
-import { newCategoryOverviewSchema } from "./schemas";
+import { categoryOverviewSchema } from "./schemas";
 
 export interface CategoryOption {
   id: number;
@@ -110,11 +110,11 @@ export function filterTransactions(
   `;
 }
 
-export async function newCategoriesOverview(
+export async function categoriesOverview(
   organizationId: string,
   query: TransactionsSearch,
-): Promise<NewCategoryOverviewType> {
-  const result = await db.execute<NewCategoryOverviewElementType>(sql`
+): Promise<CategoryOverviewType> {
+  const result = await db.execute<CategoryOverviewElementType>(sql`
       ${filterTransactions(organizationId, query)}
       SELECT cat.id,
              cat.organization_id,
@@ -202,5 +202,5 @@ export async function newCategoriesOverview(
       ORDER BY "totalAmount" DESC NULLS LAST
     `);
 
-  return newCategoryOverviewSchema.parse(result.rows);
+  return categoryOverviewSchema.parse(result.rows);
 }

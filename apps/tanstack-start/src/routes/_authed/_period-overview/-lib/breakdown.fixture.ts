@@ -1,7 +1,7 @@
-import type { NewCategoryOverviewType } from "@budget/api/schemas";
+import type { CategoryOverviewType } from "@budget/api/schemas";
 
 /**
- * L'arbre rendu par `categories.newOverview`. Partagé par les tests de
+ * L'arbre rendu par `categories.overview`. Partagé par les tests de
  * `breakdownLevel` et de `levelKey` : les deux dérivent le même niveau et
  * doivent le faire dire la même chose.
  *
@@ -10,7 +10,7 @@ import type { NewCategoryOverviewType } from "@budget/api/schemas";
  * niveau, et le poste des transactions sans catégorie, dont `name` est `null` —
  * la requête ne descend aucun libellé.
  */
-type Element = NewCategoryOverviewType[number];
+type Element = CategoryOverviewType[number];
 type Child = NonNullable<Element["children"]>[number];
 
 export const sub = (
@@ -44,4 +44,4 @@ export const poste = (
   children,
 });
 
-export const tree = (postes: Element[]): NewCategoryOverviewType => postes;
+export const tree = (postes: Element[]): CategoryOverviewType => postes;

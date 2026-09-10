@@ -1,7 +1,7 @@
 "use client";
 
 import type {
-  NewCategoryOverviewType,
+  CategoryOverviewType,
   TransactionsSearch,
 } from "@budget/api/schemas";
 
@@ -82,7 +82,7 @@ function periodKey(search: unknown) {
  * aucun niveau (même expression que `selected`, côté écran) — replier l'anneau
  * dans ces deux cas ferait clignoter la répartition pour rien.
  */
-export function levelKey(search: unknown, rows: NewCategoryOverviewType) {
+export function levelKey(search: unknown, rows: CategoryOverviewType) {
   const parent = openParent(rows, PERIOD.parse(search).category ?? undefined);
   return parent?.name ?? "";
 }
@@ -119,7 +119,7 @@ const reducedMotion = () =>
  */
 export function useDrill(
   search: Pick<TransactionsSearch, "category" | "dateFrom" | "dateTo">,
-  rows: NewCategoryOverviewType,
+  rows: CategoryOverviewType,
 ): Drill {
   const [phase, setPhase] = useState<DrillPhase>(null);
   const [dir, setDir] = useState<1 | -1>(1);

@@ -137,7 +137,7 @@ export async function updateCategoryIcon(
 // même si des transactions y sont rattachées : elles deviennent
 // non-catégorisées (category_id/category_source à NULL) plutôt que de bloquer
 // la suppression — l'avertissement en amont (UI) se base sur les compteurs de
-// `newCategoriesOverview` pour prévenir l'utilisateur avant confirmation.
+// `categoriesOverview` pour prévenir l'utilisateur avant confirmation.
 export async function removeCategory(
   organizationId: string,
   id: number,

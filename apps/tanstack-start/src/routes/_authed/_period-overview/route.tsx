@@ -11,8 +11,8 @@ import {
   wholePeriod,
 } from "~/lib/transactions-search";
 
+import { BreakdownList } from "./-components/breakdown-list";
 import { KpiBand } from "./-components/kpi-band";
-import { NewBreakdownList } from "./-components/new-breakdown-list";
 import { OverviewHeader } from "./-components/overview-header";
 
 /**
@@ -56,7 +56,7 @@ export const Route = createFileRoute("/_authed/_period-overview")({
     const [
       globalStats,
       budgetStats,
-      newOverview,
+      overview,
       categoryTree,
       bankCounts,
       banks,
@@ -75,7 +75,7 @@ export const Route = createFileRoute("/_authed/_period-overview")({
       // l'échelle et tous les postes de dépense s'affaissent à un moignon
       // indistinct (mesuré : `Revenus` à 4 000 € contre 99 € pour le plus
       // gros poste de sortie).
-      context.trpcClient.categories.newOverview.query({
+      context.trpcClient.categories.overview.query({
         ...period,
         direction: "debit",
       }),
@@ -96,7 +96,7 @@ export const Route = createFileRoute("/_authed/_period-overview")({
     return {
       globalStats,
       budgetStats,
-      newOverview,
+      overview,
       categoryTree,
       bankCounts,
       banks,
@@ -113,7 +113,7 @@ export const Route = createFileRoute("/_authed/_period-overview")({
 });
 
 function RevueLayout() {
-  const { globalStats, budgetStats, newOverview } = Route.useLoaderData();
+  const { globalStats, budgetStats, overview } = Route.useLoaderData();
 
   return (
     <div className="flex w-full gap-4">
@@ -129,12 +129,12 @@ function RevueLayout() {
 
         {/* Chaque écran rend son contenu **et** sa colonne des postes. */}
         <div className="mt-3 flex min-h-0 flex-1 flex-col gap-2">
-          <OverviewHeader newOverview={newOverview} />
+          <OverviewHeader overview={overview} />
           <Outlet />
         </div>
       </div>
       <div className="w-80 overflow-hidden">
-        <NewBreakdownList newOverview={newOverview} />
+        <BreakdownList overview={overview} />
       </div>
     </div>
   );

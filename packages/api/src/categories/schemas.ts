@@ -1,4 +1,4 @@
-// Schéma de la ligne brute renvoyée par newCategoriesOverview (SQL exécuté
+// Schéma de la ligne brute renvoyée par categoriesOverview (SQL exécuté
 // via db.execute, hors Drizzle) — clés en snake_case, telles que Postgres les
 // renvoie. `budget_amount` du parent reste une colonne numeric (string chez
 // node-postgres) ; les montants castés ::float8 dans la requête (children,
@@ -7,19 +7,17 @@ import { z } from "zod/v4";
 
 export const NO_CATEGORY_NAME = "None";
 
-const newCategoryOverviewChildSchema = z.object({
-  id: z.number().int().nullable(),
+const categoryOverviewChildSchema = z.object({
+  id: z.number().int(),
   name: z.string(),
   budgetAmount: z.number().nullable(),
   transactionCount: z.number(),
   totalAmount: z.number().nullable(),
 });
 
-export type NewCategoryOverviewChild = z.infer<
-  typeof newCategoryOverviewChildSchema
->;
+export type CategoryOverviewChild = z.infer<typeof categoryOverviewChildSchema>;
 
-const newCategoryOverviewElementSchema = z.object({
+const categoryOverviewElementSchema = z.object({
   id: z.number().int(),
   organization_id: z.string(),
   // `null` sur le poste des transactions sans catégorie, qui n'a pas de ligne
@@ -29,18 +27,16 @@ const newCategoryOverviewElementSchema = z.object({
   icon: z.string().nullable(),
   budgetAmount: z.coerce.number().nullable(),
   budgetDetailed: z.boolean(),
-  children: z.array(newCategoryOverviewChildSchema).nullable().default([]),
+  children: z.array(categoryOverviewChildSchema).nullable().default([]),
   transactionCount: z.number(),
   totalAmount: z.number().nullable(),
 });
 
-export type NewCategoryOverviewElementType = z.infer<
-  typeof newCategoryOverviewElementSchema
+export type CategoryOverviewElementType = z.infer<
+  typeof categoryOverviewElementSchema
 >;
 
-export const newCategoryOverviewSchema = z.array(
-  newCategoryOverviewElementSchema,
-);
+export const categoryOverviewSchema = z.array(categoryOverviewElementSchema);
 
 /**
  * Une catégorie **gérable** : tout l'overview sauf le poste des transactions
@@ -51,10 +47,10 @@ export const newCategoryOverviewSchema = z.array(
  * renommer, le budgéter ni lui donner une icône. Les écrans de réglages
  * l'écartent par ce prédicat et n'ont plus à connaître le cas.
  */
-export type ManagedCategory = NewCategoryOverviewElementType & { name: string };
+export type ManagedCategory = CategoryOverviewElementType & { name: string };
 
 export const isManagedCategory = (
-  category: NewCategoryOverviewElementType,
+  category: CategoryOverviewElementType,
 ): category is ManagedCategory => category.name !== null;
 
-export type NewCategoryOverviewType = z.infer<typeof newCategoryOverviewSchema>;
+export type CategoryOverviewType = z.infer<typeof categoryOverviewSchema>;

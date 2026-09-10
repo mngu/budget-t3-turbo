@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { breakdownLevel } from "./breakdown";
 import { poste, sub, tree } from "./breakdown.fixture";
 
-// `categories.newOverview` ne donne aucune ligne au reliquat — la dépense posée
+// `categories.overview` ne donne aucune ligne au reliquat — la dépense posée
 // sur la parente elle-même — alors que l'anneau en a besoin : sans lui la somme
 // des arcs n'égale plus le centre. Il se déduit du total de la parente, qui
 // couvre ses transactions directes *et* celles de ses enfants. C'est le seul
