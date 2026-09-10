@@ -1,0 +1,25 @@
+apps/tanstack-start/src/routes/_authed/_period-overview/test/route.tsx
+  h_c1b75a3cdf5637 15,57,70,80,92,97,106,109
+  h_c1b75a3cdf5637 16,76-79,81,105,107-108
+packages/api/src/categories/schemas.ts
+  h_c1b75a3cdf5637 8-9,18,20
+apps/tanstack-start/src/routes/_authed/_period-overview/-lib/breakdown.ts
+  h_c1b75a3cdf5637 6,104-107,113-115
+  h_c1b75a3cdf5637 112
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/new-breakdown-list.tsx
+  h_c1b75a3cdf5637 11,61,133-134
+  h_c1b75a3cdf5637 132,135-151
+packages/api/src/categories/queries.ts
+  h_c1b75a3cdf5637 13,180
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "cc523b13f62d1c93413576955602986af26a3356",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
