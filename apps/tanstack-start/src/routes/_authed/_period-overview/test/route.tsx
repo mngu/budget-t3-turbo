@@ -12,6 +12,8 @@ import { useCategoryColor } from "~/lib/category-color";
 import { euro0, sharePercent } from "~/lib/format";
 import { sumBy } from "~/lib/sum";
 
+import { getCategoryLabel } from "../-lib/breakdown";
+
 export const Route = createFileRoute("/_authed/_period-overview/test")({
   component: RouteComponent,
 });
@@ -52,6 +54,7 @@ function RouteComponent() {
       {overviewArcs.map((overviewArc) => {
         const { id, arc, rotationZ, color, icon, name, totalAmount } =
           overviewArc;
+        const labelName = getCategoryLabel(name);
         // La teinte résolue vaut pour l'arc *et* pour son intitulé : la valeur
         // brute est le pas clair, faux sur surface sombre.
         const resolvedColor = resolveColor(color);
@@ -64,14 +67,18 @@ function RouteComponent() {
             arc={arc}
             color={resolvedColor}
             onPointerOver={() => {
-              setCurrentHover(name);
+              setCurrentHover(labelName);
             }}
             onPointerOut={() => {
               setCurrentHover(null);
             }}
           >
-            {name && shouldDisplayName && (
-              <SegmentLabel angle={arc / 2} color={resolvedColor} text={name}>
+            {shouldDisplayName && (
+              <SegmentLabel
+                angle={arc / 2}
+                color={resolvedColor}
+                text={labelName}
+              >
                 <div className="flex items-center gap-2">
                   <CategoryIcon
                     name={icon}
@@ -82,12 +89,12 @@ function RouteComponent() {
                     style={{ color: resolvedColor }}
                     className="whitespace-nowrap"
                   >
-                    {name}
+                    {labelName}
                   </div>
                 </div>
               </SegmentLabel>
             )}
-            {Boolean(currentHover) && name === currentHover && (
+            {Boolean(currentHover) && labelName === currentHover && (
               <SegmentDetail>
                 <div className="flex flex-col items-center justify-center gap-2">
                   <CategoryIcon
@@ -95,8 +102,11 @@ function RouteComponent() {
                     color={resolvedColor}
                     className="size-5"
                   />
-                  <div className="text-control mb-1 max-w-full truncate font-semibold tracking-[-0.015em]">
-                    {name}
+                  <div
+                    style={{ color: resolvedColor }}
+                    className="text-control mb-1 max-w-full truncate font-semibold tracking-[-0.015em]"
+                  >
+                    {labelName}
                   </div>
                   <div className="num text-title leading-none font-medium tracking-[-0.03em]">
                     {euro0.format(totalAmount ?? 0)}

@@ -10,6 +10,7 @@ import { db } from "@budget/db/client";
 import { categories } from "@budget/db/schema";
 
 import { bankFilter } from "../transactions/queries";
+import { NO_CATEGORY_NAME } from "./schemas";
 import { newCategoryOverviewSchema } from "./schemas";
 
 export interface CategoryOption {
@@ -176,7 +177,7 @@ export async function newCategoriesOverview(
       -- libellé et la sentinelle, aucun texte d'interface ne descend en SQL.
       SELECT -1,
              ${organizationId}::text,
-             NULL::text,
+             ${NO_CATEGORY_NAME},
              NULL::text,
              NULL::text,
              NULL::numeric,

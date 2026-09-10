@@ -3,6 +3,7 @@ import type {
   NewCategoryOverviewType,
 } from "@budget/api/schemas";
 
+import { NO_CATEGORY_NAME } from "@budget/api/schemas";
 import { FALLBACK_CATEGORY_COLOR } from "@budget/shared";
 import { sumBy } from "~/lib/sum";
 
@@ -100,11 +101,18 @@ export function openParent(
   );
 }
 
+export function getCategoryLabel(name: string | null) {
+  return name && name !== NO_CATEGORY_NAME ? name : NO_CATEGORY;
+}
+
 function parentSlice(parent: NewCategoryOverviewElementType): BreakdownSlice {
   return {
     // `name` est null sur le poste des transactions sans catégorie : la requête
     // ne descend aucun libellé, ils se posent ici.
-    name: parent.name ?? NO_CATEGORY,
+    name:
+      parent.name && parent.name !== NO_CATEGORY_NAME
+        ? parent.name
+        : NO_CATEGORY,
     filter: parent.name ?? NO_CATEGORY_FILTER,
     unallocated: false,
     total: parent.totalAmount ?? 0,

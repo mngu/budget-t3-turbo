@@ -5,6 +5,8 @@
 // transaction_count, total_amount) arrivent en number.
 import { z } from "zod/v4";
 
+export const NO_CATEGORY_NAME = "None";
+
 const newCategoryOverviewChildSchema = z.object({
   id: z.number().int().nullable(),
   name: z.string(),
@@ -13,9 +15,9 @@ const newCategoryOverviewChildSchema = z.object({
   totalAmount: z.number().nullable(),
 });
 
-export interface NewCategoryOverviewChild extends z.infer<
+export type NewCategoryOverviewChild = z.infer<
   typeof newCategoryOverviewChildSchema
-> {}
+>;
 
 const newCategoryOverviewElementSchema = z.object({
   id: z.number().int(),
