@@ -34,7 +34,7 @@ export const DEFAULT_TUNING: Tuning = {
   iridescence: 0.35,
   hoverEmissive: 0.3,
   labelBlend: 0,
-  labelSize: 0.35,
+  labelSize: 14,
   labelLift: 2,
   labelRadius: 7.8,
 };

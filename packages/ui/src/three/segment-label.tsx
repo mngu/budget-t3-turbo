@@ -1,4 +1,6 @@
-import { Billboard, Line, Text } from "@react-three/drei";
+import type { ReactNode } from "react";
+
+import { Html, Line } from "@react-three/drei";
 import { useMemo } from "react";
 import { Color } from "three";
 
@@ -14,9 +16,10 @@ type Props = {
   /** Teinte de la catégorie, déjà passée par `resolveCategoryColor`. */
   color: string;
   text: string;
+  children?: ReactNode;
 };
 
-export function SegmentLabel({ angle, color, text }: Props) {
+export function SegmentLabel({ angle, color, children }: Props) {
   const { resolvedTheme } = useTheme();
   // `labelLift` décolle les étiquettes du plan de l'anneau : en perspective
   // elles forment un second anneau et cessent de se chevaucher dans le bas.
@@ -57,20 +60,9 @@ export function SegmentLabel({ angle, color, text }: Props) {
         transparent
         opacity={0.35}
       />
-      <Billboard position={label}>
-        {/* ponytail: sans `font`, troika télécharge Roboto depuis un CDN. Geist
-            n'est distribué qu'en woff2, que troika ne lit pas — s'en passer
-            demande de committer un .woff converti. */}
-        <Text
-          fontSize={labelSize}
-          color={labelColor}
-          anchorX={cos >= 0 ? "left" : "right"}
-          anchorY="middle"
-          position={[cos >= 0 ? 0.25 : -0.25, 0, 0]}
-        >
-          {text}
-        </Text>
-      </Billboard>
+      <Html position={label}>
+        <div style={{ fontSize: `${labelSize}px` }}>{children}</div>
+      </Html>
     </>
   );
 }

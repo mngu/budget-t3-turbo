@@ -26,6 +26,7 @@
     "./textarea": "./src/textarea.tsx",
     "./canvas-container": "./src/three/canvas-container.tsx",
     "./segment": "./src/three/segment.tsx",
+    "./segment-detail": "./src/three/segment-detail.tsx",
     "./segment-label": "./src/three/segment-label.tsx",
     "./theme": "./src/theme.tsx",
     "./toast": "./src/toast.tsx",
@@ -43,6 +44,7 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
+    "@budget/shared": "workspace:*",
     "@react-spring/three": "^10.1.2",
     "@react-three/drei": "^10.7.8",
     "@react-three/fiber": "^9.7.0",

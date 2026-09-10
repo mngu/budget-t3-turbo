@@ -32,9 +32,9 @@ const newCategoryOverviewElementSchema = z.object({
   totalAmount: z.number().nullable(),
 });
 
-export interface NewCategoryOverviewElementType extends z.infer<
+export type NewCategoryOverviewElementType = z.infer<
   typeof newCategoryOverviewElementSchema
-> {}
+>;
 
 export const newCategoryOverviewSchema = z.array(
   newCategoryOverviewElementSchema,

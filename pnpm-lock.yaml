@@ -304,6 +304,9 @@ importers:
       '@base-ui/react':
         specifier: ^1.6.0
         version: 1.6.0(@date-fns/tz@1.5.0)(@types/react@19.1.12)(date-fns@4.4.0)(react-dom@19.1.4(react@19.1.4))(react@19.1.4)
+      '@budget/shared':
+        specifier: workspace:*
+        version: link:../shared
       '@react-spring/three':
         specifier: ^10.1.2
         version: 10.1.2(@react-three/fiber@9.7.0(@types/react@19.1.12)(react-dom@19.1.4(react@19.1.4))(react@19.1.4)(three@0.185.1))(react@19.1.4)(three@0.185.1)

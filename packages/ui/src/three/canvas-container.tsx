@@ -124,9 +124,9 @@ export function CanvasContainer({ children }: Props) {
     },
     labelSize: {
       value: DEFAULT_TUNING.labelSize,
-      min: 0.1,
-      max: 1,
-      step: 0.01,
+      min: 6,
+      max: 64,
+      step: 1,
     },
     labelLift: { value: DEFAULT_TUNING.labelLift, min: 0, max: 6, step: 0.1 },
     labelRadius: {

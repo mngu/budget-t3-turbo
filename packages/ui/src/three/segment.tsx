@@ -21,6 +21,8 @@ type SegmentProps = {
   arc: number;
   rotationZ: number;
   children?: ReactNode;
+  onPointerOver?: () => void;
+  onPointerOut?: () => void;
 };
 
 type MaterialProps = {
@@ -47,7 +49,14 @@ function SegmentMaterial({ color, emissiveIntensity }: MaterialProps) {
   );
 }
 
-export function Segment({ color, arc, rotationZ, children }: SegmentProps) {
+export function Segment({
+  color,
+  arc,
+  rotationZ,
+  children,
+  onPointerOver,
+  onPointerOut,
+}: SegmentProps) {
   const [hovered, setHovered] = useState(false);
   const { hoverEmissive } = useTuning();
   const { emissiveIntensity } = useSpring({
@@ -75,8 +84,12 @@ export function Segment({ color, arc, rotationZ, children }: SegmentProps) {
       onPointerOver={(e) => {
         e.stopPropagation();
         setHovered(true);
+        onPointerOver?.();
       }}
-      onPointerOut={() => setHovered(false)}
+      onPointerOut={() => {
+        setHovered(false);
+        onPointerOut?.();
+      }}
     >
       <torusGeometry
         args={[
