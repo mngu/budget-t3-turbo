@@ -20,8 +20,17 @@ const search = transactionsSearchSchema.parse({});
 // réclame — la revue affichait des chiffres, juste faux : ceux de tous les
 // comptes sous une sélection.
 describe("filterTransactions (catégories) — périmètre", () => {
+  // La garde qui compte : le défaut écarte les exclues, pour qu'un agrégat
+  // écrit demain les écarte sans y penser. Seuls le relevé et les pastilles
+  // de comptes redemandent explicitement à les voir.
   it("écarte les lignes exclues à la main", () => {
     expect(render(filterTransactions("org_1", search))).toContain("excluded");
+  });
+
+  it("les garde sur demande explicite", () => {
+    expect(
+      render(filterTransactions("org_1", search, { includeExcluded: true })),
+    ).not.toContain("excluded");
   });
 
   it("applique le filtre de comptes", () => {

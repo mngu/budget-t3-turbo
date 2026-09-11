@@ -69,17 +69,27 @@ export async function listCategoryTree(
 }
 
 /**
- * Le périmètre des lectures de catégories : la période, le sens, les comptes
- * affichés, et jamais les lignes écartées à la main.
+ * Le périmètre commun à toutes les lectures de transactions — et **le point de
+ * passage du cloisonnement** : `ba.organization_id` y est posé avant tout
+ * filtre venu de l'URL. La période, le sens, les comptes affichés, et par
+ * défaut jamais les lignes écartées à la main.
  *
  * Le **filtre de comptes** est ce qui a manqué à la première écriture, et rien
  * à l'écran ne le réclame — sans lui la revue décrit tous les comptes sous une
  * sélection, donc affiche des chiffres, juste faux.
  *
+ * Il expose `filtered_transactions`, un CTE de composites (`(t).amount`,
+ * `(ba).bank_name`, `(c).name`, `(p).name`) : la requête qui suit en lit les
+ * champs entre parenthèses.
  */
 export function filterTransactions(
   organizationId: string,
   query: TransactionsSearch,
+  // Le défaut doit être sûr : un agrégat écrit demain écarte les exclues sans
+  // y penser. Seuls le relevé et les pastilles de comptes (qui annoncent ce
+  // que le relevé affichera) les redemandent — c'est le seul endroit d'où les
+  // reprendre.
+  { includeExcluded = false } = {},
 ) {
   const { dateFrom, dateTo, direction } = query;
   const dateCondition =
@@ -103,7 +113,7 @@ export function filterTransactions(
       WHERE true
         ${dateCondition}
         ${directionCondition}
-      AND t.excluded = 'false'
+      ${includeExcluded ? sql`` : sql`AND t.excluded = false`}
       AND ba.organization_id = ${organizationId}
       ${bankFilter(query.bank)}
     )

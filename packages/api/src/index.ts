@@ -29,10 +29,7 @@ export type {
 export type { SetupStatus } from "./banking/settings";
 export type { SyncOutcome } from "./banking/fetch-transactions";
 export type { ConsentBadge } from "./banking/domain";
-export type {
-  MonthlyCategoryTotal,
-  TransactionRow,
-} from "./transactions/queries";
+export type { TransactionRow } from "./transactions/schemas";
 export type { CategoryOption, CategoryTreeNode } from "./categories/queries";
 export type {
   IncomingInvitation,
