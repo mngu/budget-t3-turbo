@@ -16,8 +16,6 @@ export type Tuning = {
   clearcoat: number;
   clearcoatRoughness: number;
   iridescence: number;
-  /** Au-delà de 1, l'arc survolé franchit le seuil du `Bloom` et fait le halo. */
-  hoverEmissive: number;
   /** Mélange de la teinte vers le premier plan — 0 = teinte pure, illisible. */
   labelBlend: number;
   labelSize: number;
@@ -32,7 +30,6 @@ export const DEFAULT_TUNING: Tuning = {
   clearcoat: 0.47,
   clearcoatRoughness: 0.78,
   iridescence: 0.35,
-  hoverEmissive: 0.3,
   labelBlend: 0,
   labelSize: 14,
   labelLift: 2,

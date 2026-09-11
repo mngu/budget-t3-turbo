@@ -1,3 +1,7 @@
+import type { ResolvedTheme } from "@budget/ui/theme";
+
+import { Color } from "three";
+
 import { FALLBACK_CATEGORY_COLOR, resolveCategoryColor } from "@budget/shared";
 import { useTheme } from "@budget/ui/theme";
 
@@ -16,15 +20,42 @@ export function useCategoryColor(): (hex: string | null) => string {
 // Une sous-catégorie est donc un palier d'une même teinte — celle du parent —
 // du plus dense (le plus gros) au plus proche de la surface de la carte. Le
 // mélange vise `--card` et non du blanc : il s'inverse tout seul en thème sombre.
+//
+// Le mélange est calculé ici plutôt que par `color-mix()` parce que le palier
+// sert aussi de couleur de matériau three.js, qui ne lit qu'un hex — d'où le
+// thème en entrée, là où `var(--card)` s'inversait tout seul. `Color.lerp`
+// interpole en sRGB linéaire, pas en OKLab comme l'ancien `color-mix` : la
+// rampe est un peu plus claire au milieu, pas de quoi se battre pour une lib.
 const SHADE_RANGE = 55;
 
-export function shadeCategoryColor(
+// Les `--card` de styles.css, en hex parce que three ne lit pas `oklch()`. À
+// tenir alignés avec le CSS : oklch(1 0 0) en clair, oklch(0.262 0.012 265)
+// en sombre.
+const CARD_HEX: Record<ResolvedTheme, string> = {
+  light: "#ffffff",
+  dark: "#22252b",
+};
+
+export function shadeHex(
+  color: string,
+  card: string,
+  index: number,
+  count: number,
+): string {
+  const ratio = count <= 1 ? 100 : 100 - (index * SHADE_RANGE) / (count - 1);
+  // `lerp` mute l'instance et prend le poids de la *cible* : d'où le neuf et
+  // le complément.
+  return `#${new Color(color).lerp(new Color(card), 1 - ratio / 100).getHexString()}`;
+}
+
+export function useShadeCategoryColor(): (
   color: string,
   index: number,
   count: number,
-) {
-  const ratio = count <= 1 ? 100 : 100 - (index * SHADE_RANGE) / (count - 1);
-  return `color-mix(in oklab, ${color} ${ratio}%, var(--card))`;
+) => string {
+  const { resolvedTheme } = useTheme();
+  return (color, index, count) =>
+    shadeHex(color, CARD_HEX[resolvedTheme], index, count);
 }
 
 // Aplat très pâle de la teinte d'une catégorie : pastille de couleur, fond de

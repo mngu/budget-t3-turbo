@@ -3,7 +3,7 @@ import type { CategoryOverviewType } from "@budget/api/schemas";
 import { LayersIcon } from "lucide-react";
 
 import { Toolbar } from "@budget/ui/toolbar";
-import { shadeCategoryColor, useCategoryColor } from "~/lib/category-color";
+import { useCategoryColor, useShadeCategoryColor } from "~/lib/category-color";
 import { euro } from "~/lib/format";
 import { sumBy } from "~/lib/sum";
 import { useRevueSearch } from "~/lib/use-revue-search";
@@ -32,6 +32,7 @@ interface BreakdownRow {
 export function BreakdownList({ overview }: BreakdownListProps) {
   const { search, setSearch } = useRevueSearch();
   const resolveColor = useCategoryColor();
+  const shadeCategoryColor = useShadeCategoryColor();
   const { category } = search;
   // Même définition du niveau ouvert que `OverviewHeader` : sans elle, un
   // filtre posé sur une *sous*-catégorie ouvrait l'en-tête sur sa parente

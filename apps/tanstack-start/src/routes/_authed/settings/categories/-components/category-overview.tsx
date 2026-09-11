@@ -29,8 +29,8 @@ import {
 import { Input } from "@budget/ui/input";
 import { CategoryIcon } from "~/component/category-icon";
 import {
-  shadeCategoryColor,
   softCategoryColor,
+  useShadeCategoryColor,
   useCategoryColor,
 } from "~/lib/category-color";
 import { euro0 } from "~/lib/format";
@@ -57,6 +57,7 @@ export function CategoryOverview({
   const crud = useCategoryCrud();
   const preview = usePreview();
   const resolve = useCategoryColor();
+  const shadeCategoryColor = useShadeCategoryColor();
   const run = useRun();
 
   const onSetAmount = (categoryId: number, amount: number | null) =>

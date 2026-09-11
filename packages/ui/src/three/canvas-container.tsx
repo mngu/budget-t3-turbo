@@ -2,7 +2,11 @@ import type { ReactNode } from "react";
 
 import { Environment, Lightformer } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Bloom, EffectComposer } from "@react-three/postprocessing";
+import {
+  EffectComposer,
+  Selection,
+  SelectiveBloom,
+} from "@react-three/postprocessing";
 import { Leva, useControls } from "leva";
 import { useEffect, useRef } from "react";
 import { MathUtils, PerspectiveCamera } from "three";
@@ -82,11 +86,10 @@ export function CanvasContainer({ children }: Props) {
     fillColor: "#b8c8ff",
   });
 
-  // Plancher à 0,70 : c'est la luminance du plus clair des intitulés en thème
-  // sombre (mesurée sur la palette). En dessous, le texte bave.
+  // Seuil à 0 : seul l'arc survolé (`<Select>`) entre dans la passe, il doit
+  // rayonner en entier, dans sa teinte — pas seulement ses reflets.
   const bloom = useControls("Halo", {
-    luminanceThreshold: { value: 0.75, min: 0, max: 1, step: 0.01 },
-    luminanceSmoothing: { value: 0.3, min: 0, max: 1, step: 0.01 },
+    luminanceThreshold: { value: 0, min: 0, max: 1, step: 0.01 },
     radius: { value: 0.6, min: 0, max: 1, step: 0.01 },
     intensity: { value: 0.8, min: 0, max: 5, step: 0.05 },
   });
@@ -106,12 +109,6 @@ export function CanvasContainer({ children }: Props) {
       min: 0,
       max: 1,
       step: 0.01,
-    },
-    hoverEmissive: {
-      value: DEFAULT_TUNING.hoverEmissive,
-      min: 0,
-      max: 4,
-      step: 0.05,
     },
   });
 
@@ -176,14 +173,18 @@ export function CanvasContainer({ children }: Props) {
           />
         </Environment>
         <ParallaxCamera sway={camera.sway} fov={camera.fov} />
-        <TuningProvider value={{ ...tuning, ...labels }}>
-          {children}
-        </TuningProvider>
-        {/* Le halo des arcs — équivalent 3D des jetons `--arc-glow` /
-            `--arc-glow-lit` de l'anneau SVG. */}
-        <EffectComposer>
-          <Bloom mipmapBlur {...bloom} />
-        </EffectComposer>
+        {/* `Selection` doit englober la scène *et* le composeur : sans le
+            contexte, `SelectiveBloom` retombe sur une sélection vide, en
+            silence. Le halo est l'équivalent 3D du jeton `--arc-glow-lit` de
+            l'anneau SVG ; il n'y a pas de `--arc-glow` au repos. */}
+        <Selection>
+          <TuningProvider value={{ ...tuning, ...labels }}>
+            {children}
+          </TuningProvider>
+          <EffectComposer>
+            <SelectiveBloom mipmapBlur {...bloom} />
+          </EffectComposer>
+        </Selection>
       </Canvas>
     </div>
   );
