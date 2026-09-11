@@ -10,8 +10,6 @@ import { sharePercent } from "~/lib/format";
 import { sumBy } from "~/lib/sum";
 import { useRevueSearch } from "~/lib/use-revue-search";
 
-import { openParent } from "../-lib/breakdown";
-
 interface OverviewHeaderProps {
   overview: CategoryOverviewType;
 }
@@ -20,7 +18,11 @@ export function OverviewHeader({ overview }: OverviewHeaderProps) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { search } = useRevueSearch();
   const resolveColor = useCategoryColor();
-  const selected = openParent(overview, search.category);
+  const { category } = search;
+
+  const selected = category
+    ? overview.find(({ name }) => name === category)
+    : null;
   // `resolveColor` retombe déjà sur la teinte par défaut sur `null`.
   const selectedColor = selected ? resolveColor(selected.color) : "";
 

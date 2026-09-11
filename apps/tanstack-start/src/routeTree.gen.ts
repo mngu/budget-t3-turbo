@@ -19,7 +19,6 @@ import { Route as AuthedPeriodOverviewIndexRouteImport } from './routes/_authed/
 import { Route as ApiTrpcSplatRouteImport } from './routes/api/trpc.$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as AuthedPeriodOverviewTransactionsRouteImport } from './routes/_authed/_period-overview/transactions'
-import { Route as AuthedPeriodOverviewTestRouteRouteImport } from './routes/_authed/_period-overview/test/route'
 import { Route as AuthedSettingsEspacesIndexRouteImport } from './routes/_authed/settings/espaces/index'
 import { Route as AuthedSettingsCategoriesIndexRouteImport } from './routes/_authed/settings/categories/index'
 import { Route as AuthedSettingsBanquesIndexRouteImport } from './routes/_authed/settings/banques/index'
@@ -76,12 +75,6 @@ const AuthedPeriodOverviewTransactionsRoute =
     path: '/transactions',
     getParentRoute: () => AuthedPeriodOverviewRouteRoute,
   } as any)
-const AuthedPeriodOverviewTestRouteRoute =
-  AuthedPeriodOverviewTestRouteRouteImport.update({
-    id: '/test',
-    path: '/test',
-    getParentRoute: () => AuthedPeriodOverviewRouteRoute,
-  } as any)
 const AuthedSettingsEspacesIndexRoute =
   AuthedSettingsEspacesIndexRouteImport.update({
     id: '/espaces/',
@@ -112,7 +105,6 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthedSettingsRouteRouteWithChildren
   '/callback': typeof AuthedCallbackRoute
   '/invitation/$invitationId': typeof InvitationInvitationIdRoute
-  '/test': typeof AuthedPeriodOverviewTestRouteRoute
   '/transactions': typeof AuthedPeriodOverviewTransactionsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
@@ -127,7 +119,6 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthedSettingsRouteRouteWithChildren
   '/callback': typeof AuthedCallbackRoute
   '/invitation/$invitationId': typeof InvitationInvitationIdRoute
-  '/test': typeof AuthedPeriodOverviewTestRouteRoute
   '/transactions': typeof AuthedPeriodOverviewTransactionsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
@@ -145,7 +136,6 @@ export interface FileRoutesById {
   '/_authed/settings': typeof AuthedSettingsRouteRouteWithChildren
   '/_authed/callback': typeof AuthedCallbackRoute
   '/invitation/$invitationId': typeof InvitationInvitationIdRoute
-  '/_authed/_period-overview/test': typeof AuthedPeriodOverviewTestRouteRoute
   '/_authed/_period-overview/transactions': typeof AuthedPeriodOverviewTransactionsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
@@ -162,7 +152,6 @@ export interface FileRouteTypes {
     | '/settings'
     | '/callback'
     | '/invitation/$invitationId'
-    | '/test'
     | '/transactions'
     | '/api/auth/$'
     | '/api/trpc/$'
@@ -177,7 +166,6 @@ export interface FileRouteTypes {
     | '/settings'
     | '/callback'
     | '/invitation/$invitationId'
-    | '/test'
     | '/transactions'
     | '/api/auth/$'
     | '/api/trpc/$'
@@ -194,7 +182,6 @@ export interface FileRouteTypes {
     | '/_authed/settings'
     | '/_authed/callback'
     | '/invitation/$invitationId'
-    | '/_authed/_period-overview/test'
     | '/_authed/_period-overview/transactions'
     | '/api/auth/$'
     | '/api/trpc/$'
@@ -285,13 +272,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedPeriodOverviewTransactionsRouteImport
       parentRoute: typeof AuthedPeriodOverviewRouteRoute
     }
-    '/_authed/_period-overview/test': {
-      id: '/_authed/_period-overview/test'
-      path: '/test'
-      fullPath: '/test'
-      preLoaderRoute: typeof AuthedPeriodOverviewTestRouteRouteImport
-      parentRoute: typeof AuthedPeriodOverviewRouteRoute
-    }
     '/_authed/settings/espaces/': {
       id: '/_authed/settings/espaces/'
       path: '/espaces'
@@ -324,14 +304,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthedPeriodOverviewRouteRouteChildren {
-  AuthedPeriodOverviewTestRouteRoute: typeof AuthedPeriodOverviewTestRouteRoute
   AuthedPeriodOverviewTransactionsRoute: typeof AuthedPeriodOverviewTransactionsRoute
   AuthedPeriodOverviewIndexRoute: typeof AuthedPeriodOverviewIndexRoute
 }
 
 const AuthedPeriodOverviewRouteRouteChildren: AuthedPeriodOverviewRouteRouteChildren =
   {
-    AuthedPeriodOverviewTestRouteRoute: AuthedPeriodOverviewTestRouteRoute,
     AuthedPeriodOverviewTransactionsRoute:
       AuthedPeriodOverviewTransactionsRoute,
     AuthedPeriodOverviewIndexRoute: AuthedPeriodOverviewIndexRoute,

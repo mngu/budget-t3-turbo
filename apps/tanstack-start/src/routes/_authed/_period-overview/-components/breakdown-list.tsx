@@ -8,7 +8,7 @@ import { euro } from "~/lib/format";
 import { sumBy } from "~/lib/sum";
 import { useRevueSearch } from "~/lib/use-revue-search";
 
-import { getCategoryLabel, openParent } from "../-lib/breakdown";
+import { getCategoryLabel } from "../-lib/breakdown";
 import { BudgetGauge } from "./budget-gauge";
 
 interface BreakdownListProps {
@@ -37,7 +37,9 @@ export function BreakdownList({ overview }: BreakdownListProps) {
   // Même définition du niveau ouvert que `OverviewHeader` : sans elle, un
   // filtre posé sur une *sous*-catégorie ouvrait l'en-tête sur sa parente
   // pendant que la colonne restait à la racine.
-  const selectedCategory = openParent(overview, category);
+  const selectedCategory = category
+    ? overview.find(({ name }) => name === category)
+    : null;
   // `children` est nullable en base : le `json_array` d'une parente sans
   // sous-catégorie rend `null`, pas un tableau vide.
   const children = selectedCategory?.children ?? [];

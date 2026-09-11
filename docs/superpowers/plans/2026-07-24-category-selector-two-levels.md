@@ -73,7 +73,7 @@ git commit -m "feat(tanstack-start): add shared 2-level category select items re
 
 ---
 
-### Task 2: `index.tsx` — charger l'arbre, brancher `CategoryCell` et `TransactionsFilters`
+### Task 2: `index-bkp.tsx` — charger l'arbre, brancher `CategoryCell` et `TransactionsFilters`
 
 **Files:**
 
@@ -218,7 +218,7 @@ function CategoryCell({
 - [ ] **Step 5: Typecheck**
 
 Run: `pnpm -F @budget/tanstack-start typecheck`
-Expected: no errors in `index.tsx` (in particular no leftover reference to the removed `CategoryOption` import, no type mismatch on the `categories` prop passed to `CategoryCell`/`TransactionsFilters`).
+Expected: no errors in `index-bkp.tsx` (in particular no leftover reference to the removed `CategoryOption` import, no type mismatch on the `categories` prop passed to `CategoryCell`/`TransactionsFilters`).
 
 - [ ] **Step 6: Commit**
 
