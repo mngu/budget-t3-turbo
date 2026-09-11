@@ -1,0 +1,16 @@
+packages/api/src/router/categories.ts
+  h_c1b75a3cdf5637 15
+packages/api/src/categories/queries.ts
+  h_c1b75a3cdf5637 8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "a49c03b67e673131c0b64cafc4264fdb7cd8c321",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
