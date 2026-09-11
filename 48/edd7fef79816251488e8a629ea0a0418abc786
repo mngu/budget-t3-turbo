@@ -1,0 +1,26 @@
+apps/tanstack-start/src/routes/_authed/_period-overview/-lib/breakdown.ts
+  h_c1b75a3cdf5637 2,5
+docs/superpowers/plans/2026-07-24-category-selector-two-levels.md
+  h_c1b75a3cdf5637 76,221
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/overview-header.tsx
+  h_c1b75a3cdf5637 21-25
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/breakdown-list.tsx
+  h_c1b75a3cdf5637 40-42
+  h_c1b75a3cdf5637 11
+apps/tanstack-start/src/routes/_authed/_period-overview/index.tsx
+  h_c1b75a3cdf5637 1,4-6,8-11,15,18,21,24-32,40-42,44,48,50-63,65-88,91-129,132-154,156-172,174-184
+  h_c1b75a3cdf5637 173
+docs/superpowers/plans/2026-07-21-mobile-app-gluestack-ui.md
+  h_c1b75a3cdf5637 170,1430
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "48edd7fef79816251488e8a629ea0a0418abc786",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
