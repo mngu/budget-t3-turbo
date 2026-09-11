@@ -82,7 +82,13 @@ export function Segment({
           setHovered(false);
           onPointerOut?.();
         }}
-        onClick={() => onClick?.()}
+        // Comme pour le survol : sans `stopPropagation`, R3F livre le clic à
+        // chaque arc traversé par le rayon, et c'est le dernier — celui de
+        // derrière — qui écrirait l'URL.
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick?.();
+        }}
       >
         <torusGeometry
           args={[
