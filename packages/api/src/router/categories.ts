@@ -12,7 +12,7 @@ import {
   updateCategoryColor,
   updateCategoryIcon,
 } from "../categories/mutations";
-import { categoriesOverview, listCategoryTree } from "../categories/queries";
+import { categoriesOverview } from "../categories/queries";
 import { transactionsSearchSchema } from "../transactions/schemas";
 import { orgProcedure } from "../trpc";
 
@@ -25,8 +25,6 @@ const categoryId = z.number().int().positive();
 const defaultSearch = transactionsSearchSchema.parse({});
 
 export const categoriesRouter = {
-  tree: orgProcedure.query(({ ctx }) => listCategoryTree(ctx.organizationId)),
-
   overview: orgProcedure
     .input(transactionsSearchSchema.prefault(defaultSearch))
     .query(({ ctx, input }) => categoriesOverview(ctx.organizationId, input)),

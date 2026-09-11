@@ -57,7 +57,6 @@ export const Route = createFileRoute("/_authed/_period-overview")({
       globalStats,
       budgetStats,
       overview,
-      categoryTree,
       bankCounts,
       banks,
       earliestDate,
@@ -79,15 +78,6 @@ export const Route = createFileRoute("/_authed/_period-overview")({
         ...period,
         direction: "debit",
       }),
-
-      // Les quatre suivants n'alimentent pas cet écran mais l'en-tête et les
-      // cellules de la table, montés au-dessus ou en dessous de l'`Outlet`.
-      // Ils passaient par le cache react-query jusqu'au 2026-08-28 ; ce
-      // layout étant le seul endroit d'où leurs trois consommateurs sont
-      // montés (`PeriodPicker`, `BankPicker`, `useParentCategories`), le
-      // loader les porte directement — un cache de moins, et la panne
-      // d'hydratation que le préchargement rattrapait ne peut plus exister.
-      context.trpcClient.categories.tree.query(),
       context.trpcClient.transactions.bankCounts.query(deps),
       context.trpcClient.transactions.banks.query(),
       context.trpcClient.transactions.earliestDate.query(),
@@ -97,7 +87,6 @@ export const Route = createFileRoute("/_authed/_period-overview")({
       globalStats,
       budgetStats,
       overview,
-      categoryTree,
       bankCounts,
       banks,
       earliestDate,

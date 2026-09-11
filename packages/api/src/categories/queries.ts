@@ -5,68 +5,12 @@ import type {
 } from "./schemas";
 
 // Lectures de l'arborescence de catégories.
-import { eq, sql } from "@budget/db";
+import { sql } from "@budget/db";
 import { db } from "@budget/db/client";
-import { categories } from "@budget/db/schema";
 
 import { bankFilter } from "../transactions/queries";
 import { NO_CATEGORY_NAME } from "./schemas";
 import { categoryOverviewSchema } from "./schemas";
-
-export interface CategoryOption {
-  id: number;
-  name: string;
-  color: string | null;
-  // Nom Lucide (voir CATEGORY_ICON_NAMES) — toujours null pour une
-  // sous-catégorie, comme `color`.
-  icon: string | null;
-  parentId: number | null;
-}
-
-export interface CategoryTreeNode extends CategoryOption {
-  children: CategoryOption[];
-}
-
-const categoryColumns = {
-  id: categories.id,
-  name: categories.name,
-  color: categories.color,
-  icon: categories.icon,
-  parentId: categories.parentId,
-};
-
-// Reconstruit l'arborescence parents → enfants à partir d'une liste plate
-// (les catégories n'ont que 2 niveaux).
-function buildCategoryTree<T extends CategoryOption>(
-  rows: T[],
-): (T & { children: T[] })[] {
-  const roots: (T & { children: T[] })[] = [];
-  const nodeById = new Map<number, T & { children: T[] }>();
-  for (const row of rows) {
-    if (row.parentId !== null) continue;
-    const node = { ...row, children: [] as T[] };
-    nodeById.set(row.id, node);
-    roots.push(node);
-  }
-  for (const row of rows) {
-    if (row.parentId === null) continue;
-    const parent = nodeById.get(row.parentId);
-    parent?.children.push(row);
-  }
-  return roots;
-}
-
-// Arborescence complète : catégories parentes avec leurs sous-catégories.
-export async function listCategoryTree(
-  organizationId: string,
-): Promise<CategoryTreeNode[]> {
-  const rows = await db
-    .select(categoryColumns)
-    .from(categories)
-    .where(eq(categories.organizationId, organizationId))
-    .orderBy(categories.id);
-  return buildCategoryTree(rows);
-}
 
 /**
  * Le périmètre commun à toutes les lectures de transactions — et **le point de
