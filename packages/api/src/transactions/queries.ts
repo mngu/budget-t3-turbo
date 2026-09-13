@@ -1,78 +1,32 @@
-import type { BudgetStats, GlobalStats, TransactionsSearch } from "./schemas";
+import type {
+  BudgetStats,
+  GlobalStats,
+  TransactionRow,
+  TransactionsSearch,
+} from "./schemas";
 // Lectures et corrections manuelles sur la table des transactions.
 import type { SQL } from "@budget/db";
 
-import {
-  alias,
-  and,
-  asc,
-  count,
-  desc,
-  eq,
-  exists,
-  gte,
-  ilike,
-  inArray,
-  isNull,
-  lte,
-  or,
-  sql,
-} from "@budget/db";
+import { and, asc, eq, exists, inArray, or, sql } from "@budget/db";
 import { db } from "@budget/db/client";
-import { bankAccounts, categories, transactions } from "@budget/db/schema";
+import { bankAccounts, transactions } from "@budget/db/schema";
 
-import { budgetStatsSchema, globalStatsSchema, PAGE_SIZE } from "./schemas";
+import { filterTransactions } from "../categories/queries";
+import {
+  budgetStatsSchema,
+  globalStatsSchema,
+  PAGE_SIZE,
+  transactionRowSchema,
+} from "./schemas";
 
 // Nom de banque affiché : display_name choisi par l'utilisateur, sinon nom ASPSP.
 const bankLabel = sql<string>`coalesce(${bankAccounts.displayName}, ${bankAccounts.bankName})`;
 
-// Utilisé pour matcher une transaction dont la sous-catégorie appartient
-// au parent choisi dans le filtre (categories.tree, 2 niveaux).
-const parentCategories = alias(categories, "parent_categories");
-
-// Le filtre de comptes. Une liste vide vaut « pas de filtre », comme
-// `undefined` : c'est la lecture que fait déjà `selectedBanks` côté client, et
-// le panneau de comptes refuse de décocher le dernier — les deux doivent dire
-// la même chose d'une URL bricolée à la main.
-function bankCondition(
-  bank: TransactionsSearch["bank"],
-  label: SQL<string>,
-): SQL | undefined {
-  if (Array.isArray(bank))
-    return bank.length > 0 ? inArray(label, bank) : undefined;
-  return bank ? eq(label, bank) : undefined;
-}
-
-export interface TransactionRow {
-  id: number;
-  bookingDate: string;
-  description: string;
-  counterparty: string | null;
-  bankName: string;
-  raw: {
-    debtor?: { name?: string };
-  };
-  amount: string;
-  currency: string;
-  direction: "debit" | "credit";
-  status: "booked" | "pending";
-  /** Catégorie feuille — c'est elle que `updateCategory` réécrit. */
-  category: string | null;
-  /**
-   * Qui a posé la catégorie : `manual` = corrigée à la main, le seul état que
-   * la table signale (pastille « modifiée »). `llm` / `auto` sont le régime
-   * normal et n'ont rien à dire au lecteur ; `null` = aucune catégorie.
-   */
-  categorySource: string | null;
-  categoryId: number | null;
-  /** Chemin affiché : « Parent › Enfant », ou « Parent » seul. */
-  categoryPath: string | null;
-  /** Couleur de la catégorie *parente* : les lignes se lisent par famille. */
-  categoryColor: string | null;
-  categoryIcon: string | null;
-  /** Exclue à la main des agrégats — elle reste dans ce relevé, et là seulement. */
-  excluded: boolean;
-}
+// Le même libellé, lu hors du CTE de `filterTransactions` où `ba` est un
+// composite.
+const filteredBankLabel = sql.raw(
+  "coalesce((ba).display_name, (ba).bank_name)",
+);
 
 // Le filtre de comptes, en SQL brut : `bankCondition` s'écrit sur les tables
 // Drizzle non aliasées, il ne peut pas se corréler à l'alias `ba` des CTE
@@ -86,29 +40,6 @@ export function bankFilter(bank: TransactionsSearch["bank"]) {
   if (banks.length === 0) return sql``;
   const label = sql.raw("coalesce(ba.display_name, ba.bank_name)");
   return sql` AND ${inArray(label, banks)}`;
-}
-
-/**
- * Le périmètre des agrégats de la revue : la période, les comptes affichés, et
- * jamais les lignes exclues à la main.
- */
-export function filterTransactions(
-  organizationId: string,
-  query: TransactionsSearch,
-) {
-  return sql`
-    WITH filtered_transactions AS (
-      SELECT t, ba, c, p
-      FROM transactions t
-      LEFT JOIN bank_accounts ba ON t.account_id = ba.id
-      LEFT JOIN categories c ON t.category_id = c.id
-      LEFT JOIN categories p ON c.parent_id = p.id
-      WHERE t.booking_date BETWEEN ${query.dateFrom} AND ${query.dateTo}
-      AND t.excluded = 'false'
-      AND ba.organization_id = ${organizationId}
-      ${bankFilter(query.bank)}
-    )
-  `;
 }
 
 // Une catégorie **racine** (sans parent) est son propre poste : c'est elle qui
@@ -165,56 +96,21 @@ export async function globalStats(
   return globalStatsSchema.parse(result.rows[0]);
 }
 
-/**
- * Le filtre commun à toutes les lectures de transactions — et **le point de
- * passage du cloisonnement** : `organization_id` y est une condition non
- * négociable, posée avant tout filtre venu de l'URL, et non un critère de plus.
- *
- * Il porte sur `bank_accounts` : les transactions n'ont pas de colonne d'espace,
- * elles tiennent le leur de leur compte. Toute requête qui utilise ce filtre
- * doit donc joindre `bank_accounts` (`innerJoin`), sans quoi Postgres refuse.
- */
-export function transactionsFilterQuery(
-  organizationId: string,
-  query: TransactionsSearch,
-  // Les transactions exclues à la main sortent par défaut, sans param d'URL :
-  // le défaut doit être sûr, un agrégat écrit demain les écarte sans y penser.
-  // Seuls les deux appelants qui décrivent le **relevé** (la table et les
-  // pastilles de comptes, qui annoncent ce que la table affichera) les gardent.
-  { includeExcluded = false } = {},
-): SQL<unknown> | undefined {
-  const conditions: SQL[] = [eq(bankAccounts.organizationId, organizationId)];
-  if (!includeExcluded) conditions.push(eq(transactions.excluded, false));
-  // `bank` accepte une banque ou une liste (voir @budget/shared).
-  const bank = bankCondition(query.bank, bankLabel);
-  if (bank) conditions.push(bank);
-
-  if (query.direction)
-    conditions.push(eq(transactions.direction, query.direction));
-  if (query.status) conditions.push(eq(transactions.status, query.status));
-  if (query.category === "none")
-    conditions.push(isNull(transactions.categoryId));
-  else if (query.category) {
-    const categoryFilter = or(
-      eq(categories.name, query.category),
-      eq(parentCategories.name, query.category),
-    );
-    if (categoryFilter) conditions.push(categoryFilter);
-  }
-  if (query.dateFrom)
-    conditions.push(gte(transactions.bookingDate, query.dateFrom));
-  if (query.dateTo)
-    conditions.push(lte(transactions.bookingDate, query.dateTo));
-  if (query.q) {
-    const qFilter = or(
-      ilike(transactions.description, `%${query.q}%`),
-      ilike(transactions.counterparty, `%${query.q}%`),
-    );
-    if (qFilter) {
-      conditions.push(qFilter);
-    }
-  }
-  return and(...conditions);
+// Les filtres propres au relevé, posés **après** le CTE et non dedans :
+// `category` y partitionnerait l'overview, qui agrège justement *par*
+// catégorie. Un parent choisi inclut ses sous-catégories (2 niveaux).
+function statementFilters({ status, category, q }: TransactionsSearch) {
+  const statusCondition = status ? sql`AND (t).status = ${status}` : sql``;
+  const categoryCondition =
+    category === "none"
+      ? sql`AND (t).category_id IS NULL`
+      : category
+        ? sql`AND ((c).name = ${category} OR (p).name = ${category})`
+        : sql``;
+  const qCondition = q
+    ? sql`AND ((t).description ILIKE ${`%${q}%`} OR (t).counterparty ILIKE ${`%${q}%`})`
+    : sql``;
+  return sql`WHERE true ${statusCondition} ${categoryCondition} ${qCondition}`;
 }
 
 // `limit` déroge à PAGE_SIZE pour les écrans qui ne paginent pas (« À revoir »,
@@ -225,80 +121,57 @@ export async function listTransactions(
   input: TransactionsSearch,
   limit = PAGE_SIZE,
 ): Promise<{ rows: TransactionRow[]; total: number }> {
-  const where = transactionsFilterQuery(organizationId, input, {
+  const scope = filterTransactions(organizationId, input, {
     includeExcluded: true,
   });
+  const filters = statementFilters(input);
 
-  const signedAmount = sql`case when ${transactions.direction} = 'debit' then -${transactions.amount} else ${transactions.amount} end`;
+  // Tri par montant **signé** : les plus gros débits en tête en `desc`. Le
+  // départage sur `(t).id` rend la pagination stable à date égale. `order` est
+  // un enum validé par zod, `sql.raw` ne reçoit jamais une valeur libre.
   const sortColumn =
-    input.sort === "amount" ? signedAmount : transactions.bookingDate;
-  const orderBy =
-    input.order === "asc"
-      ? [asc(sortColumn), asc(transactions.id)]
-      : [desc(sortColumn), desc(transactions.id)];
+    input.sort === "amount"
+      ? sql`CASE WHEN (t).direction = 'debit' THEN -(t).amount ELSE (t).amount END`
+      : sql`(t).booking_date`;
+  const order = sql.raw(input.order === "asc" ? "ASC" : "DESC");
+  const orderBy = sql`${sortColumn} ${order}, (t).id ${order}`;
 
-  const [rows, [countRow]] = await Promise.all([
-    db
-      .select({
-        id: transactions.id,
-        bookingDate: transactions.bookingDate,
-        description: transactions.description,
-        counterparty: transactions.counterparty,
-        bankName: bankLabel,
-        raw: transactions.raw,
-        amount: transactions.amount,
-        currency: transactions.currency,
-        direction: transactions.direction,
-        status: transactions.status,
-        category: categories.name,
-        categorySource: transactions.categorySource,
-        categoryIcon: sql<
-          string | null
-        >`coalesce(${parentCategories.icon}, ${categories.icon})`,
-        categoryId: sql<
-          string | null
-        >`coalesce(${categories.id}, ${parentCategories.id})`,
-        categoryPath: sql<
-          string | null
-        >`case when ${parentCategories.name} is null then ${categories.name}
-               else ${parentCategories.name} || ' › ' || ${categories.name} end`,
-        categoryColor: sql<
-          string | null
-        >`coalesce(${parentCategories.color}, ${categories.color})`,
-        excluded: transactions.excluded,
-      })
-      .from(transactions)
-      .innerJoin(bankAccounts, eq(transactions.accountId, bankAccounts.id))
-      .leftJoin(categories, eq(transactions.categoryId, categories.id))
-      .leftJoin(parentCategories, eq(categories.parentId, parentCategories.id))
-      .where(where)
-      .orderBy(...orderBy)
-      .limit(limit)
-      .offset((input.page - 1) * limit),
-    db
-      .select({ total: count() })
-      .from(transactions)
-      .innerJoin(bankAccounts, eq(transactions.accountId, bankAccounts.id))
-      .leftJoin(categories, eq(transactions.categoryId, categories.id))
-      .leftJoin(parentCategories, eq(categories.parentId, parentCategories.id))
-      .where(where),
+  const [list, counted] = await Promise.all([
+    db.execute(sql`
+      ${scope}
+      SELECT (t).id,
+             (t).booking_date::text AS "bookingDate",
+             (t).description,
+             (t).counterparty,
+             ${filteredBankLabel} AS "bankName",
+             (t).raw,
+             (t).amount,
+             (t).currency,
+             (t).direction,
+             (t).status,
+             (c).name AS category,
+             (t).category_source AS "categorySource",
+             (t).category_id AS "categoryId",
+             CASE WHEN (p).name IS NULL THEN (c).name
+                  ELSE (p).name || ' › ' || (c).name END AS "categoryPath",
+             coalesce((p).color, (c).color) AS "categoryColor",
+             coalesce((p).icon, (c).icon) AS "categoryIcon",
+             (t).excluded
+      FROM filtered_transactions
+      ${filters}
+      ORDER BY ${orderBy}
+      LIMIT ${limit} OFFSET ${(input.page - 1) * limit}
+    `),
+    db.execute<{ total: number }>(sql`
+      ${scope}
+      SELECT count(*)::int AS total FROM filtered_transactions ${filters}
+    `),
   ]);
 
-  // La colonne jsonb `raw` se type trop largement pour être inférée.
-  return { rows: rows as TransactionRow[], total: countRow?.total ?? 0 };
-}
-
-export interface MonthlyCategoryTotal {
-  /** Mois au format `YYYY-MM`. */
-  month: string;
-  /** Catégorie parente ; `null` = transactions sans catégorie. */
-  category: string | null;
-  debit: number;
-  credit: number;
-  // Sert à repérer un mois partiel : le premier mois importé ne couvre qu'une
-  // fraction du calendrier et fausserait toute moyenne de référence. Un volume
-  // de transactions écroulé le trahit là où un montant ne le trahit pas.
-  count: number;
+  return {
+    rows: transactionRowSchema.array().parse(list.rows),
+    total: counted.rows[0]?.total ?? 0,
+  };
 }
 
 export async function listBankLabels(
@@ -359,23 +232,22 @@ export async function bankCounts(
   organizationId: string,
   input: TransactionsSearch,
 ): Promise<{ bank: string; count: number }[]> {
-  const where = transactionsFilterQuery(
+  // La pastille annonce des lignes, pas de l'argent : elle compte ce que le
+  // relevé affichera une fois le compte coché, exclusions comprises.
+  const scope = filterTransactions(
     organizationId,
     { ...input, bank: undefined },
-    // La pastille annonce des lignes, pas de l'argent : elle doit compter ce que
-    // la table affichera une fois le compte coché, exclusions comprises.
     { includeExcluded: true },
   );
-  const rows = await db
-    .select({ bank: bankLabel, count: count() })
-    .from(transactions)
-    .innerJoin(bankAccounts, eq(transactions.accountId, bankAccounts.id))
-    .leftJoin(categories, eq(transactions.categoryId, categories.id))
-    .leftJoin(parentCategories, eq(categories.parentId, parentCategories.id))
-    .where(where)
-    .groupBy(bankLabel)
-    .orderBy(asc(bankLabel));
-  return rows;
+  const result = await db.execute<{ bank: string; count: number }>(sql`
+    ${scope}
+    SELECT ${filteredBankLabel} AS bank, count(*)::int AS count
+    FROM filtered_transactions
+    ${statementFilters(input)}
+    GROUP BY 1
+    ORDER BY 1
+  `);
+  return result.rows;
 }
 
 // Une correction manuelle écrase la valeur précédente (LLM ou manuelle) ; le

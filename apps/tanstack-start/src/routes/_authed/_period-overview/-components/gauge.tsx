@@ -18,10 +18,16 @@ export function Gauge({ max, value, budget, color }: GaugeProps) {
   const budgetPct = pct(budget ?? 0);
 
   return (
-    <span className="bg-track relative block h-2 overflow-hidden rounded-full">
+    <span className="bg-track relative block h-2 rounded-full">
       <span
-        className="absolute inset-y-0 left-0 rounded-full"
-        style={{ width: valuePct, background: color ?? "grey" }}
+        className="absolute inset-y-0 left-0 rounded-full transition-[width] duration-300 ease-in starting:w-0"
+        style={
+          {
+            width: valuePct,
+            background: color ?? "grey",
+            boxShadow: `0 0 8px ${color ?? "grey"}`,
+          } as React.CSSProperties
+        }
       />
       {over && over > 0 ? (
         <span
@@ -34,7 +40,7 @@ export function Gauge({ max, value, budget, color }: GaugeProps) {
       ) : (
         over !== null && (
           <span
-            className="bg-foreground absolute top-0 h-4 w-[2px]"
+            className="bg-foreground absolute inset-y-0 w-0.5"
             style={{ left: budgetPct }}
           />
         )

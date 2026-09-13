@@ -126,7 +126,8 @@ export const categories = pgTable(
     icon: text("icon"),
     // NULL = catégorie parente ; sinon sous-catégorie. Les deux niveaux sont
     // assignables à une transaction ; choisir un parent dans le filtre de liste
-    // inclut aussi ses sous-catégories (voir transactionsFilterQuery).
+    // inclut aussi ses sous-catégories (voir statementFilters,
+    // transactions/queries.ts).
     parentId: integer("parent_id").references((): AnyPgColumn => categories.id),
     budgetAmount: numeric("budget_amount", { precision: 12, scale: 2 }),
     // Parente dont le budget est réparti sur ses sous-catégories : ce sont

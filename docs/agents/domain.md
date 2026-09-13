@@ -23,14 +23,14 @@ If any of these files don't exist, **proceed silently**. Don't flag their absenc
 │   ├── adr/                      ← 0001-….md (created lazily)
 │   └── superpowers/specs/        ← design specs and briefs
 ├── packages/{api,auth,db,shared,ui}/src/
-└── apps/{tanstack-start,expo}/src/
+└── apps/tanstack-start/src/
 ```
 
 ## Use the glossary's vocabulary
 
 When your output names a domain concept (in an issue title, a refactor proposal, a hypothesis, a test name), use the term as defined in `CONTEXT.md`. Don't drift to synonyms the glossary explicitly avoids.
 
-This project's vocabulary is **French** and the distinctions are load-bearing — « à classer » is not « sans catégorie », un « espace » is a better-auth organization, un « poste » is what `budgetSlots` defines. `CLAUDE.md` is the current authority on these; several of its paragraphs exist precisely because a synonym crept in once.
+This project's vocabulary is **French** and the distinctions are load-bearing — « sans catégorie » is the only signal of an unclassified transaction (« à classer » was retired on 2026-08-20), un « espace » is a better-auth organization, un « poste » is a parent category as `categories.overview` returns it. `CLAUDE.md` is the current authority on these; several of its paragraphs exist precisely because a synonym crept in once.
 
 If the concept you need isn't in the glossary yet, that's a signal — either you're inventing language the project doesn't use (reconsider) or there's a real gap (note it for `/domain-modeling`).
 

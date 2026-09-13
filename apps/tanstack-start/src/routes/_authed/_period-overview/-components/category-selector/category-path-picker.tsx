@@ -28,7 +28,7 @@ export function CategoryPathPicker({
   current,
   onPick,
 }: CategoryPathPickerProps) {
-  const { newOverview } = useLoaderData({
+  const { overview } = useLoaderData({
     from: "/_authed/_period-overview",
   });
 
@@ -40,12 +40,12 @@ export function CategoryPathPicker({
       className="w-120"
     >
       <CommandInput
-        placeholder={`Filtrer parmi ${newOverview.length} catégories…`}
+        placeholder={`Filtrer parmi ${overview.length} catégories…`}
       />
       <CommandList>
         <CommandEmpty>Aucune catégorie ne correspond.</CommandEmpty>
 
-        {newOverview.map((parent) => (
+        {overview.map((parent) => (
           <CommandGroup
             key={parent.id}
             heading={

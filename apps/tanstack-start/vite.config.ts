@@ -39,12 +39,24 @@ export default defineConfig({
     // symptôme ne touchait que les routes, les composants ordinaires étant justes.
     codeInspectorPlugin({
       bundler: "vite",
-      // Sans ça, WebStorm ouvre `apps/tanstack-start` comme un projet à part au
-      // lieu de sauter dans le monorepo déjà ouvert : code-inspector passe le
-      // `root` de Vite (donc l'app) à launch-ide comme workspace, et ce workspace
-      // gagne contre la détection `git rev-parse --show-toplevel`. `pathFormat`
-      // est la seule voie qui impose la racine, et elle vaut aussi pour les
-      // WebStorm < 2026.2, qui ne reçoivent aucun workspace du tout.
+      // R3F lit le `-` comme un séparateur de propriétés « percées » :
+      // `material-color` vaut `mesh.material.color`. `data-insp-path` devient
+      // donc `mesh.data.insp.path` : à la première application `mesh.data`
+      // n'existe pas, R3F renonce au perçage et écrit silencieusement
+      // `mesh.data = "<chemin>"` ; à la deuxième application des props sur le
+      // *même* objet, le perçage repart, tombe sur cette chaîne et lève
+      // « R3F: Cannot set "data-insp-path" ». D'où une panne invisible au
+      // premier rendu et qui n'apparaît qu'à une mise à jour.
+      // Rien à perdre à ne pas instrumenter ces fichiers : code-inspector
+      // intercepte des clics sur du DOM, or ces éléments ne vivent que dans le
+      // graphe WebGL — le canvas est un unique nœud DOM opaque.
+      // `match` est le seul filtre par fichier du plugin (pas d'`exclude`), et
+      // il est testé sur le chemin relatif à la racine — celui-là même qu'on
+      // lit dans les `data-insp-path` injectés. Un `escapeTags` par balise a été
+      // essayé avant : impossible à tenir complet (`animated.mesh`, `Bloom`,
+      // `Billboard`, `Line`, `Text`… reversent tous leurs props dans un objet
+      // Three) et son oubli est silencieux.
+      match: /^(?!.*packages\/ui\/src\/three\/)/,
       pathFormat: [
         path.resolve(import.meta.dirname, "../.."),
         "--line",

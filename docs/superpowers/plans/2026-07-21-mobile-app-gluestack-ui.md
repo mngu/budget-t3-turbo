@@ -167,7 +167,7 @@ pnpm --filter @budget/expo add lucide-react-native
 
 Expected : ajouté dans `apps/expo/package.json` sous `dependencies`.
 
-- [ ] **Step 2: Simplifier `index.tsx` (login + redirection)**
+- [ ] **Step 2: Simplifier `index-bkp.tsx` (login + redirection)**
 
 Remplacer le contenu de `apps/expo/src/app/index.tsx` :
 
@@ -1427,7 +1427,7 @@ Vérifier :
 
 - L'onglet Banques affiche les connexions existantes avec leur statut (badge cohérent avec ce qui est affiché sur `/banques` côté web pour le même compte).
 - Le bouton de synchronisation déclenche `sync.run`, affiche un toast de résultat, et rafraîchit la liste des connexions.
-- Le bouton de déconnexion ramène bien à l'écran de login (`index.tsx`).
+- Le bouton de déconnexion ramène bien à l'écran de login (`index-bkp.tsx`).
 - **Ne pas déclencher ce sync sur un compte réel sans confirmation explicite de l'utilisateur** — il touche de vraies sessions bancaires (voir `CLAUDE.md`, règle déjà en vigueur côté web).
 
 - [ ] **Step 5: Commit**

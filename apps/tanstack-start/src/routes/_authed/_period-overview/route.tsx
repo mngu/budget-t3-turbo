@@ -11,8 +11,8 @@ import {
   wholePeriod,
 } from "~/lib/transactions-search";
 
+import { BreakdownList } from "./-components/breakdown-list";
 import { KpiBand } from "./-components/kpi-band";
-import { NewBreakdownList } from "./-components/new-breakdown-list";
 import { OverviewHeader } from "./-components/overview-header";
 
 /**
@@ -56,8 +56,7 @@ export const Route = createFileRoute("/_authed/_period-overview")({
     const [
       globalStats,
       budgetStats,
-      newOverview,
-      categoryTree,
+      overview,
       bankCounts,
       banks,
       earliestDate,
@@ -75,19 +74,10 @@ export const Route = createFileRoute("/_authed/_period-overview")({
       // l'échelle et tous les postes de dépense s'affaissent à un moignon
       // indistinct (mesuré : `Revenus` à 4 000 € contre 99 € pour le plus
       // gros poste de sortie).
-      context.trpcClient.categories.newOverview.query({
+      context.trpcClient.categories.overview.query({
         ...period,
         direction: "debit",
       }),
-
-      // Les quatre suivants n'alimentent pas cet écran mais l'en-tête et les
-      // cellules de la table, montés au-dessus ou en dessous de l'`Outlet`.
-      // Ils passaient par le cache react-query jusqu'au 2026-08-28 ; ce
-      // layout étant le seul endroit d'où leurs trois consommateurs sont
-      // montés (`PeriodPicker`, `BankPicker`, `useParentCategories`), le
-      // loader les porte directement — un cache de moins, et la panne
-      // d'hydratation que le préchargement rattrapait ne peut plus exister.
-      context.trpcClient.categories.tree.query(),
       context.trpcClient.transactions.bankCounts.query(deps),
       context.trpcClient.transactions.banks.query(),
       context.trpcClient.transactions.earliestDate.query(),
@@ -96,8 +86,7 @@ export const Route = createFileRoute("/_authed/_period-overview")({
     return {
       globalStats,
       budgetStats,
-      newOverview,
-      categoryTree,
+      overview,
       bankCounts,
       banks,
       earliestDate,
@@ -113,11 +102,11 @@ export const Route = createFileRoute("/_authed/_period-overview")({
 });
 
 function RevueLayout() {
-  const { globalStats, budgetStats, newOverview } = Route.useLoaderData();
+  const { globalStats, budgetStats, overview } = Route.useLoaderData();
 
   return (
     <div className="flex w-full gap-4">
-      <div className="flex min-h-0 flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         {/* `flex-wrap` n'est pas dans la maquette, qui ne descend pas sous
             460 px : il évite que la colonne de droite, à largeur fixe, ne pousse
             le solde hors de l'écran sur une fenêtre étroite. */}
@@ -129,12 +118,12 @@ function RevueLayout() {
 
         {/* Chaque écran rend son contenu **et** sa colonne des postes. */}
         <div className="mt-3 flex min-h-0 flex-1 flex-col gap-2">
-          <OverviewHeader newOverview={newOverview} />
+          <OverviewHeader overview={overview} />
           <Outlet />
         </div>
       </div>
-      <div className="w-80 overflow-hidden">
-        <NewBreakdownList newOverview={newOverview} />
+      <div className="w-80 shrink-0 overflow-hidden">
+        <BreakdownList overview={overview} />
       </div>
     </div>
   );

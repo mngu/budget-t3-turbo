@@ -1,18 +1,18 @@
-import type { NewCategoryOverviewType } from "@budget/api/schemas";
+import type { CategoryOverviewType } from "@budget/api/schemas";
 
 import { LayersIcon } from "lucide-react";
 
 import { Toolbar } from "@budget/ui/toolbar";
-import { shadeCategoryColor, useCategoryColor } from "~/lib/category-color";
+import { useCategoryColor, useShadeCategoryColor } from "~/lib/category-color";
 import { euro } from "~/lib/format";
 import { sumBy } from "~/lib/sum";
 import { useRevueSearch } from "~/lib/use-revue-search";
 
-import { NO_CATEGORY, openParent } from "../-lib/breakdown";
+import { getCategoryLabel } from "../-lib/breakdown";
 import { BudgetGauge } from "./budget-gauge";
 
-interface NewBreakdownListProps {
-  newOverview: NewCategoryOverviewType;
+interface BreakdownListProps {
+  overview: CategoryOverviewType;
 }
 
 // Une ligne de la colonne, quel que soit le niveau affiché. Les deux niveaux
@@ -29,14 +29,17 @@ interface BreakdownRow {
   drillable: boolean;
 }
 
-export function NewBreakdownList({ newOverview }: NewBreakdownListProps) {
+export function BreakdownList({ overview }: BreakdownListProps) {
   const { search, setSearch } = useRevueSearch();
   const resolveColor = useCategoryColor();
+  const shadeCategoryColor = useShadeCategoryColor();
   const { category } = search;
   // Même définition du niveau ouvert que `OverviewHeader` : sans elle, un
   // filtre posé sur une *sous*-catégorie ouvrait l'en-tête sur sa parente
   // pendant que la colonne restait à la racine.
-  const selectedCategory = openParent(newOverview, category);
+  const selectedCategory = category
+    ? overview.find(({ name }) => name === category)
+    : null;
   // `children` est nullable en base : le `json_array` d'une parente sans
   // sous-catégorie rend `null`, pas un tableau vide.
   const children = selectedCategory?.children ?? [];
@@ -56,9 +59,9 @@ export function NewBreakdownList({ newOverview }: NewBreakdownListProps) {
         ),
         drillable: false,
       }))
-    : newOverview.map((cat) => ({
+    : overview.map((cat) => ({
         // `null` sur le poste des transactions sans catégorie.
-        label: cat.name ?? NO_CATEGORY,
+        label: getCategoryLabel(cat.name),
         value: cat.totalAmount ?? 0,
         budget: cat.budgetAmount,
         iconName: cat.icon,
@@ -67,7 +70,7 @@ export function NewBreakdownList({ newOverview }: NewBreakdownListProps) {
       }));
 
   const totalAmount = sumBy(rows, (row) => row.value);
-  const childCount = sumBy(newOverview, (cat) => cat.children?.length ?? 0);
+  const childCount = sumBy(overview, (cat) => cat.children?.length ?? 0);
 
   // Une parente détaillée n'a pas de montant propre (CHECK
   // `categories_detailed_no_amount`) : son budget est la somme de ses enfants.
@@ -77,7 +80,7 @@ export function NewBreakdownList({ newOverview }: NewBreakdownListProps) {
     ? selectedCategory.budgetDetailed
       ? sumBy(rows, (row) => row.budget ?? 0)
       : selectedCategory.budgetAmount
-    : sumBy(newOverview, (cat) =>
+    : sumBy(overview, (cat) =>
         cat.budgetDetailed
           ? sumBy(cat.children ?? [], (child) => child.budgetAmount ?? 0)
           : (cat.budgetAmount ?? 0),
@@ -113,8 +116,8 @@ export function NewBreakdownList({ newOverview }: NewBreakdownListProps) {
               </strong>
             </div>
             <div className="text-subtle text-meta flex justify-end">
-              {newOverview.length} poste{newOverview.length > 1 ? "s" : ""} de
-              dépense · {childCount} sous-catégorie{childCount > 1 ? "s" : ""}
+              {overview.length} poste{overview.length > 1 ? "s" : ""} de dépense
+              · {childCount} sous-catégorie{childCount > 1 ? "s" : ""}
             </div>
           </div>
         )}
@@ -129,24 +132,26 @@ export function NewBreakdownList({ newOverview }: NewBreakdownListProps) {
         aria-label="Répartition par poste"
         className="flex min-h-0 flex-1 scrollbar-thin flex-col overflow-y-auto"
       >
-        {rows.map((row, index) => (
-          <Toolbar.Button
-            key={index}
-            type="button"
-            disabled={!row.drillable}
-            className="not-aria-disabled:hover:bg-accent focus-visible:ring-accent-soft flex flex-none cursor-pointer flex-col justify-center gap-1.5 rounded-lg p-2 transition-colors outline-none focus-visible:ring-3 focus-visible:ring-inset motion-reduce:transition-none"
-            onClick={() => setSearch({ category: row.label })}
-          >
-            <BudgetGauge
-              value={row.value}
-              budget={row.budget}
-              iconName={row.iconName}
-              label={row.label}
-              color={row.color}
-              max={max}
-            />
-          </Toolbar.Button>
-        ))}
+        {rows
+          .filter((row) => row.value && row.value > 0)
+          .map((row, index) => (
+            <Toolbar.Button
+              key={index}
+              type="button"
+              disabled={!row.drillable}
+              className="not-aria-disabled:hover:bg-accent focus-visible:ring-accent-soft flex flex-none cursor-pointer flex-col justify-center gap-1.5 rounded-lg p-2 transition-colors outline-none focus-visible:ring-3 focus-visible:ring-inset motion-reduce:transition-none"
+              onClick={() => setSearch({ category: row.label })}
+            >
+              <BudgetGauge
+                value={row.value}
+                budget={row.budget}
+                iconName={row.iconName}
+                label={row.label}
+                color={row.color}
+                max={max}
+              />
+            </Toolbar.Button>
+          ))}
       </Toolbar.Root>
     </div>
   );

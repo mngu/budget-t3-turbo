@@ -1,4 +1,4 @@
-import type { NewCategoryOverviewType } from "@budget/api/schemas";
+import type { CategoryOverviewType } from "@budget/api/schemas";
 
 import { Link, useRouterState } from "@tanstack/react-router";
 import { ArrowLeftIcon, ArrowRightIcon, LayersIcon } from "lucide-react";
@@ -10,28 +10,30 @@ import { sharePercent } from "~/lib/format";
 import { sumBy } from "~/lib/sum";
 import { useRevueSearch } from "~/lib/use-revue-search";
 
-import { openParent } from "../-lib/breakdown";
-
 interface OverviewHeaderProps {
-  newOverview: NewCategoryOverviewType;
+  overview: CategoryOverviewType;
 }
 
-export function OverviewHeader({ newOverview }: OverviewHeaderProps) {
+export function OverviewHeader({ overview }: OverviewHeaderProps) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { search } = useRevueSearch();
   const resolveColor = useCategoryColor();
-  const selected = openParent(newOverview, search.category);
+  const { category } = search;
+
+  const selected = category
+    ? overview.find(({ name }) => name === category)
+    : null;
   // `resolveColor` retombe déjà sur la teinte par défaut sur `null`.
   const selectedColor = selected ? resolveColor(selected.color) : "";
 
   const subCount = selected?.children?.length ?? 0;
   // Le dénominateur sort de **la même** source que le numérateur. Pris
   // ailleurs (`globalStats.debit`), il porterait le filtre de comptes, que
-  // `categories.newOverview` ignore : la part pourrait alors dépasser 100 %.
-  const expenses = sumBy(newOverview, (cat) => cat.totalAmount ?? 0);
-  // Les postes **de dépense** : `newOverview` liste toutes les parentes de
+  // `categories.overview` ignore : la part pourrait alors dépasser 100 %.
+  const expenses = sumBy(overview, (cat) => cat.totalAmount ?? 0);
+  // Les postes **de dépense** : `overview` liste toutes les parentes de
   // l'espace, y compris celles sans aucun mouvement sur la période.
-  const postes = newOverview.filter((cat) => cat.totalAmount !== null).length;
+  const postes = overview.filter((cat) => cat.totalAmount !== null).length;
 
   return (
     <div className="flex min-w-0 flex-none items-center gap-3">

@@ -52,3 +52,40 @@ export const globalStatsSchema = z.object({
 });
 
 export type GlobalStats = z.infer<typeof globalStatsSchema>;
+
+// Une ligne du relevé, telle que `listTransactions` la lit en SQL brut. Le
+// schéma est ce qui garantit les alias camelCase : un `AS bookingDate` non
+// quoté sort en minuscules, et un cast de type mentirait sans rien lever.
+export const transactionRowSchema = z.object({
+  id: z.number().int(),
+  bookingDate: z.string(),
+  description: z.string(),
+  counterparty: z.string().nullable(),
+  bankName: z.string(),
+  raw: z.object({
+    debtor: z.object({ name: z.string().optional() }).nullable().optional(),
+  }),
+  // numeric : pg le rend en chaîne, et la table le formate elle-même.
+  amount: z.string(),
+  currency: z.string(),
+  direction: z.enum(["debit", "credit"]),
+  status: z.enum(["booked", "pending"]),
+  /** Catégorie feuille — c'est elle que `updateCategory` réécrit. */
+  category: z.string().nullable(),
+  /**
+   * Qui a posé la catégorie : `manual` = corrigée à la main, le seul état que
+   * la table signale (pastille « modifiée »). `llm` / `auto` sont le régime
+   * normal et n'ont rien à dire au lecteur ; `null` = aucune catégorie.
+   */
+  categorySource: z.enum(["llm", "manual", "auto"]).nullable(),
+  categoryId: z.number().int().nullable(),
+  /** Chemin affiché : « Parent › Enfant », ou « Parent » seul. */
+  categoryPath: z.string().nullable(),
+  /** Couleur de la catégorie *parente* : les lignes se lisent par famille. */
+  categoryColor: z.string().nullable(),
+  categoryIcon: z.string().nullable(),
+  /** Exclue à la main des agrégats — elle reste dans ce relevé, et là seulement. */
+  excluded: z.boolean(),
+});
+
+export type TransactionRow = z.infer<typeof transactionRowSchema>;

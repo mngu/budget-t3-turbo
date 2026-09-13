@@ -29,8 +29,8 @@ import {
 import { Input } from "@budget/ui/input";
 import { CategoryIcon } from "~/component/category-icon";
 import {
-  shadeCategoryColor,
   softCategoryColor,
+  useShadeCategoryColor,
   useCategoryColor,
 } from "~/lib/category-color";
 import { euro0 } from "~/lib/format";
@@ -44,19 +44,20 @@ import { CategoryDeleteDialog } from "./category-delete-dialog";
 import { CategoryIdentityDialog } from "./category-identity-dialog";
 import { TransactionPreviewDrawer } from "./transaction-preview-drawer";
 
-interface NewCategoryOverviewProps {
+interface CategoryOverviewProps {
   categoryOverview: ManagedCategory[];
   stats: ReturnType<typeof computeStats>;
 }
 
-export function NewCategoryOverview({
+export function CategoryOverview({
   categoryOverview,
   stats,
-}: NewCategoryOverviewProps) {
+}: CategoryOverviewProps) {
   const trpcClient = useTRPCClient();
   const crud = useCategoryCrud();
   const preview = usePreview();
   const resolve = useCategoryColor();
+  const shadeCategoryColor = useShadeCategoryColor();
   const run = useRun();
 
   const onSetAmount = (categoryId: number, amount: number | null) =>

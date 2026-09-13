@@ -13,7 +13,7 @@ import {
   SEARCH_DEFAULTS,
 } from "~/lib/transactions-search";
 
-import { NewCategoryOverview } from "./-components/new-category-overview";
+import { CategoryOverview } from "./-components/category-overview";
 
 export const Route = createFileRoute("/_authed/settings/categories/")({
   validateSearch: transactionsSearchSchema,
@@ -22,22 +22,23 @@ export const Route = createFileRoute("/_authed/settings/categories/")({
   },
   loaderDeps: ({ search }) => search,
   loader: async ({ context }) => {
-    const overview = await context.trpcClient.categories.newOverview.query();
     // Le poste des transactions sans catégorie appartient à la revue, pas aux
     // réglages : cet écran ne montre que ce qui se gère.
-    const newOverview = overview.filter(isManagedCategory);
-    const stats = computeStats(newOverview);
-    return { newOverview, stats };
+    const overview = (
+      await context.trpcClient.categories.overview.query()
+    ).filter(isManagedCategory);
+    const stats = computeStats(overview);
+    return { overview, stats };
   },
   staticData: { title: "Catégories", aside: CategoriesAside },
   component: CategoriesPage,
 });
 
 function CategoriesAside() {
-  const { newOverview } = Route.useLoaderData();
+  const { overview } = Route.useLoaderData();
   let totalBudget = 0;
   let childCount = 0;
-  newOverview.forEach((cat) => {
+  overview.forEach((cat) => {
     if (cat.budgetAmount) {
       totalBudget += cat.budgetAmount;
     }
@@ -52,7 +53,7 @@ function CategoriesAside() {
   });
   return (
     <div className="ml-auto flex items-stretch">
-      <Stat value={newOverview.length} label="Parentes" />
+      <Stat value={overview.length} label="Parentes" />
       <Stat value={childCount} label="Sous-catégories" />
       <Stat value={euro0.format(totalBudget)} label="Budgété / mois" />
     </div>
@@ -60,9 +61,9 @@ function CategoriesAside() {
 }
 
 function CategoriesPage() {
-  const { newOverview, stats } = Route.useLoaderData();
+  const { overview, stats } = Route.useLoaderData();
 
-  return <NewCategoryOverview categoryOverview={newOverview} stats={stats} />;
+  return <CategoryOverview categoryOverview={overview} stats={stats} />;
 }
 
 // Compteurs de l'en-tête et données dérivées du choix de teinte. « Teintes
