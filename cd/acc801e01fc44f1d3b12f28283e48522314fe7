@@ -1,0 +1,49 @@
+apps/tanstack-start/src/routes/_authed/settings/categories/-components/transaction-preview-drawer.tsx
+  s_2a919791bddf80::t_260fa63c376d08 14-15,36
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/transactions-table.tsx
+  s_2a919791bddf80::t_260fa63c376d08 6-7,114
+apps/tanstack-start/src/routes/_authed/_period-overview/index.tsx
+  s_2a919791bddf80::t_e83fbdd5d7c76f 14-15,34,151
+apps/tanstack-start/src/lib/use-format.ts
+  s_2a919791bddf80::t_260fa63c376d08 1-2,11-39,42-43
+  h_c1b75a3cdf5637 3-9,40-41
+  s_2a919791bddf80::t_e83fbdd5d7c76f 10
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/exclude-badge.tsx
+  s_2a919791bddf80::t_260fa63c376d08 18,70
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/breakdown-list.tsx
+  s_2a919791bddf80::t_260fa63c376d08 7,33
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/kpi-band.tsx
+  s_2a919791bddf80::t_e83fbdd5d7c76f 5,15,32,72,80
+apps/tanstack-start/src/component/app-header.tsx
+  s_2a919791bddf80::t_314d3669dde97f 16,31,169,222-228
+  s_2a919791bddf80::t_d1346994dac5e0 229-230
+packages/api/src/transactions/schemas.ts
+  s_2a919791bddf80::t_e18dacdf2a2e27 66
+apps/tanstack-start/src/routes/_authed/settings/categories/index.tsx
+  s_2a919791bddf80::t_e83fbdd5d7c76f 10,38,59
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/budget-gauge.tsx
+  s_2a919791bddf80::t_260fa63c376d08 3,25
+apps/tanstack-start/src/routes/_authed/settings/categories/-components/category-overview.tsx
+  s_2a919791bddf80::t_e83fbdd5d7c76f 36,56,150
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "cdacc801e01fc44f1d3b12f28283e48522314fe7",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_2a919791bddf80": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "000e5bbb-29cd-4f46-83ef-0349de3624d5",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
