@@ -1,0 +1,25 @@
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/gauge.tsx
+  h_c1b75a3cdf5637 23,26,43
+  s_51d109a4399145::t_bf58158975f1c9 24-25,27-30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "576ac419a46c070d2a859c0fd8b0d36cd797e684",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_51d109a4399145": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9827d635-a44c-4cad-939f-a175b669b142",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
