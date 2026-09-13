@@ -1,0 +1,33 @@
+packages/ui/src/three/canvas-container.tsx
+  h_c1b75a3cdf5637 14,27-28,85-88,94-95,98,100-101,104,106-107,110,115-116,119,121-122,125,127-128,131,133-134,139-140,149,155,160,162,188,197,205-206,217-224
+  s_36834a5eba9efe::t_58fbdf1f6b8aad 171-175
+  h_c1b75a3cdf5637 96-97,99,102-103,105,108-109,111,117-118,120,123-124,126,129-130,132
+packages/ui/src/three/segment.tsx
+  h_c1b75a3cdf5637 36-40
+packages/ui/src/three/tuning.ts
+  h_c1b75a3cdf5637 14-27,37-73
+apps/tanstack-start/src/routes/_authed/_period-overview/index.tsx
+  h_c1b75a3cdf5637 8,17,115
+  h_c1b75a3cdf5637 114,116
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "3610009cd103f71eb53844a09f5d58574a95300a",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_36834a5eba9efe": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c848a8ec-17af-4217-aeab-96aaa5cb1bd4",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
