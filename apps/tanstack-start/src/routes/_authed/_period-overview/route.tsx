@@ -106,7 +106,7 @@ function RevueLayout() {
 
   return (
     <div className="flex w-full gap-4">
-      <div className="flex min-h-0 flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         {/* `flex-wrap` n'est pas dans la maquette, qui ne descend pas sous
             460 px : il évite que la colonne de droite, à largeur fixe, ne pousse
             le solde hors de l'écran sur une fenêtre étroite. */}
@@ -122,7 +122,7 @@ function RevueLayout() {
           <Outlet />
         </div>
       </div>
-      <div className="w-80 overflow-hidden">
+      <div className="w-80 shrink-0 overflow-hidden">
         <BreakdownList overview={overview} />
       </div>
     </div>

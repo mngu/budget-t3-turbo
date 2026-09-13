@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project overview
 
-A personal finance tool (in French — user-facing strings, comments, and category names should be in French) for syncing transactions from 3 personal bank accounts, categorizing them, and generating budget/savings reports.
+A personal finance tool (in French — user-facing strings and category names should be in French) for syncing transactions from 3 personal bank accounts, categorizing them, and generating budget/savings reports.
 
 This is a pnpm + Turborepo monorepo (migrated from the single-package `budget-tracker` CLI tool). It reuses the same business pipeline (Enable Banking → import → categorize → PostgreSQL → transactions table) but split across workspace packages and apps.
 
