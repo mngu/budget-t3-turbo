@@ -33,11 +33,11 @@ function SegmentMaterial({ color }: { color: string }) {
   return (
     <meshPhysicalMaterial
       color={color}
-      roughness={tuning.roughness}
-      metalness={tuning.metalness}
-      clearcoat={tuning.clearcoat}
-      clearcoatRoughness={tuning.clearcoatRoughness}
-      iridescence={tuning.iridescence}
+      roughness={tuning.materialRoughness}
+      metalness={tuning.materialMetalness}
+      clearcoat={tuning.materialClearcoat}
+      clearcoatRoughness={tuning.materialClearcoatRoughness}
+      iridescence={tuning.materialIridescence}
       iridescenceIOR={1.3}
     />
   );

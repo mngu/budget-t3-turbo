@@ -11,7 +11,7 @@ import { Leva, useControls } from "leva";
 import { useEffect, useRef } from "react";
 import { MathUtils, PerspectiveCamera } from "three";
 
-import { DEFAULT_TUNING, TuningProvider } from "./tuning";
+import { DEFAULT_TUNING, PRESET_1, TuningProvider } from "./tuning";
 
 /** Position de repos, celle qu'occupait `PerspectiveCamera`. */
 const CAMERA: [number, number, number] = [0, -5, 20];
@@ -23,6 +23,8 @@ type CameraProps = {
   sway: number;
   fov: number;
 };
+
+const PRESET = PRESET_1 || DEFAULT_TUNING;
 
 /**
  * Remplace `OrbitControls` : la caméra suit le pointeur de quelques unités et
@@ -80,32 +82,62 @@ export function CanvasContainer({ children }: Props) {
   });
 
   const lights = useControls("Lumières", {
-    key: { value: 4, min: 0, max: 12, step: 0.1 },
-    rim: { value: 2.5, min: 0, max: 12, step: 0.1 },
-    fill: { value: 1.4, min: 0, max: 12, step: 0.1 },
-    fillColor: "#b8c8ff",
+    lightKey: { value: PRESET.lightKey, min: 0, max: 12, step: 0.1 },
+    lightRim: { value: PRESET.lightRim, min: 0, max: 12, step: 0.1 },
+    lightFill: { value: PRESET.lightFill, min: 0, max: 12, step: 0.1 },
+    lightFillColor: PRESET.lightFillColor,
   });
 
   // Seuil à 0 : seul l'arc survolé (`<Select>`) entre dans la passe, il doit
   // rayonner en entier, dans sa teinte — pas seulement ses reflets.
   const bloom = useControls("Halo", {
-    luminanceThreshold: { value: 0, min: 0, max: 1, step: 0.01 },
-    radius: { value: 0.6, min: 0, max: 1, step: 0.01 },
-    intensity: { value: 0.8, min: 0, max: 5, step: 0.05 },
-  });
-
-  const tuning = useControls("Matière", {
-    roughness: { value: DEFAULT_TUNING.roughness, min: 0, max: 1, step: 0.01 },
-    metalness: { value: DEFAULT_TUNING.metalness, min: 0, max: 1, step: 0.01 },
-    clearcoat: { value: DEFAULT_TUNING.clearcoat, min: 0, max: 1, step: 0.01 },
-    clearcoatRoughness: {
-      value: DEFAULT_TUNING.clearcoatRoughness,
+    luminanceThreshold: {
+      value: PRESET.bloomLuminanceThreshold,
       min: 0,
       max: 1,
       step: 0.01,
     },
-    iridescence: {
-      value: DEFAULT_TUNING.iridescence,
+    radius: {
+      value: PRESET.bloomRadius,
+      min: 0,
+      max: 1,
+      step: 0.01,
+    },
+    intensity: {
+      value: PRESET.bloomIntensity,
+      min: 0,
+      max: 5,
+      step: 0.05,
+    },
+  });
+
+  const tuning = useControls("Matière", {
+    materialRoughness: {
+      value: PRESET.materialRoughness,
+      min: 0,
+      max: 1,
+      step: 0.01,
+    },
+    materialMetalness: {
+      value: PRESET.materialMetalness,
+      min: 0,
+      max: 1,
+      step: 0.01,
+    },
+    materialClearcoat: {
+      value: PRESET.materialClearcoat,
+      min: 0,
+      max: 1,
+      step: 0.01,
+    },
+    materialClearcoatRoughness: {
+      value: PRESET.materialClearcoatRoughness,
+      min: 0,
+      max: 1,
+      step: 0.01,
+    },
+    materialIridescence: {
+      value: PRESET.materialIridescence,
       min: 0,
       max: 1,
       step: 0.01,
@@ -114,20 +146,20 @@ export function CanvasContainer({ children }: Props) {
 
   const labels = useControls("Intitulés", {
     labelBlend: {
-      value: DEFAULT_TUNING.labelBlend,
+      value: PRESET.labelBlend,
       min: 0,
       max: 1,
       step: 0.01,
     },
     labelSize: {
-      value: DEFAULT_TUNING.labelSize,
+      value: PRESET.labelSize,
       min: 6,
       max: 64,
       step: 1,
     },
-    labelLift: { value: DEFAULT_TUNING.labelLift, min: 0, max: 6, step: 0.1 },
+    labelLift: { value: PRESET.labelLift, min: 0, max: 6, step: 0.1 },
     labelRadius: {
-      value: DEFAULT_TUNING.labelRadius,
+      value: PRESET.labelRadius,
       min: 5,
       max: 12,
       step: 0.1,
@@ -136,7 +168,11 @@ export function CanvasContainer({ children }: Props) {
 
   return (
     <div id="canvas-container" className="flex min-h-0 min-w-0 flex-1 flex-col">
-      <Leva collapsed titleBar={{ title: "Anneau 3D" }} />
+      {/* `fill` rend le panneau en flux dans son parent au lieu du coin haut
+          droit fixé par leva : c'est le wrapper qui choisit le coin. */}
+      <div className="fixed bottom-4 left-4 z-50 w-[280px]">
+        <Leva fill collapsed titleBar={{ title: "Anneau 3D" }} />
+      </div>
       {/* `flat` coupe le tone mapping ACES appliqué par défaut : sans lui les
           teintes de catégorie arrivent désaturées et décalées par rapport aux
           jetons CSS, alors que la couleur *est* l'encodage. */}
@@ -149,7 +185,7 @@ export function CanvasContainer({ children }: Props) {
           {/* Clé : grand panneau devant et au-dessus de l'anneau. */}
           <Lightformer
             form="rect"
-            intensity={lights.key}
+            intensity={lights.lightKey}
             position={[0, 6, 8]}
             scale={[12, 12, 1]}
           />
@@ -158,7 +194,7 @@ export function CanvasContainer({ children }: Props) {
               panneau, pour que le liseré suive la courbe. */}
           <Lightformer
             form="ring"
-            intensity={lights.rim}
+            intensity={lights.lightRim}
             position={[0, -7, -9]}
             scale={9}
           />
@@ -166,8 +202,8 @@ export function CanvasContainer({ children }: Props) {
               éclaircir l'ombre sans la neutraliser. */}
           <Lightformer
             form="rect"
-            intensity={lights.fill}
-            color={lights.fillColor}
+            intensity={lights.lightFill}
+            color={lights.lightFillColor}
             position={[-9, -4, 5]}
             scale={[9, 9, 1]}
           />
@@ -178,7 +214,14 @@ export function CanvasContainer({ children }: Props) {
             silence. Le halo est l'équivalent 3D du jeton `--arc-glow-lit` de
             l'anneau SVG ; il n'y a pas de `--arc-glow` au repos. */}
         <Selection>
-          <TuningProvider value={{ ...tuning, ...labels }}>
+          <TuningProvider
+            value={{
+              ...PRESET,
+              ...lights,
+              ...tuning,
+              ...labels,
+            }}
+          >
             {children}
           </TuningProvider>
           <EffectComposer>

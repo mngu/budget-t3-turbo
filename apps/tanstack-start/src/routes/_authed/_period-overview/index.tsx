@@ -5,6 +5,7 @@ import { ArrowLeftIcon } from "lucide-react";
 import { useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
+import { NO_CATEGORY_NAME } from "@budget/api/schemas";
 import { CanvasContainer } from "@budget/ui/canvas-container";
 import { Segment } from "@budget/ui/segment";
 import { SegmentDetail } from "@budget/ui/segment-detail";
@@ -12,8 +13,8 @@ import { SegmentLabel } from "@budget/ui/segment-label";
 import { CategoryIcon } from "~/component/category-icon";
 import { useCategoryColor, useShadeCategoryColor } from "~/lib/category-color";
 import { sharePercent } from "~/lib/format";
-import { useFormat } from "~/lib/use-format";
 import { sumBy } from "~/lib/sum";
+import { useFormat } from "~/lib/use-format";
 import { useRevueSearch } from "~/lib/use-revue-search";
 
 import { getCategoryLabel } from "./-lib/breakdown";
@@ -110,7 +111,9 @@ function RouteComponent() {
               setCurrentHover(labelName);
             }}
             onPointerOut={() => {}}
-            onClick={() => name && setSearch({ category: name })}
+            onClick={() =>
+              name && name !== NO_CATEGORY_NAME && setSearch({ category: name })
+            }
           >
             {shouldDisplayName && (
               <SegmentLabel
