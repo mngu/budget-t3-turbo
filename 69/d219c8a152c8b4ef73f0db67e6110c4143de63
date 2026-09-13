@@ -1,0 +1,43 @@
+apps/tanstack-start/src/routes/_authed/_period-overview/route.tsx
+  s_7cb8e25f2980ae::t_1db257b8efb0a4 109
+  s_29efbb77e6a44d::t_9b70be2bd6610f 125
+CLAUDE.md
+  s_e5db1824e7b6f4::t_ea35e0367c9dbb 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "69d219c8a152c8b4ef73f0db67e6110c4143de63",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_29efbb77e6a44d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9d35ac2f-a224-4cc1-88b5-6f8c58beec22",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    },
+    "s_7cb8e25f2980ae": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b8e1466f-b335-4149-b4cd-2b9f070029bd",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    },
+    "s_e5db1824e7b6f4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b7835517-6df7-488c-8342-05c636420642",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
