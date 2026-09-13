@@ -13,6 +13,7 @@ import { cn } from "@budget/ui";
 import { Button } from "@budget/ui/button";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
@@ -27,6 +28,7 @@ import { BankPicker } from "~/component/bank-picker";
 import { PeriodPicker } from "~/component/period-picker";
 import { ThemePicker } from "~/component/theme-picker";
 import { SEARCH_DEFAULTS } from "~/lib/transactions-search";
+import { setCents, useFormat } from "~/lib/use-format";
 import { useRevueSearch } from "~/lib/use-revue-search";
 
 declare module "@tanstack/react-router" {
@@ -164,6 +166,7 @@ export function AppHeader({ title }: { title?: string }) {
  */
 function SettingsMenu({ page }: { page?: string }) {
   const navigate = useNavigate();
+  const { cents } = useFormat();
 
   // `reloadDocument` comme à la connexion (`/login`) : la session est lue dans
   // le `beforeLoad` de `_authed` via le client tRPC, un rechargement complet est
@@ -214,6 +217,15 @@ function SettingsMenu({ page }: { page?: string }) {
         <DropdownMenuGroup>
           <DropdownMenuLabel>Thème</DropdownMenuLabel>
           <ThemePicker />
+        </DropdownMenuGroup>
+
+        <DropdownMenuSeparator />
+
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>Affichage</DropdownMenuLabel>
+          <DropdownMenuCheckboxItem checked={cents} onCheckedChange={setCents}>
+            Centimes
+          </DropdownMenuCheckboxItem>
         </DropdownMenuGroup>
 
         <SpacePicker />

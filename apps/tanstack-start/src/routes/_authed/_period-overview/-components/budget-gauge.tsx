@@ -1,6 +1,6 @@
 import { cn } from "@budget/ui";
 import { CategoryIcon } from "~/component/category-icon";
-import { euro } from "~/lib/format";
+import { useFormat } from "~/lib/use-format";
 import { Gauge } from "~/routes/_authed/_period-overview/-components/gauge";
 
 interface BudgetGaugeProps {
@@ -22,6 +22,7 @@ export function BudgetGauge({
   budget = null,
   valueSize = "md",
 }: BudgetGaugeProps) {
+  const { euro } = useFormat();
   const balance = (budget ?? 0) - value;
 
   return (

@@ -11,7 +11,8 @@ import { SegmentDetail } from "@budget/ui/segment-detail";
 import { SegmentLabel } from "@budget/ui/segment-label";
 import { CategoryIcon } from "~/component/category-icon";
 import { useCategoryColor, useShadeCategoryColor } from "~/lib/category-color";
-import { euro0, sharePercent } from "~/lib/format";
+import { sharePercent } from "~/lib/format";
+import { useFormat } from "~/lib/use-format";
 import { sumBy } from "~/lib/sum";
 import { useRevueSearch } from "~/lib/use-revue-search";
 
@@ -30,6 +31,7 @@ type OverviewArc = Pick<
 };
 
 function RouteComponent() {
+  const { euro } = useFormat();
   const { overview } = useLoaderData({
     from: "/_authed/_period-overview",
   });
@@ -146,7 +148,7 @@ function RouteComponent() {
                     {labelName}
                   </div>
                   <div className="num text-title leading-none font-medium tracking-[-0.03em]">
-                    {euro0.format(totalAmount ?? 0)}
+                    {euro.format(totalAmount ?? 0)}
                   </div>
                   <div className="label-caps mt-1 whitespace-nowrap">
                     {sharePercent(totalAmount ?? 0, total)} du total

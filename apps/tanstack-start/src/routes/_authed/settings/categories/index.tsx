@@ -7,7 +7,7 @@ import {
   transactionsSearchSchema,
 } from "@budget/api/schemas";
 import { Stat } from "~/component/stat";
-import { euro0 } from "~/lib/format";
+import { useFormat } from "~/lib/use-format";
 import {
   defaultToCurrentMonth,
   SEARCH_DEFAULTS,
@@ -35,6 +35,7 @@ export const Route = createFileRoute("/_authed/settings/categories/")({
 });
 
 function CategoriesAside() {
+  const { euro } = useFormat();
   const { overview } = Route.useLoaderData();
   let totalBudget = 0;
   let childCount = 0;
@@ -55,7 +56,7 @@ function CategoriesAside() {
     <div className="ml-auto flex items-stretch">
       <Stat value={overview.length} label="Parentes" />
       <Stat value={childCount} label="Sous-catégories" />
-      <Stat value={euro0.format(totalBudget)} label="Budgété / mois" />
+      <Stat value={euro.format(totalBudget)} label="Budgété / mois" />
     </div>
   );
 }

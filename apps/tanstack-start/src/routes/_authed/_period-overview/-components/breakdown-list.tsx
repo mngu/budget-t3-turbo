@@ -4,7 +4,7 @@ import { LayersIcon } from "lucide-react";
 
 import { Toolbar } from "@budget/ui/toolbar";
 import { useCategoryColor, useShadeCategoryColor } from "~/lib/category-color";
-import { euro } from "~/lib/format";
+import { useFormat } from "~/lib/use-format";
 import { sumBy } from "~/lib/sum";
 import { useRevueSearch } from "~/lib/use-revue-search";
 
@@ -30,6 +30,7 @@ interface BreakdownRow {
 }
 
 export function BreakdownList({ overview }: BreakdownListProps) {
+  const { euro } = useFormat();
   const { search, setSearch } = useRevueSearch();
   const resolveColor = useCategoryColor();
   const shadeCategoryColor = useShadeCategoryColor();

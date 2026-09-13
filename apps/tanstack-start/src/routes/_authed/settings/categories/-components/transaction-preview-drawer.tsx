@@ -11,7 +11,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@budget/ui/dialog";
-import { dateFr, euro } from "~/lib/format";
+import { dateFr } from "~/lib/format";
+import { useFormat } from "~/lib/use-format";
 
 interface TransactionPreviewDrawerProps {
   open: boolean;
@@ -32,6 +33,7 @@ export function TransactionPreviewDrawer({
   badge,
   footer,
 }: TransactionPreviewDrawerProps) {
+  const { euro } = useFormat();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent

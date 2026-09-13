@@ -2,7 +2,7 @@ import type { BudgetStats, GlobalStats } from "@budget/api/schemas";
 
 import { cn } from "@budget/ui";
 import { useCategoryColor } from "~/lib/category-color";
-import { euro0, signedEuro0 } from "~/lib/format";
+import { useFormat } from "~/lib/use-format";
 
 import { Gauge } from "./gauge";
 
@@ -12,6 +12,7 @@ interface KpiBandProps {
 }
 
 export function KpiBand({ budgetStats, globalStats }: KpiBandProps) {
+  const { signedEuro } = useFormat();
   const getColor = useCategoryColor();
   const { credit, debit } = globalStats;
   const balance = credit - debit;
@@ -28,7 +29,7 @@ export function KpiBand({ budgetStats, globalStats }: KpiBandProps) {
             balance < 0 ? "text-bad" : "text-ok",
           )}
         >
-          {signedEuro0.format(balance)}
+          {signedEuro.format(balance)}
         </div>
       </div>
 
@@ -68,6 +69,7 @@ interface KpiBarProps {
 }
 
 function KpiBar({ value, budget, max, color, label }: KpiBarProps) {
+  const { euro } = useFormat();
   return (
     <div className="flex items-center gap-4">
       <span className="label-caps w-12 flex-none">{label}</span>
@@ -75,7 +77,7 @@ function KpiBar({ value, budget, max, color, label }: KpiBarProps) {
         <Gauge value={value} budget={budget} max={max} color={color} />
       </div>
       <span className="num text-amount text-muted-foreground w-30 flex-none text-right">
-        {euro0.format(value)}
+        {euro.format(value)}
       </span>
     </div>
   );

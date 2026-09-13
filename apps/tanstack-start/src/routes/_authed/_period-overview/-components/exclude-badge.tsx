@@ -15,7 +15,7 @@ import {
   DialogTitle,
 } from "@budget/ui/dialog";
 import { toast } from "@budget/ui/toast";
-import { signedEuro } from "~/lib/format";
+import { useFormat } from "~/lib/use-format";
 import { useTRPCClient } from "~/lib/trpc";
 
 /**
@@ -67,6 +67,7 @@ function ExcludeDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const { signedEuro } = useFormat();
   const router = useRouter();
   const trpcClient = useTRPCClient();
   const [pending, setPending] = useState(false);

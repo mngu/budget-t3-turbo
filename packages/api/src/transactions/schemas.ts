@@ -63,7 +63,7 @@ export const transactionRowSchema = z.object({
   counterparty: z.string().nullable(),
   bankName: z.string(),
   raw: z.object({
-    debtor: z.object({ name: z.string().optional() }).nullable().optional(),
+    debtor: z.object({ name: z.string().nullish() }).nullish(),
   }),
   // numeric : pg le rend en chaîne, et la table le formate elle-même.
   amount: z.string(),

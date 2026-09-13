@@ -1,28 +1,3 @@
-// Formateurs Intl partagés. Ils étaient redéclarés à l'identique d'un écran à
-// l'autre : un Intl.NumberFormat est coûteux à construire et doit de toute
-// façon rester cohérent partout.
-export const euro = new Intl.NumberFormat("fr-FR", {
-  style: "currency",
-  currency: "EUR",
-});
-
-// Arrondi à l'euro, pour les chiffres de tête des bandeaux : les centimes ne se
-// lisent pas à 30 ou 44 px et font sauter la colonne d'un mois à l'autre. Le
-// détail (lignes de liste, survol, table) garde `euro`, à deux décimales.
-export const euro0 = new Intl.NumberFormat("fr-FR", {
-  style: "currency",
-  currency: "EUR",
-  maximumFractionDigits: 0,
-});
-
-// Même arrondi, signé : un solde annonce son sens, un total de flux non.
-export const signedEuro0 = new Intl.NumberFormat("fr-FR", {
-  style: "currency",
-  currency: "EUR",
-  maximumFractionDigits: 0,
-  signDisplay: "exceptZero",
-});
-
 export const dateFr = new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium" });
 
 // Sans l'année : les écrans de la revue sont déjà bornés à un mois, la répéter
@@ -30,15 +5,6 @@ export const dateFr = new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium" });
 export const dayMonthFr = new Intl.DateTimeFormat("fr-FR", {
   day: "2-digit",
   month: "short",
-});
-
-// Montant signé : le « + » n'apparaît que sur les crédits, jamais sur zéro.
-// Les débits gardent leur signe naturel. C'est le format de la colonne Montant
-// de la table, où les deux sens se croisent ligne à ligne.
-export const signedEuro = new Intl.NumberFormat("fr-FR", {
-  style: "currency",
-  currency: "EUR",
-  signDisplay: "exceptZero",
 });
 
 // Les contreparties arrivent des banques en capitales (« CAMILLE DURAND »),

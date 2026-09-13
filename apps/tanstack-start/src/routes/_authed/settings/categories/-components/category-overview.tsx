@@ -33,7 +33,7 @@ import {
   useShadeCategoryColor,
   useCategoryColor,
 } from "~/lib/category-color";
-import { euro0 } from "~/lib/format";
+import { useFormat } from "~/lib/use-format";
 import { sumBy } from "~/lib/sum";
 import { useTRPCClient } from "~/lib/trpc";
 import { useRun } from "~/routes/_authed/settings/categories/-lib/use-run";
@@ -53,6 +53,7 @@ export function CategoryOverview({
   categoryOverview,
   stats,
 }: CategoryOverviewProps) {
+  const { euro } = useFormat();
   const trpcClient = useTRPCClient();
   const crud = useCategoryCrud();
   const preview = usePreview();
@@ -146,7 +147,7 @@ export function CategoryOverview({
                           {budgetDetailed ? (
                             <div className="flex flex-col items-end">
                               <span className={cn("num text-meta font-medium")}>
-                                {euro0.format(
+                                {euro.format(
                                   sumBy(
                                     childNodes,
                                     (child) => child.budgetAmount ?? 0,
