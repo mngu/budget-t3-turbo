@@ -1,0 +1,178 @@
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/breakdown-list.tsx
+  s_354a00006687b6::t_98e9581f3565c2 8,137
+apps/tanstack-start/src/routes/_authed/settings/categories/-components/category-delete-dialog.tsx
+  s_354a00006687b6::t_98e9581f3565c2 20,65
+apps/tanstack-start/src/routes/invitation.$invitationId.tsx
+  s_354a00006687b6::t_98e9581f3565c2 19,300,334,351
+packages/ui/src/alert-dialog.tsx
+  s_354a00006687b6::t_98e9581f3565c2 146-147,154,158
+packages/api/CLAUDE.md
+  s_354a00006687b6::t_98e9581f3565c2 15
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/category-selector/category-selector.tsx
+  s_354a00006687b6::t_98e9581f3565c2 20,50
+apps/tanstack-start/src/routes/_authed/_period-overview/-lib/use-set-category.ts
+  s_354a00006687b6::t_98e9581f3565c2 6,18,21-22,25-29
+apps/tanstack-start/src/lib/use-run.ts
+  s_354a00006687b6::t_98e9581f3565c2 1-32
+apps/tanstack-start/src/routes/_authed/settings/categories/-lib/use-preview.tsx
+  s_354a00006687b6::t_98e9581f3565c2 21,36,65-69
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/refine-bar.tsx
+  s_354a00006687b6::t_98e9581f3565c2 44,72-75,91-119,136,143-153
+packages/api/src/categorization/run.ts
+  s_354a00006687b6::t_98e9581f3565c2 17,124,126,128-134,181
+packages/api/src/router/categories.ts
+  s_354a00006687b6::t_98e9581f3565c2 12,45-46,55-57,68-70
+packages/ui/src/toggle.tsx
+  s_354a00006687b6::t_98e9581f3565c2 30
+apps/tanstack-start/src/lib/sync-toast.ts
+  s_354a00006687b6::t_98e9581f3565c2 3-5,7,29-55
+  s_354a00006687b6::t_4627e84ad8d73a 56
+packages/api/src/categorization/results.test.ts
+  s_354a00006687b6::t_98e9581f3565c2 6,24,31,48
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/transactions-table.tsx
+  s_354a00006687b6::t_98e9581f3565c2 6,115
+packages/api/src/schemas.ts
+  s_354a00006687b6::t_98e9581f3565c2 3
+apps/tanstack-start/src/routes/_authed/settings/categories/-components/transaction-preview-drawer.tsx
+  s_354a00006687b6::t_98e9581f3565c2 6,15,93-95,97-98,106-108
+apps/tanstack-start/src/routes/_authed/settings/categories/index.tsx
+  s_354a00006687b6::t_98e9581f3565c2 10,15,41-47
+packages/ui/src/badge.tsx
+  s_354a00006687b6::t_98e9581f3565c2 64
+packages/api/src/categories/budgets.ts
+  s_354a00006687b6::t_98e9581f3565c2 19
+apps/tanstack-start/src/env.ts
+  s_354a00006687b6::t_98e9581f3565c2 20
+packages/api/src/banking/fetch-transactions.ts
+  s_354a00006687b6::t_98e9581f3565c2 21
+packages/ui/src/theme.tsx
+  s_354a00006687b6::t_98e9581f3565c2 25,56
+packages/ui/src/three/segment-label.tsx
+  s_354a00006687b6::t_98e9581f3565c2 8
+packages/ui/src/field.tsx
+  s_354a00006687b6::t_98e9581f3565c2 73
+packages/api/src/pipeline.ts
+  s_354a00006687b6::t_98e9581f3565c2 53
+apps/tanstack-start/src/routes/_authed/settings/banques/-lib/consent.ts
+  s_354a00006687b6::t_98e9581f3565c2 3,6,21-22,96
+packages/api/src/trpc.ts
+  s_354a00006687b6::t_98e9581f3565c2 23,25,49,90
+packages/api/src/categories/mutations.ts
+  s_354a00006687b6::t_98e9581f3565c2 1-2,41-42,91-96,99,101-106
+packages/api/src/spaces/mutations.ts
+  s_354a00006687b6::t_98e9581f3565c2 13
+packages/ui/src/calendar.tsx
+  s_354a00006687b6::t_98e9581f3565c2 26,57,62,141,223
+packages/api/src/banking/domain.ts
+  s_354a00006687b6::t_98e9581f3565c2 4-5,33,65
+apps/tanstack-start/src/component/stat.tsx
+  s_354a00006687b6::t_98e9581f3565c2 4-7,9-12,18,24,27-41
+packages/ui/src/three/segment.tsx
+  s_354a00006687b6::t_98e9581f3565c2 8-12,70,76,90-91,105
+packages/api/src/transactions/queries.test.ts
+  s_354a00006687b6::t_98e9581f3565c2 7,41-59,61
+  s_354a00006687b6::t_a5611adc689ebb 60
+apps/tanstack-start/src/routes/_authed/settings/espaces/-components/space-card.tsx
+  s_354a00006687b6::t_98e9581f3565c2 33-34,120,125,140-154,196,254,256
+packages/ui/src/three/canvas-container.tsx
+  s_354a00006687b6::t_98e9581f3565c2 14,83-86,93,99,105,114,120,126,132,138,147,153,158,160,215,217
+apps/tanstack-start/src/routes/_authed/settings/espaces/index.tsx
+  s_354a00006687b6::t_98e9581f3565c2 10,27-28,31,77,91-92,94-105,110-111,115,143,168-171,292-303,312-319,352
+packages/api/src/categorization/results.ts
+  s_354a00006687b6::t_98e9581f3565c2 14-21
+apps/tanstack-start/src/routes/_authed/settings/banques/-components/onboarding.tsx
+  s_354a00006687b6::t_98e9581f3565c2 15,19,40-53
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/exclude-badge.tsx
+  s_354a00006687b6::t_98e9581f3565c2 17,19-20,73,78-93,107-108
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/overview-header.tsx
+  s_354a00006687b6::t_98e9581f3565c2 18-19,71-88
+apps/tanstack-start/src/routes/_authed/settings/banques/-components/sync-status.tsx
+  s_354a00006687b6::t_98e9581f3565c2 8,30
+apps/tanstack-start/src/routes/_authed/settings/banques/index.tsx
+  s_354a00006687b6::t_98e9581f3565c2 3,11,57,69-79
+packages/api/src/categorization/similar.ts
+  s_354a00006687b6::t_98e9581f3565c2 61-62,76-80
+packages/api/src/banking/settings.ts
+  s_354a00006687b6::t_98e9581f3565c2 93-100
+packages/ui/src/dropdown-menu.tsx
+  s_354a00006687b6::t_98e9581f3565c2 6
+packages/ui/src/three/tuning.ts
+  s_354a00006687b6::t_98e9581f3565c2 13-14,16,22,43
+apps/tanstack-start/src/lib/format.ts
+  s_354a00006687b6::t_98e9581f3565c2 1-2,5-9,44-48
+  s_354a00006687b6::t_248eee0c804885 49
+apps/tanstack-start/src/routes/_authed/_period-overview/index.tsx
+  s_354a00006687b6::t_98e9581f3565c2 10,88,116,132-133,154
+packages/ui/src/card.tsx
+  s_354a00006687b6::t_98e9581f3565c2 15,33
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/category-selector/category-path-picker.tsx
+  s_354a00006687b6::t_98e9581f3565c2 36
+apps/tanstack-start/src/routes/_authed/_period-overview/-lib/breakdown.ts
+  s_354a00006687b6::t_98e9581f3565c2 2
+apps/tanstack-start/CLAUDE.md
+  s_354a00006687b6::t_98e9581f3565c2 34-35
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/gauge.tsx
+  s_354a00006687b6::t_98e9581f3565c2 32
+apps/tanstack-start/src/routes/_authed/settings/categories/-components/category-overview.tsx
+  s_354a00006687b6::t_98e9581f3565c2 38-39,84,97,103,149
+apps/tanstack-start/src/lib/category-color.test.ts
+  s_354a00006687b6::t_98e9581f3565c2 12-14
+packages/api/src/categories/queries.ts
+  s_354a00006687b6::t_98e9581f3565c2 11-12,36
+packages/api/src/categorization/prompt.ts
+  s_354a00006687b6::t_98e9581f3565c2 35
+apps/tanstack-start/src/lib/trpc.ts
+  s_354a00006687b6::t_98e9581f3565c2 2
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/budget-gauge.tsx
+  s_354a00006687b6::t_98e9581f3565c2 22
+packages/api/src/transactions/queries.ts
+  s_354a00006687b6::t_98e9581f3565c2 35,44-95,342
+packages/api/src/spaces/queries.ts
+  s_354a00006687b6::t_98e9581f3565c2 4,50,185-187,387
+packages/db/src/schema.ts
+  s_354a00006687b6::t_98e9581f3565c2 44,149-150
+packages/ui/package.json
+  s_354a00006687b6::t_98e9581f3565c2 36
+apps/tanstack-start/src/component/app-header.tsx
+  s_354a00006687b6::t_98e9581f3565c2 107,137
+packages/auth/src/index.ts
+  s_354a00006687b6::t_98e9581f3565c2 29-33,49,61,64
+packages/ui/src/input-group.tsx
+  s_354a00006687b6::t_98e9581f3565c2 18,85
+apps/tanstack-start/src/component/bank-picker.tsx
+  s_354a00006687b6::t_98e9581f3565c2 3,21,58,80-81,98,103,113,149-150,157
+packages/db/src/index.ts
+  s_354a00006687b6::t_98e9581f3565c2 4
+packages/db/package.json
+  s_354a00006687b6::t_98e9581f3565c2 32
+CLAUDE.md
+  s_354a00006687b6::t_98e9581f3565c2 18
+apps/tanstack-start/src/routes/_authed/settings/banques/-components/revoke-dialog.tsx
+  s_354a00006687b6::t_98e9581f3565c2 19,72
+apps/tanstack-start/src/routes/_authed/settings/categories/-lib/use-category-crud.ts
+  s_354a00006687b6::t_98e9581f3565c2 5
+packages/api/src/transactions/import.ts
+  s_354a00006687b6::t_98e9581f3565c2 31-32
+packages/ui/src/progress.tsx
+  s_354a00006687b6::t_98e9581f3565c2 68,74
+apps/tanstack-start/src/routes/__root.tsx
+  s_354a00006687b6::t_98e9581f3565c2 48
+pnpm-lock.yaml
+  s_354a00006687b6::t_73e350b54b864d 8290,8292-8295,8297,10034-10035
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "de9af3e1bc91204fe47385a83a6be5838f047e42",
+  "prompts": {},
+  "sessions": {
+    "s_354a00006687b6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3ec1a0b9-4240-403a-8934-fbc3c3714db2",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
