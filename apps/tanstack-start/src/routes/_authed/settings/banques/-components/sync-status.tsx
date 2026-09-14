@@ -1,15 +1,11 @@
 "use client";
 
-import { useRouter } from "@tanstack/react-router";
 import { RefreshCwIcon } from "lucide-react";
-import { useState } from "react";
 
 import { cn } from "@budget/ui";
 import { Button } from "@budget/ui/button";
-import { toast } from "@budget/ui/toast";
 import { dateFr } from "~/lib/format";
-import { toastSyncOutcome } from "~/lib/sync-toast";
-import { useTRPCClient } from "~/lib/trpc";
+import { useSync } from "~/lib/sync-toast";
 
 /**
  * Écart assumé avec la maquette, qui affiche « Synchronisé à 07:12 · aujourd'hui ».
@@ -31,26 +27,7 @@ export function SyncStatus({
   totalTransactions: number;
   lastImportedAt: string | null;
 }) {
-  const router = useRouter();
-  const trpcClient = useTRPCClient();
-  const [state, setState] = useState<"idle" | "running" | "failed">("idle");
-
-  // sync.run touche aux sessions bancaires réelles et déclenche une SCA : ce
-  // bouton est le seul déclencheur, jamais un effet de bord d'autre chose.
-  const sync = async () => {
-    setState("running");
-    try {
-      const outcome = await trpcClient.sync.run.mutate();
-      await router.invalidate();
-      toastSyncOutcome(outcome);
-      setState("idle");
-    } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "Échec de la synchronisation.",
-      );
-      setState("failed");
-    }
-  };
+  const { sync, state } = useSync();
 
   const { value, meta, tone } = describe(
     state,

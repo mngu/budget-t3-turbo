@@ -58,12 +58,10 @@ export interface BankCodeParentCount {
 }
 
 // Garde les codes dont la catégorie parente dominante représente au moins
-// `minDominance` des transactions déjà catégorisées, sur au moins
-// `minSamples` observations. Pur : testable sans base.
+// BANK_CODE_MIN_DOMINANCE des transactions déjà catégorisées, sur au moins
+// BANK_CODE_MIN_SAMPLES observations. Pur : testable sans base.
 export function selectDiscriminativeBankCodes(
   rows: BankCodeParentCount[],
-  minSamples = BANK_CODE_MIN_SAMPLES,
-  minDominance = BANK_CODE_MIN_DOMINANCE,
 ): Set<string> {
   const totals = new Map<string, { total: number; top: number }>();
   for (const { bankCode, count } of rows) {
@@ -75,7 +73,11 @@ export function selectDiscriminativeBankCodes(
 
   const kept = new Set<string>();
   for (const [bankCode, { total, top }] of totals) {
-    if (total >= minSamples && top / total >= minDominance) kept.add(bankCode);
+    if (
+      total >= BANK_CODE_MIN_SAMPLES &&
+      top / total >= BANK_CODE_MIN_DOMINANCE
+    )
+      kept.add(bankCode);
   }
   return kept;
 }

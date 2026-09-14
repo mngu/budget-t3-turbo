@@ -16,7 +16,7 @@ import { categories } from "@budget/db/schema";
  * affiché est toujours la somme de ses enfants. L'aller-retour ne le rend donc
  * pas — les montants des enfants, eux, dorment en base et reviennent.
  *
- * Le `parent_id IS NULL` a la même raison qu'`updateCategoryIcon` : le drapeau
+ * Le `parent_id IS NULL` a la même raison qu'`updateCategoryIdentity` : le drapeau
  * n'a aucun sens sur une sous-catégorie, et posé là il lui effacerait son
  * montant.
  */

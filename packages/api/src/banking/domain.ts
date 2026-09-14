@@ -1,7 +1,8 @@
 // Logique métier Enable Banking pure — aucun accès DB ni réseau, testable en isolation.
 import { createSign } from "node:crypto";
 
-export const CONSENT_DAYS = 180;
+import { CONSENT_DAYS } from "./schemas";
+
 const CONSENT_WARNING_DAYS = 30;
 
 // JWT RS256 signé avec la clé privée de l'application (sans dépendance, via node:crypto).
@@ -29,7 +30,7 @@ export function makeJwt(
   return `${header}.${payload}.${signature}`;
 }
 
-// Validité demandée : 180 jours, bornée par le maximum_consent_validity de l'ASPSP.
+// Bornée par le maximum_consent_validity de l'ASPSP quand il l'annonce.
 export function clampValidUntil(
   maximumConsentValiditySeconds: number | null | undefined,
   now: Date,
@@ -61,7 +62,7 @@ export interface DiscoveredAccount {
 }
 
 // Les sessions Enable Banking renvoient les comptes sous forme de string (uid)
-// ou d'objet — même tolérance que l'ancien script CLI.
+// ou d'objet.
 export function parseSessionAccounts(
   raw: unknown[] | undefined,
 ): DiscoveredAccount[] {

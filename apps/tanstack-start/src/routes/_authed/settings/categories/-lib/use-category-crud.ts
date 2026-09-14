@@ -2,8 +2,7 @@ import { useState } from "react";
 
 import { toast } from "@budget/ui/toast";
 import { useTRPCClient } from "~/lib/trpc";
-
-import { useRun } from "./use-run";
+import { useRun } from "~/lib/use-run";
 
 export interface DeleteTarget {
   id: number;

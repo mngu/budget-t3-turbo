@@ -1,5 +1,3 @@
-import { cn } from "@budget/ui";
-
 interface GaugeProps {
   value: number;
   budget?: number | null;
@@ -31,7 +29,7 @@ export function Gauge({ max, value, budget, color }: GaugeProps) {
       />
       {over && over > 0 ? (
         <span
-          className={cn("bg-bad absolute inset-y-0 min-w-1 rounded-full")}
+          className="bg-bad absolute inset-y-0 min-w-1 rounded-full"
           style={{
             left: `calc(${valuePct} + 2px)`,
             width: `calc(${overPct} - 2px)`,

@@ -15,9 +15,6 @@
     "dev": "tsc",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
-  "dependencies": {
-    "zod": "catalog:"
-  },
   "devDependencies": {
     "@budget/tsconfig": "workspace:*",
     "typescript": "catalog:"

@@ -11,16 +11,14 @@ import { z } from "zod/v4";
 // échouer pour cette raison. `categorie: null` est la réponse légitime quand
 // aucune catégorie existante ne convient — sans cette échappatoire, le LLM est
 // contraint d'inventer un nom, qui serait rejeté silencieusement.
-export function buildCategorizationOutputSchema() {
-  return z.object({
-    resultats: z.array(
-      z.object({
-        id: z.number().int(),
-        categorie: z.string().nullable(),
-      }),
-    ),
-  });
-}
+export const categorizationOutputSchema = z.object({
+  resultats: z.array(
+    z.object({
+      id: z.number().int(),
+      categorie: z.string().nullable(),
+    }),
+  ),
+});
 
 // Court-circuit déterministe : si au moins 2 transactions similaires partagent
 // la contrepartie de la transaction à classer ET la même catégorie, on peut

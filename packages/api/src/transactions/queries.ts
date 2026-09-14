@@ -11,7 +11,6 @@ import { and, asc, eq, exists, inArray, or, sql } from "@budget/db";
 import { db } from "@budget/db/client";
 import { bankAccounts, transactions } from "@budget/db/schema";
 
-import { filterTransactions } from "../categories/queries";
 import {
   budgetStatsSchema,
   globalStatsSchema,
@@ -33,13 +32,65 @@ const filteredBankLabel = sql.raw(
 // ci-dessous. Le libellé reste celui du sélecteur de comptes
 // (`coalesce(display_name, bank_name)`), jamais `account_id` : deux comptes
 // partageant un libellé sont indissociables dans l'UI.
-export function bankFilter(bank: TransactionsSearch["bank"]) {
+function bankFilter(bank: TransactionsSearch["bank"]) {
   const banks = Array.isArray(bank) ? bank : bank ? [bank] : [];
   // Une liste vide vaut « tous les comptes », comme `undefined` — même lecture
   // que `selectedBanks` côté client.
   if (banks.length === 0) return sql``;
   const label = sql.raw("coalesce(ba.display_name, ba.bank_name)");
   return sql` AND ${inArray(label, banks)}`;
+}
+
+/**
+ * Le périmètre commun à toutes les lectures de transactions — et **le point de
+ * passage du cloisonnement** : `ba.organization_id` y est posé avant tout
+ * filtre venu de l'URL. La période, le sens, les comptes affichés, et par
+ * défaut jamais les lignes écartées à la main.
+ *
+ * Le **filtre de comptes** est ce qui a manqué à la première écriture, et rien
+ * à l'écran ne le réclame — sans lui la revue décrit tous les comptes sous une
+ * sélection, donc affiche des chiffres, juste faux.
+ *
+ * Il expose `filtered_transactions`, un CTE de composites (`(t).amount`,
+ * `(ba).bank_name`, `(c).name`, `(p).name`) : la requête qui suit en lit les
+ * champs entre parenthèses.
+ */
+export function filterTransactions(
+  organizationId: string,
+  query: TransactionsSearch,
+  // Le défaut doit être sûr : un agrégat écrit demain écarte les exclues sans
+  // y penser. Seuls le relevé et les pastilles de comptes (qui annoncent ce
+  // que le relevé affichera) les redemandent — c'est le seul endroit d'où les
+  // reprendre.
+  { includeExcluded = false } = {},
+) {
+  const { dateFrom, dateTo, direction } = query;
+  const dateCondition =
+    dateFrom && dateTo
+      ? sql`AND t.booking_date BETWEEN ${dateFrom} AND ${dateTo}`
+      : sql``;
+
+  // Ternaire explicite : `direction && sql\`…\`` glisse `undefined` dans le
+  // gabarit quand le sens n'est pas précisé.
+  const directionCondition = direction
+    ? sql`AND t.direction = ${direction}`
+    : sql``;
+
+  return sql`
+    WITH filtered_transactions AS (
+      SELECT t, ba, c, p
+      FROM transactions t
+      LEFT JOIN bank_accounts ba ON t.account_id = ba.id
+      LEFT JOIN categories c ON t.category_id = c.id
+      LEFT JOIN categories p ON c.parent_id = p.id
+      WHERE true
+        ${dateCondition}
+        ${directionCondition}
+      ${includeExcluded ? sql`` : sql`AND t.excluded = false`}
+      AND ba.organization_id = ${organizationId}
+      ${bankFilter(query.bank)}
+    )
+  `;
 }
 
 // Une catégorie **racine** (sans parent) est son propre poste : c'est elle qui
@@ -288,7 +339,7 @@ export async function setTransactionExcluded(
  * ciblée par un id venu du client — l'`UPDATE` n'a pas de `FROM bank_accounts` où
  * accrocher la condition, d'où le `EXISTS` corrélé.
  */
-export function ownedByOrganization(organizationId: string): SQL {
+function ownedByOrganization(organizationId: string): SQL {
   return exists(
     db
       .select({ one: sql`1` })

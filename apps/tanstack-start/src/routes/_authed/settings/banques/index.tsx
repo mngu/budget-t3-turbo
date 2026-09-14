@@ -1,6 +1,6 @@
 import type { ConnectionSummary } from "@budget/api";
 
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { UnlinkIcon } from "lucide-react";
 import { useState } from "react";
 
@@ -8,6 +8,7 @@ import { Button } from "@budget/ui/button";
 import { toast } from "@budget/ui/toast";
 import { sumBy } from "~/lib/sum";
 import { useTRPCClient } from "~/lib/trpc";
+import { useRun } from "~/lib/use-run";
 
 import { ConnectionCard } from "./-components/connection-card";
 import { ConsentAlert } from "./-components/consent-alert";
@@ -52,8 +53,8 @@ function BanquesAside() {
 
 function BanquesPage() {
   const { setup, connections, orphans } = Route.useLoaderData();
-  const router = useRouter();
   const trpcClient = useTRPCClient();
+  const run = useRun();
 
   const [revokeTarget, setRevokeTarget] = useState<ConnectionSummary | null>(
     null,
@@ -65,20 +66,17 @@ function BanquesPage() {
   const revoke = async () => {
     if (!revokeTarget) return;
     setRevoking(true);
-    try {
-      await trpcClient.connections.revoke.mutate({
-        connectionId: revokeTarget.id,
-      });
-      toast.success(`Accès à ${revokeTarget.aspspName} révoqué.`);
-      setRevokeTarget(null);
-      await router.invalidate();
-    } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "Échec de la révocation.",
-      );
-    } finally {
-      setRevoking(false);
-    }
+    const ok = await run(
+      () =>
+        trpcClient.connections.revoke.mutate({
+          connectionId: revokeTarget.id,
+        }),
+      "Échec de la révocation.",
+    );
+    setRevoking(false);
+    if (ok === null) return;
+    toast.success(`Accès à ${revokeTarget.aspspName} révoqué.`);
+    setRevokeTarget(null);
   };
 
   return (

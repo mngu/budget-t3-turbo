@@ -11,7 +11,7 @@ import { Leva, useControls } from "leva";
 import { useEffect, useRef } from "react";
 import { MathUtils, PerspectiveCamera } from "three";
 
-import { DEFAULT_TUNING, PRESET_1, TuningProvider } from "./tuning";
+import { DEFAULT_TUNING, TuningContext } from "./tuning";
 
 /** Position de repos, celle qu'occupait `PerspectiveCamera`. */
 const CAMERA: [number, number, number] = [0, -5, 20];
@@ -23,8 +23,6 @@ type CameraProps = {
   sway: number;
   fov: number;
 };
-
-const PRESET = PRESET_1 || DEFAULT_TUNING;
 
 /**
  * Remplace `OrbitControls` : la caméra suit le pointeur de quelques unités et
@@ -82,29 +80,29 @@ export function CanvasContainer({ children }: Props) {
   });
 
   const lights = useControls("Lumières", {
-    lightKey: { value: PRESET.lightKey, min: 0, max: 12, step: 0.1 },
-    lightRim: { value: PRESET.lightRim, min: 0, max: 12, step: 0.1 },
-    lightFill: { value: PRESET.lightFill, min: 0, max: 12, step: 0.1 },
-    lightFillColor: PRESET.lightFillColor,
+    lightKey: { value: 3.4, min: 0, max: 12, step: 0.1 },
+    lightRim: { value: 2.3, min: 0, max: 12, step: 0.1 },
+    lightFill: { value: 6.6, min: 0, max: 12, step: 0.1 },
+    lightFillColor: "#b8c8ff",
   });
 
   // Seuil à 0 : seul l'arc survolé (`<Select>`) entre dans la passe, il doit
   // rayonner en entier, dans sa teinte — pas seulement ses reflets.
   const bloom = useControls("Halo", {
     luminanceThreshold: {
-      value: PRESET.bloomLuminanceThreshold,
+      value: 0.12,
       min: 0,
       max: 1,
       step: 0.01,
     },
     radius: {
-      value: PRESET.bloomRadius,
+      value: 0.4,
       min: 0,
       max: 1,
       step: 0.01,
     },
     intensity: {
-      value: PRESET.bloomIntensity,
+      value: 0.45,
       min: 0,
       max: 5,
       step: 0.05,
@@ -113,31 +111,31 @@ export function CanvasContainer({ children }: Props) {
 
   const tuning = useControls("Matière", {
     materialRoughness: {
-      value: PRESET.materialRoughness,
+      value: DEFAULT_TUNING.materialRoughness,
       min: 0,
       max: 1,
       step: 0.01,
     },
     materialMetalness: {
-      value: PRESET.materialMetalness,
+      value: DEFAULT_TUNING.materialMetalness,
       min: 0,
       max: 1,
       step: 0.01,
     },
     materialClearcoat: {
-      value: PRESET.materialClearcoat,
+      value: DEFAULT_TUNING.materialClearcoat,
       min: 0,
       max: 1,
       step: 0.01,
     },
     materialClearcoatRoughness: {
-      value: PRESET.materialClearcoatRoughness,
+      value: DEFAULT_TUNING.materialClearcoatRoughness,
       min: 0,
       max: 1,
       step: 0.01,
     },
     materialIridescence: {
-      value: PRESET.materialIridescence,
+      value: DEFAULT_TUNING.materialIridescence,
       min: 0,
       max: 1,
       step: 0.01,
@@ -146,20 +144,20 @@ export function CanvasContainer({ children }: Props) {
 
   const labels = useControls("Intitulés", {
     labelBlend: {
-      value: PRESET.labelBlend,
+      value: DEFAULT_TUNING.labelBlend,
       min: 0,
       max: 1,
       step: 0.01,
     },
     labelSize: {
-      value: PRESET.labelSize,
+      value: DEFAULT_TUNING.labelSize,
       min: 6,
       max: 64,
       step: 1,
     },
-    labelLift: { value: PRESET.labelLift, min: 0, max: 6, step: 0.1 },
+    labelLift: { value: DEFAULT_TUNING.labelLift, min: 0, max: 6, step: 0.1 },
     labelRadius: {
-      value: PRESET.labelRadius,
+      value: DEFAULT_TUNING.labelRadius,
       min: 5,
       max: 12,
       step: 0.1,
@@ -214,16 +212,9 @@ export function CanvasContainer({ children }: Props) {
             silence. Le halo est l'équivalent 3D du jeton `--arc-glow-lit` de
             l'anneau SVG ; il n'y a pas de `--arc-glow` au repos. */}
         <Selection>
-          <TuningProvider
-            value={{
-              ...PRESET,
-              ...lights,
-              ...tuning,
-              ...labels,
-            }}
-          >
+          <TuningContext value={{ ...tuning, ...labels }}>
             {children}
-          </TuningProvider>
+          </TuningContext>
           <EffectComposer>
             <SelectiveBloom mipmapBlur {...bloom} />
           </EffectComposer>

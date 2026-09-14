@@ -1,19 +1,12 @@
 import type { ConnectionSummary } from "@budget/api";
 
+import { CONSENT_DAYS } from "@budget/api/schemas";
 import { dateFr } from "~/lib/format";
 
-// Miroir de `CONSENT_DAYS` (@budget/api, banking/domain.ts). Il ne peut pas être
-// importé : les imports app → @budget/api sont tous des `import type`, effacés à
-// la compilation, et faire entrer une *valeur* ferait suivre @budget/db/pg dans
-// le bundle client (même raison d'être que @budget/shared).
-const CONSENT_WINDOW_DAYS = 180;
-
-export type ConsentLevel = "ok" | "warning" | "expired" | "revoked";
+type ConsentLevel = "ok" | "warning" | "expired" | "revoked";
 
 export type ConsentTone = "ok" | "warn" | "bad";
 
-/** Tailwind ne génère que les classes écrites en toutes lettres : les rôles de
- *  couleur de la maquette se traduisent par une table, pas par interpolation. */
 /**
  * Variante de `Badge` / `Alert` correspondant à chaque ton. `bad` passe par
  * `destructive` : `--destructive` a exactement la valeur de `--bad`.
@@ -25,6 +18,8 @@ export const TONE_VARIANT: Record<ConsentTone, "ok" | "warn" | "destructive"> =
     bad: "destructive",
   };
 
+/** Tailwind ne génère que les classes écrites en toutes lettres : les rôles de
+ *  couleur de la maquette se traduisent par une table, pas par interpolation. */
 export const CONSENT_TONE: Record<
   ConsentTone,
   { text: string; bg: string; border: string; fill: string }
@@ -98,7 +93,7 @@ export function consentView(connection: ConnectionSummary): ConsentView {
     tone: level === "warning" ? "warn" : "ok",
     badge: `Expire dans ${daysLeft} j`,
     meta: `jusqu'au ${dateFr.format(until)}`,
-    pct: Math.min(100, Math.round((daysLeft / CONSENT_WINDOW_DAYS) * 100)),
+    pct: Math.min(100, Math.round((daysLeft / CONSENT_DAYS) * 100)),
   };
 }
 

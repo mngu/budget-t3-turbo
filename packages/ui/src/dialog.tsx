@@ -54,10 +54,6 @@ function DialogContent({
    * dialogues un peu longs de l'app, qui répétaient `gap-0 p-0`.
    */
   padded?: boolean;
-  /**
-   * La croix de fermeture. `CommandDialog` la masque : son champ de recherche
-   * occupe le coin, et Échap ferme déjà la palette.
-   */
   showCloseButton?: boolean;
 }) {
   return (

@@ -10,7 +10,7 @@ import type { SpaceRole } from "./queries";
 // better-auth est `setActive`, qui touche la session — donc côté client.
 import { randomUUID } from "node:crypto";
 
-import { sendInvitationEmail } from "@budget/auth";
+import { sendInvitationEmail, slugify } from "@budget/auth";
 import { and, eq, gt, ne, sql } from "@budget/db";
 import { db } from "@budget/db/client";
 import { invitation, member, organization, user } from "@budget/db/schema";
@@ -39,11 +39,6 @@ function cleanName(name: string): string {
   if (trimmed.length === 0) throw new Error("Le nom ne peut pas être vide.");
   return trimmed;
 }
-
-// Le slug n'est affiché nulle part : un suffixe aléatoire évite d'avoir à
-// gérer les collisions sur une valeur que personne ne lit.
-const slugify = (name: string) =>
-  `${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${randomUUID().slice(0, 8)}`;
 
 /** Espace partagé neuf — vide, c'est tout son propos (voir `shareSpace`). */
 export async function createSpace(
@@ -134,7 +129,6 @@ export async function inviteMember(
 ): Promise<void> {
   await assertOwner(userId, organizationId);
   const address = email.trim().toLowerCase();
-  if (!address.includes("@")) throw new Error("Adresse email invalide.");
 
   const [already] = await db
     .select({ id: member.id })

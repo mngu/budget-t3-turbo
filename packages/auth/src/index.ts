@@ -26,6 +26,11 @@ const MAGIC_LINK_MINUTES = 15;
  * Enable Banking de l'installation, reste hors espace.
  */
 
+// Le slug n'est affiché nulle part : le suffixe aléatoire évite d'avoir à
+// gérer les collisions sur une valeur que personne ne lit.
+export const slugify = (name: string) =>
+  `${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${randomUUID().slice(0, 8)}`;
+
 // Espace personnel créé à l'inscription. Sans lui, la session d'un nouvel
 // utilisateur n'aurait aucun espace actif et l'app entière lui répondrait
 // FORBIDDEN — y compris à un invité, dont l'adhésion n'est créée qu'à
@@ -41,9 +46,7 @@ async function createPersonalOrganization(newUser: {
     id: organizationId,
     name: label,
     isPersonal: true,
-    // Le slug n'est affiché nulle part : le suffixe aléatoire évite d'avoir à
-    // gérer les collisions sur une valeur que personne ne lit.
-    slug: `${label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${randomUUID().slice(0, 8)}`,
+    slug: slugify(label),
     createdAt: new Date(),
   });
   await db.insert(member).values({
@@ -55,12 +58,10 @@ async function createPersonalOrganization(newUser: {
   });
 }
 
-export function initAuth<
-  TExtraPlugins extends BetterAuthPlugin[] = [],
->(options: {
+export function initAuth(options: {
   baseUrl: string;
   secret: string | undefined;
-  extraPlugins?: TExtraPlugins;
+  extraPlugins?: BetterAuthPlugin[];
   trustedOrigins?: string[];
 }) {
   const config = {

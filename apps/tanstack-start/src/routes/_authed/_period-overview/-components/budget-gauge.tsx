@@ -19,7 +19,7 @@ export function BudgetGauge({
   iconName,
   max,
   color,
-  budget = null,
+  budget,
   valueSize = "md",
 }: BudgetGaugeProps) {
   const { euro } = useFormat();

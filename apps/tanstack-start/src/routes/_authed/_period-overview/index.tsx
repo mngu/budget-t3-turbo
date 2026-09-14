@@ -7,8 +7,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 
 import { NO_CATEGORY_NAME } from "@budget/api/schemas";
 import { CanvasContainer } from "@budget/ui/canvas-container";
-import { Segment } from "@budget/ui/segment";
-import { SegmentDetail } from "@budget/ui/segment-detail";
+import { Html, Segment } from "@budget/ui/segment";
 import { SegmentLabel } from "@budget/ui/segment-label";
 import { CategoryIcon } from "~/component/category-icon";
 import { useCategoryColor, useShadeCategoryColor } from "~/lib/category-color";
@@ -85,9 +84,8 @@ function RouteComponent() {
     });
     rotation += arc;
   }
-  const firstOverviewArcName = overviewArcs[0]?.name;
   const [currentHover, setCurrentHover] = useState<string | null>(
-    firstOverviewArcName ?? null,
+    overviewArcs[0]?.name ?? null,
   );
 
   return (
@@ -110,17 +108,12 @@ function RouteComponent() {
             onPointerOver={() => {
               setCurrentHover(labelName);
             }}
-            onPointerOut={() => {}}
             onClick={() =>
               name && name !== NO_CATEGORY_NAME && setSearch({ category: name })
             }
           >
             {shouldDisplayName && (
-              <SegmentLabel
-                angle={arc / 2}
-                color={resolvedColor}
-                text={labelName}
-              >
+              <SegmentLabel angle={arc / 2} color={resolvedColor}>
                 <div className="flex items-center gap-2">
                   <CategoryIcon
                     name={icon}
@@ -136,8 +129,8 @@ function RouteComponent() {
                 </div>
               </SegmentLabel>
             )}
-            {Boolean(currentHover) && labelName === currentHover && (
-              <SegmentDetail>
+            {labelName === currentHover && (
+              <Html center>
                 <div className="flex flex-col items-center justify-center gap-2">
                   <CategoryIcon
                     name={icon}
@@ -158,7 +151,7 @@ function RouteComponent() {
                   </div>
                   {selectedCategory && <RingBackButton onClick={back} />}
                 </div>
-              </SegmentDetail>
+              </Html>
             )}
           </Segment>
         );

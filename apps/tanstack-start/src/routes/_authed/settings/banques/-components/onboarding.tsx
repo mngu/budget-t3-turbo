@@ -2,7 +2,6 @@
 
 import type { SetupStatus } from "@budget/api";
 
-import { useRouter } from "@tanstack/react-router";
 import { KeyRoundIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -13,10 +12,11 @@ import { Input } from "@budget/ui/input";
 import { Spinner } from "@budget/ui/spinner";
 import { toast } from "@budget/ui/toast";
 import { useTRPCClient } from "~/lib/trpc";
+import { useRun } from "~/lib/use-run";
 
 export function Onboarding({ setup }: { setup: SetupStatus }) {
-  const router = useRouter();
   const trpcClient = useTRPCClient();
+  const run = useRun();
   const [applicationId, setApplicationId] = useState("");
   const [privateKeyPem, setPrivateKeyPem] = useState("");
   const [redirectUrl, setRedirectUrl] = useState(setup.redirectUrl ?? "");
@@ -37,23 +37,20 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
 
   const submit = async () => {
     setSaving(true);
-    try {
-      const status = await trpcClient.settings.save.mutate({
-        applicationId,
-        privateKeyPem,
-        redirectUrl,
-      });
-      if (status.configured)
-        toast.success("Configuration Enable Banking validée !");
-      else toast.warning(status.error ?? "Configuration incomplète.");
-      await router.invalidate();
-    } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "Échec de la sauvegarde.",
-      );
-    } finally {
-      setSaving(false);
-    }
+    const status = await run(
+      () =>
+        trpcClient.settings.save.mutate({
+          applicationId,
+          privateKeyPem,
+          redirectUrl,
+        }),
+      "Échec de la sauvegarde.",
+    );
+    setSaving(false);
+    if (!status) return;
+    if (status.configured)
+      toast.success("Configuration Enable Banking validée !");
+    else toast.warning(status.error ?? "Configuration incomplète.");
   };
 
   return (

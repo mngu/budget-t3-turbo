@@ -27,7 +27,6 @@ export function SearchInput({
   const [text, setText] = useState(urlValue);
   const debouncedText = useDebounce(text, delay);
 
-  // Pousse la valeur debouncée vers l'URL, une fois le debounce écoulé.
   useEffect(() => {
     if (debouncedText === urlValue) return;
     void navigate({

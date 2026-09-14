@@ -12,7 +12,7 @@ Détail du package API. Le `CLAUDE.md` de la racine garde la vue d'ensemble et l
   - `pipeline.ts` — `performSync` / `performImport`, cross-domaine. `lib/` ne garde que le transverse (`data-dir.ts`, `single-flight.ts`).
   - `schemas.ts` — **le point d'entrée `@budget/api/schemas`** : ré-exporte `transactions/schemas` et `categories/schemas`, rien d'autre. C'est le seul module du package que le navigateur importe comme valeur ; tout ce qui touche la base ou un SDK reste hors de lui (voir la racine).
 
-  Le sens des dépendances est `router/` → domaines → `lib/`, jamais l'inverse. Les services importent `db` directement (même singleton que `ctx.db`, voir `trpc.ts`). `lib/single-flight.ts` sérialise les opérations longues : clé `sync:${orgId}` (sync + import) et clé `categorize:${orgId}`.
+  Le sens des dépendances est `router/` → domaines → `lib/`, jamais l'inverse. Les services importent `db` directement (il n'est pas dans le contexte tRPC). `lib/single-flight.ts` sérialise les opérations longues : clé `sync:${orgId}` (sync + import) et clé `categorize:${orgId}`.
 
   `tsconfig.include` vaut `["src"]`, donc `tsc` émet `dist/index.d.ts` et `dist/schemas.d.ts` — les deux `exports.types` de `package.json` doivent suivre, sinon les apps ne résolvent plus les types.
 

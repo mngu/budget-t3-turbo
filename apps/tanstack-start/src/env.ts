@@ -12,26 +12,12 @@ export const env = createEnv({
       .enum(["development", "production", "test"])
       .default("development"),
   },
-  /**
-   * Specify your server-side environment variables schema here.
-   * This way you can ensure the app isn't built with invalid env vars.
-   */
   server: {
     POSTGRES_URL: z.url(),
     // `SITE_URL` vient d'`authEnv()` : les emails envoyés depuis @budget/auth
     // en ont besoin, et deux déclarations pourraient diverger.
   },
-
-  /**
-   * Specify your client-side environment variables schema here.
-   * For them to be exposed to the client, prefix them with `NEXT_PUBLIC_`.
-   */
-  client: {
-    // NEXT_PUBLIC_CLIENTVAR: z.string(),
-  },
-  /**
-   * Destructure all variables from `process.env` to make sure they aren't tree-shaken away.
-   */
+  client: {},
   runtimeEnv: process.env,
   // Voir `authEnv()` : une clé présente mais vide vaut absente.
   emptyStringAsUndefined: true,

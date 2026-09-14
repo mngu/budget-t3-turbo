@@ -24,12 +24,9 @@
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
     "ui-add": "turbo run ui-add",
-    "android": "expo run:android",
-    "ios": "expo run:ios",
     "knip": "knip"
   },
   "devDependencies": {
-    "@turbo/gen": "^2.5.8",
     "@types/node": "catalog:",
     "dotenv-cli": "^10.0.0",
     "eslint-plugin-turbo": "^2.5.8",

@@ -9,8 +9,7 @@ import {
   createCategory,
   removeCategory,
   renameCategory,
-  updateCategoryColor,
-  updateCategoryIcon,
+  updateCategoryIdentity,
 } from "../categories/mutations";
 import { categoriesOverview } from "../categories/queries";
 import { transactionsSearchSchema } from "../transactions/schemas";
@@ -43,8 +42,8 @@ export const categoriesRouter = {
       renameCategory(ctx.organizationId, input.id, input.name),
     ),
 
-  // La palette fermée est contrainte ici, à l'entrée ; la règle « seule une
-  // catégorie parente a une couleur propre » vit dans updateCategoryColor.
+  // Palette et jeu d'icônes fermés sont contraints ici, à l'entrée ; la règle
+  // « seule une parente a une identité propre » vit dans updateCategoryIdentity.
   updateColor: orgProcedure
     .input(
       z.object({
@@ -53,12 +52,11 @@ export const categoriesRouter = {
       }),
     )
     .mutation(({ ctx, input }) =>
-      updateCategoryColor(ctx.organizationId, input.id, input.color),
+      updateCategoryIdentity(ctx.organizationId, input.id, {
+        color: input.color,
+      }),
     ),
 
-  // Même forme que updateColor : jeu fermé contraint à l'entrée, règle
-  // « seule une parente a une icône » dans updateCategoryIcon. `null` =
-  // retour à l'état sans icône.
   updateIcon: orgProcedure
     .input(
       z.object({
@@ -67,7 +65,9 @@ export const categoriesRouter = {
       }),
     )
     .mutation(({ ctx, input }) =>
-      updateCategoryIcon(ctx.organizationId, input.id, input.icon),
+      updateCategoryIdentity(ctx.organizationId, input.id, {
+        icon: input.icon,
+      }),
     ),
 
   remove: orgProcedure

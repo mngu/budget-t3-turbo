@@ -5,17 +5,13 @@ import { useMemo } from "react";
 import { Color } from "three";
 
 import { useTheme } from "../theme";
-import { useTuning } from "./tuning";
-
-const RING_RADIUS = 5;
-const TUBE_RADIUS = 1;
+import { RING_RADIUS, TUBE_RADIUS, useTuning } from "./tuning";
 
 type Props = {
   /** Milieu de l'arc, dans le repère local du segment. */
   angle: number;
   /** Teinte de la catégorie, déjà passée par `resolveCategoryColor`. */
   color: string;
-  text: string;
   children?: ReactNode;
 };
 

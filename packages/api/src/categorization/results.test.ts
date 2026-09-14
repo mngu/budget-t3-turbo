@@ -3,7 +3,7 @@ import type { SimilarTxn } from "./similar";
 import { describe, expect, it } from "vitest";
 
 import {
-  buildCategorizationOutputSchema,
+  categorizationOutputSchema,
   partitionResults,
   resolveShortcut,
 } from "./results";
@@ -21,14 +21,14 @@ const similarTxn = (overrides: Partial<SimilarTxn> = {}): SimilarTxn => ({
   ...overrides,
 });
 
-describe("buildCategorizationOutputSchema", () => {
+describe("categorizationOutputSchema", () => {
   it("valide la forme (id + categorie) sans imposer l'énumération des catégories connues", () => {
     // Le filtrage des catégories inconnues (ex. si le LLM invente ou répète
     // un nom de catégorie qui n'existe plus après un remplacement) est
     // délégué à partitionResults, pas au schéma — un z.enum() ici ferait
     // planter le parsing structured-output de tout le lot au lieu d'ignorer
     // juste la transaction concernée (voir partitionResults ci-dessous).
-    const schema = buildCategorizationOutputSchema();
+    const schema = categorizationOutputSchema;
     expect(
       schema.safeParse({ resultats: [{ id: 1, categorie: "Alimentation" }] })
         .success,
@@ -45,7 +45,7 @@ describe("buildCategorizationOutputSchema", () => {
 
   it("accepte categorie: null (aucune catégorie ne convient)", () => {
     expect(
-      buildCategorizationOutputSchema().safeParse({
+      categorizationOutputSchema.safeParse({
         resultats: [{ id: 1, categorie: null }],
       }).success,
     ).toBe(true);

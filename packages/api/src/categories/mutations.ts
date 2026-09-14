@@ -1,6 +1,5 @@
-// Écritures sur l'arborescence de catégories (hors application de suggestions,
-// voir suggestions/apply.ts).
-import { and, eq, inArray } from "@budget/db";
+// Écritures sur l'arborescence de catégories.
+import { and, eq, inArray, isNull } from "@budget/db";
 import { db } from "@budget/db/client";
 import { categories, transactions } from "@budget/db/schema";
 import { FALLBACK_CATEGORY_COLOR } from "@budget/shared";
@@ -39,10 +38,8 @@ async function assertNameAvailable(
   }
 }
 
-// Crée une catégorie (parentId null) ou sous-catégorie (parentId d'un parent
-// existant). Couleur par défaut FALLBACK_CATEGORY_COLOR pour un parent —
-// jamais pour un enfant, qui hérite visuellement de son parent (voir
-// transactions/queries.ts, breakdownByCategories).
+// Couleur par défaut pour un parent seulement : une sous-catégorie hérite
+// visuellement de son parent et n'a jamais de couleur propre.
 export async function createCategory(
   organizationId: string,
   name: string,
@@ -91,46 +88,22 @@ export async function renameCategory(
     .where(inOrg(organizationId, id));
 }
 
-// Change la couleur d'une catégorie PARENTE uniquement — une sous-catégorie
-// n'a jamais de couleur propre, elle hérite toujours visuellement de son parent
-// (voir transactions/queries.ts, breakdownByCategories, qui ne regarde même pas la couleur
-// d'une sous-catégorie). La palette fermée est validée par le routeur.
-export async function updateCategoryColor(
+// Couleur et icône sont l'identité d'une catégorie PARENTE : une sous-catégorie
+// hérite visuellement de son parent et n'en a jamais en propre, d'où le
+// `isNull(parentId)` dans le `WHERE`. Un `UPDATE` à zéro ligne ne lève pas,
+// d'où le `returning`. Palette et jeu d'icônes sont validés par le routeur ;
+// `icon: null` remet la pastille creuse (la couleur travaille seule).
+export async function updateCategoryIdentity(
   organizationId: string,
   id: number,
-  color: string,
+  identity: { color: string } | { icon: string | null },
 ): Promise<void> {
-  const [category] = await db
-    .select({ parentId: categories.parentId })
-    .from(categories)
-    .where(inOrg(organizationId, id));
-  if (!category) throw new Error("Catégorie introuvable.");
-  if (category.parentId !== null) {
-    throw new Error("Seules les catégories parentes ont une couleur propre.");
-  }
-
-  await db.update(categories).set({ color }).where(inOrg(organizationId, id));
-}
-
-// Même règle que updateCategoryColor : l'icône fait partie de l'identité d'une
-// catégorie PARENTE, une sous-catégorie n'en a jamais. `null` remet la
-// catégorie dans l'état « sans icône » (pastille creuse, la couleur travaille
-// seule). Le jeu fermé est validé par le routeur.
-export async function updateCategoryIcon(
-  organizationId: string,
-  id: number,
-  icon: string | null,
-): Promise<void> {
-  const [category] = await db
-    .select({ parentId: categories.parentId })
-    .from(categories)
-    .where(inOrg(organizationId, id));
-  if (!category) throw new Error("Catégorie introuvable.");
-  if (category.parentId !== null) {
-    throw new Error("Seules les catégories parentes ont une icône propre.");
-  }
-
-  await db.update(categories).set({ icon }).where(inOrg(organizationId, id));
+  const updated = await db
+    .update(categories)
+    .set(identity)
+    .where(and(inOrg(organizationId, id), isNull(categories.parentId)))
+    .returning({ id: categories.id });
+  if (updated.length === 0) throw new Error("Catégorie parente introuvable.");
 }
 
 // Supprime une catégorie (et, pour un parent, ses sous-catégories en cascade)

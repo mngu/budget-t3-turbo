@@ -5,14 +5,14 @@ import { useCursor } from "@react-three/drei";
 import { Select } from "@react-three/postprocessing";
 import { useState } from "react";
 
-import { useTuning } from "./tuning";
+import { RING_RADIUS, TUBE_RADIUS, useTuning } from "./tuning";
 
-const RING_RADIUS = 5;
-const TUBE_RADIUS = 1;
+// L'app n'a pas drei en dépendance : c'est par ici qu'elle pose une carte
+// HTML au centre de l'anneau.
+export { Html } from "@react-three/drei";
+
 /** Partagé par le tore et ses bouchons : voir plus bas. */
 const RADIAL_SEGMENTS = 24;
-/** Jour angulaire entre deux arcs, rogné sur les arcs trop courts pour l'absorber. */
-const GAP = 0.0;
 
 // Aucun prop n'est reversé dans le `mesh` : ce qu'un plugin de dev injecte
 // dans `<Segment>` (`data-insp-path`) ferait tomber R3F. Voir vite.config.ts.
@@ -22,7 +22,6 @@ type SegmentProps = {
   rotationZ: number;
   children?: ReactNode;
   onPointerOver?: () => void;
-  onPointerOut?: () => void;
   onClick?: () => void;
 };
 
@@ -49,7 +48,6 @@ export function Segment({
   rotationZ,
   children,
   onPointerOver,
-  onPointerOut,
   onClick,
 }: SegmentProps) {
   const [hovered, setHovered] = useState(false);
@@ -60,9 +58,6 @@ export function Segment({
   });
   useCursor(hovered);
 
-  const gap = Math.min(GAP, arc * 0.3);
-  const drawn = arc - gap;
-
   return (
     // `Select` inscrit le tube, ses bouchons et le trait de l'intitulé dans le
     // `SelectiveBloom` du composeur : le halo se dessine dans la teinte de
@@ -72,16 +67,13 @@ export function Segment({
         scale={scale}
         rotation-x={rotateX}
         rotation-y={rotateY}
-        rotation-z={rotationZ + gap / 2}
+        rotation-z={rotationZ}
         onPointerOver={(e) => {
           e.stopPropagation();
           setHovered(true);
           onPointerOver?.();
         }}
-        onPointerOut={() => {
-          setHovered(false);
-          onPointerOut?.();
-        }}
+        onPointerOut={() => setHovered(false)}
         // Comme pour le survol : sans `stopPropagation`, R3F livre le clic à
         // chaque arc traversé par le rayon, et c'est le dernier — celui de
         // derrière — qui écrirait l'URL.
@@ -95,8 +87,8 @@ export function Segment({
             RING_RADIUS,
             TUBE_RADIUS,
             RADIAL_SEGMENTS,
-            Math.max(8, Math.ceil(drawn * 32)),
-            drawn,
+            Math.max(8, Math.ceil(arc * 32)),
+            arc,
           ]}
         />
         <SegmentMaterial color={color} />
@@ -110,7 +102,7 @@ export function Segment({
           Le `group` porte la rotation autour de l'anneau et le `mesh` celle du
           disque : trois rotations dans un seul Euler s'appliqueraient dans
           l'ordre Rx·Ry·Rz, pas dans celui qu'on lit. */}
-        {[0, drawn].map((angle, i) => (
+        {[0, arc].map((angle, i) => (
           <group key={angle} rotation-z={angle}>
             <mesh
               position={[RING_RADIUS, 0, 0]}

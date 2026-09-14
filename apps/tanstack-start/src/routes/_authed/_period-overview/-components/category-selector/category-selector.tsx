@@ -17,7 +17,7 @@ type CategorySelectorProps = {
   /** Sélection courante, **détenue par l'appelant** : ici l'URL. Pas d'état
    *  local qui la double — il ne saurait rien du « ✕ » ni d'un retour arrière. */
   value?: SelectedCategory;
-  onChange?: (selectedCategory?: SelectedCategory) => void;
+  onChange: (selectedCategory?: SelectedCategory) => void;
 };
 
 export function CategorySelector({ value, onChange }: CategorySelectorProps) {
@@ -47,7 +47,7 @@ export function CategorySelector({ value, onChange }: CategorySelectorProps) {
         open={isOpen}
         onOpenChange={setIsOpen}
         current={value}
-        onPick={(category) => onChange?.(category)}
+        onPick={onChange}
       />
     </>
   );

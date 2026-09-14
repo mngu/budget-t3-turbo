@@ -10,8 +10,6 @@ export class EbApiError extends Error {
   constructor(
     public readonly status: number,
     message: string,
-    // Non documenté par Enable Banking, mais relayé s'il apparaît un jour.
-    public readonly retryAfter: string | null = null,
   ) {
     super(message);
   }
@@ -67,7 +65,6 @@ export async function ebApi(
       `${init.method ?? "GET"} ${path} → ${resp.status} ${await resp.text()}${
         retryAfter ? ` (Retry-After : ${retryAfter})` : ""
       }`,
-      retryAfter,
     );
   }
   return resp.json();

@@ -16,6 +16,7 @@ import { Input } from "@budget/ui/input";
 import { Spinner } from "@budget/ui/spinner";
 import { toast } from "@budget/ui/toast";
 import { authClient } from "~/auth/client";
+import { Stat } from "~/component/stat";
 import { useTRPCClient } from "~/lib/trpc";
 
 /**
@@ -296,7 +297,7 @@ function Shell({
   stats?: { label: string; value: number }[];
   note?: string;
   footnote: string;
-  primary?: { label: string; onClick: () => void; disabled?: boolean };
+  primary?: { label: string; onClick: () => void };
   secondary?: { label: string; onClick: () => void };
   pending?: boolean;
   children?: React.ReactNode;
@@ -330,13 +331,7 @@ function Shell({
           {stats && (
             <div className="border-border bg-surface-2 grid grid-cols-3 border-b">
               {stats.map((stat) => (
-                <div
-                  key={stat.label}
-                  className="border-border border-r px-4 py-2.5 last:border-r-0"
-                >
-                  <div className="num text-body font-medium">{stat.value}</div>
-                  <div className="label-caps mt-0.5">{stat.label}</div>
-                </div>
+                <Stat key={stat.label} tile {...stat} />
               ))}
             </div>
           )}
@@ -353,10 +348,7 @@ function Shell({
               </Button>
             )}
             {primary && (
-              <Button
-                disabled={primary.disabled ?? pending}
-                onClick={primary.onClick}
-              >
+              <Button disabled={pending} onClick={primary.onClick}>
                 {pending && <Spinner />}
                 {primary.label}
               </Button>

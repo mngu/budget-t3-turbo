@@ -1,7 +1,7 @@
 // Lectures de l'écran « Espaces » : mes espaces, leurs membres, leurs
 // invitations. Un espace est une `organization` (plugin better-auth) ; voir
 // CLAUDE.md, section « Espaces ».
-import { and, count, eq, gt, inArray, isNull, or, sql } from "@budget/db";
+import { and, count, eq, gt, inArray, sql } from "@budget/db";
 import { db } from "@budget/db/client";
 import {
   bankAccounts,
@@ -47,7 +47,7 @@ export interface SpaceInvitation {
  * appartient à la personne qui s'est authentifiée à la banque : sur un espace
  * partagé, tout le monde voit les opérations mais elle seule peut le refaire.
  */
-export interface SpaceConsent {
+interface SpaceConsent {
   bankName: string;
   authorizedBy: string;
 }
@@ -182,19 +182,9 @@ export async function listSpaces(
         ),
     ]);
 
-  const byOrg = <T extends { organizationId: string }>(rows: T[]) => {
-    const map = new Map<string, T[]>();
-    for (const row of rows) {
-      map.set(row.organizationId, [
-        ...(map.get(row.organizationId) ?? []),
-        row,
-      ]);
-    }
-    return map;
-  };
-  const membersByOrg = byOrg(members);
-  const invitesByOrg = byOrg(invites);
-  const consentsByOrg = byOrg(consents);
+  const membersByOrg = Map.groupBy(members, (m) => m.organizationId);
+  const invitesByOrg = Map.groupBy(invites, (i) => i.organizationId);
+  const consentsByOrg = Map.groupBy(consents, (c) => c.organizationId);
   const countOf = (rows: { organizationId: string; n: number }[], id: string) =>
     rows.find((r) => r.organizationId === id)?.n ?? 0;
 
@@ -394,9 +384,7 @@ export async function hasRole(
       and(
         eq(member.organizationId, organizationId),
         eq(member.userId, userId),
-        role === undefined
-          ? or(isNull(member.role), sql`true`)
-          : eq(member.role, role),
+        role ? eq(member.role, role) : undefined,
       ),
     );
   return row !== undefined;

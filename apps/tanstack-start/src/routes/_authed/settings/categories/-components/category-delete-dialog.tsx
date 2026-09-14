@@ -17,6 +17,7 @@ import {
 } from "@budget/ui/alert-dialog";
 import { Badge } from "@budget/ui/badge";
 import { Spinner } from "@budget/ui/spinner";
+import { DialogFacts } from "~/component/dialog-facts";
 
 export function CategoryDeleteDialog({
   target,
@@ -61,23 +62,7 @@ export function CategoryDeleteDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        {facts.length > 0 && (
-          <div className="flex flex-col gap-2">
-            {facts.map((fact) => (
-              <div
-                key={fact.label}
-                className="grid grid-cols-[56px_minmax(0,1fr)] items-baseline gap-2.5"
-              >
-                <span className="num text-destructive text-body text-right font-medium">
-                  {fact.n}
-                </span>
-                <span className="text-muted-foreground text-control">
-                  {fact.label}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
+        {facts.length > 0 && <DialogFacts facts={facts} />}
 
         {target && target.childNames.length > 0 && (
           <div className="flex flex-wrap gap-1.5">

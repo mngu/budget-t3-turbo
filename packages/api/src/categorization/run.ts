@@ -14,7 +14,7 @@ import { bankAccounts, categories, transactions } from "@budget/db/schema";
 import { withSingleFlight } from "../lib/single-flight";
 import { buildFewShotUserMessage, buildSystemPrompt } from "./prompt";
 import {
-  buildCategorizationOutputSchema,
+  categorizationOutputSchema,
   partitionResults,
   resolveShortcut,
 } from "./results";
@@ -70,7 +70,6 @@ async function runCategorization(
   const categoryNames = categoryRows.map((c) => c.name);
   const categoryIdByName = new Map(categoryRows.map((c) => [c.name, c.id]));
   const systemPrompt = buildSystemPrompt(categoryNames);
-  const categorizationOutputSchema = buildCategorizationOutputSchema();
 
   const rows: TxnForLlm[] = await db
     .select({
@@ -122,20 +121,17 @@ async function runCategorization(
   for (const txn of rows) {
     const similars = similarsByTxnId.get(txn.id) ?? [];
     const shortcut = resolveShortcut(similars, txn.counterparty);
-    if (shortcut !== null) {
-      const categoryId = categoryIdByName.get(shortcut);
-      if (categoryId !== undefined) {
-        await db
-          .update(transactions)
-          .set({ categoryId, categorySource: "auto" as const })
-          .where(
-            and(eq(transactions.id, txn.id), isNull(transactions.categoryId)),
-          );
-        categorized++;
-      }
-    } else {
+    if (shortcut === null) {
       llmRows.push(txn);
+      continue;
     }
+    const categoryId = categoryIdByName.get(shortcut);
+    if (categoryId === undefined) continue;
+    await db
+      .update(transactions)
+      .set({ categoryId, categorySource: "auto" as const })
+      .where(and(eq(transactions.id, txn.id), isNull(transactions.categoryId)));
+    categorized++;
   }
   if (categorized > 0) {
     console.log(`   ${categorized} court-circuitées (déterministe)`);
@@ -182,7 +178,7 @@ async function runCategorization(
 
         if (declined.length > 0) {
           console.log(
-            `   ${declined.length} laissées sans catégorie (aucune catégorie existante ne convient) — lancez l'analyse de suggestions depuis /categories.`,
+            `   ${declined.length} laissées sans catégorie (aucune catégorie existante ne convient)`,
           );
         }
         // Ne jamais avaler ce cas en silence : une catégorie inconnue renvoyée

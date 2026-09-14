@@ -12,7 +12,6 @@ import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
 import { ThemeProvider } from "@budget/ui/theme";
 import { Toaster } from "@budget/ui/toast";
-import { TooltipProvider } from "@budget/ui/tooltip";
 
 import appCss from "~/styles.css?url";
 
@@ -46,9 +45,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           <HeadContent />
         </head>
         <body className="bg-background text-foreground min-h-screen font-sans antialiased">
-          {/* Monté une fois : le provider partage le délai et n'ouvre qu'une
-              infobulle à la fois. */}
-          <TooltipProvider>{children}</TooltipProvider>
+          {children}
           <Toaster />
           <TanStackRouterDevtools position="bottom-right" />
           <Scripts />

@@ -3,7 +3,7 @@
 import type { TransactionRow } from "@budget/api";
 
 import { cn } from "@budget/ui";
-import { dayMonthFr, titleCase } from "~/lib/format";
+import { dayMonthFr, signedAmount, titleCase } from "~/lib/format";
 import { useFormat } from "~/lib/use-format";
 import { useRevueSearch } from "~/lib/use-revue-search";
 
@@ -112,7 +112,7 @@ function Row({
   repeatsDate: boolean;
 }) {
   const { signedEuro } = useFormat();
-  const signed = (row.direction === "debit" ? -1 : 1) * Number(row.amount);
+  const signed = signedAmount(row);
   const debtor = row.raw.debtor?.name ?? row.counterparty;
 
   return (

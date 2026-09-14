@@ -2,7 +2,6 @@
 
 import type { TransactionRow } from "@budget/api";
 
-import { useRouter } from "@tanstack/react-router";
 import { EyeOffIcon } from "lucide-react";
 import { useState } from "react";
 
@@ -15,8 +14,10 @@ import {
   DialogTitle,
 } from "@budget/ui/dialog";
 import { toast } from "@budget/ui/toast";
-import { useFormat } from "~/lib/use-format";
+import { signedAmount } from "~/lib/format";
 import { useTRPCClient } from "~/lib/trpc";
+import { useFormat } from "~/lib/use-format";
+import { useRun } from "~/lib/use-run";
 
 /**
  * Exclusion manuelle d'une transaction, posée dans le même emplacement que
@@ -68,34 +69,29 @@ function ExcludeDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   const { signedEuro } = useFormat();
-  const router = useRouter();
   const trpcClient = useTRPCClient();
+  const run = useRun();
   const [pending, setPending] = useState(false);
 
   const toggle = async () => {
     setPending(true);
-    try {
-      await trpcClient.transactions.setExcluded.mutate({
-        id: row.id,
-        excluded: !row.excluded,
-      });
-      await router.invalidate();
-      toast.success(
-        row.excluded
-          ? "La ligne compte de nouveau dans les analyses."
-          : "La ligne est écartée des analyses.",
-      );
-      onOpenChange(false);
-    } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "Échec de la mise à jour.",
-      );
-    } finally {
-      setPending(false);
-    }
+    const ok = await run(
+      () =>
+        trpcClient.transactions.setExcluded.mutate({
+          id: row.id,
+          excluded: !row.excluded,
+        }),
+      "Échec de la mise à jour.",
+    );
+    setPending(false);
+    if (ok === null) return;
+    toast.success(
+      row.excluded
+        ? "La ligne compte de nouveau dans les analyses."
+        : "La ligne est écartée des analyses.",
+    );
+    onOpenChange(false);
   };
-
-  const signed = (row.direction === "debit" ? -1 : 1) * Number(row.amount);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -108,8 +104,8 @@ function ExcludeDialog({
         </DialogTitle>
         <div className="text-control p-3.5">
           <p className="text-muted-foreground">
-            <span className="num">{signedEuro.format(signed)}</span> ·{" "}
-            {row.description}
+            <span className="num">{signedEuro.format(signedAmount(row))}</span>{" "}
+            · {row.description}
           </p>
           <p className="text-subtle text-control mt-2">
             {row.excluded

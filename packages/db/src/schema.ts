@@ -41,7 +41,7 @@ export const appSettings = pgTable("app_settings", {
     .defaultNow(),
 });
 
-// Une session PSD2 par banque — remplace data/session-*.json.
+// Une session PSD2 par banque.
 export const bankConnections = pgTable("bank_connections", {
   id: serial("id").primaryKey(),
   organizationId: organizationId(),
@@ -146,8 +146,8 @@ export const categories = pgTable(
     ),
     // Le nom est unique *dans l'espace*, plus sur toute la table. Deux espaces
     // ont chacun leur « Alimentation » sans se voir. Tout ce qui résout une
-    // catégorie par son nom (`upsertCategory`, `setTransactionCategory`, le
-    // filtre `category` de l'URL) doit donc porter l'espace, sans quoi la
+    // catégorie par son nom (`createCategory`, `renameCategory`, le filtre
+    // `category` de l'URL) doit donc porter l'espace, sans quoi la
     // résolution devient ambiguë.
     uniqueIndex("categories_org_name_uq").on(t.organizationId, t.name),
   ],
@@ -199,12 +199,7 @@ export const transactions = pgTable(
   ],
 );
 
-export type NewBankAccount = typeof bankAccounts.$inferInsert;
 export type NewTransaction = typeof transactions.$inferInsert;
-export type NewCategory = typeof categories.$inferInsert;
-export type AppSettingsRow = typeof appSettings.$inferSelect;
-export type BankConnection = typeof bankConnections.$inferSelect;
-export type AuthRequest = typeof authRequests.$inferSelect;
 export type Transaction = typeof transactions.$inferSelect;
 
 export * from "./auth-schema";

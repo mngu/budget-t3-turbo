@@ -8,61 +8,8 @@ import type {
 import { sql } from "@budget/db";
 import { db } from "@budget/db/client";
 
-import { bankFilter } from "../transactions/queries";
-import { NO_CATEGORY_NAME } from "./schemas";
-import { categoryOverviewSchema } from "./schemas";
-
-/**
- * Le périmètre commun à toutes les lectures de transactions — et **le point de
- * passage du cloisonnement** : `ba.organization_id` y est posé avant tout
- * filtre venu de l'URL. La période, le sens, les comptes affichés, et par
- * défaut jamais les lignes écartées à la main.
- *
- * Le **filtre de comptes** est ce qui a manqué à la première écriture, et rien
- * à l'écran ne le réclame — sans lui la revue décrit tous les comptes sous une
- * sélection, donc affiche des chiffres, juste faux.
- *
- * Il expose `filtered_transactions`, un CTE de composites (`(t).amount`,
- * `(ba).bank_name`, `(c).name`, `(p).name`) : la requête qui suit en lit les
- * champs entre parenthèses.
- */
-export function filterTransactions(
-  organizationId: string,
-  query: TransactionsSearch,
-  // Le défaut doit être sûr : un agrégat écrit demain écarte les exclues sans
-  // y penser. Seuls le relevé et les pastilles de comptes (qui annoncent ce
-  // que le relevé affichera) les redemandent — c'est le seul endroit d'où les
-  // reprendre.
-  { includeExcluded = false } = {},
-) {
-  const { dateFrom, dateTo, direction } = query;
-  const dateCondition =
-    dateFrom && dateTo
-      ? sql`AND t.booking_date BETWEEN ${dateFrom} AND ${dateTo}`
-      : sql``;
-
-  // Ternaire explicite : `direction && sql\`…\`` glisse `undefined` dans le
-  // gabarit quand le sens n'est pas précisé.
-  const directionCondition = direction
-    ? sql`AND t.direction = ${direction}`
-    : sql``;
-
-  return sql`
-    WITH filtered_transactions AS (
-      SELECT t, ba, c, p
-      FROM transactions t
-      LEFT JOIN bank_accounts ba ON t.account_id = ba.id
-      LEFT JOIN categories c ON t.category_id = c.id
-      LEFT JOIN categories p ON c.parent_id = p.id
-      WHERE true
-        ${dateCondition}
-        ${directionCondition}
-      ${includeExcluded ? sql`` : sql`AND t.excluded = false`}
-      AND ba.organization_id = ${organizationId}
-      ${bankFilter(query.bank)}
-    )
-  `;
-}
+import { filterTransactions } from "../transactions/queries";
+import { categoryOverviewSchema, NO_CATEGORY_NAME } from "./schemas";
 
 export async function categoriesOverview(
   organizationId: string,
@@ -86,8 +33,7 @@ export async function categoriesOverview(
              -- comptés dans aucune enveloppe (CHECK
              -- categories_detailed_no_amount, et budgetSlots côté app). Les
              -- lire peindrait dans la revue une jauge contre un chiffre absent
-             -- de l'enveloppe. Ce masque venait de child_budget
-             -- (transactions/queries.ts), supprimé avec breakdownByCategories.
+             -- de l'enveloppe.
              'budgetAmount',
              CASE WHEN cat.budget_detailed THEN c.budget_amount::float8 END,
              'transactionCount',

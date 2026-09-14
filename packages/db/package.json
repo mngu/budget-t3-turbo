@@ -29,8 +29,7 @@
   },
   "dependencies": {
     "drizzle-orm": "^0.44.7",
-    "pg": "^8.22.0",
-    "zod": "catalog:"
+    "pg": "^8.22.0"
   },
   "devDependencies": {
     "@budget/tsconfig": "workspace:*",

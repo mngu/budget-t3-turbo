@@ -33,10 +33,10 @@ import {
   useShadeCategoryColor,
   useCategoryColor,
 } from "~/lib/category-color";
-import { useFormat } from "~/lib/use-format";
 import { sumBy } from "~/lib/sum";
 import { useTRPCClient } from "~/lib/trpc";
-import { useRun } from "~/routes/_authed/settings/categories/-lib/use-run";
+import { useFormat } from "~/lib/use-format";
+import { useRun } from "~/lib/use-run";
 
 import { useCategoryCrud } from "../-lib/use-category-crud";
 import { usePreview } from "../-lib/use-preview";
@@ -81,7 +81,7 @@ export function CategoryOverview({
     <>
       <Card className="p-0">
         <CardContent className="p-0">
-          <Accordion defaultValue={["shipping"]}>
+          <Accordion>
             {categoryOverview.map(
               ({
                 id,
@@ -94,13 +94,13 @@ export function CategoryOverview({
                 transactionCount,
               }) => {
                 const resolvedColor = resolve(color);
-                const soft = softCategoryColor(resolve(color));
+                const soft = softCategoryColor(resolvedColor);
                 const childNodes = children ?? [];
                 const previewParent = () =>
                   preview.openCategory({
                     name,
                     includesChildren: childNodes.length > 0,
-                    color: resolve(color),
+                    color: resolvedColor,
                     soft,
                     icon: icon,
                   });
@@ -146,7 +146,7 @@ export function CategoryOverview({
                         <div className="flex w-40 items-center justify-end gap-2">
                           {budgetDetailed ? (
                             <div className="flex flex-col items-end">
-                              <span className={cn("num text-meta font-medium")}>
+                              <span className="num text-meta font-medium">
                                 {euro.format(
                                   sumBy(
                                     childNodes,
@@ -348,7 +348,6 @@ export function CategoryOverview({
         description={preview.preview?.description}
         transactions={preview.preview?.txns ?? []}
         badge={preview.preview?.badge}
-        footer={preview.preview?.footer}
       />
     </>
   );
@@ -360,7 +359,6 @@ function NameInput({
 }: {
   name: string;
   onRename: (name: string) => Promise<boolean>;
-  className?: string;
 }) {
   const [value, setValue] = useState(name);
 

@@ -30,8 +30,8 @@ import {
 } from "@budget/ui/dropdown-menu";
 import { Input } from "@budget/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "@budget/ui/toggle-group";
-
-import { dateFr } from "../-lib/format";
+import { Stat } from "~/component/stat";
+import { dateFr } from "~/lib/format";
 
 /** Variante de `Badge` portant le statut d'une invitation. */
 const STATUS_VARIANT: Record<
@@ -117,12 +117,12 @@ export function SpaceCard({
           </div>
           <div className="text-subtle text-control mt-1">
             {shared
-              ? `Créé le ${dateFr(space.createdAt)}${
+              ? `Créé le ${dateFr.format(new Date(space.createdAt))}${
                   pending > 0
                     ? ` · ${pending} invitation${pending > 1 ? "s" : ""} en attente`
                     : ""
                 }`
-              : `Créé le ${dateFr(space.createdAt)} avec votre compte`}
+              : `Créé le ${dateFr.format(new Date(space.createdAt))} avec votre compte`}
           </div>
         </div>
 
@@ -137,22 +137,21 @@ export function SpaceCard({
       </div>
 
       <div className="border-border bg-surface-2 grid grid-cols-4 border-t">
-        <Stat
-          value={space.counts.accounts}
-          singular="Compte"
-          plural="Comptes"
-        />
-        <Stat
-          value={space.counts.categories}
-          singular="Catégorie"
-          plural="Catégories"
-        />
-        <Stat
-          value={space.counts.transactions}
-          singular="Transaction"
-          plural="Transactions"
-        />
-        <Stat value={space.counts.members} singular="Membre" plural="Membres" />
+        {(
+          [
+            [space.counts.accounts, "Compte", "Comptes"],
+            [space.counts.categories, "Catégorie", "Catégories"],
+            [space.counts.transactions, "Transaction", "Transactions"],
+            [space.counts.members, "Membre", "Membres"],
+          ] as const
+        ).map(([value, singular, plural]) => (
+          <Stat
+            key={singular}
+            tile
+            value={value}
+            label={value > 1 ? plural : singular}
+          />
+        ))}
       </div>
 
       {shared && !alone && (
@@ -194,7 +193,7 @@ export function SpaceCard({
                 {member.role === "owner" ? "Propriétaire" : "Membre"}
               </span>
               <span className="text-subtle num text-meta">
-                depuis le {dateFr(member.since)}
+                depuis le {dateFr.format(new Date(member.since))}
               </span>
               {/* Se retirer soi-même, c'est « Quitter » : même ligne, autre
                   procédure — l'une part du propriétaire, l'autre de soi. */}
@@ -252,9 +251,9 @@ export function SpaceCard({
                     )}
                   >
                     {invitation.status === "expired"
-                      ? `expirée le ${dateFr(invitation.expiresAt)}`
+                      ? `expirée le ${dateFr.format(new Date(invitation.expiresAt))}`
                       : invitation.status === "pending"
-                        ? `expire le ${dateFr(invitation.expiresAt)}`
+                        ? `expire le ${dateFr.format(new Date(invitation.expiresAt))}`
                         : ""}
                   </span>
                   <div className="flex items-center justify-end gap-3">
@@ -470,25 +469,6 @@ function InviteForm({
       <span className="text-subtle text-control flex-none whitespace-nowrap">
         le lien vaut 7 jours
       </span>
-    </div>
-  );
-}
-
-function Stat({
-  value,
-  singular,
-  plural,
-}: {
-  value: number;
-  singular: string;
-  plural: string;
-}) {
-  return (
-    <div className="border-border border-r px-4 py-2.5 last:border-r-0">
-      <div className="num text-body font-medium">
-        {value.toLocaleString("fr-FR")}
-      </div>
-      <div className="label-caps mt-0.5">{value > 1 ? plural : singular}</div>
     </div>
   );
 }

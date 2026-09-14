@@ -3,6 +3,7 @@
 import type { PreviewBadge } from "../-lib/use-preview";
 import type { TransactionRow } from "@budget/api";
 
+import { cn } from "@budget/ui";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@budget/ui/dialog";
-import { dateFr } from "~/lib/format";
+import { dateFr, signedAmount } from "~/lib/format";
 import { useFormat } from "~/lib/use-format";
 
 interface TransactionPreviewDrawerProps {
@@ -21,7 +22,6 @@ interface TransactionPreviewDrawerProps {
   transactions: TransactionRow[];
   description?: string;
   badge?: PreviewBadge;
-  footer?: string;
 }
 
 export function TransactionPreviewDrawer({
@@ -31,7 +31,6 @@ export function TransactionPreviewDrawer({
   transactions,
   description,
   badge,
-  footer,
 }: TransactionPreviewDrawerProps) {
   const { euro } = useFormat();
   return (
@@ -91,13 +90,12 @@ export function TransactionPreviewDrawer({
                       crédit indiscernable d'une dépense. C'est la catégorie
                       absente, et elle seule, qui passe la ligne en warn. */}
                   <span
-                    className={`num text-meta text-right ${
-                      category === null ? "text-warn" : ""
-                    }`}
-                  >
-                    {euro.format(
-                      (txn.direction === "debit" ? -1 : 1) * Number(txn.amount),
+                    className={cn(
+                      "num text-meta text-right",
+                      category === null && "text-warn",
                     )}
+                  >
+                    {euro.format(signedAmount(txn))}
                   </span>
                 </div>
               );
@@ -105,7 +103,9 @@ export function TransactionPreviewDrawer({
           )}
         </div>
 
-        {footer && <DialogFooter>{footer}</DialogFooter>}
+        <DialogFooter>
+          Aperçu limité aux 25 transactions les plus récentes.
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

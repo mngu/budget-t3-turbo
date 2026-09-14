@@ -1,6 +1,6 @@
 "use client";
 
-import { useLoaderData, useRouter } from "@tanstack/react-router";
+import { useLoaderData } from "@tanstack/react-router";
 import { ChevronDownIcon, RefreshCwIcon } from "lucide-react";
 import { useState } from "react";
 
@@ -17,11 +17,9 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@budget/ui/dropdown-menu";
-import { toast } from "@budget/ui/toast";
 import { sumBy } from "~/lib/sum";
-import { toastSyncOutcome } from "~/lib/sync-toast";
+import { useSync } from "~/lib/sync-toast";
 import { selectedBanks, toggleBank } from "~/lib/transactions-search";
-import { useTRPCClient } from "~/lib/trpc";
 import { useRevueSearch } from "~/lib/use-revue-search";
 
 /**
@@ -54,11 +52,10 @@ export function BankPicker() {
     from: "/_authed/_period-overview",
   });
 
-  const known = banks;
   const selected = selectedBanks(search);
   const isOn = (bank: string) =>
     selected.length === 0 || selected.includes(bank);
-  const offCount = known.filter((bank) => !isOn(bank)).length;
+  const offCount = banks.filter((bank) => !isOn(bank)).length;
 
   const total = sumBy(
     bankCounts.filter((entry) => isOn(entry.bank)),
@@ -80,8 +77,8 @@ export function BankPicker() {
         }
       >
         {offCount > 0
-          ? `${known.length - offCount}/${known.length} comptes`
-          : `${known.length} compte${known.length > 1 ? "s" : ""}`}
+          ? `${banks.length - offCount}/${banks.length} comptes`
+          : `${banks.length} compte${banks.length > 1 ? "s" : ""}`}
         <ChevronDownIcon />
       </DropdownMenuTrigger>
 
@@ -98,12 +95,12 @@ export function BankPicker() {
             </DropdownMenuShortcut>
           </DropdownMenuLabel>
 
-          {known.map((bank) => (
+          {banks.map((bank) => (
             <DropdownMenuCheckboxItem
               key={bank}
               checked={isOn(bank)}
               onCheckedChange={() =>
-                setSearch({ bank: toggleBank(search, bank, known) })
+                setSearch({ bank: toggleBank(search, bank, banks) })
               }
             >
               {bank}
@@ -113,7 +110,7 @@ export function BankPicker() {
             </DropdownMenuCheckboxItem>
           ))}
 
-          {known.length === 0 && (
+          {banks.length === 0 && (
             <DropdownMenuItem disabled>Aucun compte connecté.</DropdownMenuItem>
           )}
         </DropdownMenuGroup>
@@ -149,28 +146,15 @@ export function BankPicker() {
  * l'appelant qui referme, une fois l'opération aboutie.
  */
 function SyncItem({ onDone }: { onDone: () => void }) {
-  const router = useRouter();
-  const trpcClient = useTRPCClient();
-  const [syncing, setSyncing] = useState(false);
+  const { sync, state } = useSync();
+  const syncing = state === "running";
 
   return (
     <DropdownMenuItem
       closeOnClick={false}
       disabled={syncing}
       onClick={async () => {
-        setSyncing(true);
-        try {
-          const outcome = await trpcClient.sync.run.mutate();
-          await router.invalidate();
-          toastSyncOutcome(outcome);
-          onDone();
-        } catch (err) {
-          toast.error(
-            err instanceof Error ? err.message : "Échec de la synchronisation.",
-          );
-        } finally {
-          setSyncing(false);
-        }
+        if (await sync()) onDone();
       }}
     >
       <RefreshCwIcon className={cn(syncing && "animate-spin")} />

@@ -32,7 +32,7 @@ Règles :
 - N'invente jamais de catégorie : toute réponse hors de cette liste est ignorée.
 - Les transactions similaires fournies sont des indices, pas une autorité. Ne classe par analogie que si la transaction est réellement de même nature (même contrepartie, même type d'opération) : des libellés qui se ressemblent ne suffisent pas.
 - Une catégorie « à peu près » n'est pas une bonne réponse. Si la transaction relève d'un type de dépense ou de revenu absent de la liste, réponds null.
-- La liste est incomplète par construction : répondre null est un résultat normal et utile. Ces transactions sont reprises par l'analyse qui propose de nouvelles catégories.
+- La liste est incomplète par construction : répondre null est un résultat normal et utile.
 
 Réponds pour chaque transaction avec son id et sa catégorie (ou null).`;
 }

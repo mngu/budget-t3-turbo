@@ -50,7 +50,7 @@ export async function performSync(
 }
 
 // Rejoue l'import des data/*.json déjà présents sans toucher aux sessions
-// bancaires — donc sans déclencher de SCA. Remplace l'ancien `pnpm run import`.
+// bancaires — donc sans déclencher de SCA.
 // Retourne null si la catégorisation a échoué (l'import, lui, a réussi).
 export async function performImport(
   organizationId: string,

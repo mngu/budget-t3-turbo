@@ -41,7 +41,7 @@ const CONTEXT_FILTERS = {
  * bouton doublerait l'URL et divergerait d'elle au premier « ✕ » ou retour
  * arrière.
  */
-export function selectedCategory(
+function selectedCategory(
   overview: CategoryOverviewType,
   category: string | undefined,
 ): SelectedCategory | undefined {
@@ -69,33 +69,16 @@ function Divider() {
 }
 
 /**
- * Barre « Affiner … » propre à un écran. Chaque écran n'expose que les filtres
- * qui ont un sens pour lui.
+ * Barre « Affiner … » de `/transactions` : sens, catégorie, et le champ de
+ * recherche `q`. Celui-ci vivait dans l'en-tête tant que celui-ci portait les
+ * filtres des quatre écrans ; `Transactions.dc.html` le pose dans cette barre,
+ * c'est un outil de table, pas de périmètre.
  */
 export function RefineBar({
-  label,
-  sens,
-  searchField,
   overview,
-  right,
   className,
 }: {
-  /** Intitulé en capitales. Absent sur `/transactions`, dont la maquette pose
-   *  une barre encadrée qui se passe de titre. */
-  label?: string;
-  /** Sélecteur Tous / Débit / Crédit. */
-  sens?: boolean;
   overview: CategoryOverviewType;
-  /**
-   * Champ de recherche `q`. Il vivait dans l'en-tête tant que celui-ci portait
-   * les filtres des quatre écrans ; le nouvel en-tête n'en a plus, et
-   * `Transactions.dc.html` le pose dans cette barre — c'est un outil de table,
-   * pas de périmètre. Seule `/transactions` l'affiche : ailleurs, `q` reste
-   * visible et retirable via `<ActiveFilters>`.
-   */
-  searchField?: boolean;
-  /** Contenu aligné à droite (compteur de périmètre). */
-  right?: React.ReactNode;
   className?: string;
 }) {
   const { search, setSearch } = useRevueSearch();
@@ -105,41 +88,35 @@ export function RefineBar({
     <div
       className={cn("flex flex-wrap items-center gap-x-3 gap-y-2.5", className)}
     >
-      {label && <span className="label-caps mr-0.5">{label}</span>}
-
-      {sens && (
-        <>
-          <ToggleGroup
-            size="sm"
-            aria-label="Sens des transactions"
-            className="flex-none"
-            value={[search.direction ?? "tous"]}
-            onValueChange={([value]) =>
-              setSearch({
-                direction:
-                  value === "debit" || value === "credit" ? value : undefined,
-              })
-            }
-          >
-            {SENSES.map((item) => (
-              <ToggleGroupItem key={item.value} value={item.value}>
-                {item.label}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
-          <Divider />
-          <CategorySelector
-            value={selectedCategory(overview, search.category)}
-            onChange={(selected) =>
-              setSearch({
-                category: !selected
-                  ? undefined
-                  : (selected.child?.name ?? selected.parent.name ?? "none"),
-              })
-            }
-          />
-        </>
-      )}
+      <ToggleGroup
+        size="sm"
+        aria-label="Sens des transactions"
+        className="flex-none"
+        value={[search.direction ?? "tous"]}
+        onValueChange={([value]) =>
+          setSearch({
+            direction:
+              value === "debit" || value === "credit" ? value : undefined,
+          })
+        }
+      >
+        {SENSES.map((item) => (
+          <ToggleGroupItem key={item.value} value={item.value}>
+            {item.label}
+          </ToggleGroupItem>
+        ))}
+      </ToggleGroup>
+      <Divider />
+      <CategorySelector
+        value={selectedCategory(overview, search.category)}
+        onChange={(selected) =>
+          setSearch({
+            category: !selected
+              ? undefined
+              : (selected.child?.name ?? selected.parent.name ?? "none"),
+          })
+        }
+      />
 
       {search.category && (
         <button
@@ -156,35 +133,24 @@ export function RefineBar({
       {dirty && (
         <button
           type="button"
-          className={cn(
-            "text-primary text-control",
-            !right && !searchField && "ml-auto",
-          )}
+          className="text-primary text-control"
           onClick={() => setSearch(CONTEXT_FILTERS)}
         >
           Retirer ces filtres
         </button>
       )}
 
-      {right && (
-        <span className="text-subtle text-control ml-auto whitespace-nowrap">
-          {right}
-        </span>
-      )}
-
-      {searchField && (
-        <InputGroup className="ml-auto max-w-105 min-w-38 flex-1">
-          <InputGroupAddon>
-            <SearchIcon />
-          </InputGroupAddon>
-          <SearchInput
-            param="q"
-            resetParams={{ page: 1 }}
-            placeholder="Rechercher un libellé, une catégorie, un montant…"
-            aria-label="Recherche"
-          />
-        </InputGroup>
-      )}
+      <InputGroup className="ml-auto max-w-105 min-w-38 flex-1">
+        <InputGroupAddon>
+          <SearchIcon />
+        </InputGroupAddon>
+        <SearchInput
+          param="q"
+          resetParams={{ page: 1 }}
+          placeholder="Rechercher un libellé, une catégorie, un montant…"
+          aria-label="Recherche"
+        />
+      </InputGroup>
     </div>
   );
 }

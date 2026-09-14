@@ -16,6 +16,7 @@ import {
   AlertDialogTitle,
 } from "@budget/ui/alert-dialog";
 import { Spinner } from "@budget/ui/spinner";
+import { DialogFacts } from "~/component/dialog-facts";
 
 /**
  * Confirmation de révocation — un `AlertDialog` et non un `Dialog` : le geste
@@ -68,23 +69,7 @@ export function RevokeDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <div className="flex flex-col gap-2">
-          {facts.map((fact) => (
-            <div
-              key={fact.label}
-              className="grid grid-cols-[56px_minmax(0,1fr)] items-baseline gap-2.5"
-            >
-              <span
-                className={`num text-body text-right font-medium ${fact.tone}`}
-              >
-                {fact.n}
-              </span>
-              <span className="text-muted-foreground text-control">
-                {fact.label}
-              </span>
-            </div>
-          ))}
-        </div>
+        <DialogFacts facts={facts} />
 
         <AlertDialogFooter>
           <AlertDialogCancel>Annuler</AlertDialogCancel>

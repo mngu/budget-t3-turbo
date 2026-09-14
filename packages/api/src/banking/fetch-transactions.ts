@@ -1,5 +1,4 @@
 // Synchronisation des transactions : connexions actives (DB) → data/transactions-*.json.
-// Le pipeline aval (import → categorize) reste inchangé.
 import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
@@ -19,8 +18,7 @@ export interface SyncOutcome {
 
 // psuHeaders (Psu-Ip-Address, Psu-User-Agent) : présents quand le sync est déclenché
 // par l'utilisateur dans l'app — la requête est alors classée « PSU présent » et
-// échappe au plafond PSD2 des accès non-assistés (~4/jour par banque). Le CLI/cron
-// n'en envoie pas (accès en arrière-plan assumé).
+// échappe au plafond PSD2 des accès non-assistés (~4/jour par banque).
 export async function syncBanks(
   organizationId: string,
   psuHeaders: Record<string, string> = {},

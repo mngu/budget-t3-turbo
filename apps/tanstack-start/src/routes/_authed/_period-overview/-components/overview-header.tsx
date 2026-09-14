@@ -15,7 +15,8 @@ interface OverviewHeaderProps {
 }
 
 export function OverviewHeader({ overview }: OverviewHeaderProps) {
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isTable =
+    useRouterState({ select: (s) => s.location.pathname }) === "/transactions";
   const { search } = useRevueSearch();
   const resolveColor = useCategoryColor();
   const { category } = search;
@@ -67,27 +68,24 @@ export function OverviewHeader({ overview }: OverviewHeaderProps) {
           : `${postes} poste${postes > 1 ? "s" : ""} de dépense`}
       </span>
 
-      {pathname === "/transactions" ? (
-        <Link
-          to="/"
-          search={search}
-          title="Retour"
-          className="border-border bg-card text-muted-foreground hover:border-subtle hover:text-foreground hover:bg-accent text-control ml-auto flex h-7 flex-none items-center gap-1.5 rounded-full border pr-2 pl-3 font-medium whitespace-nowrap"
-        >
-          <ArrowLeftIcon className="text-subtle size-3.5" aria-hidden />
-          Retour
-        </Link>
-      ) : (
-        <Link
-          to="/transactions"
-          search={search}
-          title="Ouvrir la liste des transactions"
-          className="border-border bg-card text-muted-foreground hover:border-subtle hover:text-foreground hover:bg-accent text-control ml-auto flex h-7 flex-none items-center gap-1.5 rounded-full border pr-2 pl-3 font-medium whitespace-nowrap"
-        >
-          Voir les transactions
-          <ArrowRightIcon className="text-subtle size-3.5" aria-hidden />
-        </Link>
-      )}
+      <Link
+        to={isTable ? "/" : "/transactions"}
+        search={search}
+        title={isTable ? "Retour" : "Ouvrir la liste des transactions"}
+        className="border-border bg-card text-muted-foreground hover:border-subtle hover:text-foreground hover:bg-accent text-control ml-auto flex h-7 flex-none items-center gap-1.5 rounded-full border pr-2 pl-3 font-medium whitespace-nowrap"
+      >
+        {isTable ? (
+          <>
+            <ArrowLeftIcon className="text-subtle size-3.5" aria-hidden />
+            Retour
+          </>
+        ) : (
+          <>
+            Voir les transactions
+            <ArrowRightIcon className="text-subtle size-3.5" aria-hidden />
+          </>
+        )}
+      </Link>
     </div>
   );
 }

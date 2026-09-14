@@ -4,8 +4,8 @@ import { LayersIcon } from "lucide-react";
 
 import { Toolbar } from "@budget/ui/toolbar";
 import { useCategoryColor, useShadeCategoryColor } from "~/lib/category-color";
-import { useFormat } from "~/lib/use-format";
 import { sumBy } from "~/lib/sum";
+import { useFormat } from "~/lib/use-format";
 import { useRevueSearch } from "~/lib/use-revue-search";
 
 import { getCategoryLabel } from "../-lib/breakdown";
@@ -134,7 +134,7 @@ export function BreakdownList({ overview }: BreakdownListProps) {
         className="flex min-h-0 flex-1 scrollbar-thin flex-col overflow-y-auto"
       >
         {rows
-          .filter((row) => row.value && row.value > 0)
+          .filter((row) => row.value > 0)
           .map((row, index) => (
             <Toolbar.Button
               key={index}

@@ -7,11 +7,12 @@ import {
   transactionsSearchSchema,
 } from "@budget/api/schemas";
 import { Stat } from "~/component/stat";
-import { useFormat } from "~/lib/use-format";
+import { sumBy } from "~/lib/sum";
 import {
   defaultToCurrentMonth,
   SEARCH_DEFAULTS,
 } from "~/lib/transactions-search";
+import { useFormat } from "~/lib/use-format";
 
 import { CategoryOverview } from "./-components/category-overview";
 
@@ -37,21 +38,13 @@ export const Route = createFileRoute("/_authed/settings/categories/")({
 function CategoriesAside() {
   const { euro } = useFormat();
   const { overview } = Route.useLoaderData();
-  let totalBudget = 0;
-  let childCount = 0;
-  overview.forEach((cat) => {
-    if (cat.budgetAmount) {
-      totalBudget += cat.budgetAmount;
-    }
-    if (cat.children) {
-      childCount += cat.children.length;
-      cat.children.forEach((subCat) => {
-        if (subCat.budgetAmount) {
-          totalBudget += subCat.budgetAmount;
-        }
-      });
-    }
-  });
+  const childCount = sumBy(overview, (cat) => cat.children?.length ?? 0);
+  const totalBudget = sumBy(
+    overview,
+    (cat) =>
+      (cat.budgetAmount ?? 0) +
+      sumBy(cat.children ?? [], (child) => child.budgetAmount ?? 0),
+  );
   return (
     <div className="ml-auto flex items-stretch">
       <Stat value={overview.length} label="Parentes" />

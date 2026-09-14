@@ -22,15 +22,14 @@ export async function importTransactions(
 ): Promise<boolean> {
   const DATA = orgDataDir(organizationId);
 
-  // 1. Comptes connus (créés par le wizard de connexion, ou import historique)
   const dbAccounts = await db
     .select({ id: bankAccounts.id, uid: bankAccounts.uid })
     .from(bankAccounts)
     .where(eq(bankAccounts.organizationId, organizationId));
   const uidToAccountId = new Map(dbAccounts.map((a) => [a.uid, a.id]));
 
-  // 2. Transactions. Le répertoire n'existe pas tant que l'espace n'a jamais
-  // synchronisé : rien à importer, ce n'est pas une erreur.
+  // Le répertoire n'existe pas tant que l'espace n'a jamais synchronisé :
+  // rien à importer, ce n'est pas une erreur.
   if (!existsSync(DATA)) return false;
   const txnFiles = readdirSync(DATA).filter(
     (f) => f.startsWith("transactions-") && f.endsWith(".json"),

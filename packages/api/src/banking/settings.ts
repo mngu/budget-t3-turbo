@@ -33,10 +33,6 @@ const NOT_CONFIGURED: SetupStatus = {
 let statusCache: { at: number; status: SetupStatus } | null = null;
 const STATUS_TTL_MS = 3600 * 1000;
 
-function invalidateSetupStatus(): void {
-  statusCache = null;
-}
-
 async function checkSettings(settings: EbSettings): Promise<SetupStatus> {
   try {
     const jwt = makeJwt(settings.applicationId, settings.privateKeyPem);
@@ -68,16 +64,6 @@ async function checkSettings(settings: EbSettings): Promise<SetupStatus> {
   }
 }
 
-async function upsertSettings(settings: EbSettings): Promise<void> {
-  await db
-    .insert(appSettings)
-    .values({ id: 1, ...settings })
-    .onConflictDoUpdate({
-      target: appSettings.id,
-      set: { ...settings, updatedAt: new Date() },
-    });
-}
-
 export async function getSetupStatus(): Promise<SetupStatus> {
   if (statusCache && Date.now() - statusCache.at < STATUS_TTL_MS)
     return statusCache.status;
@@ -104,7 +90,13 @@ export async function saveSettings(input: EbSettings): Promise<SetupStatus> {
     throw new Error(status.error ?? "Validation Enable Banking échouée.");
   }
 
-  await upsertSettings(input);
-  invalidateSetupStatus();
+  await db
+    .insert(appSettings)
+    .values({ id: 1, ...input })
+    .onConflictDoUpdate({
+      target: appSettings.id,
+      set: { ...input, updatedAt: new Date() },
+    });
+  statusCache = null;
   return status;
 }

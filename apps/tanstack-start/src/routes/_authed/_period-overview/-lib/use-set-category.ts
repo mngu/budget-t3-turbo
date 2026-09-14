@@ -1,10 +1,9 @@
 "use client";
 
-import { useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 
-import { toast } from "@budget/ui/toast";
 import { useTRPCClient } from "~/lib/trpc";
+import { useRun } from "~/lib/use-run";
 
 /**
  * Écriture de la catégorie d'une transaction, partagée par les quatre écrans de
@@ -15,26 +14,19 @@ import { useTRPCClient } from "~/lib/trpc";
  * prochaine passe de catégorisation LLM et la sort du rail de relecture.
  */
 export function useSetCategory() {
-  const router = useRouter();
   const trpcClient = useTRPCClient();
+  const run = useRun();
   const [pending, setPending] = useState(false);
 
+  // Sans le toast d'échec de `run`, l'erreur serait invisible : le loader
+  // n'ayant pas été invalidé, l'écran retombe sur l'ancienne valeur sans rien dire.
   const setCategory = async (id: number, categoryId: number | null) => {
     setPending(true);
-    try {
-      await trpcClient.transactions.updateCategory.mutate({ id, categoryId });
-      await router.invalidate();
-    } catch (err) {
-      // Sans ce toast l'échec est invisible : le loader n'ayant pas été
-      // invalidé, l'écran retombe sur l'ancienne valeur sans rien dire.
-      toast.error(
-        err instanceof Error
-          ? err.message
-          : "Échec de la mise à jour de la catégorie.",
-      );
-    } finally {
-      setPending(false);
-    }
+    await run(
+      () => trpcClient.transactions.updateCategory.mutate({ id, categoryId }),
+      "Échec de la mise à jour de la catégorie.",
+    );
+    setPending(false);
   };
 
   return { setCategory, pending };

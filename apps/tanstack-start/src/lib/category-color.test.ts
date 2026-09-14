@@ -9,7 +9,9 @@ describe("shadeHex", () => {
   });
 
   it("rapproche les paliers suivants de la carte", () => {
-    const [a, b, c] = [0, 1, 2].map((i) => shadeHex("#1447e6", "#ffffff", i, 3));
+    const [a, b, c] = [0, 1, 2].map((i) =>
+      shadeHex("#1447e6", "#ffffff", i, 3),
+    );
     expect(a).not.toBe(b);
     expect(b).not.toBe(c);
     expect(shadeHex("#1447e6", "#ffffff", 2, 3)).toBe(

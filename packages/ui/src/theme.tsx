@@ -22,8 +22,7 @@ const getStoredThemeMode = (): ThemeMode => {
 
 const setStoredThemeMode = (theme: ThemeMode) => {
   try {
-    const parsedTheme = ThemeModeSchema.parse(theme);
-    localStorage.setItem(themeKey, parsedTheme);
+    localStorage.setItem(themeKey, theme);
   } catch {
     // Silently fail if localStorage is unavailable
   }
@@ -54,7 +53,7 @@ const setupPreferredListener = () => {
   return () => mediaQuery.removeEventListener("change", handler);
 };
 
-export const themeDetectorScript = (function () {
+const themeDetectorScript = (function () {
   function themeFn() {
     const isValidTheme = (theme: string): theme is ThemeMode => {
       const validThemes = ["light", "dark", "auto"] as const;

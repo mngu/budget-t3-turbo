@@ -18,7 +18,7 @@ import { useTRPCClient } from "~/lib/trpc";
  * déjà un palier mélangé vers `--card`. Le repasser dans `softCategoryColor`
  * mélangerait deux fois et rendrait la pastille indiscernable de la carte.
  */
-export interface PreviewRequest {
+interface PreviewRequest {
   name: string;
   includesChildren: boolean;
   color: string;
@@ -33,15 +33,12 @@ export interface PreviewBadge {
   icon: ReactNode;
 }
 
-export interface PreviewState {
+interface PreviewState {
   title: string;
   description: string;
   txns: TransactionRow[];
   badge: PreviewBadge;
-  footer: string;
 }
-
-const PREVIEW_FOOTER = "Aperçu limité aux 25 transactions les plus récentes.";
 
 /** Le panneau d'aperçu : les transactions d'une catégorie, les 25 plus récentes. */
 export function usePreview() {
@@ -65,8 +62,11 @@ export function usePreview() {
       title: name,
       description: `${result.rows.length} transaction(s) — aperçu de cette catégorie (25 plus récentes)${includesChildren ? ", y compris les sous-catégories" : ""}.`,
       txns: result.rows,
-      badge: categoryBadge(color, soft, icon),
-      footer: PREVIEW_FOOTER,
+      badge: {
+        color,
+        soft,
+        icon: <CategoryIcon name={icon} className="size-3.5" />,
+      },
     });
   };
 
@@ -74,21 +74,5 @@ export function usePreview() {
     preview,
     close: () => setPreview(null),
     openCategory,
-  };
-}
-
-// Pastille d'en-tête du panneau d'aperçu : la teinte et l'aplat déjà résolus
-// pour le thème par l'appelant (l'aplat est celui de la parente, jamais dérivé
-// d'un palier de sous-catégorie — voir PreviewRequest), et l'icône de la
-// catégorie, creuse si elle n'en a pas.
-function categoryBadge(
-  color: string,
-  soft: string,
-  icon: string | null,
-): PreviewBadge {
-  return {
-    color,
-    soft,
-    icon: <CategoryIcon name={icon} className="size-3.5" />,
   };
 }

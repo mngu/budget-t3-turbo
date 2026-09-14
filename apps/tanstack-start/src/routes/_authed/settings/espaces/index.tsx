@@ -7,7 +7,7 @@ import type {
   SpaceRole,
 } from "@budget/api";
 
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import {
   LockIcon,
   LogOutIcon,
@@ -24,8 +24,11 @@ import { useState } from "react";
 import { Button } from "@budget/ui/button";
 import { toast } from "@budget/ui/toast";
 import { authClient } from "~/auth/client";
+import { Stat } from "~/component/stat";
+import { dayMonthLongFr } from "~/lib/format";
 import { sumBy } from "~/lib/sum";
 import { useTRPCClient } from "~/lib/trpc";
+import { useRun } from "~/lib/use-run";
 
 import { SpaceCard } from "./-components/space-card";
 import { SpaceDialog } from "./-components/space-dialog";
@@ -70,8 +73,8 @@ const CREATE_CONVERT = "convertir";
  */
 function EspacesAside() {
   const { spaces, members } = Route.useLoaderData();
-  const router = useRouter();
   const trpcClient = useTRPCClient();
+  const runMutation = useRun();
   const personal = spaces.find((s) => s.isPersonal);
 
   const [creating, setCreating] = useState(false);
@@ -85,36 +88,31 @@ function EspacesAside() {
     // c'est le seul moyen, rien ne déplace un compte d'un espace à l'autre.
     const convert = choice === CREATE_CONVERT ? personal : undefined;
     setBusy(true);
-    try {
-      await (convert
-        ? trpcClient.spaces.share.mutate({ id: convert.id, name: draft })
-        : trpcClient.spaces.create.mutate({ name: draft }));
-      setCreating(false);
-      await router.invalidate();
-      toast.success(
+    const ok = await runMutation<unknown>(
+      () =>
         convert
-          ? "Espace partagé — invitez maintenant les membres."
-          : "Espace créé — il est vide.",
-      );
-    } catch (err) {
-      toast.error(
-        err instanceof Error
-          ? err.message
-          : "Échec de la création de l'espace.",
-      );
-    } finally {
-      setBusy(false);
-    }
+          ? trpcClient.spaces.share.mutate({ id: convert.id, name: draft })
+          : trpcClient.spaces.create.mutate({ name: draft }),
+      "Échec de la création de l'espace.",
+    );
+    setBusy(false);
+    if (ok === null) return;
+    setCreating(false);
+    toast.success(
+      convert
+        ? "Espace partagé — invitez maintenant les membres."
+        : "Espace créé — il est vide.",
+    );
   };
 
   return (
     <div className="ml-auto flex items-center gap-4">
-      <div className="border-border flex items-center gap-4 border-r pr-4">
-        <Counter
+      <div className="border-border flex items-stretch border-r pr-4">
+        <Stat
           value={spaces.length}
           label={spaces.length > 1 ? "Espaces" : "Espace"}
         />
-        <Counter value={members} label={members > 1 ? "Membres" : "Membre"} />
+        <Stat value={members} label={members > 1 ? "Membres" : "Membre"} />
       </div>
       <Button
         onClick={() => {
@@ -141,8 +139,8 @@ function EspacesAside() {
 
 function EspacesPage() {
   const { spaces, incoming } = Route.useLoaderData();
-  const router = useRouter();
   const trpcClient = useTRPCClient();
+  const runMutation = useRun();
 
   const [action, setAction] = useState<Action | null>(null);
   // Saisie du dialogue : nom de l'espace, ou nom retapé pour confirmer une
@@ -167,17 +165,10 @@ function EspacesPage() {
 
   const run = async (task: () => Promise<unknown>, fallback: string) => {
     setBusy(true);
-    try {
-      await task();
-      setAction(null);
-      await router.invalidate();
-      return true;
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : fallback);
-      return false;
-    } finally {
-      setBusy(false);
-    }
+    const ok = (await runMutation(task, fallback)) !== null;
+    if (ok) setAction(null);
+    setBusy(false);
+    return ok;
   };
 
   // ── Gestes ───────────────────────────────────────────────────────────────
@@ -298,38 +289,35 @@ function EspacesPage() {
   // pour le refus : le lien devient inerte mais l'espace peut ré-inviter la
   // même adresse (une invitation refusée n'est plus « pending »).
   const respond = async (invitation: IncomingInvitation, accept: boolean) => {
-    setBusy(true);
-    try {
-      await (accept
-        ? trpcClient.spaces.acceptInvitation.mutate({
-            invitationId: invitation.id,
-          })
-        : trpcClient.spaces.declineInvitation.mutate({
-            invitationId: invitation.id,
-          }));
+    const ok = await run(
+      () =>
+        accept
+          ? trpcClient.spaces.acceptInvitation.mutate({
+              invitationId: invitation.id,
+            })
+          : trpcClient.spaces.declineInvitation.mutate({
+              invitationId: invitation.id,
+            }),
+      "Échec de la réponse.",
+    );
+    if (ok)
       toast.success(
         accept
           ? `Vous avez rejoint ${invitation.spaceName} — basculez dessus pour le voir.`
           : "Invitation refusée.",
       );
-      await router.invalidate();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Échec de la réponse.");
-    } finally {
-      setBusy(false);
-    }
   };
 
   const resend = async (invitation: SpaceInvitation) => {
-    try {
-      await trpcClient.spaces.resendInvitation.mutate({
-        invitationId: invitation.id,
-      });
+    const ok = await runMutation(
+      () =>
+        trpcClient.spaces.resendInvitation.mutate({
+          invitationId: invitation.id,
+        }),
+      "Échec de l'envoi.",
+    );
+    if (ok !== null)
       toast.success(`Invitation renvoyée à ${invitation.email}.`);
-      await router.invalidate();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Échec de l'envoi.");
-    }
   };
 
   // ── Rendu ────────────────────────────────────────────────────────────────
@@ -361,11 +349,7 @@ function EspacesPage() {
                   catégories et tout l'historique de cet espace, comme{" "}
                   {invitation.role === "owner" ? "propriétaire" : "membre"}.
                   Valable jusqu'au{" "}
-                  {new Date(invitation.expiresAt).toLocaleDateString("fr-FR", {
-                    day: "numeric",
-                    month: "long",
-                  })}
-                  .
+                  {dayMonthLongFr.format(new Date(invitation.expiresAt))}.
                 </div>
               </div>
               <div className="flex flex-none items-center gap-2">
@@ -461,17 +445,6 @@ function EspacesPage() {
         onClose={() => setAction(null)}
       />
     </>
-  );
-}
-
-function Counter({ value, label }: { value: number; label: string }) {
-  return (
-    <div className="text-right">
-      <div className="num text-body font-medium">
-        {value.toLocaleString("fr-FR")}
-      </div>
-      <div className="label-caps mt-0.5">{label}</div>
-    </div>
   );
 }
 
