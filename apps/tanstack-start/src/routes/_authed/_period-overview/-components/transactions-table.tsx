@@ -2,7 +2,24 @@
 
 import type { TransactionRow } from "@budget/api";
 
+import { Link } from "@tanstack/react-router";
+
 import { cn } from "@budget/ui";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from "@budget/ui/pagination";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@budget/ui/table";
 import { dayMonthFr, signedAmount, titleCase } from "~/lib/format";
 import { useFormat } from "~/lib/use-format";
 import { useRevueSearch } from "~/lib/use-revue-search";
@@ -10,22 +27,6 @@ import { useRevueSearch } from "~/lib/use-revue-search";
 import { useSetCategory } from "../-lib/use-set-category";
 import { CategorySelector } from "./category-selector/category-selector";
 import { ExcludeBadge } from "./exclude-badge";
-
-/**
- * Une seule définition de gabarit pour l'en-tête et les lignes : deux grilles
- * déclarées séparément finissent toujours par diverger d'un pixel.
- *
- * Une seule colonne s'écarte de la maquette : « Compte », 220 px au lieu de 168.
- * Elle dimensionne la sienne sur des noms de banque *tronqués* — son script
- * retire « (Commun) » et « (perso) » avant d'afficher. Ici ces suffixes sont ce
- * qui distingue les deux comptes Caisse d'Épargne : les retirer rendrait deux
- * lignes indiscernables. À 168 px, l'appariement le plus fréquent des données
- * réelles (« Revolut (Commun) · Camille Durand », 157 lignes) coupait en
- * plein milieu du nom — la colonne aurait remplacé deux colonnes lisibles par
- * une seule tronquée. Les 52 px viennent de « Libellé », seule colonne libre.
- */
-const GRID =
-  "grid grid-cols-[74px_minmax(120px,1fr)_220px_244px_118px] items-center gap-4.5 pr-2.5 pl-2";
 
 export function TransactionsTable({
   rows,
@@ -38,7 +39,7 @@ export function TransactionsTable({
   pageCount: number;
   total: number;
 }) {
-  const { search, setSearch } = useRevueSearch();
+  const { search } = useRevueSearch();
 
   // La maquette éteint la date des lignes qui répètent celle du dessus, pour
   // faire ressortir les ruptures de journée. Uniquement sous tri par date :
@@ -47,31 +48,40 @@ export function TransactionsTable({
   const grouped = search.sort === "date";
 
   return (
-    <div className="min-h-0 flex-1 scrollbar-thin overflow-y-auto pr-2">
-      <div
-        className={cn(
-          GRID,
-          // Opaque et au-dessus des lignes : il reste collé en haut pendant que
-          // la liste défile dessous.
-          "label-caps border-border-strong bg-background sticky top-0 z-[2] h-8 border-b",
-        )}
+    <div className="flex min-h-0 flex-1 flex-col">
+      <Table
+        containerClassName="min-h-0 flex-1 scrollbar-thin overflow-y-auto pr-2"
+        // `border-separate` : en `collapse`, le trait sous l'en-tête appartient
+        // à la table et reste en place quand les `th` collent en haut.
+        className="table-fixed border-separate border-spacing-0"
       >
-        <SortableHead label="Date" sortKey="date" />
-        <span>Libellé</span>
-        <span>Compte</span>
-        <span>Catégorie</span>
-        <SortableHead label="Montant" sortKey="amount" className="text-right" />
-      </div>
+        <TableHeader className="label-caps sticky top-0 z-[2]">
+          <TableRow className="hover:bg-transparent">
+            <SortableHead label="Date" sortKey="date" className="w-18" />
+            <Head>Libellé</Head>
+            <Head className="w-40">Compte</Head>
+            <Head className="w-44">Tiers</Head>
+            <Head className="w-60">Catégorie</Head>
+            <SortableHead
+              label="Montant"
+              sortKey="amount"
+              className="w-28 text-right"
+            />
+          </TableRow>
+        </TableHeader>
 
-      {rows.map((row, index) => (
-        <Row
-          key={row.id}
-          row={row}
-          repeatsDate={
-            grouped && rows[index - 1]?.bookingDate === row.bookingDate
-          }
-        />
-      ))}
+        <TableBody className="[&_td]:border-border [&_td]:border-b">
+          {rows.map((row, index) => (
+            <Row
+              key={row.id}
+              row={row}
+              repeatsDate={
+                grouped && rows[index - 1]?.bookingDate === row.bookingDate
+              }
+            />
+          ))}
+        </TableBody>
+      </Table>
 
       {rows.length === 0 && (
         <p className="text-subtle text-control py-15 text-center">
@@ -79,29 +89,42 @@ export function TransactionsTable({
         </p>
       )}
 
-      <div className="text-subtle text-control flex items-center justify-center gap-3 p-4">
-        <button
-          type="button"
-          disabled={page <= 1}
-          onClick={() => setSearch({ page: page - 1 })}
-          className="border-border text-muted-foreground hover:bg-accent rounded-md border px-2.5 py-1 disabled:opacity-40"
-        >
-          ‹ Précédent
-        </button>
+      <Pagination className="text-subtle text-control items-center gap-3 p-4">
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious
+              render={
+                <Link to="." search={(prev) => ({ ...prev, page: page - 1 })} />
+              }
+              aria-disabled={page <= 1}
+              className="aria-disabled:pointer-events-none aria-disabled:opacity-40"
+            />
+          </PaginationItem>
+        </PaginationContent>
         <span>
           Page {page} sur {pageCount} — {total} transactions
         </span>
-        <button
-          type="button"
-          disabled={page >= pageCount}
-          onClick={() => setSearch({ page: page + 1 })}
-          className="border-border-strong hover:bg-accent rounded-md border px-2.5 py-1 disabled:opacity-40"
-        >
-          Suivant ›
-        </button>
-      </div>
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationNext
+              render={
+                <Link to="." search={(prev) => ({ ...prev, page: page + 1 })} />
+              }
+              aria-disabled={page >= pageCount}
+              className="aria-disabled:pointer-events-none aria-disabled:opacity-40"
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
     </div>
   );
+}
+
+// Opaque et au-dessus des lignes : la liste défile dessous.
+const HEAD = "border-border-strong bg-background h-8 border-b px-2 font-medium";
+
+function Head(props: React.ComponentProps<"th">) {
+  return <TableHead {...props} className={cn(HEAD, props.className)} />;
 }
 
 function Row({
@@ -111,46 +134,54 @@ function Row({
   row: TransactionRow;
   repeatsDate: boolean;
 }) {
-  const { signedEuro } = useFormat();
+  const { signedEuro } = useFormat(2);
   const signed = signedAmount(row);
   const debtor = row.raw.debtor?.name ?? row.counterparty;
 
   return (
-    <div
+    <TableRow
       className={cn(
-        GRID,
         // `group` : le bouton d'exclusion ne se montre qu'au survol tant que la
         // ligne compte (voir ExcludeBadge).
-        "border-border hover:bg-accent group h-11 border-b",
+        "group h-11",
         // Une ligne écartée des totaux se lit encore, mais en retrait.
         row.excluded && "opacity-50",
       )}
     >
-      <span
+      <TableCell
         className={cn(
           "num text-meta",
           repeatsDate ? "text-subtle" : "text-muted-foreground",
         )}
       >
         {dayMonthFr.format(new Date(row.bookingDate))}
-      </span>
+      </TableCell>
 
-      <span className="flex min-w-0 items-center gap-1.5">
-        <span className="text-body truncate">{row.description}</span>
-        <ExcludeBadge row={row} />
-      </span>
+      <TableCell>
+        <span className="flex min-w-0 items-center gap-1.5">
+          <span className="text-body truncate">{row.description}</span>
+          <ExcludeBadge row={row} />
+        </span>
+      </TableCell>
 
-      <span className="text-subtle text-control truncate">
+      <TableCell className="text-subtle text-control truncate">
         {row.bankName}
-        {debtor && ` · ${titleCase(debtor)}`}
-      </span>
+      </TableCell>
 
-      <CategoryCell row={row} />
+      <TableCell className="text-subtle text-control truncate">
+        {debtor && titleCase(debtor)}
+      </TableCell>
 
-      <span className={cn("num text-body text-right", signed > 0 && "text-ok")}>
+      <TableCell>
+        <CategoryCell row={row} />
+      </TableCell>
+
+      <TableCell
+        className={cn("num text-body text-right", signed > 0 && "text-ok")}
+      >
         {signedEuro.format(signed)}
-      </span>
-    </div>
+      </TableCell>
+    </TableRow>
   );
 }
 
@@ -218,18 +249,20 @@ function SortableHead({
   const { search, setSearch } = useRevueSearch();
   const active = search.sort === sortKey;
   return (
-    <button
-      type="button"
-      className={cn("text-left hover:underline", className)}
-      onClick={() =>
-        setSearch({
-          sort: sortKey,
-          order: active && search.order === "desc" ? "asc" : "desc",
-        })
-      }
-    >
-      {label}
-      {active ? (search.order === "desc" ? " ↓" : " ↑") : ""}
-    </button>
+    <Head className={className}>
+      <button
+        type="button"
+        className="hover:underline"
+        onClick={() =>
+          setSearch({
+            sort: sortKey,
+            order: active && search.order === "desc" ? "asc" : "desc",
+          })
+        }
+      >
+        {label}
+        {active ? (search.order === "desc" ? " ↓" : " ↑") : ""}
+      </button>
+    </Head>
   );
 }

@@ -33,11 +33,15 @@ export function setCents(on: boolean) {
   listeners.forEach((listener) => listener());
 }
 
-export function useFormat() {
+export function useFormat(forcedDigits?: number) {
   const cents = useSyncExternalStore(subscribe, readCents, () => true);
+  const digits =
+    forcedDigits && forcedDigits !== 0 ? forcedDigits : cents ? 2 : 0;
   return {
     cents,
-    euro: cents ? formatCurrency(2) : formatCurrency(0),
-    signedEuro: cents ? formatCurrency(2, true) : formatCurrency(0, true),
+    euro: cents ? formatCurrency(digits) : formatCurrency(digits),
+    signedEuro: cents
+      ? formatCurrency(digits, true)
+      : formatCurrency(digits, true),
   };
 }
