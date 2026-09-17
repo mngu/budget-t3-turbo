@@ -1,45 +1,27 @@
-import type {
-  BudgetStats,
-  GlobalStats,
-  StatsInputSchema,
-  TransactionRow,
-  TransactionsSearch,
-} from "./schemas";
+import type { StatsInputSchema, TransactionsSearch } from "./schemas";
 // Lectures et corrections manuelles sur la table des transactions.
 import type { SQL } from "@budget/db";
 
-import { and, asc, eq, exists, inArray, or, sql } from "@budget/db";
+import { and, eq, exists, sql } from "@budget/db";
 import { db } from "@budget/db/client";
 import { bankAccounts, transactions } from "@budget/db/schema";
 
 import {
+  bankCountSchema,
+  bankLabelSchema,
   budgetStatsSchema,
+  earliestDateSchema,
   globalStatsSchema,
   PAGE_SIZE,
+  totalSchema,
   transactionRowSchema,
 } from "./schemas";
 
-// Nom de banque affiché : display_name choisi par l'utilisateur, sinon nom ASPSP.
-const bankLabel = sql<string>`coalesce(${bankAccounts.displayName}, ${bankAccounts.bankName})`;
-
-// Le même libellé, lu hors du CTE de `filterTransactions` où `ba` est un
-// composite.
-const filteredBankLabel = sql.raw(
-  "coalesce((ba).display_name, (ba).bank_name)",
-);
-
-// Le filtre de comptes, en SQL brut : `bankCondition` s'écrit sur les tables
-// Drizzle non aliasées, il ne peut pas se corréler à l'alias `ba` des CTE
-// ci-dessous. Le libellé reste celui du sélecteur de comptes
-// (`coalesce(display_name, bank_name)`), jamais `account_id` : deux comptes
-// partageant un libellé sont indissociables dans l'UI.
-function bankFilter(bank: TransactionsSearch["bank"]) {
-  const banks = Array.isArray(bank) ? bank : bank ? [bank] : [];
-  // Une liste vide vaut « tous les comptes », comme `undefined` — même lecture
-  // que `selectedBanks` côté client.
-  if (banks.length === 0) return sql``;
-  return sql` AND ${inArray(filteredBankLabel, banks)}`;
-}
+// Nom de banque affiché : display_name choisi par l'utilisateur, sinon nom
+// ASPSP. `ba` est l'alias de bank_accounts partout où il s'écrit. Jamais
+// `account_id` : deux comptes partageant un libellé sont indissociables dans
+// l'UI, c'est donc le libellé que le sélecteur de comptes filtre.
+const bankLabel = sql`coalesce(ba.display_name, ba.bank_name)`;
 
 /**
  * Le périmètre commun à toutes les lectures de transactions — et **le point de
@@ -52,8 +34,7 @@ function bankFilter(bank: TransactionsSearch["bank"]) {
  * sélection, donc affiche des chiffres, juste faux.
  *
  * Il expose `filtered_transactions`, un CTE de composites (`(t).amount`,
- * `(ba).bank_name`, `(c).name`, `(p).name`) : la requête qui suit en lit les
- * champs entre parenthèses.
+ * `(c).name`, `(p).name`) plus la colonne `bank_name`, le libellé ci-dessus.
  */
 export function filterTransactions(
   organizationId: string,
@@ -64,31 +45,25 @@ export function filterTransactions(
   // reprendre.
   { includeExcluded = false } = {},
 ) {
-  const { dateFrom, dateTo, direction } = query;
-  const dateCondition =
-    dateFrom && dateTo
-      ? sql`AND t.booking_date BETWEEN ${dateFrom} AND ${dateTo}`
-      : sql``;
+  const { dateFrom, dateTo, direction, bank } = query;
+  // Une liste vide vaut « tous les comptes », comme `undefined` — même lecture
+  // que `selectedBanks` côté client.
+  const banks = Array.isArray(bank) ? bank : bank ? [bank] : [];
 
-  // Ternaire explicite : `direction && sql\`…\`` glisse `undefined` dans le
+  // Ternaires explicites : `direction && sql\`…\`` glisse `undefined` dans le
   // gabarit quand le sens n'est pas précisé.
-  const directionCondition = direction
-    ? sql`AND t.direction = ${direction}`
-    : sql``;
-
   return sql`
     WITH filtered_transactions AS (
-      SELECT t, ba, c, p
+      SELECT t, c, p, ${bankLabel} AS bank_name
       FROM transactions t
-      LEFT JOIN bank_accounts ba ON t.account_id = ba.id
+      JOIN bank_accounts ba ON t.account_id = ba.id
       LEFT JOIN categories c ON t.category_id = c.id
       LEFT JOIN categories p ON c.parent_id = p.id
-      WHERE true
-        ${dateCondition}
-        ${directionCondition}
-      ${includeExcluded ? sql`` : sql`AND t.excluded = false`}
-      AND ba.organization_id = ${organizationId}
-      ${bankFilter(query.bank)}
+      WHERE ba.organization_id = ${organizationId}
+        ${dateFrom && dateTo ? sql`AND t.booking_date BETWEEN ${dateFrom} AND ${dateTo}` : sql``}
+        ${direction ? sql`AND t.direction = ${direction}` : sql``}
+        ${includeExcluded ? sql`` : sql`AND t.excluded = false`}
+        ${banks.length > 0 ? sql`AND ${bankLabel} IN ${banks}` : sql``}
     )
   `;
 }
@@ -108,7 +83,7 @@ export async function budgetStats(
   organizationId: string,
   query: StatsInputSchema,
 ) {
-  const result = await db.execute<BudgetStats>(sql`
+  const result = await db.execute(sql`
       ${filterTransactions(organizationId, query)},
       budget_by_cat AS (
         SELECT COALESCE((p).name, (c).name) AS name, ${parentBudget} AS amount, SUM((t).amount) AS total
@@ -126,7 +101,7 @@ export async function globalStats(
   organizationId: string,
   query: StatsInputSchema,
 ) {
-  const result = await db.execute<GlobalStats>(sql`
+  const result = await db.execute(sql`
       ${filterTransactions(organizationId, query)}
       SELECT
         COALESCE(SUM((t).amount) FILTER (WHERE (t).direction = 'debit'), 0)::float8 AS debit,
@@ -160,7 +135,7 @@ export async function listTransactions(
   organizationId: string,
   input: TransactionsSearch,
   limit = PAGE_SIZE,
-): Promise<{ rows: TransactionRow[]; total: number }> {
+) {
   const scope = filterTransactions(organizationId, input, {
     includeExcluded: true,
   });
@@ -183,7 +158,7 @@ export async function listTransactions(
              (t).booking_date::text AS "bookingDate",
              (t).description,
              (t).counterparty,
-             ${filteredBankLabel} AS "bankName",
+             bank_name AS "bankName",
              (t).raw,
              (t).amount,
              (t).currency,
@@ -202,7 +177,7 @@ export async function listTransactions(
       ORDER BY ${orderBy}
       LIMIT ${limit} OFFSET ${(input.page - 1) * limit}
     `),
-    db.execute<{ total: number }>(sql`
+    db.execute(sql`
       ${scope}
       SELECT count(*)::int AS total FROM filtered_transactions ${filters}
     `),
@@ -210,38 +185,28 @@ export async function listTransactions(
 
   return {
     rows: transactionRowSchema.array().parse(list.rows),
-    total: counted.rows[0]?.total ?? 0,
+    total: totalSchema.parse(counted.rows[0]).total,
   };
 }
 
-export async function listBankLabels(
-  organizationId: string,
-): Promise<string[]> {
-  const rows = await db
-    .selectDistinct({ bankName: bankLabel })
-    .from(bankAccounts)
-    .where(
-      and(
-        eq(bankAccounts.organizationId, organizationId),
-        // Un compte décoché au wizard n'est jamais importé : le nommer ici
-        // ajouterait au panneau une ligne à 0 qui ne peut rien filtrer.
-        // Mais s'il a déjà des transactions (décoché *après* un import), son
-        // libellé doit rester : ses lignes pèsent dans les agrégats tant que
-        // `bank` est indéfini, et sans case à cocher elles disparaîtraient au
-        // premier décochage sans que rien ne l'explique.
-        or(
-          eq(bankAccounts.enabled, true),
-          exists(
-            db
-              .select({ one: sql`1` })
-              .from(transactions)
-              .where(eq(transactions.accountId, bankAccounts.id)),
-          ),
-        ),
-      ),
-    )
-    .orderBy(asc(bankLabel));
-  return rows.map((r) => r.bankName);
+export async function listBankLabels(organizationId: string) {
+  const result = await db.execute(sql`
+    SELECT DISTINCT ${bankLabel} AS "bankName"
+    FROM bank_accounts ba
+    WHERE ba.organization_id = ${organizationId}
+      -- Un compte décoché au wizard n'est jamais importé : le nommer ici
+      -- ajouterait au panneau une ligne à 0 qui ne peut rien filtrer.
+      -- Mais s'il a déjà des transactions (décoché *après* un import), son
+      -- libellé doit rester : ses lignes pèsent dans les agrégats tant que
+      -- bank est indéfini, et sans case à cocher elles disparaîtraient au
+      -- premier décochage sans que rien ne l'explique.
+      AND (ba.enabled OR EXISTS (SELECT 1 FROM transactions t WHERE t.account_id = ba.id))
+    ORDER BY 1
+  `);
+  return bankLabelSchema
+    .array()
+    .parse(result.rows)
+    .map((r) => r.bankName);
 }
 
 /**
@@ -254,15 +219,14 @@ export async function listBankLabels(
  * parlait pas de dates. Le périmètre est l'espace, via `bank_accounts` —
  * `transactions` ne porte pas d'`organization_id`.
  */
-export async function earliestTransactionDate(
-  organizationId: string,
-): Promise<string | null> {
-  const [row] = await db
-    .select({ date: sql<string | null>`min(${transactions.bookingDate})` })
-    .from(transactions)
-    .innerJoin(bankAccounts, eq(transactions.accountId, bankAccounts.id))
-    .where(eq(bankAccounts.organizationId, organizationId));
-  return row?.date ?? null;
+export async function earliestTransactionDate(organizationId: string) {
+  const result = await db.execute(sql`
+    SELECT min(t.booking_date)::text AS date
+    FROM transactions t
+    JOIN bank_accounts ba ON t.account_id = ba.id
+    WHERE ba.organization_id = ${organizationId}
+  `);
+  return earliestDateSchema.parse(result.rows[0]).date;
 }
 
 // Nombre de transactions par banque pour les pastilles de la barre de filtres.
@@ -271,7 +235,7 @@ export async function earliestTransactionDate(
 export async function bankCounts(
   organizationId: string,
   input: TransactionsSearch,
-): Promise<{ bank: string; count: number }[]> {
+) {
   // La pastille annonce des lignes, pas de l'argent : elle compte ce que le
   // relevé affichera une fois le compte coché, exclusions comprises.
   const scope = filterTransactions(
@@ -279,15 +243,15 @@ export async function bankCounts(
     { ...input, bank: undefined },
     { includeExcluded: true },
   );
-  const result = await db.execute<{ bank: string; count: number }>(sql`
+  const result = await db.execute(sql`
     ${scope}
-    SELECT ${filteredBankLabel} AS bank, count(*)::int AS count
+    SELECT bank_name AS bank, count(*)::int AS count
     FROM filtered_transactions
     ${statementFilters(input)}
     GROUP BY 1
     ORDER BY 1
   `);
-  return result.rows;
+  return bankCountSchema.array().parse(result.rows);
 }
 
 // Une correction manuelle écrase la valeur précédente (LLM ou manuelle) ; le
@@ -304,7 +268,7 @@ export async function setTransactionCategory(
 ): Promise<void> {
   await db
     .update(transactions)
-    .set({ categoryId: categoryId, categorySource: "manual" })
+    .set({ categoryId, categorySource: "manual" })
     .where(and(eq(transactions.id, id), ownedByOrganization(organizationId)));
 }
 

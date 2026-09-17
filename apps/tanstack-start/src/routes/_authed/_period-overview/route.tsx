@@ -90,7 +90,6 @@ export const Route = createFileRoute("/_authed/_period-overview")({
       context.trpcClient.transactions.banks.query(),
       context.trpcClient.transactions.earliestDate.query(),
     ]);
-    console.log("MAX globalStats", globalStats);
 
     return {
       globalStats,

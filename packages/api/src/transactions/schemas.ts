@@ -60,6 +60,14 @@ export const globalStatsSchema = z.object({
 
 export type GlobalStats = z.infer<typeof globalStatsSchema>;
 
+export const bankLabelSchema = z.object({ bankName: z.string() });
+export const bankCountSchema = z.object({
+  bank: z.string(),
+  count: z.number().int(),
+});
+export const earliestDateSchema = z.object({ date: z.string().nullable() });
+export const totalSchema = z.object({ total: z.number().int() });
+
 // Une ligne du relevé, telle que `listTransactions` la lit en SQL brut. Le
 // schéma est ce qui garantit les alias camelCase : un `AS bookingDate` non
 // quoté sort en minuscules, et un cast de type mentirait sans rien lever.
