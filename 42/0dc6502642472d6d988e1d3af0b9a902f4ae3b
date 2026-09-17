@@ -1,0 +1,51 @@
+CLAUDE.md
+  s_ec25715e203ee1::t_3586f80e5d89f4 14,38,67
+packages/api/src/categorization.test.ts
+  s_ec25715e203ee1::t_8a4ecad28ea33d 1-104
+packages/api/src/pipeline.test.ts
+  s_ec25715e203ee1::t_4d9056e5a604a6 4,13
+packages/api/src/categorization.ts
+  s_ec25715e203ee1::t_2348ba6ed70bf3 228-229
+  s_ec25715e203ee1::t_1aa5c5f9ba7d17 117-124
+  s_ec25715e203ee1::t_50d47e62450854 1-9,11,13-20,43-48,50-55,71-76,78,109-116,125-168,170-208,220-227,230-300
+  s_ec25715e203ee1::t_61d9ac56e425b7 10,12,21-42,56-70,79-108,209-219
+  s_ec25715e203ee1::t_adc8229a1ea8cf 49,77,169
+packages/api/src/pipeline.ts
+  s_ec25715e203ee1::t_4d9056e5a604a6 2,5
+packages/db/CLAUDE.md
+  s_ec25715e203ee1::t_3586f80e5d89f4 27
+packages/api/src/transactions/queries.ts
+  s_ec25715e203ee1::t_4d9056e5a604a6 305
+apps/tanstack-start/src/routes/_authed/settings/categories/-lib/use-preview.tsx
+  s_ec25715e203ee1::t_6717124fedc526 4,44-48,65,69,79-101,106
+packages/api/CLAUDE.md
+  s_ec25715e203ee1::t_ffc6c4888a72f1 34
+  s_ec25715e203ee1::t_7bca384ae7439f 33
+  s_ec25715e203ee1::t_3586f80e5d89f4 11,23,32,35-36
+  s_ec25715e203ee1::t_49c11b0de2bc54 19-20
+apps/tanstack-start/src/routes/_authed/settings/categories/-components/transaction-preview-drawer.tsx
+  s_ec25715e203ee1::t_6717124fedc526 18-19,109
+  s_ec25715e203ee1::t_dca36dd3ce1759 37,100
+packages/api/src/router/categories.ts
+  s_ec25715e203ee1::t_b7816f570c3f97 15
+  s_ec25715e203ee1::t_602d1399f538a5 32-36
+apps/tanstack-start/src/routes/_authed/settings/categories/index.tsx
+  s_ec25715e203ee1::t_0589bffda5d544 3-5,7-9,12,20,22,24-28,30,56-71,74-113,133-134
+  s_ec25715e203ee1::t_6717124fedc526 16-17,72,114-132
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "420dc6502642472d6d988e1d3af0b9a902f4ae3b",
+  "prompts": {},
+  "sessions": {
+    "s_ec25715e203ee1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "04bb161b-4472-4254-86c3-0f523be94e92",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
