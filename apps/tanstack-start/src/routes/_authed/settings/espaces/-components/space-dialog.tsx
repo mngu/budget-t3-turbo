@@ -36,8 +36,6 @@ export interface SpaceDialogSpec {
   }[];
   choice?: string;
   onChoice?: (key: string) => void;
-  /** Chiffres de l'impact, avant la phrase : c'est ce qui décide. */
-  facts?: { value: string; label: string }[];
   input?: { label: string; placeholder?: string; value: string };
   onInput?: (value: string) => void;
   hint?: string;
@@ -139,29 +137,6 @@ export function SpaceDialog({
                   </button>
                 );
               })}
-            </div>
-          )}
-
-          {spec.facts && spec.facts.length > 0 && (
-            <div className="border-border mt-3.5 flex flex-col overflow-hidden rounded-md border">
-              {spec.facts.map((fact) => (
-                <div
-                  key={fact.label}
-                  className="border-border bg-surface-2 flex items-center gap-2.5 border-b px-3 py-2 last:border-b-0"
-                >
-                  <span
-                    className={cn(
-                      "num text-meta min-w-11 font-medium",
-                      spec.tone === "bad" ? "text-bad" : "text-foreground",
-                    )}
-                  >
-                    {fact.value}
-                  </span>
-                  <span className="text-muted-foreground text-control min-w-0">
-                    {fact.label}
-                  </span>
-                </div>
-              ))}
             </div>
           )}
 

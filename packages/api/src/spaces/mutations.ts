@@ -1,4 +1,4 @@
-import type { SpaceRole } from "./queries";
+import type { SpaceRole } from "./schemas";
 
 // Écritures de l'écran « Espaces ».
 //

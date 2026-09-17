@@ -2,11 +2,6 @@ import type { TransactionRow } from "@budget/api";
 
 export const dateFr = new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium" });
 
-export const dayMonthLongFr = new Intl.DateTimeFormat("fr-FR", {
-  day: "numeric",
-  month: "long",
-});
-
 // Sans l'année : les écrans de la revue sont déjà bornés à un mois, la répéter
 // sur chaque ligne fait passer la colonne de date sur deux lignes.
 export const dayMonthFr = new Intl.DateTimeFormat("fr-FR", {

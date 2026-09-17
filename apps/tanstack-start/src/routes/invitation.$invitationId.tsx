@@ -16,7 +16,6 @@ import { Input } from "@budget/ui/input";
 import { Spinner } from "@budget/ui/spinner";
 import { toast } from "@budget/ui/toast";
 import { authClient } from "~/auth/client";
-import { Stat } from "~/component/stat";
 import { useTRPCClient } from "~/lib/trpc";
 
 /**
@@ -196,15 +195,6 @@ function InvitationPage() {
           ? "En acceptant, vous verrez les comptes bancaires, les catégories et les transactions de cet espace, exactement comme les autres membres."
           : `${invitation.invitedBy} vous invite. Il vous faut un compte pour accéder à l'espace — il se crée ici, avec l'adresse invitée.`
       }
-      stats={
-        signedInAsInvited
-          ? [
-              { label: "Comptes", value: invitation.counts.accounts },
-              { label: "Catégories", value: invitation.counts.categories },
-              { label: "Membres", value: invitation.counts.members },
-            ]
-          : undefined
-      }
       note={
         signedInAsInvited ? "Vous pourrez quitter l'espace à tout moment." : ""
       }
@@ -282,7 +272,6 @@ function Shell({
   tone,
   title,
   body,
-  stats,
   note,
   footnote,
   primary,
@@ -294,7 +283,6 @@ function Shell({
   tone: keyof typeof TONE;
   title: string;
   body: string;
-  stats?: { label: string; value: number }[];
   note?: string;
   footnote: string;
   primary?: { label: string; onClick: () => void };
@@ -327,14 +315,6 @@ function Shell({
               {body}
             </div>
           </div>
-
-          {stats && (
-            <div className="border-border bg-surface-2 grid grid-cols-3 border-b">
-              {stats.map((stat) => (
-                <Stat key={stat.label} tile {...stat} />
-              ))}
-            </div>
-          )}
 
           {children}
 

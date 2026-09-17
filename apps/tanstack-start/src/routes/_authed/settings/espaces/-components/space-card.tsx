@@ -10,16 +10,13 @@ import type {
 import {
   EllipsisIcon,
   KeyRoundIcon,
-  LockIcon,
   LogOutIcon,
   PencilIcon,
-  ShieldCheckIcon,
   Trash2Icon,
   UserIcon,
   UsersIcon,
 } from "lucide-react";
 
-import { cn } from "@budget/ui";
 import { Badge } from "@budget/ui/badge";
 import { Button } from "@budget/ui/button";
 import {
@@ -30,26 +27,6 @@ import {
 } from "@budget/ui/dropdown-menu";
 import { Input } from "@budget/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "@budget/ui/toggle-group";
-import { Stat } from "~/component/stat";
-import { dateFr } from "~/lib/format";
-
-/** Variante de `Badge` portant le statut d'une invitation. */
-const STATUS_VARIANT: Record<
-  SpaceInvitation["status"],
-  "warn" | "ok" | "destructive" | "secondary"
-> = {
-  pending: "warn",
-  accepted: "ok",
-  expired: "destructive",
-  canceled: "secondary",
-};
-
-const STATUS_LABEL: Record<SpaceInvitation["status"], string> = {
-  pending: "En attente",
-  accepted: "Acceptée",
-  expired: "Expirée",
-  canceled: "Annulée",
-};
 
 export interface SpaceCardActions {
   onSwitch: () => void;
@@ -77,30 +54,11 @@ export function SpaceCard({
 }) {
   const shared = !space.isPersonal;
   const owner = space.role === "owner";
-  // Un espace partagé où l'on est encore seul : la carte remplace la liste des
-  // membres par une invitation en grand — il n'y a rien à lister.
-  const alone =
-    shared && space.counts.members === 1 && space.invitations.length === 0;
-  const pending = space.invitations.filter(
-    (i) => i.status === "pending",
-  ).length;
 
   return (
-    <div
-      className={cn(
-        "bg-card overflow-hidden rounded-lg border",
-        space.isActive ? "border-primary" : "border-border-strong",
-      )}
-    >
+    <div className="bg-card border-border-strong overflow-hidden rounded-lg border">
       <div className="grid grid-cols-[36px_minmax(0,1fr)_auto] items-center gap-3.5 px-4 py-3.5">
-        <span
-          className={cn(
-            "flex size-9 items-center justify-center rounded-md",
-            space.isActive
-              ? "bg-accent-soft text-primary"
-              : "bg-surface-2 text-subtle",
-          )}
-        >
+        <span className="bg-surface-2 text-subtle flex size-9 items-center justify-center rounded-md">
           {shared ? (
             <UsersIcon className="size-4" />
           ) : (
@@ -108,22 +66,11 @@ export function SpaceCard({
           )}
         </span>
 
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2.5">
-            <span className="text-subheading">{space.name}</span>
-            {space.isActive && <Badge>Espace actif</Badge>}
-            <Badge variant="outline">{owner ? "Propriétaire" : "Membre"}</Badge>
-            {!shared && <Badge variant="secondary">Personnel</Badge>}
-          </div>
-          <div className="text-subtle text-control mt-1">
-            {shared
-              ? `Créé le ${dateFr.format(new Date(space.createdAt))}${
-                  pending > 0
-                    ? ` · ${pending} invitation${pending > 1 ? "s" : ""} en attente`
-                    : ""
-                }`
-              : `Créé le ${dateFr.format(new Date(space.createdAt))} avec votre compte`}
-          </div>
+        <div className="flex min-w-0 flex-wrap items-center gap-2.5">
+          <span className="text-subheading">{space.name}</span>
+          {space.isActive && <Badge>Espace actif</Badge>}
+          <Badge variant="outline">{owner ? "Propriétaire" : "Membre"}</Badge>
+          {!shared && <Badge variant="secondary">Personnel</Badge>}
         </div>
 
         <div className="flex items-center gap-2.5">
@@ -136,38 +83,13 @@ export function SpaceCard({
         </div>
       </div>
 
-      <div className="border-border bg-surface-2 grid grid-cols-4 border-t">
-        {(
-          [
-            [space.counts.accounts, "Compte", "Comptes"],
-            [space.counts.categories, "Catégorie", "Catégories"],
-            [space.counts.transactions, "Transaction", "Transactions"],
-            [space.counts.members, "Membre", "Membres"],
-          ] as const
-        ).map(([value, singular, plural]) => (
-          <Stat
-            key={singular}
-            tile
-            value={value}
-            label={value > 1 ? plural : singular}
-          />
-        ))}
-      </div>
-
-      {shared && !alone && (
+      {shared && (
         <div className="border-border flex flex-col border-t">
-          <SectionLabel
-            label="Membres"
-            note={
-              space.counts.members > 1
-                ? `${space.counts.members} personnes voient les mêmes comptes`
-                : "1 personne"
-            }
-          />
+          <span className="label-caps px-4 pt-3.5 pb-2">Membres</span>
           {space.members.map((member) => (
             <div
               key={member.userId}
-              className="border-border grid min-h-11 grid-cols-[minmax(0,1fr)_106px_132px_78px] items-center gap-3.5 border-t px-4"
+              className="border-border grid min-h-11 grid-cols-[minmax(0,1fr)_106px_78px] items-center gap-3.5 border-t px-4"
             >
               <div className="min-w-0">
                 <div className="flex min-w-0 items-center gap-2">
@@ -192,23 +114,15 @@ export function SpaceCard({
                 )}
                 {member.role === "owner" ? "Propriétaire" : "Membre"}
               </span>
-              <span className="text-subtle num text-meta">
-                depuis le {dateFr.format(new Date(member.since))}
-              </span>
-              {/* Se retirer soi-même, c'est « Quitter » : même ligne, autre
-                  procédure — l'une part du propriétaire, l'autre de soi. */}
-              {(member.isMe || owner) && (
+              {/* Se retirer soi-même, c'est « Quitter », dans le menu. */}
+              {owner && !member.isMe && (
                 <Button
                   variant="link"
                   size="xs"
                   className="justify-self-end"
-                  onClick={() =>
-                    member.isMe
-                      ? actions.onLeave()
-                      : actions.onRemoveMember(member)
-                  }
+                  onClick={() => actions.onRemoveMember(member)}
                 >
-                  {member.isMe ? "Quitter" : "Retirer"}
+                  Retirer
                 </Button>
               )}
             </div>
@@ -216,61 +130,24 @@ export function SpaceCard({
 
           {space.invitations.length > 0 && (
             <>
-              <SectionLabel
-                label="Invitations"
-                note={
-                  pending > 0
-                    ? "le lien expire au bout de 7 jours"
-                    : "aucune invitation active"
-                }
-                bordered
-              />
+              <span className="label-caps border-border border-t px-4 pt-3.5 pb-2">
+                Invitations en attente
+              </span>
               {space.invitations.map((invitation) => (
                 <div
                   key={invitation.id}
-                  className="border-border grid min-h-11 grid-cols-[minmax(0,1fr)_106px_132px_auto] items-center gap-3.5 border-t px-4"
+                  className="border-border grid min-h-11 grid-cols-[minmax(0,1fr)_auto] items-center gap-3.5 border-t px-4"
                 >
-                  <div className="min-w-0">
-                    <div className="text-body truncate">{invitation.email}</div>
-                    <div className="text-subtle text-control truncate">
-                      invitée par {invitation.invitedBy}
-                    </div>
-                  </div>
-                  <Badge
-                    variant={STATUS_VARIANT[invitation.status]}
-                    className="w-max"
-                  >
-                    {STATUS_LABEL[invitation.status]}
-                  </Badge>
-                  <span
-                    className={cn(
-                      "num text-meta",
-                      invitation.status === "expired"
-                        ? "text-bad"
-                        : "text-subtle",
-                    )}
-                  >
-                    {invitation.status === "expired"
-                      ? `expirée le ${dateFr.format(new Date(invitation.expiresAt))}`
-                      : invitation.status === "pending"
-                        ? `expire le ${dateFr.format(new Date(invitation.expiresAt))}`
-                        : ""}
-                  </span>
-                  <div className="flex items-center justify-end gap-3">
-                    {owner &&
-                      (invitation.status === "pending" ||
-                        invitation.status === "expired") && (
-                        <Button
-                          variant="link"
-                          size="xs"
-                          onClick={() => actions.onResendInvitation(invitation)}
-                        >
-                          {invitation.status === "expired"
-                            ? "Renvoyer une invitation"
-                            : "Renvoyer"}
-                        </Button>
-                      )}
-                    {owner && invitation.status === "pending" && (
+                  <div className="text-body truncate">{invitation.email}</div>
+                  {owner && (
+                    <div className="flex items-center gap-3">
+                      <Button
+                        variant="link"
+                        size="xs"
+                        onClick={() => actions.onResendInvitation(invitation)}
+                      >
+                        Renvoyer
+                      </Button>
                       <Button
                         variant="link"
                         size="xs"
@@ -278,8 +155,8 @@ export function SpaceCard({
                       >
                         Annuler
                       </Button>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </>
@@ -292,71 +169,6 @@ export function SpaceCard({
               onSubmit={() => actions.onInvite(invite.email, invite.role)}
             />
           )}
-
-          {space.consents.length > 0 && space.counts.members > 1 && (
-            <div className="border-border flex items-start gap-2.5 border-t px-4 py-3">
-              <ShieldCheckIcon className="text-subtle mt-px size-3.5 flex-none" />
-              <div className="text-muted-foreground text-control text-pretty">
-                {space.consents.map((consent, index) => (
-                  <span key={consent.bankName}>
-                    {index > 0 && " "}
-                    L'accès bancaire de{" "}
-                    <span className="text-foreground font-medium">
-                      {consent.bankName}
-                    </span>{" "}
-                    a été autorisé par{" "}
-                    <span className="text-foreground font-medium">
-                      {consent.authorizedBy}
-                    </span>
-                    .
-                  </span>
-                ))}{" "}
-                Tous les membres voient les opérations, mais seule cette
-                personne peut renouveler l'autorisation, tous les six mois
-                environ.
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {alone && (
-        <div className="border-border flex flex-col items-center gap-3 border-t px-4 py-6">
-          <span className="text-subtle text-control max-w-105 text-center text-pretty">
-            Personne d'autre dans cet espace. Invitez quelqu'un par email : la
-            personne verra les mêmes comptes et les mêmes catégories que vous.
-          </span>
-          {owner && (
-            <div className="flex flex-wrap items-center justify-center gap-2.5">
-              <Input
-                type="email"
-                value={invite.email}
-                onChange={(e) =>
-                  onInviteChange({ ...invite, email: e.target.value })
-                }
-                placeholder="adresse email"
-                className="w-62"
-              />
-              <Button
-                size="sm"
-                onClick={() => actions.onInvite(invite.email, invite.role)}
-              >
-                Inviter
-              </Button>
-            </div>
-          )}
-        </div>
-      )}
-
-      {!shared && (
-        <div className="border-border flex items-start gap-2.5 border-t px-4 py-3">
-          <LockIcon className="text-subtle mt-px size-3.5 flex-none" />
-          <div className="text-muted-foreground text-control text-pretty">
-            Espace personnel : un seul membre, créé avec votre compte. Il peut
-            devenir un espace partagé — vous le renommez et vous invitez
-            quelqu'un, tout ce qu'il contient reste en place. L'opération ne se
-            défait pas.
-          </div>
         </div>
       )}
     </div>
@@ -379,8 +191,6 @@ function SpaceMenu({
 }) {
   const owner = space.role === "owner";
 
-  // Une entrée referme le menu d'elle-même : le `close()` qui enveloppait
-  // chaque action a disparu avec l'état local d'ouverture.
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -415,8 +225,6 @@ function SpaceMenu({
           </DropdownMenuItem>
         )}
         {owner && (
-          // L'espace personnel ne se supprime pas : l'entrée ouvre le dialogue
-          // qui l'explique, elle n'annonce donc pas une destruction.
           <DropdownMenuItem
             variant={space.isPersonal ? "default" : "destructive"}
             onClick={actions.onDelete}
@@ -466,31 +274,6 @@ function InviteForm({
       >
         Envoyer l&apos;invitation
       </Button>
-      <span className="text-subtle text-control flex-none whitespace-nowrap">
-        le lien vaut 7 jours
-      </span>
-    </div>
-  );
-}
-
-function SectionLabel({
-  label,
-  note,
-  bordered,
-}: {
-  label: string;
-  note: string;
-  bordered?: boolean;
-}) {
-  return (
-    <div
-      className={cn(
-        "flex items-baseline gap-2.5 px-4 pt-3.5 pb-2",
-        bordered && "border-border border-t",
-      )}
-    >
-      <span className="label-caps">{label}</span>
-      <span className="text-subtle text-control">{note}</span>
     </div>
   );
 }

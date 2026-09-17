@@ -17,4 +17,4 @@ export type {
   SpaceInvitation,
   SpaceMember,
   SpaceRole,
-} from "./spaces/queries";
+} from "./spaces/schemas";

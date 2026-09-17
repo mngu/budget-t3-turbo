@@ -14,7 +14,6 @@ import {
   MailIcon,
   MailXIcon,
   PencilIcon,
-  RefreshCwIcon,
   Trash2Icon,
   UserMinusIcon,
   UsersIcon,
@@ -24,9 +23,6 @@ import { useState } from "react";
 import { Button } from "@budget/ui/button";
 import { toast } from "@budget/ui/toast";
 import { authClient } from "~/auth/client";
-import { Stat } from "~/component/stat";
-import { dayMonthLongFr } from "~/lib/format";
-import { sumBy } from "~/lib/sum";
 import { useTRPCClient } from "~/lib/trpc";
 import { useRun } from "~/lib/use-run";
 
@@ -39,15 +35,14 @@ export const Route = createFileRoute("/_authed/settings/espaces/")({
       context.trpcClient.spaces.list.query(),
       context.trpcClient.spaces.incoming.query(),
     ]);
-    const members = sumBy(spaces, (space) => space.counts.members);
-    return { spaces, incoming, members };
+    return { spaces, incoming };
   },
   staticData: { title: "Espaces", aside: EspacesAside },
   component: EspacesPage,
 });
 
 /**
- * Le geste en cours de confirmation. Un seul état pour les dix dialogues : ils
+ * Le geste en cours de confirmation. Un seul état pour tous les dialogues : ils
  * s'excluent, et porter la cible dans la variante évite d'avoir à retrouver
  * « quel espace, déjà ? » au moment de confirmer.
  */
@@ -57,7 +52,6 @@ type Action =
   | { kind: "delete"; space: Space }
   | { kind: "deletePersonal" }
   | { kind: "leave"; space: Space }
-  | { kind: "switch"; space: Space }
   | { kind: "invite"; space: Space; email: string; role: SpaceRole }
   | { kind: "removeMember"; space: Space; member: SpaceMember }
   | { kind: "cancelInvitation"; space: Space; invitation: SpaceInvitation };
@@ -66,13 +60,13 @@ const CREATE_EMPTY = "vide";
 const CREATE_CONVERT = "convertir";
 
 /**
- * Les compteurs et la création, posés dans la rangée de titre par le layout
+ * La création, posée dans la rangée de titre par le layout
  * (`staticData.aside`). Le geste vit donc ici et non parmi ceux d'EspacesPage :
  * l'aside est rendu *au-dessus* de la page, aucun état de la page ne lui est
  * atteignable. Il n'en a pas besoin — le loader lui suffit.
  */
 function EspacesAside() {
-  const { spaces, members } = Route.useLoaderData();
+  const { spaces } = Route.useLoaderData();
   const trpcClient = useTRPCClient();
   const runMutation = useRun();
   const personal = spaces.find((s) => s.isPersonal);
@@ -107,13 +101,6 @@ function EspacesAside() {
 
   return (
     <div className="ml-auto flex items-center gap-4">
-      <div className="border-border flex items-stretch border-r pr-4">
-        <Stat
-          value={spaces.length}
-          label={spaces.length > 1 ? "Espaces" : "Espace"}
-        />
-        <Stat value={members} label={members > 1 ? "Membres" : "Membre"} />
-      </div>
       <Button
         onClick={() => {
           setDraft("");
@@ -150,10 +137,6 @@ function EspacesPage() {
   const [invites, setInvites] = useState<
     Record<string, { email: string; role: SpaceRole }>
   >({});
-
-  const personal = spaces.find((s) => s.isPersonal);
-  const soloBanner =
-    spaces.length === 1 && personal !== undefined ? personal : null;
 
   const inviteOf = (id: string) =>
     invites[id] ?? { email: "", role: "member" as SpaceRole };
@@ -229,16 +212,6 @@ function EspacesPage() {
         }
         return;
       }
-      case "switch":
-        // Même geste que la bascule de l'en-tête : l'espace vit dans la
-        // session, le cache des loaders du routeur servirait sinon celui de
-        // l'espace quitté.
-        setBusy(true);
-        await authClient.organization.setActive({
-          organizationId: action.space.id,
-        });
-        window.location.reload();
-        return;
       case "invite": {
         const ok = await run(
           () =>
@@ -283,6 +256,14 @@ function EspacesPage() {
         return;
       }
     }
+  };
+
+  // Même geste que la bascule de l'en-tête : l'espace vit dans la session, le
+  // cache des loaders du routeur servirait sinon celui de l'espace quitté.
+  const switchTo = async (space: Space) => {
+    setBusy(true);
+    await authClient.organization.setActive({ organizationId: space.id });
+    window.location.reload();
   };
 
   // Répondre à une invitation reçue. Pas de dialogue de confirmation, même
@@ -348,8 +329,6 @@ function EspacesPage() {
                   En acceptant, vous verrez tous les comptes, toutes les
                   catégories et tout l'historique de cet espace, comme{" "}
                   {invitation.role === "owner" ? "propriétaire" : "membre"}.
-                  Valable jusqu'au{" "}
-                  {dayMonthLongFr.format(new Date(invitation.expiresAt))}.
                 </div>
               </div>
               <div className="flex flex-none items-center gap-2">
@@ -372,40 +351,6 @@ function EspacesPage() {
         </div>
       )}
 
-      {soloBanner && (
-        <div className="border-border-strong bg-surface-2 mt-5 flex flex-wrap items-center gap-4 rounded-lg border px-5 py-4">
-          <span className="bg-card border-border-strong text-primary flex size-8 flex-none items-center justify-center rounded-md border">
-            <UsersIcon className="size-4" />
-          </span>
-          <div className="min-w-70 flex-1">
-            <div className="text-body font-semibold tracking-[-0.015em]">
-              Vous êtes seul sur cet espace
-            </div>
-            <div className="text-muted-foreground text-control mt-1 max-w-165 text-pretty">
-              Vos{" "}
-              <span className="num text-meta">
-                {soloBanner.counts.transactions.toLocaleString("fr-FR")}
-              </span>{" "}
-              transactions, vos comptes et vos catégories vivent ici. Pour
-              partager ce budget, invitez la personne{" "}
-              <span className="text-foreground font-medium">
-                dans cet espace
-              </span>{" "}
-              : rien à redéplacer, l'historique reste. Un espace neuf, lui,
-              démarre vide.
-            </div>
-          </div>
-          <Button
-            className="flex-none"
-            onClick={() =>
-              open({ kind: "share", space: soloBanner }, soloBanner.name)
-            }
-          >
-            Partager cet espace
-          </Button>
-        </div>
-      )}
-
       <div className="mt-5 flex flex-col gap-3.5">
         {spaces.map((space) => (
           <SpaceCard
@@ -416,7 +361,7 @@ function EspacesPage() {
               setInvites((s) => ({ ...s, [space.id]: next }))
             }
             actions={{
-              onSwitch: () => open({ kind: "switch", space }),
+              onSwitch: () => void switchTo(space),
               onRename: () => open({ kind: "rename", space }, space.name),
               onShare: () => open({ kind: "share", space }, space.name),
               onDelete: () =>
@@ -468,7 +413,8 @@ function createSpec(ctx: {
           {
             key: CREATE_CONVERT,
             label: "Partager mon espace actuel",
-            description: `Vos ${personal.counts.accounts} compte(s), ${personal.counts.categories} catégories et ${personal.counts.transactions.toLocaleString("fr-FR")} transactions restent en place ; l'espace change de nom et accueille d'autres membres.`,
+            description:
+              "Vos comptes, vos catégories et votre historique restent en place ; l'espace change de nom et accueille d'autres membres.",
             warning:
               "Vous n'aurez plus d'espace personnel séparé, et cela ne se défait pas.",
           },
@@ -553,25 +499,7 @@ function describe(
         icon: <Trash2Icon className="size-4" />,
         tone: "bad",
         title: `Supprimer ${action.space.name} ?`,
-        body: "Tout le contenu de l'espace est effacé pour tous ses membres, définitivement. Il n'y a pas de corbeille.",
-        facts: [
-          {
-            value: String(action.space.counts.accounts),
-            label: "compte(s) bancaire(s) déconnecté(s)",
-          },
-          {
-            value: String(action.space.counts.categories),
-            label: "catégories et leurs budgets",
-          },
-          {
-            value: action.space.counts.transactions.toLocaleString("fr-FR"),
-            label: "transactions et leur historique",
-          },
-          {
-            value: String(action.space.counts.members),
-            label: "membre(s) perdent l'accès",
-          },
-        ],
+        body: "Comptes, catégories, budgets et historique sont effacés pour tous ses membres, définitivement. Il n'y a pas de corbeille.",
         input: {
           label: "Tapez le nom de l'espace pour confirmer",
           placeholder: action.space.name,
@@ -604,15 +532,6 @@ function describe(
         cta: "Quitter l'espace",
         cancel: "Annuler",
       };
-    case "switch":
-      return {
-        icon: <RefreshCwIcon className="size-4" />,
-        tone: "primary",
-        title: `Basculer vers ${action.space.name} ?`,
-        body: "L'espace actif change pour toute la session et la page se recharge : revue, transactions et budgets repartent sur les données de cet espace.",
-        cta: "Basculer et recharger",
-        cancel: "Annuler",
-      };
     case "invite":
       return {
         icon: <MailIcon className="size-4" />,
@@ -631,7 +550,6 @@ function describe(
         tone: "bad",
         title: `Retirer ${action.member.name} de ${action.space.name} ?`,
         body: `${action.member.name} perdra l'accès aux comptes et aux transactions de cet espace. Rien n'est supprimé : les comptes appartiennent à l'espace, pas à la personne.`,
-        facts: consentFacts(action.space, action.member),
         footnote: "Vous pourrez l'inviter de nouveau.",
         cta: "Retirer",
         cancel: "Annuler",
@@ -646,20 +564,4 @@ function describe(
         cancel: "Revenir",
       };
   }
-}
-
-/**
- * Le vrai coût de retirer quelqu'un : les autorisations bancaires qu'il a
- * posées. Personne d'autre ne peut les renouveler — c'est ce que dit déjà le
- * bandeau de la carte, répété ici parce que c'est le moment de le savoir.
- */
-function consentFacts(space: Space, member: SpaceMember) {
-  const theirs = space.consents.filter((c) => c.authorizedBy === member.name);
-  if (theirs.length === 0) return undefined;
-  return [
-    {
-      value: String(theirs.length),
-      label: `connexion(s) bancaire(s) autorisée(s) par ${member.name} — à réautoriser par quelqu'un d'autre`,
-    },
-  ];
 }
