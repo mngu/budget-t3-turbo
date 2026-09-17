@@ -1,0 +1,21 @@
+apps/tanstack-start/src/routes/_authed/_period-overview/route.tsx
+  h_c1b75a3cdf5637 64-73,93
+packages/api/src/transactions/queries.ts
+  h_c1b75a3cdf5637 4,41,60,101-102,109,114,127
+packages/api/src/router/transactions.ts
+  h_c1b75a3cdf5637 16-17,35,39
+  h_c1b75a3cdf5637 15,18
+packages/api/src/transactions/schemas.ts
+  h_c1b75a3cdf5637 42-48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "0c3545d92b9c9e1841e882056140a3043c6dcfb2",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
