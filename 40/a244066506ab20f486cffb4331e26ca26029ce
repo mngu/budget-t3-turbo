@@ -1,0 +1,32 @@
+packages/api/src/spaces/mutations.ts
+  s_0dd0dcd11f7f43::t_44c5493969fb0d 1
+CLAUDE.md
+  s_0dd0dcd11f7f43::t_d5c07d4f3615a1 43,47,49
+packages/api/src/index.ts
+  s_0dd0dcd11f7f43::t_44c5493969fb0d 20
+apps/tanstack-start/src/routes/_authed/settings/espaces/-components/space-card.tsx
+  s_0dd0dcd11f7f43::t_26af3fea15f77f 59,61,69-73,86,88,92,117-118,123,125,133-135,139,141-150,158-159
+packages/api/src/spaces/schemas.ts
+  s_0dd0dcd11f7f43::t_44c5493969fb0d 1-63
+apps/tanstack-start/src/routes/_authed/settings/espaces/index.tsx
+  s_0dd0dcd11f7f43::t_9802865f078c01 38,45,63,69,261-268,364,416-417,502
+packages/api/src/spaces/queries.ts
+  s_0dd0dcd11f7f43::t_dcfd452c9763e1 21-23,42,77,103
+  s_0dd0dcd11f7f43::t_44c5493969fb0d 1-7,11,14-19,26-27,34-41,43-61,68-69,74-76,78-87,93-94,99-102,104-114,118-119,121-128,137-144
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "40a244066506ab20f486cffb4331e26ca26029ce",
+  "prompts": {},
+  "sessions": {
+    "s_0dd0dcd11f7f43": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "294de4cb-f695-4d09-9591-35cf7c1108b3",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
