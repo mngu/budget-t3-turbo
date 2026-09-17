@@ -39,6 +39,13 @@ export const transactionsSearchSchema = z.object({
 
 export type TransactionsSearch = z.infer<typeof transactionsSearchSchema>;
 
+export const statsInputSchema = transactionsSearchSchema.pick({
+  bank: true,
+  dateFrom: true,
+  dateTo: true,
+});
+export type StatsInputSchema = z.infer<typeof statsInputSchema>;
+
 export const budgetStatsSchema = z.object({
   totalBudget: z.coerce.number(),
   totalAmount: z.coerce.number(),

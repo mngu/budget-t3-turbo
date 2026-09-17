@@ -1,6 +1,7 @@
 import type {
   BudgetStats,
   GlobalStats,
+  StatsInputSchema,
   TransactionRow,
   TransactionsSearch,
 } from "./schemas";
@@ -37,8 +38,7 @@ function bankFilter(bank: TransactionsSearch["bank"]) {
   // Une liste vide vaut « tous les comptes », comme `undefined` — même lecture
   // que `selectedBanks` côté client.
   if (banks.length === 0) return sql``;
-  const label = sql.raw("coalesce(ba.display_name, ba.bank_name)");
-  return sql` AND ${inArray(label, banks)}`;
+  return sql` AND ${inArray(filteredBankLabel, banks)}`;
 }
 
 /**
@@ -57,7 +57,7 @@ function bankFilter(bank: TransactionsSearch["bank"]) {
  */
 export function filterTransactions(
   organizationId: string,
-  query: TransactionsSearch,
+  query: Partial<TransactionsSearch>,
   // Le défaut doit être sûr : un agrégat écrit demain écarte les exclues sans
   // y penser. Seuls le relevé et les pastilles de comptes (qui annoncent ce
   // que le relevé affichera) les redemandent — c'est le seul endroit d'où les
@@ -97,32 +97,21 @@ export function filterTransactions(
 // en porte le nom, l'icône, la couleur et le budget. Sans ce repli, un
 // `GROUP BY (p).name` rassemble toutes les racines — et les transactions sans
 // catégorie du tout — dans un seul seau `null`.
-const parentName = sql`COALESCE((p).name, (c).name)`;
-// …et son budget est le sien. Un `COALESCE((p).budget_amount,
-// (c).budget_amount)` serait faux ici : sous une parente **sans** budget, il
-// ferait passer celui d'une sous-catégorie pour le budget du poste.
-//
-// Sauf quand le poste est **détaillé** : ce sont alors ses sous-catégories qui
-// portent les montants, et son budget est leur somme. Elle n'en stocke aucun à
-// elle (CHECK `categories_detailed_no_amount`), il n'y a donc rien à préférer —
-// la somme est la seule valeur qui existe.
-const posteId = sql`COALESCE((p).id, (c).id)`;
-const posteDetailed = sql`COALESCE((p).budget_detailed, (c).budget_detailed)`;
 const parentBudget = sql`CASE
-        WHEN ${posteDetailed}
-          THEN (SELECT SUM(k.budget_amount) FROM categories k WHERE k.parent_id = ${posteId})
+        WHEN COALESCE((p).budget_detailed, (c).budget_detailed)
+          THEN (SELECT SUM(k.budget_amount) FROM categories k WHERE k.parent_id = COALESCE((p).id, (c).id))
         WHEN (p).name IS NULL THEN (c).budget_amount
         ELSE (p).budget_amount
       END`;
 
 export async function budgetStats(
   organizationId: string,
-  query: TransactionsSearch,
+  query: StatsInputSchema,
 ) {
   const result = await db.execute<BudgetStats>(sql`
       ${filterTransactions(organizationId, query)},
       budget_by_cat AS (
-        SELECT ${parentName} AS name, ${parentBudget} AS amount, SUM((t).amount) AS total
+        SELECT COALESCE((p).name, (c).name) AS name, ${parentBudget} AS amount, SUM((t).amount) AS total
         FROM filtered_transactions
         WHERE ${parentBudget} IS NOT NULL
         GROUP BY 1, 2
@@ -135,7 +124,7 @@ export async function budgetStats(
 
 export async function globalStats(
   organizationId: string,
-  query: TransactionsSearch,
+  query: StatsInputSchema,
 ) {
   const result = await db.execute<GlobalStats>(sql`
       ${filterTransactions(organizationId, query)}

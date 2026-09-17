@@ -61,8 +61,16 @@ export const Route = createFileRoute("/_authed/_period-overview")({
       banks,
       earliestDate,
     ] = await Promise.all([
-      context.trpcClient.transactions.globalStats.query(period),
-      context.trpcClient.transactions.budgetStats.query(period),
+      context.trpcClient.transactions.globalStats.query({
+        dateFrom: deps.dateFrom,
+        dateTo: deps.dateTo,
+        bank: deps.bank,
+      }),
+      context.trpcClient.transactions.budgetStats.query({
+        dateFrom: deps.dateFrom,
+        dateTo: deps.dateTo,
+        bank: deps.bank,
+      }),
       // `wholePeriod` et non `deps` : le périmètre de la revue est la
       // période et les comptes, jamais le poste filtré — sinon l'anneau
       // porterait le poste ouvert à 100 % de sa propre répartition. La
@@ -82,6 +90,7 @@ export const Route = createFileRoute("/_authed/_period-overview")({
       context.trpcClient.transactions.banks.query(),
       context.trpcClient.transactions.earliestDate.query(),
     ]);
+    console.log("MAX globalStats", globalStats);
 
     return {
       globalStats,

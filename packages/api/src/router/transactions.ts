@@ -12,7 +12,10 @@ import {
   setTransactionCategory,
   setTransactionExcluded,
 } from "../transactions/queries";
-import { transactionsSearchSchema } from "../transactions/schemas";
+import {
+  statsInputSchema,
+  transactionsSearchSchema,
+} from "../transactions/schemas";
 import { orgProcedure } from "../trpc";
 
 export const transactionsRouter = {
@@ -29,11 +32,11 @@ export const transactionsRouter = {
     ),
 
   globalStats: orgProcedure
-    .input(transactionsSearchSchema)
+    .input(statsInputSchema)
     .query(({ ctx, input }) => globalStats(ctx.organizationId, input)),
 
   budgetStats: orgProcedure
-    .input(transactionsSearchSchema)
+    .input(statsInputSchema)
     .query(({ ctx, input }) => budgetStats(ctx.organizationId, input)),
 
   banks: orgProcedure.query(({ ctx }) => listBankLabels(ctx.organizationId)),
