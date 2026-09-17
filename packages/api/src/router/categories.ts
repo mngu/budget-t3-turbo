@@ -12,6 +12,7 @@ import {
   updateCategoryIdentity,
 } from "../categories/mutations";
 import { categoriesOverview } from "../categories/queries";
+import { categorizeUncategorized } from "../categorization";
 import { transactionsSearchSchema } from "../transactions/schemas";
 import { orgProcedure } from "../trpc";
 
@@ -27,6 +28,11 @@ export const categoriesRouter = {
   overview: orgProcedure
     .input(transactionsSearchSchema.prefault(defaultSearch))
     .query(({ ctx, input }) => categoriesOverview(ctx.organizationId, input)),
+
+  // Même fonction qu'en fin de sync ; ici l'échec du LLM remonte à l'écran.
+  categorize: orgProcedure.mutation(({ ctx }) =>
+    categorizeUncategorized(ctx.organizationId),
+  ),
 
   create: orgProcedure
     .input(

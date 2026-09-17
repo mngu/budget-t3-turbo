@@ -15,6 +15,8 @@ import {
 import { dateFr, signedAmount } from "~/lib/format";
 import { useFormat } from "~/lib/use-format";
 
+import { PREVIEW_LIMIT } from "../-lib/use-preview";
+
 interface TransactionPreviewDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -32,7 +34,7 @@ export function TransactionPreviewDrawer({
   description,
   badge,
 }: TransactionPreviewDrawerProps) {
-  const { euro } = useFormat();
+  const { signedEuro } = useFormat();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -95,7 +97,7 @@ export function TransactionPreviewDrawer({
                       category === null && "text-warn",
                     )}
                   >
-                    {euro.format(signedAmount(txn))}
+                    {signedEuro.format(signedAmount(txn))}
                   </span>
                 </div>
               );
@@ -104,7 +106,7 @@ export function TransactionPreviewDrawer({
         </div>
 
         <DialogFooter>
-          Aperçu limité aux 25 transactions les plus récentes.
+          Aperçu limité aux {PREVIEW_LIMIT} transactions les plus récentes.
         </DialogFooter>
       </DialogContent>
     </Dialog>

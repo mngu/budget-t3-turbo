@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { syncBanks } from "./banking/fetch-transactions";
-import { categorizeUncategorized } from "./categorization/run";
+import { categorizeUncategorized } from "./categorization";
 import { performImport, performSync } from "./pipeline";
 import { importTransactions } from "./transactions/import";
 
@@ -10,7 +10,7 @@ import { importTransactions } from "./transactions/import";
 // chargerait src/db/client.ts et exigerait DATABASE_URL.
 vi.mock("./banking/fetch-transactions", () => ({ syncBanks: vi.fn() }));
 vi.mock("./transactions/import", () => ({ importTransactions: vi.fn() }));
-vi.mock("./categorization/run", () => ({ categorizeUncategorized: vi.fn() }));
+vi.mock("./categorization", () => ({ categorizeUncategorized: vi.fn() }));
 
 const syncMock = vi.mocked(syncBanks);
 const runImportMock = vi.mocked(importTransactions);

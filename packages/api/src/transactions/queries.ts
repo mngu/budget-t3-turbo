@@ -302,7 +302,7 @@ export async function bankCounts(
 }
 
 // Une correction manuelle écrase la valeur précédente (LLM ou manuelle) ; le
-// garde IS NULL de categorization/run.ts empêche le LLM d'y retoucher ensuite.
+// garde IS NULL de categorization.ts empêche le LLM d'y retoucher ensuite.
 //
 // Les **deux** côtés portent l'espace, et c'est le point à ne pas alléger : la
 // catégorie parce que son nom n'est unique que dans l'espace, la transaction

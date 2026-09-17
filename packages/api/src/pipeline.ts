@@ -1,8 +1,8 @@
 import type { SyncOutcome } from "./banking/fetch-transactions";
-import type { CategorizeResult } from "./categorization/run";
+import type { CategorizeResult } from "./categorization";
 
 import { syncBanks } from "./banking/fetch-transactions";
-import { categorizeUncategorized } from "./categorization/run";
+import { categorizeUncategorized } from "./categorization";
 import { withSingleFlight } from "./lib/single-flight";
 import { importTransactions } from "./transactions/import";
 
