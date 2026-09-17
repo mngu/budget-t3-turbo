@@ -1,0 +1,43 @@
+packages/ui/src/table.tsx
+  s_b910414977368f::t_6cd7977d9c8262 5
+  s_b910414977368f::t_b6448a6dcd2147 1,3-4,7-14,18,22,26,36,46,54-55,59,67-68,72,80-81,85,94,98,108,111,123
+  s_b910414977368f::t_3ccb8b08fd2b7f 2,6,15-17,19-21,23-25,27-35,37-45,47-53,56-58,60-66,69-71,73-79,82-84,86-93,95-97,99-107,109-110,112-122
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/transactions-table.tsx
+  s_b910414977368f::t_f5c2caa7043283 96-98,110-112
+  s_b910414977368f::t_b6448a6dcd2147 5-6,8-22,42,51-56,58-84,92-95,99-103,107-109,113-118,123-127,142,146,151,158,160-165,167,169-173,175-177,179-181,183-184,252-266
+  h_c1b75a3cdf5637 137
+  s_b910414977368f::t_d97f89c15ebcf0 128-129
+packages/ui/package.json
+  s_b910414977368f::t_6cd7977d9c8262 21,25
+apps/tanstack-start/src/lib/use-format.ts
+  h_c1b75a3cdf5637 36,38-39,42,44-45
+  h_c1b75a3cdf5637 43
+packages/ui/src/pagination.tsx
+  s_b910414977368f::t_6cd7977d9c8262 8
+  s_b910414977368f::t_f875a3936872df 53,57-62
+  s_b910414977368f::t_bf25bc983ac88c 54,63,70
+  s_b910414977368f::t_7bd37d90958a1f 10
+  s_b910414977368f::t_b6448a6dcd2147 1-7,21,34,38,42-45,47,72,77,82,90,95,100,108,121,125-126,128,139
+  s_b910414977368f::t_3ccb8b08fd2b7f 9,11-20,22-33,35-37,39-41,46,48-52,55-56,64-69,71,73-76,78-81,83-89,91-94,96-99,101-107,109-120,122-124,127,129-138
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "ef0c1dc891f49619c45ed61245db16f1f12084ee",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_b910414977368f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "327ec21f-7056-49db-bea9-2d4ab1c75c3d",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
