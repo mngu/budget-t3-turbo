@@ -10,12 +10,15 @@ import { RING_RADIUS, TUBE_RADIUS, useTuning } from "./tuning";
 type Props = {
   /** Milieu de l'arc, dans le repère local du segment. */
   angle: number;
+  /** Rotation du segment autour de l'anneau : `angle` seul ne dit pas de quel
+   *  côté de l'anneau l'intitulé tombe. */
+  rotation: number;
   /** Teinte de la catégorie, déjà passée par `resolveCategoryColor`. */
   color: string;
   children?: ReactNode;
 };
 
-export function SegmentLabel({ angle, color, children }: Props) {
+export function SegmentLabel({ angle, rotation, color, children }: Props) {
   const { resolvedTheme } = useTheme();
   // `labelLift` décolle les étiquettes du plan de l'anneau : en perspective
   // elles forment un second anneau et cessent de se chevaucher dans le bas.
@@ -56,8 +59,18 @@ export function SegmentLabel({ angle, color, children }: Props) {
         transparent
         opacity={0.35}
       />
+      {/* `Html` pose le coin haut gauche du bloc sur le point : à gauche de
+          l'anneau, l'intitulé partirait vers la droite, dans les arcs. Le bloc
+          s'accroche donc par le côté qui regarde l'anneau, à mi-hauteur du trait. */}
       <Html position={label}>
-        <div style={{ fontSize: `${labelSize}px` }}>{children}</div>
+        <div
+          style={{
+            fontSize: `${labelSize}px`,
+            transform: `translate(${Math.cos(rotation + angle) < 0 ? "-100%" : "0"}, -50%)`,
+          }}
+        >
+          {children}
+        </div>
       </Html>
     </>
   );

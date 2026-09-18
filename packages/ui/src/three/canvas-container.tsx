@@ -1,3 +1,4 @@
+import type { ResolvedTheme } from "../theme";
 import type { ReactNode } from "react";
 
 import { Environment, Lightformer } from "@react-three/drei";
@@ -11,6 +12,7 @@ import { Leva, useControls } from "leva";
 import { useEffect, useRef } from "react";
 import { MathUtils, PerspectiveCamera } from "three";
 
+import { useTheme } from "../theme";
 import { DEFAULT_TUNING, TuningContext } from "./tuning";
 
 /** Position de repos, celle qu'occupait `PerspectiveCamera`. */
@@ -18,6 +20,45 @@ const CAMERA: [number, number, number] = [0, -5, 20];
 /** Vitesse de rattrapage de `damp` — indépendante du framerate, contrairement
  *  à un `lerp` à facteur constant. */
 const LAMBDA = 3;
+
+/**
+ * Lumières et halo par thème. Le jeu sombre détache les tubes du fond par un
+ * liseré clair (contre-jour) ; sur fond blanc ce liseré fond dans le fond et
+ * c'est un flanc plus sombre qui détache, d'où un contre-jour presque nul et
+ * un remplissage plus bas en clair. Le halo est additif : sur blanc il ne peut
+ * pas déborder de l'arc, il doit donc le faire rayonner de l'intérieur.
+ */
+const SCENE: Record<
+  ResolvedTheme,
+  {
+    lightKey: number;
+    lightRim: number;
+    lightFill: number;
+    lightFillColor: string;
+    luminanceThreshold: number;
+    radius: number;
+    intensity: number;
+  }
+> = {
+  dark: {
+    lightKey: 3.4,
+    lightRim: 2.3,
+    lightFill: 6.6,
+    lightFillColor: "#b8c8ff",
+    luminanceThreshold: 0.12,
+    radius: 0.4,
+    intensity: 0.45,
+  },
+  light: {
+    lightKey: 1.8,
+    lightRim: 0.3,
+    lightFill: 7,
+    lightFillColor: "#ffffff",
+    luminanceThreshold: 0,
+    radius: 0.6,
+    intensity: 1.2,
+  },
+};
 
 type CameraProps = {
   sway: number;
@@ -79,35 +120,35 @@ export function CanvasContainer({ children }: Props) {
     sway: { value: 2.2, min: 0, max: 6, step: 0.1 },
   });
 
-  const lights = useControls("Lumières", {
-    lightKey: { value: 3.4, min: 0, max: 12, step: 0.1 },
-    lightRim: { value: 2.3, min: 0, max: 12, step: 0.1 },
-    lightFill: { value: 6.6, min: 0, max: 12, step: 0.1 },
-    lightFillColor: "#b8c8ff",
-  });
+  const { resolvedTheme } = useTheme();
+  const scene = SCENE[resolvedTheme];
+  const [lights, setLights] = useControls("Lumières", () => ({
+    lightKey: { value: scene.lightKey, min: 0, max: 12, step: 0.1 },
+    lightRim: { value: scene.lightRim, min: 0, max: 12, step: 0.1 },
+    lightFill: { value: scene.lightFill, min: 0, max: 12, step: 0.1 },
+    lightFillColor: scene.lightFillColor,
+  }));
 
   // Seuil à 0 : seul l'arc survolé (`<Select>`) entre dans la passe, il doit
   // rayonner en entier, dans sa teinte — pas seulement ses reflets.
-  const bloom = useControls("Halo", {
+  const [bloom, setBloom] = useControls("Halo", () => ({
     luminanceThreshold: {
-      value: 0.12,
+      value: scene.luminanceThreshold,
       min: 0,
       max: 1,
       step: 0.01,
     },
-    radius: {
-      value: 0.4,
-      min: 0,
-      max: 1,
-      step: 0.01,
-    },
-    intensity: {
-      value: 0.45,
-      min: 0,
-      max: 5,
-      step: 0.05,
-    },
-  });
+    radius: { value: scene.radius, min: 0, max: 1, step: 0.01 },
+    intensity: { value: scene.intensity, min: 0, max: 5, step: 0.05 },
+  }));
+
+  // Un tableau de dépendances sur `useControls` ne remet à jour que les bornes,
+  // jamais la valeur : c'est `set` qui ramène les curseurs sur le jeu du thème.
+  useEffect(() => {
+    const { lightKey, lightRim, lightFill, lightFillColor, ...halo } = scene;
+    setLights({ lightKey, lightRim, lightFill, lightFillColor });
+    setBloom(halo);
+  }, [scene, setLights, setBloom]);
 
   const tuning = useControls("Matière", {
     materialRoughness: {
@@ -184,6 +225,7 @@ export function CanvasContainer({ children }: Props) {
           <Lightformer
             form="rect"
             intensity={lights.lightKey}
+            color={lights.lightFillColor}
             position={[0, 6, 8]}
             scale={[12, 12, 1]}
           />
@@ -193,6 +235,7 @@ export function CanvasContainer({ children }: Props) {
           <Lightformer
             form="ring"
             intensity={lights.lightRim}
+            color={lights.lightFillColor}
             position={[0, -7, -9]}
             scale={9}
           />

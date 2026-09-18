@@ -28,7 +28,7 @@ import {
   setMonthStartDay,
   toISODate,
 } from "~/lib/date";
-import { dateFr, dayMonthFr } from "~/lib/format";
+import { dateFr } from "~/lib/format";
 import { useRevueSearch } from "~/lib/use-revue-search";
 
 const monthFr = new Intl.DateTimeFormat("fr-FR", {
@@ -283,15 +283,6 @@ export function PeriodPicker() {
               />
 
               <div className="mt-2.5 flex items-center gap-2.5">
-                <span className="text-subtle num text-meta">
-                  {draft
-                    ? `Début : ${dayMonthFr.format(draft)} — choisir la fin`
-                    : from && to
-                      ? // Les bornes en clair : sur un cycle qui ne commence pas
-                        // le 1er, l'intitulé de l'en-tête ne dit qu'un nom de mois.
-                        `${dayMonthFr.format(from)} – ${dayMonthFr.format(to)} · ${differenceInCalendarDays(to, from) + 1} j`
-                      : "Toute la période"}
-                </span>
                 <button
                   type="button"
                   className="text-primary text-control ml-auto"

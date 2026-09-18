@@ -1,15 +1,19 @@
 import type { ReactNode } from "react";
 
 import { animated, config, useSpring } from "@react-spring/three";
-import { useCursor } from "@react-three/drei";
+import { Html, useCursor } from "@react-three/drei";
 import { Select } from "@react-three/postprocessing";
 import { useState } from "react";
 
 import { RING_RADIUS, TUBE_RADIUS, useTuning } from "./tuning";
 
-// L'app n'a pas drei en dépendance : c'est par ici qu'elle pose une carte
-// HTML au centre de l'anneau.
-export { Html } from "@react-three/drei";
+// La carte HTML au centre de l'anneau. Un composant et non un réexport de
+// `Html` : rendu depuis un fichier de l'app, `Html` recevrait le
+// `data-insp-path` du plugin de dev et le reverserait dans son `group` (voir
+// vite.config.ts) ; ici la prop tombe sur un composant React et s'y arrête.
+export function SegmentDetail({ children }: { children: ReactNode }) {
+  return <Html center>{children}</Html>;
+}
 
 /** Partagé par le tore et ses bouchons : voir plus bas. */
 const RADIAL_SEGMENTS = 24;

@@ -7,7 +7,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 
 import { NO_CATEGORY_NAME } from "@budget/api/schemas";
 import { CanvasContainer } from "@budget/ui/canvas-container";
-import { Html, Segment } from "@budget/ui/segment";
+import { Segment, SegmentDetail } from "@budget/ui/segment";
 import { SegmentLabel } from "@budget/ui/segment-label";
 import { CategoryIcon } from "~/component/category-icon";
 import { useCategoryColor, useShadeCategoryColor } from "~/lib/category-color";
@@ -113,7 +113,11 @@ function RouteComponent() {
             }
           >
             {shouldDisplayName && (
-              <SegmentLabel angle={arc / 2} color={resolvedColor}>
+              <SegmentLabel
+                angle={arc / 2}
+                rotation={rotationZ}
+                color={resolvedColor}
+              >
                 <div className="flex items-center gap-2">
                   <CategoryIcon
                     name={icon}
@@ -130,7 +134,7 @@ function RouteComponent() {
               </SegmentLabel>
             )}
             {labelName === currentHover && (
-              <Html center>
+              <SegmentDetail>
                 <div className="flex flex-col items-center justify-center gap-2">
                   <CategoryIcon
                     name={icon}
@@ -151,7 +155,7 @@ function RouteComponent() {
                   </div>
                   {selectedCategory && <RingBackButton onClick={back} />}
                 </div>
-              </Html>
+              </SegmentDetail>
             )}
           </Segment>
         );
