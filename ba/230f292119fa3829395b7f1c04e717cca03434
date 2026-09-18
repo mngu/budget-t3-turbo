@@ -1,0 +1,41 @@
+apps/tanstack-start/src/component/period-picker.tsx
+  h_c1b75a3cdf5637 31
+packages/ui/src/three/segment-label.tsx
+  s_da3c7dfbe961c8::t_1883a045a1f305 13-15,21,69
+  s_da3c7dfbe961c8::t_9e2be086bb3bb0 62-64,66-68,70-73
+packages/ui/src/three/canvas-container.tsx
+  s_da3c7dfbe961c8::t_f06727090f0618 125-130,134,136,141-151
+  s_da3c7dfbe961c8::t_cd16b82de64057 1
+  s_da3c7dfbe961c8::t_97b1c235a25a13 27
+  s_da3c7dfbe961c8::t_f21216268a4245 53-56
+  h_c1b75a3cdf5637 228,238
+  s_da3c7dfbe961c8::t_a6135d0f7aa64a 15,24-26,28-52,57-62,123-124
+packages/ui/src/three/segment.tsx
+  s_da3c7dfbe961c8::t_9d20f2ea5966f7 4,10-16
+apps/tanstack-start/CLAUDE.md
+  s_da3c7dfbe961c8::t_dc9ba122a3b537 34
+apps/tanstack-start/src/routes/_authed/_period-overview/index.tsx
+  s_da3c7dfbe961c8::t_9d20f2ea5966f7 10,137,158
+  s_da3c7dfbe961c8::t_1883a045a1f305 116-120
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "ba230f292119fa3829395b7f1c04e717cca03434",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_da3c7dfbe961c8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "921799e8-cece-440c-8ebc-6f1ca888d121",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
