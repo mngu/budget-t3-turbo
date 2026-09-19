@@ -1,0 +1,20 @@
+packages/ui/src/three/canvas-container.tsx
+  s_ef8fab3d1223e3::t_b062635d984a85 233-236
+  s_ef8fab3d1223e3::t_668d531d0ba59b 232
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "83fa9066c0eb6094db45e0a053154b759e860bb6",
+  "prompts": {},
+  "sessions": {
+    "s_ef8fab3d1223e3": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f47298b42ffebJRlrHacRVIBfs",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
