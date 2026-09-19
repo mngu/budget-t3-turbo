@@ -104,7 +104,14 @@ export function AppHeader({ title }: { title?: string }) {
   const linkSearch = isRevue ? search : SEARCH_DEFAULTS;
 
   return (
-    <header className="bg-background relative z-30 flex h-13 flex-none items-center gap-3 px-4 transition-shadow duration-200 sm:gap-3.5 sm:px-5">
+    <header
+      className={cn(
+        "bg-background relative z-30 flex-none items-center gap-x-3 px-4 transition-shadow duration-200 sm:gap-x-3.5 sm:px-5",
+        isRevue
+          ? "grid h-26 grid-cols-2 grid-rows-2 md:h-13 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:grid-rows-1"
+          : "flex h-13",
+      )}
+    >
       {/* La marque *est* le retour à la revue. C'est le seul lien de la barre
           depuis que la rangée de navigation en est partie : les liens entre les
           deux écrans de la revue vivent maintenant dans la zone centrale, mais
@@ -114,7 +121,7 @@ export function AppHeader({ title }: { title?: string }) {
         to="/"
         search={linkSearch}
         title="Revue du mois"
-        className="flex items-center gap-2.5 hover:opacity-60"
+        className="flex items-center gap-2.5 justify-self-start hover:opacity-60"
       >
         <div className="bg-primary size-2.5 rounded-xs" />
         <span className="text-body hidden font-semibold tracking-[-0.02em] sm:inline">
@@ -131,10 +138,17 @@ export function AppHeader({ title }: { title?: string }) {
         </div>
       )}
 
-      {isRevue && <PeriodPicker />}
+      {isRevue && (
+        <div className="col-span-2 row-start-2 flex min-w-0 justify-center md:col-span-1 md:col-start-2 md:row-start-1">
+          <PeriodPicker />
+        </div>
+      )}
 
       <div
-        className={cn("flex items-center gap-3", isRevue ? "ml-1" : "ml-auto")}
+        className={cn(
+          "ml-auto flex items-center gap-3",
+          isRevue && "col-start-2 row-start-1 md:col-start-3",
+        )}
       >
         {isRevue && <BankPicker />}
         <SettingsMenu page={title} />

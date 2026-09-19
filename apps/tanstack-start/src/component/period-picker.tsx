@@ -28,7 +28,7 @@ import {
   setMonthStartDay,
   toISODate,
 } from "~/lib/date";
-import { dateFr } from "~/lib/format";
+import { dateFr, dayMonthFr } from "~/lib/format";
 import { useRevueSearch } from "~/lib/use-revue-search";
 
 const monthFr = new Intl.DateTimeFormat("fr-FR", {
@@ -54,7 +54,11 @@ function periodLabel(from?: Date, to?: Date, startDay = 1) {
         addDays(from, Math.floor(differenceInCalendarDays(to, from) / 2)),
       ),
     );
-  return `${dateFr.format(from)} – ${dateFr.format(to)}`;
+  const start =
+    from.getFullYear() === to.getFullYear()
+      ? dayMonthFr.format(from)
+      : dateFr.format(from);
+  return `${start} – ${dateFr.format(to)}`;
 }
 
 interface Preset {
@@ -92,18 +96,7 @@ function buildPresets(anchor: Date, startDay: number): Preset[] {
 }
 
 /**
- * Sélecteur de période de l'en-tête : `Juillet 2026 ▾  [‹|›]`. L'intitulé ouvre
- * un panneau à deux colonnes (raccourcis, calendrier) et les deux flèches, qui
- * sautent de mois en mois, sont **groupées à sa droite** dans une coque à bord.
- * Elles l'encadraient sans coque jusqu'à la révision de maquette du 2026-08-07 :
- * un pas d'un mois est un seul contrôle à deux sens, pas deux boutons posés de
- * part et d'autre d'un troisième qui, lui, ouvre un panneau.
- *
- * La plage n'est écrite dans l'URL qu'au **second** clic du calendrier, jamais
- * au premier : la borne de début vit dans `draft` en attendant sa fin. Pousser
- * `dateFrom` seul rejouerait tous les loaders de l'app sur une période ouverte —
- * un aller-retour complet, visible, pour un état que l'utilisateur n'a pas fini
- * de composer.
+ * Keep incomplete ranges local so the loaders only run once both dates are chosen.
  */
 export function PeriodPicker() {
   const { search, setSearch } = useRevueSearch();
@@ -170,7 +163,13 @@ export function PeriodPicker() {
   };
 
   return (
-    <div className="ml-auto flex min-w-0 items-center gap-1">
+    <div className="grid w-72 max-w-full grid-cols-[2rem_minmax(0,1fr)_2rem] items-center gap-1">
+      <StepButton
+        label="Période précédente"
+        onClick={() => shiftMonth(-1)}
+        disabled={!monthReachable(stepTarget(-1))}
+        glyph="‹"
+      />
       <Popover
         open={open}
         onOpenChange={(next) => {
@@ -185,22 +184,23 @@ export function PeriodPicker() {
             <button
               type="button"
               title="Choisir une période"
-              // `truncate` : une plage libre (« 1 sept. 2026 – 30 sept. 2026 ») ne tient
-              // pas dans un en-tête de téléphone, les flèches et les comptes priment.
-              className="num hover:text-foreground flex h-6 min-w-0 items-center gap-1.5 pr-0.5 font-medium tracking-[-0.01em] whitespace-nowrap"
+              className="num hover:text-foreground min-h-8 min-w-0 text-center font-medium tracking-[-0.01em]"
               // Le serveur ignore le jour de départ : l'intitulé rendu par SSR
               // peut différer de celui du client jusqu'à la réécriture d'URL.
               suppressHydrationWarning
               {...props}
             >
-              <span className="truncate">
-                {periodLabel(from, to, startDay)}
+              <span>{periodLabel(from, to, startDay)}</span>
+              <span
+                className="text-subtle text-label ml-1.5"
+                aria-hidden="true"
+              >
+                ▾
               </span>
-              <span className="text-subtle text-label flex-none">▾</span>
             </button>
           )}
         />
-        <PopoverContent align="end" className="w-auto gap-0 p-3.5">
+        <PopoverContent align="center" className="w-auto gap-0 p-3.5">
           <div className="flex gap-4">
             <div className="flex w-28 flex-none flex-col gap-0.5 pt-0.5">
               {buildPresets(anchor, startDay).map((preset) => {
@@ -300,21 +300,12 @@ export function PeriodPicker() {
         </PopoverContent>
       </Popover>
 
-      <div className="border-border bg-card ml-1.5 flex items-center gap-px rounded-md border p-px">
-        <StepButton
-          label="Période précédente"
-          onClick={() => shiftMonth(-1)}
-          disabled={!monthReachable(stepTarget(-1))}
-          glyph="‹"
-        />
-        <span className="bg-border h-3 w-px" />
-        <StepButton
-          label="Période suivante"
-          onClick={() => shiftMonth(1)}
-          disabled={!monthReachable(stepTarget(1))}
-          glyph="›"
-        />
-      </div>
+      <StepButton
+        label="Période suivante"
+        onClick={() => shiftMonth(1)}
+        disabled={!monthReachable(stepTarget(1))}
+        glyph="›"
+      />
     </div>
   );
 }
@@ -337,7 +328,7 @@ function StepButton({
       aria-label={label}
       onClick={onClick}
       disabled={disabled}
-      className="text-subtle hover:bg-accent hover:text-foreground text-body touch-target flex h-5 w-6 items-center justify-center rounded-sm disabled:pointer-events-none disabled:opacity-30"
+      className="text-subtle hover:bg-accent hover:text-foreground text-body touch-target flex size-8 items-center justify-center rounded-sm disabled:pointer-events-none disabled:opacity-30"
     >
       {glyph}
     </button>
