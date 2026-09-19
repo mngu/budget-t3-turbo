@@ -1,0 +1,89 @@
+apps/tanstack-start/src/lib/category-color.ts
+  s_957e260fd2c366::t_5071f527d68eec 24-28,31-41,56-60
+apps/tanstack-start/src/component/app-header.tsx
+  s_957e260fd2c366::t_9aec0378476f0e 120
+  s_957e260fd2c366::t_1758935584ade4 107
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/kpi-band.tsx
+  s_957e260fd2c366::t_f9eb97d914144d 23,36
+apps/tanstack-start/src/routes/_authed/settings/banques/-components/connection-card.tsx
+  s_957e260fd2c366::t_06092fc701b71b 33,68
+apps/tanstack-start/src/routes/login.tsx
+  s_957e260fd2c366::t_463127ef82ce6a 99
+apps/tanstack-start/src/routes/_authed/_period-overview/index.tsx
+  s_957e260fd2c366::t_199bfbc5e80ea6 1-28,35,37-42
+  s_957e260fd2c366::t_9aec0378476f0e 43
+apps/tanstack-start/src/lib/category-color.test.ts
+  s_957e260fd2c366::t_20580fd1ec0389 21-28
+apps/tanstack-start/src/routes/_authed/settings/banques/index.tsx
+  s_957e260fd2c366::t_06092fc701b71b 39
+apps/tanstack-start/src/styles.css
+  s_957e260fd2c366::t_199bfbc5e80ea6 301-315
+  s_957e260fd2c366::t_64b0cc6b3a84ce 10
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/exclude-badge.tsx
+  s_957e260fd2c366::t_199bfbc5e80ea6 47-48,51
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/transactions-table.tsx
+  s_957e260fd2c366::t_1758935584ade4 60-64
+  s_957e260fd2c366::t_9aec0378476f0e 66-68,169-175,178,182,186
+  s_957e260fd2c366::t_199bfbc5e80ea6 104,118,266
+apps/tanstack-start/src/component/bank-picker.tsx
+  s_957e260fd2c366::t_9aec0378476f0e 4,79,83-85
+  s_957e260fd2c366::t_1758935584ade4 81-82
+apps/tanstack-start/src/routes/_authed/settings/categories/-components/category-overview.tsx
+  s_957e260fd2c366::t_06092fc701b71b 110,139-140,235
+  s_957e260fd2c366::t_8e93ce235010ef 111,237,249
+packages/ui/src/dialog.tsx
+  s_957e260fd2c366::t_06092fc701b71b 77
+apps/tanstack-start/src/routes/_authed/settings/route.tsx
+  s_957e260fd2c366::t_9aec0378476f0e 21-22
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/refine-bar.tsx
+  s_957e260fd2c366::t_199bfbc5e80ea6 127,143-145
+apps/tanstack-start/src/routes/_authed/_period-overview/route.tsx
+  s_957e260fd2c366::t_9aec0378476f0e 120
+  s_957e260fd2c366::t_199bfbc5e80ea6 5,9,116-117,137-144
+  s_957e260fd2c366::t_9e33befacb846f 121,132
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/overview-header.tsx
+  s_957e260fd2c366::t_9aec0378476f0e 62-64,66-70
+  s_957e260fd2c366::t_5083c764473647 65
+  s_957e260fd2c366::t_f9eb97d914144d 61
+  s_957e260fd2c366::t_199bfbc5e80ea6 18,39-57,59-60
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/ring.tsx
+  s_957e260fd2c366::t_199bfbc5e80ea6 1-189
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/category-selector/category-path-picker.tsx
+  s_957e260fd2c366::t_1758935584ade4 36-40
+apps/tanstack-start/src/routes/_authed/settings/espaces/-components/space-card.tsx
+  s_957e260fd2c366::t_06092fc701b71b 92
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/breakdown-list.tsx
+  s_957e260fd2c366::t_20580fd1ec0389 98-100
+  s_957e260fd2c366::t_199bfbc5e80ea6 5,95-97
+apps/tanstack-start/src/component/period-picker.tsx
+  s_957e260fd2c366::t_97de2d106c4067 173,188-190
+  s_957e260fd2c366::t_199bfbc5e80ea6 340
+  s_957e260fd2c366::t_20580fd1ec0389 196-198
+packages/ui/src/three/canvas-container.tsx
+  s_957e260fd2c366::t_9aec0378476f0e 235
+  s_957e260fd2c366::t_ed084eb397813c 99,111-116
+  s_957e260fd2c366::t_fff3a3b02ed3be 23-29,101-110,125
+apps/tanstack-start/src/routes/_authed/route.tsx
+  s_957e260fd2c366::t_9aec0378476f0e 29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "ec7b2ce149b228e38ad6a0a8ed7c6dc3f7957921",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_957e260fd2c366": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d5d7d1aa-d575-4635-b0ca-0ee8eef55039",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
