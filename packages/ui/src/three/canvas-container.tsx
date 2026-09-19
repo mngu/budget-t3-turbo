@@ -229,7 +229,11 @@ export function CanvasContainer({ children }: Props) {
   });
 
   return (
-    <div id="canvas-container" className="flex min-h-0 min-w-0 flex-1 flex-col">
+    // Keep Drei's depth-based HTML z-indices below application overlays.
+    <div
+      id="canvas-container"
+      className="isolate flex min-h-0 min-w-0 flex-1 flex-col"
+    >
       {/* `fill` rend le panneau en flux dans son parent au lieu du coin haut
           droit fixé par leva : c'est le wrapper qui choisit le coin. */}
       <div className="fixed bottom-4 left-4 z-50 hidden w-[280px] md:block">
