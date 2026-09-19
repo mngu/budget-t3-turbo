@@ -1,0 +1,46 @@
+apps/tanstack-start/src/component/app-header.tsx
+  s_ef8fab3d1223e3::t_eb001ced6beb4a 109-112,141-145
+  s_ef8fab3d1223e3::t_a22e629ac66fe1 148-151
+  s_ef8fab3d1223e3::t_be15d327d152ff 107-108,113-114,124
+AGENTS.md
+  s_b517c99309bdeb::t_3ea0c04d330abb 6,14,18-19,27,38,47-48,50-51
+  s_b517c99309bdeb::t_3f8b222edac5ed 28
+  s_b517c99309bdeb::t_03336e66d2a7e0 1-5,7-13,15-17,20-26,29-37,39-46,49
+apps/tanstack-start/src/component/period-picker.tsx
+  s_ef8fab3d1223e3::t_a22e629ac66fe1 57-60,193-198
+  h_c1b75a3cdf5637 166
+  s_ef8fab3d1223e3::t_ae2a3be037f378 31,61,99,167-172,187,203,303-308,331
+apps/tanstack-start/src/component/bank-picker.tsx
+  s_ef8fab3d1223e3::t_66388de04960cc 10,44-50,60,62-68,115-116
+  s_ef8fab3d1223e3::t_d1719e9904d511 11-18,28,125-126,128,134
+  s_ef8fab3d1223e3::t_0acc34fcaf5402 69-114
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "4dc64deb70ab4b663aed72e1dde84557f5e2ddb3",
+  "prompts": {},
+  "humans": {
+    "h_c1b75a3cdf5637": {
+      "author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_b517c99309bdeb": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f473a1c99ffeLUpV3XQ0sLHhEa",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    },
+    "s_ef8fab3d1223e3": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f47298b42ffebJRlrHacRVIBfs",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
