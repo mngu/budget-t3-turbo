@@ -1,0 +1,226 @@
+packages/ui/src/button.tsx
+  s_7bdbce4b33d61b::t_9e6afb29e8864b 21
+packages/ui/src/three/canvas-container.tsx
+  s_7bdbce4b33d61b::t_69dcb651442889 19,22,25,63,74,83,134,146,217,219,228,245
+packages/api/src/categorization.ts
+  s_7bdbce4b33d61b::t_4cef964bad5b1a 38-39,62-64,93,108,145-146,232
+packages/api/src/router/sync.ts
+  s_7bdbce4b33d61b::t_4cef964bad5b1a 10
+apps/tanstack-start/src/component/stat.tsx
+  s_7bdbce4b33d61b::t_82f021cb68b67d 11
+packages/ui/src/dialog.tsx
+  s_7bdbce4b33d61b::t_9e6afb29e8864b 47
+  s_7bdbce4b33d61b::t_676dbb021d7e48 62
+packages/api/src/router/categories.ts
+  s_7bdbce4b33d61b::t_4cef964bad5b1a 28
+tooling/typescript/base.json
+  s_7bdbce4b33d61b::t_89bf3720ffa433 6
+packages/ui/src/three/segment-label.tsx
+  s_7bdbce4b33d61b::t_69dcb651442889 11,13,15,22,56
+packages/db/src/index.ts
+  s_7bdbce4b33d61b::t_89bf3720ffa433 2
+packages/ui/src/three/tuning.ts
+  s_7bdbce4b33d61b::t_69dcb651442889 3-4,14,17
+docker-initdb/01-pg_trgm.sql
+  s_7bdbce4b33d61b::t_4d457df1c02a8c 1
+packages/api/src/spaces/schemas.ts
+  s_7bdbce4b33d61b::t_d89de02b878ca8 39
+packages/api/src/pipeline.ts
+  s_7bdbce4b33d61b::t_4cef964bad5b1a 9,17,45
+packages/api/src/spaces/mutations.ts
+  s_7bdbce4b33d61b::t_d89de02b878ca8 3-4,14,60-61,121,185,205,232,301
+apps/tanstack-start/src/routes/_authed/settings/espaces/-components/space-dialog.tsx
+  s_7bdbce4b33d61b::t_740ca509feea69 33
+deploy/docker-compose.yml
+  s_7bdbce4b33d61b::t_4d457df1c02a8c 1-2,15,19,38,41
+packages/ui/src/index.ts
+  s_7bdbce4b33d61b::t_9e6afb29e8864b 4-5
+packages/shared/src/icons.ts
+  s_7bdbce4b33d61b::t_9e6afb29e8864b 1,4,6
+apps/tanstack-start/src/routes/_authed/settings/banques/-components/sync-status.tsx
+  s_7bdbce4b33d61b::t_740ca509feea69 10-11
+packages/api/src/transactions/import.ts
+  s_7bdbce4b33d61b::t_4cef964bad5b1a 13,25,68
+packages/api/src/banking/fetch-transactions.ts
+  s_7bdbce4b33d61b::t_d89de02b878ca8 18,95
+packages/api/src/transactions/queries.ts
+  s_7bdbce4b33d61b::t_4cef964bad5b1a 19,25,31,87,112,163,173,184,205,228
+apps/tanstack-start/src/routes/_authed/settings/banques/ajouter.tsx
+  s_7bdbce4b33d61b::t_740ca509feea69 119,238
+packages/shared/src/colors.ts
+  s_7bdbce4b33d61b::t_9e6afb29e8864b 5,10-11,32
+apps/tanstack-start/src/routes/_authed/settings/categories/-lib/use-preview.tsx
+  s_7bdbce4b33d61b::t_740ca509feea69 10-11
+apps/tanstack-start/src/styles.css
+  s_7bdbce4b33d61b::t_56107e46954a85 7,18,21-23,27,30,33,36,39-44,93-97,99,101-102,104,107,117,119,178,219
+apps/tanstack-start/src/lib/use-format.ts
+  s_7bdbce4b33d61b::t_699107ef02c79e 31
+apps/tanstack-start/src/lib/use-revue-search.ts
+  s_7bdbce4b33d61b::t_699107ef02c79e 7-8,13
+apps/tanstack-start/src/auth/server.ts
+  s_7bdbce4b33d61b::t_699107ef02c79e 11
+apps/tanstack-start/src/lib/use-run.ts
+  s_7bdbce4b33d61b::t_699107ef02c79e 5
+apps/tanstack-start/src/routes/_authed/_period-overview/index.tsx
+  s_7bdbce4b33d61b::t_680edc77979706 4,7
+packages/api/src/pipeline.test.ts
+  s_7bdbce4b33d61b::t_4cef964bad5b1a 8
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/transactions-table.tsx
+  s_7bdbce4b33d61b::t_680edc77979706 44,51
+  s_7bdbce4b33d61b::t_7161ce1f0d0301 141
+packages/api/src/lib/single-flight.ts
+  s_7bdbce4b33d61b::t_4cef964bad5b1a 1
+packages/api/src/router/transactions.ts
+  s_7bdbce4b33d61b::t_4cef964bad5b1a 23
+packages/auth/src/index.ts
+  s_7bdbce4b33d61b::t_89bf3720ffa433 20-21,59,92,94,107
+packages/api/src/categories/queries.ts
+  s_7bdbce4b33d61b::t_d89de02b878ca8 30,65
+apps/tanstack-start/src/lib/transactions-search.ts
+  s_7bdbce4b33d61b::t_676dbb021d7e48 19
+  s_7bdbce4b33d61b::t_82f021cb68b67d 5-6,29,47,54
+apps/tanstack-start/src/component/search-input.tsx
+  s_7bdbce4b33d61b::t_82f021cb68b67d 42
+packages/api/src/router/connections.ts
+  s_7bdbce4b33d61b::t_4cef964bad5b1a 34
+apps/tanstack-start/src/routes/api/trpc.$.ts
+  s_7bdbce4b33d61b::t_680edc77979706 10-11
+apps/tanstack-start/src/lib/category-color.test.ts
+  s_7bdbce4b33d61b::t_699107ef02c79e 22
+apps/tanstack-start/src/lib/cors.ts
+  s_7bdbce4b33d61b::t_699107ef02c79e 3
+apps/tanstack-start/src/routes/_authed/callback.tsx
+  s_7bdbce4b33d61b::t_680edc77979706 10
+packages/ui/src/dropdown-menu.tsx
+  s_7bdbce4b33d61b::t_9e6afb29e8864b 142
+packages/db/src/schema.ts
+  s_7bdbce4b33d61b::t_89bf3720ffa433 26,40,57,72,76,78,87,99,103,137
+.gitignore
+  s_7bdbce4b33d61b::t_676dbb021d7e48 60
+packages/api/src/categories/budgets.ts
+  s_7bdbce4b33d61b::t_d89de02b878ca8 1,6-7,37-38
+packages/api/src/banking/domain.ts
+  s_7bdbce4b33d61b::t_d89de02b878ca8 61,85
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/breakdown-list.tsx
+  s_7bdbce4b33d61b::t_680edc77979706 64
+apps/tanstack-start/vitest.config.ts
+  s_7bdbce4b33d61b::t_699107ef02c79e 3,5
+packages/api/src/banking/settings.ts
+  s_7bdbce4b33d61b::t_d89de02b878ca8 29,72
+packages/api/src/spaces/queries.ts
+  s_7bdbce4b33d61b::t_d89de02b878ca8 18,74
+packages/auth/script/auth-cli.ts
+  s_7bdbce4b33d61b::t_89bf3720ffa433 1
+apps/tanstack-start/src/component/category-icon.tsx
+  s_7bdbce4b33d61b::t_82f021cb68b67d 62
+apps/tanstack-start/src/env.ts
+  s_7bdbce4b33d61b::t_680edc77979706 17
+apps/tanstack-start/src/routes/invitation.$invitationId.tsx
+  s_7bdbce4b33d61b::t_680edc77979706 21,62,73
+apps/tanstack-start/src/lib/format.ts
+  s_7bdbce4b33d61b::t_699107ef02c79e 10,26
+apps/tanstack-start/vite.config.ts
+  s_7bdbce4b33d61b::t_699107ef02c79e 13-14,18,23,26-27,42-43
+apps/tanstack-start/src/routes/_authed/settings/banques/-components/connection-card.tsx
+  s_7bdbce4b33d61b::t_740ca509feea69 140
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/overview-header.tsx
+  s_7bdbce4b33d61b::t_680edc77979706 33
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/ring.tsx
+  s_7bdbce4b33d61b::t_680edc77979706 63
+apps/tanstack-start/src/routes/_authed/settings/categories/index.tsx
+  s_7bdbce4b33d61b::t_740ca509feea69 20,23,91
+.env.example
+  s_7bdbce4b33d61b::t_4d457df1c02a8c 1,7,10-11,15,18
+.dockerignore
+  s_7bdbce4b33d61b::t_676dbb021d7e48 1-2
+packages/auth/env.ts
+  s_7bdbce4b33d61b::t_89bf3720ffa433 12,15,19
+docker-compose.yml
+  s_7bdbce4b33d61b::t_4d457df1c02a8c 1-2,16
+apps/tanstack-start/src/routes/_authed/settings/categories/-components/category-identity-dialog.tsx
+  s_7bdbce4b33d61b::t_740ca509feea69 29,31,37
+packages/api/src/lib/data-dir.ts
+  s_7bdbce4b33d61b::t_4cef964bad5b1a 4-5,10
+.oxlintrc.json
+  s_7bdbce4b33d61b::t_89bf3720ffa433 3,13,67,86,93-94,124
+apps/tanstack-start/src/lib/url.ts
+  s_7bdbce4b33d61b::t_699107ef02c79e 17
+deploy/deploy.sh
+  s_7bdbce4b33d61b::t_4d457df1c02a8c 2,4-5,10-13,15-16,22,27-30,40,42,44,46-47,57,70-72,80
+apps/tanstack-start/src/component/gradient-waves-bg.tsx
+  s_7bdbce4b33d61b::t_82f021cb68b67d 5-6,138,197
+deploy/pull-db.sh
+  s_7bdbce4b33d61b::t_4d457df1c02a8c 2-3,7,12,23,26
+packages/auth/src/email.ts
+  s_7bdbce4b33d61b::t_89bf3720ffa433 1-3
+packages/api/src/categories/mutations.ts
+  s_7bdbce4b33d61b::t_d89de02b878ca8 6,14,68,77,95,114
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/exclude-badge.tsx
+  s_7bdbce4b33d61b::t_680edc77979706 37
+apps/tanstack-start/src/component/app-header.tsx
+  s_7bdbce4b33d61b::t_82f021cb68b67d 64,69,126,190-191
+packages/ui/src/table.tsx
+  s_7bdbce4b33d61b::t_9e6afb29e8864b 7
+apps/tanstack-start/src/routes/_authed/settings/espaces/index.tsx
+  s_7bdbce4b33d61b::t_740ca509feea69 69,175,242
+packages/api/src/banking/connections.ts
+  s_7bdbce4b33d61b::t_d89de02b878ca8 38,103,125,185,224,337,424
+packages/api/src/categories/schemas.ts
+  s_7bdbce4b33d61b::t_d89de02b878ca8 18,35
+packages/api/src/trpc.ts
+  s_7bdbce4b33d61b::t_4cef964bad5b1a 18,49-50,78
+apps/tanstack-start/src/lib/trpc.ts
+  s_7bdbce4b33d61b::t_699107ef02c79e 52
+apps/tanstack-start/src/component/period-picker.tsx
+  s_7bdbce4b33d61b::t_82f021cb68b67d 41,64,92,104,116,122,147,157,180,223
+deploy/Dockerfile
+  s_7bdbce4b33d61b::t_4d457df1c02a8c 1,7
+apps/tanstack-start/src/routes/_authed/settings/banques/-lib/consent.ts
+  s_7bdbce4b33d61b::t_740ca509feea69 43,48,52,105
+apps/tanstack-start/src/routes/_authed/settings/categories/-lib/use-category-crud.ts
+  s_7bdbce4b33d61b::t_740ca509feea69 10
+packages/ui/src/toggle-group.tsx
+  s_7bdbce4b33d61b::t_9e6afb29e8864b 73
+packages/ui/src/three/segment.tsx
+  s_7bdbce4b33d61b::t_69dcb651442889 10,17,72,88-89,94
+packages/api/src/router/spaces.ts
+  s_7bdbce4b33d61b::t_4cef964bad5b1a 30,91
+packages/api/src/transactions/normalize.ts
+  s_7bdbce4b33d61b::t_4cef964bad5b1a 49,53
+apps/tanstack-start/src/lib/sync-toast.ts
+  s_7bdbce4b33d61b::t_699107ef02c79e 29
+apps/tanstack-start/src/routes/_authed/_period-overview/route.tsx
+  s_7bdbce4b33d61b::t_680edc77979706 20-21,48
+packages/ui/src/toolbar.tsx
+  s_7bdbce4b33d61b::t_9e6afb29e8864b 3
+apps/tanstack-start/src/lib/date.ts
+  s_7bdbce4b33d61b::t_699107ef02c79e 14-15,34,38
+apps/tanstack-start/src/routes/_authed/settings/espaces/-components/space-card.tsx
+  s_7bdbce4b33d61b::t_740ca509feea69 176
+apps/tanstack-start/src/lib/category-color.ts
+  s_7bdbce4b33d61b::t_699107ef02c79e 6,13-14,28
+apps/tanstack-start/src/routes/_authed/settings/banques/-components/bank-logo.tsx
+  s_7bdbce4b33d61b::t_740ca509feea69 7-8
+apps/tanstack-start/src/auth/client.ts
+  s_7bdbce4b33d61b::t_699107ef02c79e 7
+apps/tanstack-start/src/routes/login.tsx
+  s_7bdbce4b33d61b::t_680edc77979706 51
+packages/api/src/transactions/schemas.ts
+  s_7bdbce4b33d61b::t_4cef964bad5b1a 7,73,81,83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "8b46998ea15a868ea0d015922402b2a6759071d7",
+  "prompts": {},
+  "sessions": {
+    "s_7bdbce4b33d61b": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f4703d0ceffehpiNfOj7QVAVtR",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
