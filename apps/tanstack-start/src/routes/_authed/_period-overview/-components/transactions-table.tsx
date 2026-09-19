@@ -57,11 +57,15 @@ export function TransactionsTable({
       >
         <TableHeader className="label-caps sticky top-0 z-[2]">
           <TableRow className="hover:bg-transparent">
-            <SortableHead label="Date" sortKey="date" className="w-18" />
+            <SortableHead
+              label="Date"
+              sortKey="date"
+              className="w-14 md:w-18"
+            />
             <Head>Libellé</Head>
-            <Head className="w-40">Compte</Head>
-            <Head className="w-44">Tiers</Head>
-            <Head className="w-60">Catégorie</Head>
+            <Head className="hidden w-40 md:table-cell">Compte</Head>
+            <Head className="hidden w-44 md:table-cell">Tiers</Head>
+            <Head className="hidden w-60 md:table-cell">Catégorie</Head>
             <SortableHead
               label="Montant"
               sortKey="amount"
@@ -97,7 +101,7 @@ export function TransactionsTable({
                 <Link to="." search={(prev) => ({ ...prev, page: page - 1 })} />
               }
               aria-disabled={page <= 1}
-              className="aria-disabled:pointer-events-none aria-disabled:opacity-40"
+              className="touch-target aria-disabled:pointer-events-none aria-disabled:opacity-40"
             />
           </PaginationItem>
         </PaginationContent>
@@ -111,7 +115,7 @@ export function TransactionsTable({
                 <Link to="." search={(prev) => ({ ...prev, page: page + 1 })} />
               }
               aria-disabled={page >= pageCount}
-              className="aria-disabled:pointer-events-none aria-disabled:opacity-40"
+              className="touch-target aria-disabled:pointer-events-none aria-disabled:opacity-40"
             />
           </PaginationItem>
         </PaginationContent>
@@ -162,17 +166,24 @@ function Row({
           <span className="text-body truncate">{row.description}</span>
           <ExcludeBadge row={row} />
         </span>
+        {/* Sous `md` la colonne Catégorie n'a plus de place : le sélecteur
+            passe sous le libellé. Deux instances, une par gabarit — un seul
+            bouton tant que le menu est fermé, Base UI ne monte le contenu
+            qu'à l'ouverture. */}
+        <span className="mt-1 flex md:hidden">
+          <CategoryCell row={row} />
+        </span>
       </TableCell>
 
-      <TableCell className="text-subtle text-control truncate">
+      <TableCell className="text-subtle text-control hidden truncate md:table-cell">
         {row.bankName}
       </TableCell>
 
-      <TableCell className="text-subtle text-control truncate">
+      <TableCell className="text-subtle text-control hidden truncate md:table-cell">
         {debtor && titleCase(debtor)}
       </TableCell>
 
-      <TableCell>
+      <TableCell className="hidden md:table-cell">
         <CategoryCell row={row} />
       </TableCell>
 
@@ -252,7 +263,7 @@ function SortableHead({
     <Head className={className}>
       <button
         type="button"
-        className="hover:underline"
+        className="touch-target hover:underline"
         onClick={() =>
           setSearch({
             sort: sortKey,

@@ -7,7 +7,7 @@
 /* Les composants @budget/ui vivent hors de l'app : Tailwind v4 ne les scanne
    pas automatiquement (workspace via node_modules) — sans ce @source, leurs
    classes utilitaires ne sont pas générées. */
-@source "../../../packages/ui/src/*.{ts,tsx}";
+@source "../../../packages/ui/src/**/*.{ts,tsx}";
 
 @custom-variant dark (&:is(.dark *));
 @custom-variant auto (&:is(.auto *));
@@ -295,6 +295,21 @@
   }
   .num {
     @apply font-mono tabular-nums;
+  }
+}
+
+/* Zone de toucher de 44 px minimum (WCAG 2.5.8) sans grossir le dessin : un
+   pseudo-élément déborde du bouton de ce qui lui manque, et seulement au doigt
+   (`pointer: coarse`) — à la souris, une cible de 20 px est une cible de 20 px.
+   `min(0px, …)` : un bouton déjà assez grand ne rétrécit pas. */
+@utility touch-target {
+  @media (pointer: coarse) {
+    position: relative;
+    &::after {
+      content: "";
+      position: absolute;
+      inset: min(0px, calc((100% - 2.75rem) / 2));
+    }
   }
 }
 

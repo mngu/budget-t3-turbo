@@ -124,7 +124,7 @@ export function RefineBar({
           title="Retirer le filtre de catégorie"
           aria-label="Retirer le filtre de catégorie"
           onClick={() => setSearch({ category: undefined })}
-          className="text-subtle hover:bg-accent hover:text-foreground text-meta flex size-6 flex-none items-center justify-center rounded-md"
+          className="text-subtle hover:bg-accent hover:text-foreground text-meta touch-target flex size-6 flex-none items-center justify-center rounded-md"
         >
           ✕
         </button>
@@ -140,7 +140,9 @@ export function RefineBar({
         </button>
       )}
 
-      <InputGroup className="ml-auto max-w-105 min-w-38 flex-1">
+      {/* Sous `md`, la recherche passe en tête et en pleine largeur : sur une
+          liste, le geste dominant au téléphone est de retrouver une ligne. */}
+      <InputGroup className="order-first grow basis-full md:order-none md:ml-auto md:max-w-105 md:min-w-38 md:basis-0">
         <InputGroupAddon>
           <SearchIcon />
         </InputGroupAddon>

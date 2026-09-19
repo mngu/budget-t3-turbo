@@ -74,7 +74,7 @@ function DialogContent({
               // deux, celui-ci le renvoie *entier* sous le pli — sans barre de
               // défilement, le bas devenait inatteignable en silence. 116 px =
               // les 92 du haut plus une marge de page de 24 en bas.
-              "data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 border-border-strong top-23 left-1/2 max-h-[calc(100dvh-116px)] w-full max-w-md -translate-x-1/2 overflow-y-auto rounded-xl border",
+              "data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 border-border-strong top-23 left-1/2 max-h-[calc(100dvh-116px)] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 overflow-y-auto rounded-xl border",
           className,
         )}
         {...props}

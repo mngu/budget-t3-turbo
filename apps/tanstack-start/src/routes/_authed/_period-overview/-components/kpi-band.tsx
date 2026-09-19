@@ -20,7 +20,7 @@ export function KpiBand({ budgetStats, globalStats }: KpiBandProps) {
   const { totalAmount, totalBudget } = budgetStats;
 
   return (
-    <div className="flex gap-10">
+    <div className="flex flex-col gap-4 lg:flex-row lg:gap-10">
       <div>
         <div className="label-caps">Solde</div>
         <div
@@ -33,7 +33,7 @@ export function KpiBand({ budgetStats, globalStats }: KpiBandProps) {
         </div>
       </div>
 
-      <div className="w-1/2">
+      <div className="lg:w-1/2">
         <KpiBar
           label="Entrées"
           value={credit}

@@ -2,9 +2,11 @@ import {
   createFileRoute,
   Outlet,
   stripSearchParams,
+  useRouterState,
 } from "@tanstack/react-router";
 
 import { transactionsSearchSchema } from "@budget/api/schemas";
+import { cn } from "@budget/ui";
 import {
   defaultToCurrentMonth,
   SEARCH_DEFAULTS,
@@ -111,10 +113,12 @@ export const Route = createFileRoute("/_authed/_period-overview")({
 
 function RevueLayout() {
   const { globalStats, budgetStats, overview } = Route.useLoaderData();
+  const isTable =
+    useRouterState({ select: (s) => s.location.pathname }) === "/transactions";
 
   return (
-    <div className="flex w-full gap-4">
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+    <div className="flex w-full flex-col gap-4 self-start md:flex-row md:self-stretch">
+      <div className="flex min-w-0 flex-col md:min-h-0 md:flex-1">
         {/* `flex-wrap` n'est pas dans la maquette, qui ne descend pas sous
             460 px : il évite que la colonne de droite, à largeur fixe, ne pousse
             le solde hors de l'écran sur une fenêtre étroite. */}
@@ -125,12 +129,19 @@ function RevueLayout() {
         </div>
 
         {/* Chaque écran rend son contenu **et** sa colonne des postes. */}
-        <div className="mt-3 flex min-h-0 flex-1 flex-col gap-2">
+        <div className="mt-3 flex flex-col gap-2 md:min-h-0 md:flex-1">
           <OverviewHeader overview={overview} />
           <Outlet />
         </div>
       </div>
-      <div className="w-80 shrink-0 overflow-hidden">
+      {/* Sous `md`, la colonne *est* l'écran `/` ; sous la table elle
+          arriverait après cinquante lignes et une pagination. */}
+      <div
+        className={cn(
+          "overflow-hidden md:w-80 md:shrink-0",
+          isTable && "hidden md:block",
+        )}
+      >
         <BreakdownList overview={overview} />
       </div>
     </div>

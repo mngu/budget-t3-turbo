@@ -3,8 +3,6 @@ import type { CategoryOverviewType } from "@budget/api/schemas";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { ArrowLeftIcon, ArrowRightIcon, LayersIcon } from "lucide-react";
 
-import { cn } from "@budget/ui";
-import { CategoryIcon } from "~/component/category-icon";
 import { softCategoryColor, useCategoryColor } from "~/lib/category-color";
 import { sharePercent } from "~/lib/format";
 import { sumBy } from "~/lib/sum";
@@ -17,7 +15,7 @@ interface OverviewHeaderProps {
 export function OverviewHeader({ overview }: OverviewHeaderProps) {
   const isTable =
     useRouterState({ select: (s) => s.location.pathname }) === "/transactions";
-  const { search } = useRevueSearch();
+  const { search, setSearch } = useRevueSearch();
   const resolveColor = useCategoryColor();
   const { category } = search;
 
@@ -38,35 +36,38 @@ export function OverviewHeader({ overview }: OverviewHeaderProps) {
 
   return (
     <div className="flex min-w-0 flex-none items-center gap-3">
-      <span
-        className={cn(
-          "flex size-7 flex-none items-center justify-center rounded-lg",
-          !selected && "bg-sunken text-subtle",
-        )}
-        style={
-          selected
-            ? { background: softCategoryColor(selectedColor) }
-            : undefined
-        }
-      >
-        {selected ? (
-          <CategoryIcon
-            name={selected.icon}
-            className="size-4"
-            color={selectedColor}
-          />
-        ) : (
+      {/* Poste ouvert : la vignette est la sortie, sur toutes les tailles —
+          sur téléphone l'anneau et son bouton central n'existent pas, et Échap
+          n'a pas de clavier. L'icône du poste reste en tête de la colonne. */}
+      {selected ? (
+        <button
+          type="button"
+          title="Revenir à toutes les catégories"
+          aria-label="Revenir à toutes les catégories"
+          onClick={() => setSearch({ category: undefined })}
+          className="touch-target flex size-7 flex-none items-center justify-center rounded-lg hover:opacity-70"
+          style={{
+            background: softCategoryColor(selectedColor),
+            color: selectedColor,
+          }}
+        >
+          <ArrowLeftIcon className="size-4" aria-hidden />
+        </button>
+      ) : (
+        <span className="bg-sunken text-subtle flex size-7 flex-none items-center justify-center rounded-lg">
           <LayersIcon className="size-4" aria-hidden />
-        )}
-      </span>
-      <span className="text-heading min-w-0 truncate">
-        {selected ? selected.name : "Toutes catégories"}
-      </span>
-      <span className="text-subtle text-control flex-none whitespace-nowrap">
-        {selected
-          ? `${subCount} sous-catégorie${subCount > 1 ? "s" : ""} · ${sharePercent(selected.totalAmount ?? 0, expenses)} des sorties`
-          : `${postes} poste${postes > 1 ? "s" : ""} de dépense`}
-      </span>
+        </span>
+      )}
+      <div className="flex min-w-0 flex-col lg:flex-row lg:items-center lg:gap-3">
+        <span className="text-heading min-w-0 truncate">
+          {selected ? selected.name : "Toutes catégories"}
+        </span>
+        <span className="text-subtle text-control truncate lg:flex-none">
+          {selected
+            ? `${subCount} sous-catégorie${subCount > 1 ? "s" : ""} · ${sharePercent(selected.totalAmount ?? 0, expenses)} des sorties`
+            : `${postes} poste${postes > 1 ? "s" : ""} de dépense`}
+        </span>
+      </div>
 
       <Link
         to={isTable ? "/" : "/transactions"}

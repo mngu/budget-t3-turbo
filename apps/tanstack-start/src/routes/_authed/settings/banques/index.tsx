@@ -36,7 +36,7 @@ function BanquesAside() {
   const { setup, connections, orphans } = Route.useLoaderData();
   const { total, lastImportedAt } = importTotals(connections, orphans);
   return (
-    <div className="ml-auto flex items-center gap-4">
+    <div className="ml-auto flex flex-wrap items-center justify-end gap-4">
       <SyncStatus totalTransactions={total} lastImportedAt={lastImportedAt} />
       {setup.configured && (
         <Button

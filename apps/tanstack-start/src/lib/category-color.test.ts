@@ -18,4 +18,12 @@ describe("shadeHex", () => {
       shadeHex("#1447e6", "#ffffff", 1, 2),
     );
   });
+
+  // Valeurs relevées sur `three.Color.lerp` (sRGB linéaire), que la fonction a
+  // remplacé le 2026-09-19 pour sortir three du bundle des téléphones.
+  it("interpole en sRGB linéaire, comme three", () => {
+    expect(shadeHex("#1447e6", "#ffffff", 1, 3)).toBe("#9099ed");
+    expect(shadeHex("#1447e6", "#ffffff", 2, 3)).toBe("#c4c8f4");
+    expect(shadeHex("#e11d48", "#22252b", 4, 5)).toBe("#9f223a");
+  });
 });

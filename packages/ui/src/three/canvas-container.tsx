@@ -20,6 +20,13 @@ const CAMERA: [number, number, number] = [0, -5, 20];
 /** Vitesse de rattrapage de `damp` — indépendante du framerate, contrairement
  *  à un `lerp` à facteur constant. */
 const LAMBDA = 3;
+/** Distance de repos, `|CAMERA|`. */
+const CAMERA_DISTANCE = Math.hypot(...CAMERA);
+/** Largeur du plus long intitulé (icône + « Assurance épargne »), en pixels :
+ *  les intitulés sont du HTML, leur taille ne suit pas la caméra. Sur un
+ *  canvas étroit (tablette, colonne des postes à côté), la caméra recule
+ *  jusqu'à ce que l'anneau *et* deux intitulés tiennent dans la largeur. */
+const LABEL_PX = 130;
 
 /**
  * Lumières et halo par thème. Le jeu sombre détache les tubes du fond par un
@@ -89,8 +96,24 @@ function ParallaxCamera({ sway, fov }: CameraProps) {
     camera.updateProjectionMatrix();
   }, [camera, fov]);
 
-  useFrame(({ pointer }, delta) => {
+  useFrame(({ pointer, size }, delta) => {
     const amount = still.current ? 0 : sway;
+    // Demi-largeur visible à l'origine : d·tan(fov/2)·aspect. Il faut y loger
+    // le rayon des intitulés plus un intitulé en pixels, d'où la part de la
+    // largeur qui reste à l'anneau une fois deux intitulés retirés.
+    const usable = Math.max(0.2, 1 - (2 * LABEL_PX) / size.width);
+    const needed =
+      DEFAULT_TUNING.labelRadius /
+      (Math.tan(MathUtils.degToRad(fov / 2)) *
+        (size.width / size.height) *
+        usable);
+    const retreat = Math.max(1, needed / CAMERA_DISTANCE);
+    camera.position.z = MathUtils.damp(
+      camera.position.z,
+      CAMERA[2] * retreat,
+      LAMBDA,
+      delta,
+    );
     camera.position.x = MathUtils.damp(
       camera.position.x,
       CAMERA[0] + pointer.x * amount,
@@ -99,7 +122,7 @@ function ParallaxCamera({ sway, fov }: CameraProps) {
     );
     camera.position.y = MathUtils.damp(
       camera.position.y,
-      CAMERA[1] + pointer.y * amount,
+      CAMERA[1] * retreat + pointer.y * amount,
       LAMBDA,
       delta,
     );
@@ -209,7 +232,7 @@ export function CanvasContainer({ children }: Props) {
     <div id="canvas-container" className="flex min-h-0 min-w-0 flex-1 flex-col">
       {/* `fill` rend le panneau en flux dans son parent au lieu du coin haut
           droit fixé par leva : c'est le wrapper qui choisit le coin. */}
-      <div className="fixed bottom-4 left-4 z-50 w-[280px]">
+      <div className="fixed bottom-4 left-4 z-50 hidden w-[280px] md:block">
         <Leva fill collapsed titleBar={{ title: "Anneau 3D" }} />
       </div>
       {/* `flat` coupe le tone mapping ACES appliqué par défaut : sans lui les

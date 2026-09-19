@@ -33,7 +33,11 @@ export function CategoryPathPicker({
   });
 
   return (
-    <CommandDialog open={open} onOpenChange={onOpenChange} className="w-120">
+    <CommandDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      className="max-w-120"
+    >
       <CommandInput
         placeholder={`Filtrer parmi ${overview.length} catégories…`}
       />

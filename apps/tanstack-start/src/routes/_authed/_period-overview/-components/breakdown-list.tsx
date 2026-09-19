@@ -2,6 +2,7 @@ import type { CategoryOverviewType } from "@budget/api/schemas";
 
 import { LayersIcon } from "lucide-react";
 
+import { cn } from "@budget/ui";
 import { Toolbar } from "@budget/ui/toolbar";
 import { useCategoryColor, useShadeCategoryColor } from "~/lib/category-color";
 import { sumBy } from "~/lib/sum";
@@ -91,7 +92,12 @@ export function BreakdownList({ overview }: BreakdownListProps) {
 
   return (
     <div className="flex h-full flex-col gap-4">
-      <div className="h-28 px-2">
+      {/* Sous `md`, à la racine, ce bloc répète le bandeau (« Sorties ») et
+          l'en-tête de poste ; ouvert, il est la seule vue du poste face à son
+          budget et reste. */}
+      <div
+        className={cn("px-2 md:h-28", !selectedCategory && "hidden md:block")}
+      >
         {selectedCategory ? (
           <BudgetGauge
             value={selectedCategory.totalAmount ?? 0}

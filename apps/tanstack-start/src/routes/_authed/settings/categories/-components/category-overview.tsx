@@ -107,8 +107,8 @@ export function CategoryOverview({
 
                 return (
                   <AccordionItem key={id} value={id}>
-                    <div className="hover:bg-surface-2 flex w-full items-center justify-between gap-2 p-2">
-                      <div className="flex items-center gap-2">
+                    <div className="hover:bg-surface-2 flex w-full flex-wrap items-center justify-between gap-2 p-2">
+                      <div className="flex min-w-0 grow basis-full items-center gap-2 md:basis-0">
                         <AccordionTrigger />
 
                         <button
@@ -136,7 +136,8 @@ export function CategoryOverview({
                         />
                       </div>
 
-                      <div className="flex justify-end gap-2">
+                      {/* Sous `md`, compteur et budget passent sous le nom. */}
+                      <div className="flex basis-full items-center justify-end gap-2 md:basis-auto">
                         <CountButton
                           count={transactionCount}
                           onClick={previewParent}
@@ -231,9 +232,9 @@ export function CategoryOverview({
                           return (
                             <div
                               key={id}
-                              className="hover:bg-surface-2 flex min-h-10 items-center justify-between px-2 ps-16"
+                              className="hover:bg-surface-2 flex min-h-10 flex-wrap items-center justify-between px-2 ps-16"
                             >
-                              <div className="flex flex-2 items-center gap-2">
+                              <div className="flex min-w-0 grow-2 basis-full items-center gap-2 md:basis-0">
                                 <span
                                   className="size-2 rounded-full"
                                   style={{ background: shade }}
@@ -245,7 +246,7 @@ export function CategoryOverview({
                                   }
                                 />
                               </div>
-                              <div className="flex flex-1 items-center justify-end gap-2">
+                              <div className="flex basis-full items-center justify-end gap-2 md:grow md:basis-0">
                                 <CountButton
                                   count={transactionCount}
                                   onClick={() =>

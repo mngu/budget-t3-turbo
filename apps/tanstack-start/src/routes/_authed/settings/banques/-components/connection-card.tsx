@@ -30,7 +30,7 @@ export function ConnectionCard({
         view.critical ? tone.border : "border-border",
       )}
     >
-      <div className="grid grid-cols-[38px_minmax(0,1fr)_auto] items-center gap-3.5 px-4.5 py-3.5">
+      <div className="grid grid-cols-[38px_minmax(0,1fr)] items-center gap-3.5 px-4.5 py-3.5 md:grid-cols-[38px_minmax(0,1fr)_auto]">
         <BankLogo
           name={connection.aspspName}
           logoUrl={connection.logoUrl}
@@ -65,7 +65,7 @@ export function ConnectionCard({
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="col-start-2 flex items-center gap-2 md:col-start-auto">
           {/* Une connexion critique appelle un renouvellement : c'est la
               variante pleine qui le dit, la teinte du ton restant portée par la
               pastille de statut au-dessus. */}

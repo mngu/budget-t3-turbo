@@ -89,7 +89,7 @@ export function SpaceCard({
           {space.members.map((member) => (
             <div
               key={member.userId}
-              className="border-border grid min-h-11 grid-cols-[minmax(0,1fr)_106px_78px] items-center gap-3.5 border-t px-4"
+              className="border-border grid min-h-11 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3.5 border-t px-4 md:grid-cols-[minmax(0,1fr)_106px_78px]"
             >
               <div className="min-w-0">
                 <div className="flex min-w-0 items-center gap-2">

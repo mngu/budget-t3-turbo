@@ -44,10 +44,11 @@ export function ExcludeBadge({ row }: { row: TransactionRow }) {
             : "Exclure des analyses"
         }
         className={cn(
-          "text-label flex flex-none items-center gap-0.5 rounded-full border px-1.5 py-px leading-3.5",
+          "text-label touch-target flex flex-none items-center gap-0.5 rounded-full border px-1.5 py-px leading-3.5",
+          // Le survol n'existe pas au doigt : sous `md` la marque reste visible.
           row.excluded
             ? "border-border bg-surface-2 text-subtle"
-            : "border-border text-subtle opacity-0 group-hover:opacity-100",
+            : "border-border text-subtle md:opacity-0 md:group-hover:opacity-100",
         )}
       >
         <EyeOffIcon className="size-2.5" />

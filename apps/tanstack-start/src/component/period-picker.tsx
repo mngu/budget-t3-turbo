@@ -170,7 +170,7 @@ export function PeriodPicker() {
   };
 
   return (
-    <div className="ml-auto flex items-center gap-1">
+    <div className="ml-auto flex min-w-0 items-center gap-1">
       <Popover
         open={open}
         onOpenChange={(next) => {
@@ -185,13 +185,17 @@ export function PeriodPicker() {
             <button
               type="button"
               title="Choisir une période"
-              className="num hover:text-foreground flex h-6 items-center gap-1.5 pr-0.5 font-medium tracking-[-0.01em] whitespace-nowrap"
+              // `truncate` : une plage libre (« 1 sept. 2026 – 30 sept. 2026 ») ne tient
+              // pas dans un en-tête de téléphone, les flèches et les comptes priment.
+              className="num hover:text-foreground flex h-6 min-w-0 items-center gap-1.5 pr-0.5 font-medium tracking-[-0.01em] whitespace-nowrap"
               // Le serveur ignore le jour de départ : l'intitulé rendu par SSR
               // peut différer de celui du client jusqu'à la réécriture d'URL.
               suppressHydrationWarning
               {...props}
             >
-              {periodLabel(from, to, startDay)}
+              <span className="truncate">
+                {periodLabel(from, to, startDay)}
+              </span>
               <span className="text-subtle text-label flex-none">▾</span>
             </button>
           )}
@@ -333,7 +337,7 @@ function StepButton({
       aria-label={label}
       onClick={onClick}
       disabled={disabled}
-      className="text-subtle hover:bg-accent hover:text-foreground text-body flex h-5 w-6 items-center justify-center rounded-sm disabled:pointer-events-none disabled:opacity-30"
+      className="text-subtle hover:bg-accent hover:text-foreground text-body touch-target flex h-5 w-6 items-center justify-center rounded-sm disabled:pointer-events-none disabled:opacity-30"
     >
       {glyph}
     </button>

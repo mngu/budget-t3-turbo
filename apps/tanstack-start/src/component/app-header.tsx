@@ -104,7 +104,7 @@ export function AppHeader({ title }: { title?: string }) {
   const linkSearch = isRevue ? search : SEARCH_DEFAULTS;
 
   return (
-    <header className="bg-background relative z-30 flex h-13 flex-none items-center gap-3.5 px-5 transition-shadow duration-200">
+    <header className="bg-background relative z-30 flex h-13 flex-none items-center gap-3 px-4 transition-shadow duration-200 sm:gap-3.5 sm:px-5">
       {/* La marque *est* le retour à la revue. C'est le seul lien de la barre
           depuis que la rangée de navigation en est partie : les liens entre les
           deux écrans de la revue vivent maintenant dans la zone centrale, mais
@@ -117,7 +117,7 @@ export function AppHeader({ title }: { title?: string }) {
         className="flex items-center gap-2.5 hover:opacity-60"
       >
         <div className="bg-primary size-2.5 rounded-xs" />
-        <span className="text-body font-semibold tracking-[-0.02em]">
+        <span className="text-body hidden font-semibold tracking-[-0.02em] sm:inline">
           Budget
         </span>
       </Link>

@@ -18,8 +18,8 @@ function SettingsLayout() {
   });
   const { title, aside: Aside } = staticData ?? {};
   return (
-    <main className="mx-auto w-200">
-      <div className="mb-8 flex items-center">
+    <main className="mx-auto w-full max-w-200">
+      <div className="mb-6 flex flex-wrap items-center gap-y-4 md:mb-8">
         <h1 className="text-title">{title}</h1>
         {Aside && <Aside />}
       </div>

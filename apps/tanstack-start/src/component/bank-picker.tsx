@@ -1,7 +1,7 @@
 "use client";
 
 import { useLoaderData } from "@tanstack/react-router";
-import { ChevronDownIcon, RefreshCwIcon } from "lucide-react";
+import { ChevronDownIcon, LandmarkIcon, RefreshCwIcon } from "lucide-react";
 import { useState } from "react";
 
 import { cn } from "@budget/ui";
@@ -76,9 +76,13 @@ export function BankPicker() {
           />
         }
       >
+        <LandmarkIcon className="sm:hidden" />
         {offCount > 0
-          ? `${banks.length - offCount}/${banks.length} comptes`
-          : `${banks.length} compte${banks.length > 1 ? "s" : ""}`}
+          ? `${banks.length - offCount}/${banks.length}`
+          : banks.length}
+        <span className="hidden sm:inline">
+          compte{banks.length > 1 ? "s" : ""}
+        </span>
         <ChevronDownIcon />
       </DropdownMenuTrigger>
 
