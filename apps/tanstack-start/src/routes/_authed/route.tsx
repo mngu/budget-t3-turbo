@@ -7,8 +7,6 @@ import {
 
 import { AppHeader } from "~/component/app-header";
 
-// Toutes les routes de l'app vivent sous ce layout sans segment d'URL :
-// session obligatoire, sinon redirection vers /login.
 export const Route = createFileRoute("/_authed")({
   beforeLoad: async ({ context, location }) => {
     const session = await context.trpcClient.auth.getSession.query();

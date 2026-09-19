@@ -36,10 +36,6 @@ function DropdownMenuContent({
         side={side}
         sideOffset={sideOffset}
       >
-        {/* Second écart avec la sortie de `shadcn add` : son `w-(--anchor-width)`
-            colle la largeur du menu à celle du déclencheur. C'est bon pour un
-            select, faux pour un menu ouvert depuis une icône — le panneau tombait
-            à `min-w-32` et les libellés passaient à la ligne. */}
         <MenuPrimitive.Popup
           data-slot="dropdown-menu-content"
           className={cn(
@@ -69,9 +65,6 @@ function DropdownMenuLabel({
       data-slot="dropdown-menu-label"
       data-inset={inset}
       className={cn(
-        // `flex` en plus de la sortie de `shadcn add` : sans lui, un
-        // `DropdownMenuShortcut` posé dans un intitulé ne peut pas se caler à
-        // droite. Sans effet sur un intitulé seul.
         "text-subtle text-label flex items-center gap-2 px-2 py-1 uppercase data-inset:pl-7",
         className,
       )}
@@ -95,10 +88,6 @@ function DropdownMenuItem({
       data-inset={inset}
       data-variant={variant}
       className={cn(
-        // Écart assumé avec la sortie de `shadcn add` : `aria-current` marque
-        // l'entrée de l'écran où l'on se trouve déjà. Le composant en porte le
-        // style pour que les appelants n'aient aucune classe à écrire — voir
-        // `docs/adr/0001-le-design-appartient-au-package-ui.md`.
         "aria-[current]:font-semibold",
         "group/dropdown-menu-item focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive dark:data-[variant=destructive]:focus:bg-destructive/20 data-[variant=destructive]:*:[svg]:text-destructive text-control relative flex cursor-default items-center gap-2 rounded-md p-2 outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-40 data-inset:pl-7 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className,
@@ -150,19 +139,7 @@ function DropdownMenuRadioGroup({ ...props }: MenuPrimitive.RadioGroup.Props) {
   );
 }
 
-/**
- * Une entrée de choix. `variant="tile"` en fait une tuile — icône au-dessus de
- * l'intitulé, tiers de la largeur — pour un groupe qui se lit d'un coup d'œil
- * plutôt que ligne à ligne (le sélecteur de thème). L'option retenue s'y marque
- * par la teinte pâle du reste de l'app et non par une coche : elle est seule
- * dans sa rangée, la coche n'ajouterait rien.
- *
- * C'est bien un `Menu.RadioItem` et pas un `ToggleGroup`, malgré l'allure : un
- * `ToggleGroup` posé dans un menu est un second composite que celui du menu
- * n'enregistre pas — le focus y entre et n'en ressort plus (mesuré : ni ↓ ni →
- * ne quittent la première tuile, les deux autres et « Se déconnecter »
- * deviennent inatteignables au clavier).
- */
+// Use menu radio items for tiles: nesting a ToggleGroup traps arrow-key navigation.
 function DropdownMenuRadioItem({
   className,
   children,
@@ -180,9 +157,6 @@ function DropdownMenuRadioItem({
       data-variant={variant}
       className={cn(
         "focus:bg-accent focus:text-accent-foreground focus:**:text-accent-foreground text-control relative flex cursor-default items-center gap-2 rounded-md py-2 pr-8 pl-2 outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-40 data-inset:pl-7 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-        // `min-w-0` : sans lui, la tuile plancherait sur la largeur de son
-        // intitulé (`min-width: auto`) et les trois seraient inégales — c'est la
-        // piste de grille qui décide, pas le mot le plus long.
         variant === "tile" &&
           "data-checked:bg-accent-soft data-checked:text-primary text-control min-w-0 flex-col justify-center gap-1 p-2 data-checked:font-semibold",
         className,

@@ -52,11 +52,6 @@ function CommandDialog({
           className,
         )}
       >
-        {/* Deux corrections sur la sortie de `shadcn add`. L'en-tête accessible
-            était rendu *hors* du `DialogContent`, où il ne nomme pas le
-            dialogue. Et `Command`, la racine cmdk, manquait : sans elle, le
-            premier `CommandInput` lit un store `undefined` et l'écran plante
-            (« Cannot read properties of undefined (reading 'subscribe') »). */}
         <DialogHeader className="sr-only">
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>

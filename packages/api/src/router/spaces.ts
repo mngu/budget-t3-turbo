@@ -27,12 +27,7 @@ const invitationId = z.string().min(1);
 const spaceName = z.string().min(1).max(80);
 const role = z.enum(["owner", "member"]);
 
-/**
- * Espaces — **pas d'`orgProcedure` ici**, et c'est la particularité de ce
- * routeur : il parle *des* espaces au lieu de travailler *dans* un espace.
- * Chaque procédure porte donc sa propre autorisation (appartenance, rôle
- * propriétaire), au cas par cas, sur l'espace que l'input désigne.
- */
+// Authorize each target space separately; orgProcedure only covers the active space.
 export const spacesRouter = {
   list: protectedProcedure.query(({ ctx }) =>
     listSpaces(
@@ -41,9 +36,6 @@ export const spacesRouter = {
     ),
   ),
 
-  // Les invitations qui m'attendent. Scopée par l'email de la session et non
-  // par un input : c'est le même critère que celui qu'`acceptInvitation`
-  // revérifie de son côté.
   incoming: protectedProcedure.query(({ ctx }) =>
     listIncomingInvitations(ctx.session.user.email),
   ),
@@ -52,8 +44,6 @@ export const spacesRouter = {
     .input(z.object({ name: spaceName }))
     .mutation(({ ctx, input }) => createSpace(ctx.session.user.id, input.name)),
 
-  // Ouvre l'espace personnel au partage : il garde tout son contenu et change
-  // seulement de nom et de nature. Voir `shareSpace` — sans retour arrière.
   share: protectedProcedure
     .input(z.object({ id: spaceId, name: spaceName }))
     .mutation(({ ctx, input }) =>
@@ -98,11 +88,7 @@ export const spacesRouter = {
       cancelInvitation(ctx.session.user.id, input.invitationId),
     ),
 
-  // **Publique**, et c'est nécessaire : l'écran d'acceptation doit s'afficher
-  // pour quelqu'un qui n'a pas encore de compte. Elle ne renvoie que ce qu'on
-  // peut montrer à qui détient le lien — nom de l'espace, qui invite,
-  // volumétrie — jamais les membres ni la moindre transaction (voir
-  // `getInvitation`). L'identifiant est un UUID, il ne se devine pas.
+  // Invitees may not have an account yet; getInvitation limits the public payload.
   invitation: publicProcedure
     .input(z.object({ invitationId }))
     .query(({ input }) => getInvitation(input.invitationId)),

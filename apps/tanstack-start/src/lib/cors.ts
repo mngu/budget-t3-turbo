@@ -1,11 +1,6 @@
 import { env } from "~/env";
 
-/**
- * En dev, l'app Expo tourne en web sur un port Metro variable (8081, 3001…) —
- * origine différente du serveur API (port 3000) donc soumise au CORS du
- * navigateur. En prod, l'app web tanstack-start sert son API en same-origin :
- * aucune origine cross-site n'est autorisée.
- */
+// Allow localhost cross-origin requests in development; production uses same-origin APIs.
 function isAllowedOrigin(origin: string | null): origin is string {
   if (!origin || env.NODE_ENV === "production") return false;
   return /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin);

@@ -18,16 +18,7 @@ import { toast } from "@budget/ui/toast";
 import { authClient } from "~/auth/client";
 import { useTRPCClient } from "~/lib/trpc";
 
-/**
- * Écran d'acceptation d'une invitation — **hors du layout `_authed`** : l'invité
- * n'a pas forcément de compte, et c'est ici qu'il peut le créer avec l'adresse
- * invitée — l'inscription est ouverte par ailleurs (`/login`), mais ce chemin
- * enchaîne directement sur l'adhésion à l'espace.
- *
- * Cinq états, qui viennent tous du statut de l'invitation croisé avec la
- * session : à accepter (connecté), à demander un lien de connexion
- * (déconnecté), lien envoyé, invitation expirée, invitation déjà utilisée.
- */
+// Public route: invitees may need to create an account before joining.
 export const Route = createFileRoute("/invitation/$invitationId")({
   loader: async ({ context, params }) => {
     const [invitation, session] = await Promise.all([
@@ -68,8 +59,7 @@ function InvitationPage() {
     try {
       const { organizationId } =
         await trpcClient.spaces.acceptInvitation.mutate({ invitationId });
-      // L'espace rejoint devient l'espace actif : sans ça, l'invité arrive sur
-      // la revue de son espace personnel, vide, en croyant que rien n'a marché.
+      // Open the joined space rather than the invitee's empty personal space.
       await authClient.organization.setActive({ organizationId });
       window.location.href = "/";
     } catch (err) {
@@ -80,18 +70,11 @@ function InvitationPage() {
     }
   };
 
-  // Un lien de connexion à l'adresse invitée : il crée le compte s'il n'existe
-  // pas, et le `callbackURL` ramène ici une fois ouvert — l'écran bascule alors
-  // sur l'état « connecté », avec son bouton Rejoindre. On ne peut pas
-  // court-circuiter avec le lien d'invitation déjà en main : c'est l'adresse
-  // qu'il faut prouver, et lui ne prouve que la possession de ce lien-ci.
+  // The invitation link alone does not prove email ownership; require a magic link.
   const requestLink = async () => {
     setPending(true);
     const { error } = await authClient.signIn.magicLink({
       email: invitation.email,
-      // Le nom est facultatif : l'adresse invitée fournit un repli lisible.
-      // Il n'est retenu qu'à la création du compte — les autres membres de
-      // l'espace le verront dans la liste.
       name: name.trim() || (invitation.email.split("@")[0] ?? invitation.email),
       callbackURL: `/invitation/${invitationId}`,
     });
@@ -153,7 +136,6 @@ function InvitationPage() {
     );
   }
 
-  // Statut `pending` : reste à savoir si la personne a déjà un compte.
   const signedInAsInvited =
     email !== null && email.toLowerCase() === invitation.email.toLowerCase();
 
@@ -237,8 +219,6 @@ function InvitationPage() {
         <div className="border-border flex flex-col gap-3 border-b px-5 py-4">
           <Field>
             <FieldLabel>Adresse email</FieldLabel>
-            {/* L'adresse ne se choisit pas : l'invitation ne vaut que pour
-                elle. Un `Input` désactivé plutôt qu'un encadré fait main. */}
             <Input value={invitation.email} readOnly disabled />
           </Field>
           <Field>

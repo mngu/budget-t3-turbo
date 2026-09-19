@@ -4,14 +4,10 @@ import { performImport, performSync } from "../pipeline";
 import { orgProcedure } from "../trpc";
 
 export const syncRouter = {
-  // Rejoue l'import des data/*.json déjà présents puis la catégorisation, sans
-  // aucun appel bancaire (donc sans SCA ni consommation du quota PSD2).
   import: orgProcedure.mutation(({ ctx }) => performImport(ctx.organizationId)),
 
   run: orgProcedure.mutation(({ ctx }) => {
-    // Sync déclenché depuis l'app = utilisateur présent : relayer son IP et son
-    // user-agent (PSU headers) classe l'accès « PSU présent » côté banque, ce qui
-    // l'exempte du plafond PSD2 des accès non-assistés (~4/jour).
+    // Forward PSU headers to identify user-present access to the bank.
     const psuHeaders: Record<string, string> = {};
     const ip = ctx.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
     const userAgent = ctx.headers.get("user-agent");

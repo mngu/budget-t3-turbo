@@ -12,22 +12,11 @@ import { Field, FieldDescription, FieldLabel } from "@budget/ui/field";
 import { Input } from "@budget/ui/input";
 import { Spinner } from "@budget/ui/spinner";
 
-/**
- * Le dialogue **unique** de l'écran Espaces : dix gestes (créer, partager,
- * inviter, retirer, quitter, annuler, renommer, supprimer, basculer, refus de
- * supprimer le personnel) passent par cette coque, comme dans la maquette.
- *
- * Ce n'est pas une économie de composants : ces dialogues se ressemblent parce
- * qu'ils disent tous la même chose dans le même ordre — ce que le geste change,
- * ce qu'il ne change pas, et ce qui ne se défait pas. Une coque commune est ce
- * qui garantit qu'aucun n'oublie une de ces trois lignes.
- */
 export interface SpaceDialogSpec {
   icon: React.ReactNode;
   tone: "primary" | "warn" | "bad";
   title: string;
   body: string;
-  /** Choix exclusifs (création d'espace) — la seule variante à deux chemins. */
   choices?: {
     key: string;
     label: string;
@@ -41,15 +30,11 @@ export interface SpaceDialogSpec {
   hint?: string;
   footnote?: string;
   cta: string;
-  /** Absent = pas de bouton d'annulation (dialogue purement informatif). */
+  /** Omit for informational dialogs without a cancel action. */
   cancel?: string;
   disabled?: boolean;
 }
 
-// La sévérité tient dans la pastille du dialogue ; le bouton, lui, prend une
-// *variante* du composant plutôt qu'une teinte écrite ici. « warn » n'en a pas
-// (l'action est irréversible sans être destructrice) et retombe sur la variante
-// par défaut — voir `docs/adr/0001-le-design-appartient-au-package-ui.md`.
 const TONE: Record<
   "primary" | "warn" | "bad",
   { chip: string; cta: "default" | "destructive" }

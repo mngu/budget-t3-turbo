@@ -17,7 +17,6 @@ import { CategoryIcon } from "~/component/category-icon";
 type CategoryPathPickerProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Nom de la catégorie actuellement portée par la transaction. */
   current?: SelectedCategory | null;
   onPick: (arg: SelectedCategory) => void;
 };

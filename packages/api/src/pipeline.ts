@@ -6,13 +6,7 @@ import { categorizeUncategorized } from "./categorization";
 import { withSingleFlight } from "./lib/single-flight";
 import { importTransactions } from "./transactions/import";
 
-// Un seul verrou pour tout ce qui alimente `transactions` : un import ne doit
-// pas s'intercaler dans une synchronisation en cours (et réciproquement).
-//
-// Par espace : deux foyers écrivent dans des lignes disjointes, un verrou global
-// ferait attendre l'un pour l'autre avec un message qu'il n'a pas provoqué.
-// Ce que la clé promet n'est vrai que parce que tout ce qu'elle protège est lui
-// aussi scopé — `importTransactions` lit le seul répertoire de l'espace.
+// Sync and import share a per-space lock because they write the same transactions.
 const withSyncLock = <T>(organizationId: string, run: () => Promise<T>) =>
   withSingleFlight(
     `sync:${organizationId}`,
@@ -20,8 +14,7 @@ const withSyncLock = <T>(organizationId: string, run: () => Promise<T>) =>
     run,
   );
 
-// Import des data/*.json présents, puis catégorisation. La catégorisation est
-// best-effort : son échec ne doit jamais invalider un import réussi.
+// Categorization is best-effort: its failure must not invalidate a successful import.
 async function importAndCategorize(
   organizationId: string,
 ): Promise<CategorizeResult | null> {
@@ -49,9 +42,7 @@ export async function performSync(
   });
 }
 
-// Rejoue l'import des data/*.json déjà présents sans toucher aux sessions
-// bancaires — donc sans déclencher de SCA.
-// Retourne null si la catégorisation a échoué (l'import, lui, a réussi).
+// Replay stored files without bank calls or strong authentication.
 export async function performImport(
   organizationId: string,
 ): Promise<CategorizeResult | null> {

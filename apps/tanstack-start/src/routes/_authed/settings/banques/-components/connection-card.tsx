@@ -66,9 +66,6 @@ export function ConnectionCard({
         </div>
 
         <div className="col-start-2 flex items-center gap-2 md:col-start-auto">
-          {/* Une connexion critique appelle un renouvellement : c'est la
-              variante pleine qui le dit, la teinte du ton restant portée par la
-              pastille de statut au-dessus. */}
           <Button
             variant={view.critical ? "default" : "outline"}
             size="sm"
@@ -140,10 +137,7 @@ function AccountRow({
           </span>
         )}
       </div>
-      {/* Compté même pour un compte exclu : ces transactions sont bien en base
-          et pèsent dans le total de l'en-tête. La maquette met « — » parce que
-          son compte exclu est vide ; un compte historique décoché en porte des
-          centaines, et les cacher ici ferait mentir les deux chiffres. */}
+      {/* Disabled accounts retain their imported transactions and count toward totals. */}
       <span className="text-subtle num text-meta whitespace-nowrap">
         {account.transactionCount} transaction
         {account.transactionCount > 1 ? "s" : ""}

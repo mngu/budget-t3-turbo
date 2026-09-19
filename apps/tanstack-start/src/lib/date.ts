@@ -11,11 +11,8 @@ export function toISODate(d: Date | string = new Date()) {
   return format(d, "yyyy-MM-dd");
 }
 
-// Jour de départ du « mois » : 1 par défaut, réglable dans le sélecteur de
-// période pour caler la revue sur un cycle de paie (« mon mois commence le 28 »).
-// Gardé par navigateur, comme le thème — aucun écran serveur n'en dépend : le
-// réglage ne fait que *produire* les bornes de l'URL, tout ce qui suit ne lit
-// que `dateFrom`/`dateTo`.
+// The browser's pay-cycle preference only produces URL date bounds;
+// server queries depend on dateFrom/dateTo, not this setting.
 const MONTH_START_KEY = "month-start-day";
 
 export const MONTH_START_DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
@@ -34,17 +31,14 @@ export function setMonthStartDay(day: number) {
   try {
     localStorage.setItem(MONTH_START_KEY, String(day));
   } catch {
-    // localStorage indisponible : le réglage ne survivra pas au rechargement.
+    // Keep the in-memory preference when localStorage is unavailable.
   }
 }
 
-// Le jour de départ ramené à un jour qui existe dans le mois de `base` : un
-// cycle qui commence le 31 commence le 28 en février. Les cycles restent
-// contigus et sans recouvrement, c'est tout ce qu'on lui demande.
+// Clamp to the month's last day so short months keep contiguous pay cycles.
 const startIn = (base: Date, day: number) =>
   setDate(base, Math.min(day, getDaysInMonth(base)));
 
-/** Bornes du cycle mensuel qui contient `d`. */
 export function cycleOf(d: Date, startDay = 1): { start: Date; end: Date } {
   let start = startIn(d, startDay);
   if (d < start) start = startIn(subMonths(d, 1), startDay);

@@ -16,8 +16,6 @@ export function SearchInput({
   delay?: number;
   resetParams?: Record<string, unknown>;
 } & Omit<React.ComponentProps<typeof InputGroupInput>, "value" | "onChange">) {
-  // Cast needed: eslint's typed-linting disagrees with `tsc` here — removing it breaks
-  // `pnpm typecheck` (TS7053, no index signature) since `search[param]` below needs a string index.
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   const search = useSearch({ strict: false }) as Record<string, unknown>;
   const navigate = useNavigate();
@@ -41,17 +39,13 @@ export function SearchInput({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedText]);
 
-  // Sync depuis l'URL (réinitialisation, back/forward) — jamais pendant la frappe,
-  // sinon le retour du debounce écraserait le texte en cours de saisie.
+  // Do not let a debounced URL update overwrite ongoing typing.
   useEffect(() => {
     if (document.activeElement !== inputRef.current) {
       setText(urlValue);
     }
   }, [urlValue]);
 
-  // `InputGroupInput` et non `Input` : ce champ est toujours accompagné d'une
-  // icône, donc toujours dans un `InputGroup` — c'est le groupe qui porte la
-  // boîte et le focus, l'input ne doit pas en dessiner une seconde.
   return (
     <InputGroupInput
       ref={inputRef}

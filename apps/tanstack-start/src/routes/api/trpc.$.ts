@@ -7,11 +7,8 @@ import { auth } from "~/auth/server";
 import { corsPreflight, withCors } from "~/lib/cors";
 
 const handler = (req: Request) => {
-  // Sync déclenché depuis l'app : sync.ts classe l'accès « PSU présent » côté
-  // banque (exempté du quota PSD2 des accès non-assistés, ~4/jour) à partir du
-  // header x-forwarded-for. En accès direct (ex. localhost), il n'y a pas de
-  // proxy donc pas de x-forwarded-for : on complète avec l'IP socket résolue
-  // par TanStack pour ne pas perdre ce classement.
+  // Direct requests have no proxy header. Forward the socket IP so bank sync
+  // can identify user-present access, exempt from unattended PSD2 quotas.
   const headers = new Headers(req.headers);
   if (!headers.has("x-forwarded-for")) {
     const ip = getRequestIP({ xForwardedFor: true });

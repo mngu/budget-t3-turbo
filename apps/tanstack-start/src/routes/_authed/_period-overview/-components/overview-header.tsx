@@ -22,23 +22,15 @@ export function OverviewHeader({ overview }: OverviewHeaderProps) {
   const selected = category
     ? overview.find(({ name }) => name === category)
     : null;
-  // `resolveColor` retombe déjà sur la teinte par défaut sur `null`.
   const selectedColor = selected ? resolveColor(selected.color) : "";
 
   const subCount = selected?.children?.length ?? 0;
-  // Le dénominateur sort de **la même** source que le numérateur. Pris
-  // ailleurs (`globalStats.debit`), il porterait le filtre de comptes, que
-  // `categories.overview` ignore : la part pourrait alors dépasser 100 %.
   const expenses = sumBy(overview, (cat) => cat.totalAmount ?? 0);
-  // Les postes **de dépense** : `overview` liste toutes les parentes de
-  // l'espace, y compris celles sans aucun mouvement sur la période.
   const postes = overview.filter((cat) => cat.totalAmount !== null).length;
 
   return (
     <div className="flex min-w-0 flex-none items-center gap-3">
-      {/* Poste ouvert : la vignette est la sortie, sur toutes les tailles —
-          sur téléphone l'anneau et son bouton central n'existent pas, et Échap
-          n'a pas de clavier. L'icône du poste reste en tête de la colonne. */}
+      {/* Mobile has neither the ring's back button nor an Escape key. */}
       {selected ? (
         <button
           type="button"

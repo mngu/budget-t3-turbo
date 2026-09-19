@@ -1,10 +1,5 @@
 import { cn } from "@budget/ui";
 
-/**
- * Les chiffres d'un dialogue de confirmation, avant la phrase : ce qui décide,
- * c'est le nombre de lignes que le geste touche. `tone` colore le chiffre
- * (`text-bad`, `text-ok`) ; sans lui, il est `destructive`.
- */
 export function DialogFacts({
   facts,
 }: {

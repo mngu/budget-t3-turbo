@@ -19,8 +19,6 @@ import { consentAlert } from "./-lib/consent";
 
 export const Route = createFileRoute("/_authed/settings/banques/")({
   loader: async ({ context }) => {
-    // `settings.status` appelle l'API Enable Banking : les deux lectures DB
-    // partent en même temps plutôt que derrière elle.
     const [setup, connections, orphans] = await Promise.all([
       context.trpcClient.settings.status.query(),
       context.trpcClient.connections.list.query(),
@@ -180,9 +178,6 @@ function OrphanBanner({
   );
 }
 
-// Le bloc d'état ne parle que d'imports (voir la note de SyncStatus) : le total
-// et la date la plus récente se lisent dans les comptes déjà chargés, comptes
-// orphelins compris — leurs transactions sont dans la même table.
 function importTotals(
   connections: ConnectionSummary[],
   orphans: { transactionCount: number }[],

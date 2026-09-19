@@ -1,7 +1,5 @@
 import type { EbSettings } from "./client";
 
-// Onboarding Enable Banking : vérification de la configuration et sauvegarde.
-// Source de vérité unique : la table app_settings (pas de fallback fichiers).
 import { db } from "@budget/db/client";
 import { appSettings } from "@budget/db/schema";
 
@@ -28,8 +26,7 @@ const NOT_CONFIGURED: SetupStatus = {
   error: null,
 };
 
-// La vérification appelle l'API Enable Banking : memo 1 h des statuts OK
-// pour ne pas ralentir chaque chargement de la page Banques.
+// Cache successful checks to avoid an Enable Banking request on every page load.
 let statusCache: { at: number; status: SetupStatus } | null = null;
 const STATUS_TTL_MS = 3600 * 1000;
 
@@ -72,8 +69,7 @@ export async function getSetupStatus(): Promise<SetupStatus> {
   if (!settings) return NOT_CONFIGURED;
 
   const status = await checkSettings(settings);
-  // Seuls les statuts entièrement OK sont mémorisés : pendant la configuration,
-  // l'utilisateur doit voir l'état frais à chaque tentative.
+  // Do not cache failures: setup retries must see fresh status.
   if (status.configured) statusCache = { at: Date.now(), status };
   return status;
 }

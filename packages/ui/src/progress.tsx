@@ -4,12 +4,6 @@ import { Progress as ProgressPrimitive } from "@base-ui/react/progress";
 
 import { cn } from "@budget/ui";
 
-/**
- * Ajout au jeu de `shadcn add` : la barre porte parfois un état plutôt qu'une
- * simple avancée (une échéance qui approche, par exemple). Même vocabulaire à
- * trois couleurs que `Badge` et `Alert` — l'indicateur est rendu par `Progress`
- * lui-même, il n'y a pas d'autre façon de le teindre depuis l'appelant.
- */
 const INDICATOR_VARIANT = {
   default: "bg-primary",
   ok: "bg-ok",
@@ -45,10 +39,6 @@ function ProgressTrack({ className, ...props }: ProgressPrimitive.Track.Props) {
   return (
     <ProgressPrimitive.Track
       className={cn(
-        // `bg-track` et non le `bg-muted` de `shadcn add` : `--muted` est à 2 %
-        // de `--card`, la piste vide y est invisible. `--track` est le token que
-        // toutes les autres barres de l'app utilisent (jauges de budget,
-        // bandeau) — une piste doit se lire même à zéro.
         "bg-track relative flex h-1 w-full items-center overflow-x-hidden rounded-full",
         className,
       )}

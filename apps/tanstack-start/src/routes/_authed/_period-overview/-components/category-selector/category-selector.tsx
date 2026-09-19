@@ -14,8 +14,6 @@ export type SelectedCategory = {
 };
 
 type CategorySelectorProps = {
-  /** Sélection courante, **détenue par l'appelant** : ici l'URL. Pas d'état
-   *  local qui la double — il ne saurait rien du « ✕ » ni d'un retour arrière. */
   value?: SelectedCategory;
   onChange: (selectedCategory?: SelectedCategory) => void;
 };

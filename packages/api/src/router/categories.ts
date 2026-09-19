@@ -18,10 +18,6 @@ import { orgProcedure } from "../trpc";
 
 const categoryId = z.number().int().positive();
 
-// Chaque champ de `transactionsSearchSchema` porte un `.catch()`, donc `{}` se
-// résout en « tous les comptes, page 1 ». Fabriquer le défaut avec le schéma
-// lui-même évite de recopier ces valeurs — `.prefault({})` ne typecheck pas,
-// `.catch()` gardant le type d'entrée interne de chaque champ.
 const defaultSearch = transactionsSearchSchema.parse({});
 
 export const categoriesRouter = {
@@ -29,7 +25,7 @@ export const categoriesRouter = {
     .input(transactionsSearchSchema.prefault(defaultSearch))
     .query(({ ctx, input }) => categoriesOverview(ctx.organizationId, input)),
 
-  // Même fonction qu'en fin de sync ; ici l'échec du LLM remonte à l'écran.
+  // Unlike post-sync categorization, this user action must surface LLM failures.
   categorize: orgProcedure.mutation(({ ctx }) =>
     categorizeUncategorized(ctx.organizationId),
   ),
@@ -48,8 +44,6 @@ export const categoriesRouter = {
       renameCategory(ctx.organizationId, input.id, input.name),
     ),
 
-  // Palette et jeu d'icônes fermés sont contraints ici, à l'entrée ; la règle
-  // « seule une parente a une identité propre » vit dans updateCategoryIdentity.
   updateColor: orgProcedure
     .input(
       z.object({
@@ -80,11 +74,7 @@ export const categoriesRouter = {
     .input(z.object({ id: categoryId }))
     .mutation(({ ctx, input }) => removeCategory(ctx.organizationId, input.id)),
 
-  // Écran /settings/categories. Un budget est un montant mensuel posé sur une
-  // catégorie, sans dimension de mois : `set` écrase, il n'y a rien à
-  // versionner.
   budgets: {
-    // Borne haute alignée sur celle du champ de saisie (5 chiffres).
     set: orgProcedure
       .input(
         z.object({
@@ -96,8 +86,6 @@ export const categoriesRouter = {
         setCategoryBudget(ctx.organizationId, input.categoryId, input.amount),
       ),
 
-    // Bascule Global / Détaillé d'une parente. Efface son montant global au
-    // passage — voir setCategoryDetailed.
     setDetailed: orgProcedure
       .input(z.object({ categoryId, detailed: z.boolean() }))
       .mutation(({ ctx, input }) =>

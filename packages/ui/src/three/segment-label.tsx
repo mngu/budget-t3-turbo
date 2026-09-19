@@ -8,22 +8,18 @@ import { useTheme } from "../theme";
 import { RING_RADIUS, TUBE_RADIUS, useTuning } from "./tuning";
 
 type Props = {
-  /** Milieu de l'arc, dans le repère local du segment. */
+  /** Arc midpoint in the segment's local coordinates. */
   angle: number;
-  /** Rotation du segment autour de l'anneau : `angle` seul ne dit pas de quel
-   *  côté de l'anneau l'intitulé tombe. */
+  /** Rotation around the ring, needed to determine the label's side. */
   rotation: number;
-  /** Teinte de la catégorie, déjà passée par `resolveCategoryColor`. */
+  /** Theme-resolved category color. */
   color: string;
   children?: ReactNode;
 };
 
 export function SegmentLabel({ angle, rotation, color, children }: Props) {
   const { resolvedTheme } = useTheme();
-  // `labelLift` décolle les étiquettes du plan de l'anneau : en perspective
-  // elles forment un second anneau et cessent de se chevaucher dans le bas.
-  // `labelBlend` mélange la teinte vers le premier plan — la teinte pure est
-  // illisible en petit corps, même règle que l'anneau SVG.
+  // Lift labels to reduce overlap; blend toward the foreground for text contrast.
   const { labelBlend, labelSize, labelLift, labelRadius } = useTuning();
   const cos = Math.cos(angle);
   const sin = Math.sin(angle);
@@ -50,8 +46,6 @@ export function SegmentLabel({ angle, rotation, color, children }: Props) {
 
   return (
     <>
-      {/* Trait de rappel : décalée vers l'extérieur *et* vers le haut, une
-          étiquette ne désigne plus son arc sans lui. */}
       <Line
         points={[anchor, label]}
         color={labelColor}
@@ -59,9 +53,7 @@ export function SegmentLabel({ angle, rotation, color, children }: Props) {
         transparent
         opacity={0.35}
       />
-      {/* `Html` pose le coin haut gauche du bloc sur le point : à gauche de
-          l'anneau, l'intitulé partirait vers la droite, dans les arcs. Le bloc
-          s'accroche donc par le côté qui regarde l'anneau, à mi-hauteur du trait. */}
+      {/* Anchor the ring-facing edge so left-side labels extend away from the arcs. */}
       <Html position={label}>
         <div
           style={{

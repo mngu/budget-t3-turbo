@@ -41,18 +41,14 @@ export function TransactionsTable({
 }) {
   const { search } = useRevueSearch();
 
-  // La maquette éteint la date des lignes qui répètent celle du dessus, pour
-  // faire ressortir les ruptures de journée. Uniquement sous tri par date :
-  // trié par montant, deux dates identiques qui se suivent ne veulent rien dire
-  // et l'estompage mentirait sur la structure de la liste.
+  // Dim repeated dates only under date sorting, where they indicate day groups.
   const grouped = search.sort === "date";
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <Table
         containerClassName="min-h-0 flex-1 scrollbar-thin overflow-y-auto pr-2"
-        // `border-separate` : en `collapse`, le trait sous l'en-tête appartient
-        // à la table et reste en place quand les `th` collent en haut.
+        // Collapsed borders do not move with sticky header cells.
         className="table-fixed border-separate border-spacing-0"
       >
         <TableHeader className="label-caps sticky top-0 z-[2]">
@@ -124,7 +120,6 @@ export function TransactionsTable({
   );
 }
 
-// Opaque et au-dessus des lignes : la liste défile dessous.
 const HEAD = "border-border-strong bg-background h-8 border-b px-2 font-medium";
 
 function Head(props: React.ComponentProps<"th">) {
@@ -143,15 +138,7 @@ function Row({
   const debtor = row.raw.debtor?.name ?? row.counterparty;
 
   return (
-    <TableRow
-      className={cn(
-        // `group` : le bouton d'exclusion ne se montre qu'au survol tant que la
-        // ligne compte (voir ExcludeBadge).
-        "group h-11",
-        // Une ligne écartée des totaux se lit encore, mais en retrait.
-        row.excluded && "opacity-50",
-      )}
-    >
+    <TableRow className={cn("group h-11", row.excluded && "opacity-50")}>
       <TableCell
         className={cn(
           "num text-meta",
@@ -166,10 +153,6 @@ function Row({
           <span className="text-body truncate">{row.description}</span>
           <ExcludeBadge row={row} />
         </span>
-        {/* Sous `md` la colonne Catégorie n'a plus de place : le sélecteur
-            passe sous le libellé. Deux instances, une par gabarit — un seul
-            bouton tant que le menu est fermé, Base UI ne monte le contenu
-            qu'à l'ouverture. */}
         <span className="mt-1 flex md:hidden">
           <CategoryCell row={row} />
         </span>
@@ -196,23 +179,9 @@ function Row({
   );
 }
 
-/**
- * Cellule de catégorie : c'est le bouton « Reclasser » de la maquette, discret
- * jusqu'au survol.
- *
- * Le libellé affiché est la **sous-catégorie** seule, pas le chemin complet —
- * l'icône de la parente dit déjà la famille. Trois états, dans l'ordre où le
- * lecteur les rencontre :
- * — aucune catégorie du tout ;
- * — posée sur une parente qui a des sous-catégories : c'est « à classer », et le
- *   libellé nomme la parente pour dire dans laquelle ;
- * — posée sur une parente sans enfant : classée, rien à ajouter.
- */
 function CategoryCell({ row }: { row: TransactionRow }) {
   const { setCategory } = useSetCategory();
 
-  // `categoryPath` vaut « Parent › Enfant », ou le seul nom quand la
-  // transaction est posée sur la parente.
   const path = row.categoryPath?.split(" › ") ?? [];
   const parentName = path[0] ?? null;
   const subName = path[1] ?? null;
@@ -246,8 +215,6 @@ function CategoryCell({ row }: { row: TransactionRow }) {
   );
 }
 
-// Le tri vit dans les search params (le serveur pagine) : l'en-tête ne fait que
-// les réécrire, il n'y a pas d'état de tri côté client.
 function SortableHead({
   label,
   sortKey,

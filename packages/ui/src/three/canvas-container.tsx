@@ -15,26 +15,14 @@ import { MathUtils, PerspectiveCamera } from "three";
 import { useTheme } from "../theme";
 import { DEFAULT_TUNING, TuningContext } from "./tuning";
 
-/** Position de repos, celle qu'occupait `PerspectiveCamera`. */
 const CAMERA: [number, number, number] = [0, -5, 20];
-/** Vitesse de rattrapage de `damp` — indépendante du framerate, contrairement
- *  à un `lerp` à facteur constant. */
+/** Frame-rate-independent damping speed. */
 const LAMBDA = 3;
-/** Distance de repos, `|CAMERA|`. */
 const CAMERA_DISTANCE = Math.hypot(...CAMERA);
-/** Largeur du plus long intitulé (icône + « Assurance épargne »), en pixels :
- *  les intitulés sont du HTML, leur taille ne suit pas la caméra. Sur un
- *  canvas étroit (tablette, colonne des postes à côté), la caméra recule
- *  jusqu'à ce que l'anneau *et* deux intitulés tiennent dans la largeur. */
+// HTML labels do not scale with the camera; reserve a label's width on each side.
 const LABEL_PX = 130;
 
-/**
- * Lumières et halo par thème. Le jeu sombre détache les tubes du fond par un
- * liseré clair (contre-jour) ; sur fond blanc ce liseré fond dans le fond et
- * c'est un flanc plus sombre qui détache, d'où un contre-jour presque nul et
- * un remplissage plus bas en clair. Le halo est additif : sur blanc il ne peut
- * pas déborder de l'arc, il doit donc le faire rayonner de l'intérieur.
- */
+// Dark surfaces need rim lighting; light surfaces need darker sides for contrast.
 const SCENE: Record<
   ResolvedTheme,
   {
@@ -72,12 +60,7 @@ type CameraProps = {
   fov: number;
 };
 
-/**
- * Remplace `OrbitControls` : la caméra suit le pointeur de quelques unités et
- * revient au repos. L'orbite libre laissait mettre l'anneau de chant, ce qui
- * détruit la lecture des parts — et faisait passer les intitulés du fond
- * devant les arcs proches.
- */
+// Limit motion to parallax: free orbit can turn the ring edge-on and obscure its proportions.
 function ParallaxCamera({ sway, fov }: CameraProps) {
   const camera = useThree((state) => state.camera);
   const still = useRef(false);
@@ -88,8 +71,7 @@ function ParallaxCamera({ sway, fov }: CameraProps) {
     ).matches;
   }, []);
 
-  // `<Canvas camera>` ne s'applique qu'au montage : sans ça le curseur de leva
-  // ne ferait rien.
+  // Canvas camera props only apply on mount; update the live camera for Leva changes.
   useEffect(() => {
     if (!(camera instanceof PerspectiveCamera)) return;
     camera.fov = fov;
@@ -98,9 +80,7 @@ function ParallaxCamera({ sway, fov }: CameraProps) {
 
   useFrame(({ pointer, size }, delta) => {
     const amount = still.current ? 0 : sway;
-    // Demi-largeur visible à l'origine : d·tan(fov/2)·aspect. Il faut y loger
-    // le rayon des intitulés plus un intitulé en pixels, d'où la part de la
-    // largeur qui reste à l'anneau une fois deux intitulés retirés.
+    // Visible half-width is d * tan(fov / 2) * aspect, minus fixed-width HTML labels.
     const usable = Math.max(0.2, 1 - (2 * LABEL_PX) / size.width);
     const needed =
       DEFAULT_TUNING.labelRadius /
@@ -126,7 +106,6 @@ function ParallaxCamera({ sway, fov }: CameraProps) {
       LAMBDA,
       delta,
     );
-    // Sans `OrbitControls`, plus rien ne recentre la caméra sur l'anneau.
     camera.lookAt(0, 0, 0);
   });
 
@@ -152,8 +131,7 @@ export function CanvasContainer({ children }: Props) {
     lightFillColor: scene.lightFillColor,
   }));
 
-  // Seuil à 0 : seul l'arc survolé (`<Select>`) entre dans la passe, il doit
-  // rayonner en entier, dans sa teinte — pas seulement ses reflets.
+  // Bloom the whole selected arc, not just its bright reflections.
   const [bloom, setBloom] = useControls("Halo", () => ({
     luminanceThreshold: {
       value: scene.luminanceThreshold,
@@ -165,8 +143,7 @@ export function CanvasContainer({ children }: Props) {
     intensity: { value: scene.intensity, min: 0, max: 5, step: 0.05 },
   }));
 
-  // Un tableau de dépendances sur `useControls` ne remet à jour que les bornes,
-  // jamais la valeur : c'est `set` qui ramène les curseurs sur le jeu du thème.
+  // useControls dependencies update bounds, not values; set applies theme defaults.
   useEffect(() => {
     const { lightKey, lightRim, lightFill, lightFillColor, ...halo } = scene;
     setLights({ lightKey, lightRim, lightFill, lightFillColor });
@@ -234,21 +211,13 @@ export function CanvasContainer({ children }: Props) {
       id="canvas-container"
       className="isolate flex min-h-0 min-w-0 flex-1 flex-col"
     >
-      {/* `fill` rend le panneau en flux dans son parent au lieu du coin haut
-          droit fixé par leva : c'est le wrapper qui choisit le coin. */}
       <div className="fixed bottom-4 left-4 z-50 hidden w-[280px] md:block">
         <Leva fill collapsed titleBar={{ title: "Anneau 3D" }} />
       </div>
-      {/* `flat` coupe le tone mapping ACES appliqué par défaut : sans lui les
-          teintes de catégorie arrivent désaturées et décalées par rapport aux
-          jetons CSS, alors que la couleur *est* l'encodage. */}
+      {/* Disable ACES tone mapping to keep category colors aligned with CSS. */}
       <Canvas flat camera={{ position: CAMERA, fov: camera.fov }}>
-        {/* Éclairage par image, généré à la volée à partir de ses enfants :
-            aucun HDR téléchargé, contrairement à `<Environment preset="…">`.
-            L'ancienne `ambientLight intensity={1}` remplissait tout et annulait
-            le relief que les deux directionnelles essayaient de créer. */}
+        {/* Generate environment lighting locally to avoid downloading an HDR asset. */}
         <Environment resolution={256}>
-          {/* Clé : grand panneau devant et au-dessus de l'anneau. */}
           <Lightformer
             form="rect"
             intensity={lights.lightKey}
@@ -256,9 +225,7 @@ export function CanvasContainer({ children }: Props) {
             position={[0, 6, 8]}
             scale={[12, 12, 1]}
           />
-          {/* Contre-jour : derrière et sous l'anneau, il pose un liseré sur le
-              bord des tubes et les détache du fond. En anneau plutôt qu'en
-              panneau, pour que le liseré suive la courbe. */}
+          {/* Ring-shaped backlighting follows the tubes' curvature. */}
           <Lightformer
             form="ring"
             intensity={lights.lightRim}
@@ -266,8 +233,6 @@ export function CanvasContainer({ children }: Props) {
             position={[0, -7, -9]}
             scale={9}
           />
-          {/* Remplissage : côté caméra, froid et faible (~1/3 de la clé) pour
-              éclaircir l'ombre sans la neutraliser. */}
           <Lightformer
             form="rect"
             intensity={lights.lightFill}
@@ -277,10 +242,7 @@ export function CanvasContainer({ children }: Props) {
           />
         </Environment>
         <ParallaxCamera sway={camera.sway} fov={camera.fov} />
-        {/* `Selection` doit englober la scène *et* le composeur : sans le
-            contexte, `SelectiveBloom` retombe sur une sélection vide, en
-            silence. Le halo est l'équivalent 3D du jeton `--arc-glow-lit` de
-            l'anneau SVG ; il n'y a pas de `--arc-glow` au repos. */}
+        {/* Scene and composer must share Selection or selective bloom silently stays empty. */}
         <Selection>
           <TuningContext value={{ ...tuning, ...labels }}>
             {children}

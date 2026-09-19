@@ -4,7 +4,6 @@ import type {
   CategoryOverviewType,
 } from "./schemas";
 
-// Lectures de l'arborescence de catégories.
 import { sql } from "@budget/db";
 import { db } from "@budget/db/client";
 
@@ -28,12 +27,7 @@ export async function categoriesOverview(
            SELECT json_build_object(
              'id', c.id, 
              'name', c.name, 
-             -- Sous une parente **globale**, les montants des enfants sont
-             -- dormants : conservés pour qu'un aller-retour ne les perde pas,
-             -- comptés dans aucune enveloppe (CHECK
-             -- categories_detailed_no_amount, et budgetSlots côté app). Les
-             -- lire peindrait dans la revue une jauge contre un chiffre absent
-             -- de l'enveloppe.
+             -- Child amounts remain stored but only count under a detailed parent.
              'budgetAmount',
              CASE WHEN cat.budget_detailed THEN c.budget_amount::float8 END,
              'transactionCount',
@@ -68,13 +62,7 @@ export async function categoriesOverview(
 
       UNION ALL
 
-      -- Le poste des transactions qu'aucune catégorie ne range. Il n'a pas de
-      -- ligne dans categories, et rien ne permet de le déduire des autres
-      -- postes : sans cette branche l'anneau prétend partitionner un total
-      -- dont il ignore une part, et la sentinelle d'URL none — seul signal
-      -- restant des transactions non classées — perd son unique producteur.
-      -- name reste NULL : ce sont les replis de breakdown.ts qui posent le
-      -- libellé et la sentinelle, aucun texte d'interface ne descend en SQL.
+      -- Include uncategorized spending so the breakdown accounts for the full total.
       SELECT -1,
              ${organizationId}::text,
              ${NO_CATEGORY_NAME},
@@ -93,8 +81,6 @@ export async function categoriesOverview(
                FROM filtered_transactions
                WHERE (t).category_id IS NULL
              )
-      -- Pas de ligne quand tout est rangé : un poste vide se lirait comme un
-      -- reste à classer qui n'existe pas.
       WHERE EXISTS (
         SELECT 1 FROM filtered_transactions WHERE (t).category_id IS NULL
       )

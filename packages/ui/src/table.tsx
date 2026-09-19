@@ -4,9 +4,7 @@ import * as React from "react";
 
 import { cn } from "@budget/ui";
 
-// `containerClassName` : c'est le conteneur qui défile, pas la table — un
-// en-tête `sticky` se cale sur l'ancêtre défilant le plus proche, et ce
-// conteneur en est un (`overflow-x-auto` rend aussi l'axe vertical défilant).
+// Set scroll bounds on the container: sticky headers use this overflow ancestor.
 function Table({
   className,
   containerClassName,

@@ -1,4 +1,3 @@
-// Synchronisation des transactions : connexions actives (DB) → data/transactions-*.json.
 import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
@@ -16,9 +15,7 @@ export interface SyncOutcome {
   rateLimited: string[];
 }
 
-// psuHeaders (Psu-Ip-Address, Psu-User-Agent) : présents quand le sync est déclenché
-// par l'utilisateur dans l'app — la requête est alors classée « PSU présent » et
-// échappe au plafond PSD2 des accès non-assistés (~4/jour par banque).
+// PSU headers identify user-present access, exempt from unattended PSD2 quotas.
 export async function syncBanks(
   organizationId: string,
   psuHeaders: Record<string, string> = {},
@@ -84,8 +81,6 @@ export async function syncBanks(
         );
       }
     } catch (err) {
-      // 401 = session PSD2 expirée ou invalidée : la connexion passe en expired,
-      // le sync continue pour les autres banques.
       if (err instanceof EbApiError && err.status === 401) {
         await db
           .update(bankConnections)
@@ -97,8 +92,7 @@ export async function syncBanks(
         );
         continue;
       }
-      // 429 (ASPSP_RATE_LIMIT_EXCEEDED) = quota d'accès de la banque atteint :
-      // rien à renouveler, réessayer plus tard (~6 h recommandées par Enable Banking).
+      // Rate limits require waiting, not renewing consent.
       if (err instanceof EbApiError && err.status === 429) {
         rateLimited.push(conn.aspspName);
         console.warn(

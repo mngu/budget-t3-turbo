@@ -16,11 +16,6 @@ interface BreakdownListProps {
   overview: CategoryOverviewType;
 }
 
-// Une ligne de la colonne, quel que soit le niveau affiché. Les deux niveaux
-// n'ont pas la même forme en base — seule une parente porte couleur, icône et
-// enfants — et rien ne relierait pour TypeScript le niveau courant à la forme
-// que `map` rend. Les deux sont donc aplaties ici, une fois, là où l'on sait
-// encore de laquelle on parle.
 interface BreakdownRow {
   label: string;
   value: number;
@@ -36,14 +31,9 @@ export function BreakdownList({ overview }: BreakdownListProps) {
   const resolveColor = useCategoryColor();
   const shadeCategoryColor = useShadeCategoryColor();
   const { category } = search;
-  // Même définition du niveau ouvert que `OverviewHeader` : sans elle, un
-  // filtre posé sur une *sous*-catégorie ouvrait l'en-tête sur sa parente
-  // pendant que la colonne restait à la racine.
   const selectedCategory = category
     ? overview.find(({ name }) => name === category)
     : null;
-  // `children` est nullable en base : le `json_array` d'une parente sans
-  // sous-catégorie rend `null`, pas un tableau vide.
   const children = selectedCategory?.children ?? [];
 
   const rows: BreakdownRow[] = selectedCategory
@@ -51,8 +41,6 @@ export function BreakdownList({ overview }: BreakdownListProps) {
         label: child.name,
         value: child.totalAmount ?? 0,
         budget: child.budgetAmount,
-        // Une sous-catégorie n'a ni icône ni couleur propre : elle emprunte
-        // celles de sa parente, en palier de teinte selon son rang.
         iconName: selectedCategory.icon,
         color: shadeCategoryColor(
           resolveColor(selectedCategory.color),
@@ -62,7 +50,6 @@ export function BreakdownList({ overview }: BreakdownListProps) {
         drillable: false,
       }))
     : overview.map((cat) => ({
-        // `null` sur le poste des transactions sans catégorie.
         label: getCategoryLabel(cat.name),
         value: cat.totalAmount ?? 0,
         budget: cat.budgetAmount,
@@ -74,9 +61,7 @@ export function BreakdownList({ overview }: BreakdownListProps) {
   const totalAmount = sumBy(rows, (row) => row.value);
   const childCount = sumBy(overview, (cat) => cat.children?.length ?? 0);
 
-  // Une parente détaillée n'a pas de montant propre (CHECK
-  // `categories_detailed_no_amount`) : son budget est la somme de ses enfants.
-  // Une parente globale porte le sien, et ceux de ses enfants sont dormants.
+  // Child budgets only contribute when the parent uses detailed budgeting.
   const selectedCategoryBudget = selectedCategory?.budgetAmount ?? null;
   const totalBudget = selectedCategory
     ? selectedCategory.budgetDetailed
@@ -92,9 +77,6 @@ export function BreakdownList({ overview }: BreakdownListProps) {
 
   return (
     <div className="flex h-full flex-col gap-4">
-      {/* Sous `md`, à la racine, ce bloc répète le bandeau (« Sorties ») et
-          l'en-tête de poste ; ouvert, il est la seule vue du poste face à son
-          budget et reste. */}
       <div
         className={cn("px-2 md:h-28", !selectedCategory && "hidden md:block")}
       >

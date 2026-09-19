@@ -5,9 +5,6 @@ import type {
   SpaceRole,
 } from "./schemas";
 
-// Lectures de l'écran « Espaces » : mes espaces, leurs membres, leurs
-// invitations. Un espace est une `organization` (plugin better-auth) ; voir
-// CLAUDE.md, section « Espaces ».
 import { sql } from "@budget/db";
 import { db } from "@budget/db/client";
 
@@ -18,15 +15,9 @@ import {
   spacesSchema,
 } from "./schemas";
 
-// Une inscription par lien magique peut ne pas donner de nom : même repli que
-// le hook d'inscription (`packages/auth`), le préfixe de l'adresse.
+// Magic-link signup may omit a name; match the signup hook's email-prefix fallback.
 const displayName = sql`coalesce(nullif(u.name, ''), split_part(u.email, '@', 1))`;
 
-/**
- * Tous les espaces de l'utilisateur, membres et invitations compris, en une
- * requête : les cartes affichent leurs membres dépliés, un appel par espace
- * ferait N+1 requêtes pour une poignée de lignes.
- */
 export async function listSpaces(
   userId: string,
   activeOrganizationId: string | null,
@@ -61,13 +52,6 @@ export async function listSpaces(
   return spacesSchema.parse(result.rows);
 }
 
-/**
- * Les invitations qui m'attendent, vues depuis mon compte. L'inscription étant
- * ouverte, on peut très bien avoir créé son compte sans jamais cliquer le lien
- * reçu par email : sans cette liste, ce lien serait la seule porte d'entrée
- * d'un espace partagé. Les périmées sont écartées : une invitation qui ne peut
- * plus être acceptée n'a rien à faire dans une liste de gestes à faire.
- */
 export async function listIncomingInvitations(
   email: string,
 ): Promise<IncomingInvitation[]> {
@@ -87,12 +71,7 @@ export async function listIncomingInvitations(
   return incomingInvitationsSchema.parse(result.rows);
 }
 
-/**
- * L'invitation vue depuis son lien, **avant toute authentification** : l'invité
- * n'a pas forcément de compte. Ne renvoie donc que ce qu'il est légitime de
- * montrer à qui détient le lien — nom de l'espace et qui invite — et jamais la
- * liste des membres ni la moindre transaction.
- */
+// Public lookup: expose only invitation details, never space members or transactions.
 export async function getInvitation(
   invitationId: string,
 ): Promise<InvitationDetail | null> {
@@ -114,10 +93,6 @@ export async function getInvitation(
   return row ? invitationDetailSchema.parse(row) : null;
 }
 
-/**
- * Le nombre d'espaces où l'utilisateur est encore membre, et s'il est le seul
- * propriétaire de celui-ci. Les deux gardes de `leaveSpace` en sortent.
- */
 export async function membershipGuards(userId: string, organizationId: string) {
   const result = await db.execute(sql`
     SELECT (SELECT count(*)::int FROM member WHERE user_id = ${userId}) AS "spaceCount",
@@ -128,7 +103,6 @@ export async function membershipGuards(userId: string, organizationId: string) {
   return membershipGuardsSchema.parse(result.rows[0]);
 }
 
-/** Vrai si l'utilisateur est membre de l'espace, avec le rôle demandé si fourni. */
 export async function hasRole(
   userId: string,
   organizationId: string,

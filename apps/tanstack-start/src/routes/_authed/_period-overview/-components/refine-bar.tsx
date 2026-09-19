@@ -16,31 +16,17 @@ import { useRevueSearch } from "~/lib/use-revue-search";
 
 import { CategorySelector } from "./category-selector/category-selector";
 
-// Au pluriel, comme les deux totaux qui les surplombent sur `/transactions` :
-// le bouton nomme un ensemble de lignes, pas le sens d'une transaction.
-//
-// `ToggleGroup` ne manipule que des chaînes : « Tous » y est la valeur
-// `"tous"`, traduite en `direction: undefined` à l'aller comme au retour.
 const SENSES = [
   { value: "tous", label: "Tous" },
   { value: "debit", label: "Débits" },
   { value: "credit", label: "Crédits" },
 ];
 
-// Filtres de *contenu* : ceux que les barres ci-dessous posent et retirent. La
-// banque n'en fait pas partie — elle se règle depuis l'en-tête, où son état est
-// visible depuis n'importe quel écran.
 const CONTEXT_FILTERS = {
   direction: undefined,
   category: undefined,
 } satisfies Partial<TransactionsSearch>;
 
-/**
- * Résout le nom porté par l'URL (`?category=`) en chemin de l'arborescence, pour
- * que le bouton de filtre lise la même source que la table. Sans ça, l'état du
- * bouton doublerait l'URL et divergerait d'elle au premier « ✕ » ou retour
- * arrière.
- */
 function selectedCategory(
   overview: CategoryOverviewType,
   category: string | undefined,
@@ -63,17 +49,10 @@ function selectedCategory(
   }
 }
 
-// Séparateur vertical entre groupes de contrôles de la barre (maquette : 1×20).
 function Divider() {
   return <span className="bg-border h-5 w-px flex-none" />;
 }
 
-/**
- * Barre « Affiner … » de `/transactions` : sens, catégorie, et le champ de
- * recherche `q`. Celui-ci vivait dans l'en-tête tant que celui-ci portait les
- * filtres des quatre écrans ; `Transactions.dc.html` le pose dans cette barre,
- * c'est un outil de table, pas de périmètre.
- */
 export function RefineBar({
   overview,
   className,
@@ -140,8 +119,6 @@ export function RefineBar({
         </button>
       )}
 
-      {/* Sous `md`, la recherche passe en tête et en pleine largeur : sur une
-          liste, le geste dominant au téléphone est de retrouver une ligne. */}
       <InputGroup className="order-first grow basis-full md:order-none md:ml-auto md:max-w-105 md:min-w-38 md:basis-0">
         <InputGroupAddon>
           <SearchIcon />

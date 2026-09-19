@@ -1,7 +1,5 @@
-# Le contexte d'image est `deploy/` (voir deploy/deploy.sh), pas la racine —
-# ce fichier est un filet pour un `docker build` lancé d'ici par erreur.
-# `data/` contient les credentials Enable Banking, `.env` la clé Anthropic et
-# AUTH_SECRET : ni l'un ni l'autre ne doit entrer dans une couche d'image.
+# deploy.sh builds from the staged remote directory; protect secrets and bank
+# exports if a build is accidentally launched from the repository root.
 .env
 .env.*
 !.env.example

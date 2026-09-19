@@ -26,11 +26,6 @@ type OverviewArc = Pick<
   arc: number;
 };
 
-/**
- * L'anneau 3D. Export par défaut pour le `lazy()` de `index.tsx`, qui ne le
- * monte qu'au-dessus de `md` : c'est ce qui tient three.js, drei et
- * postprocessing hors du bundle d'un téléphone, où l'anneau n'est pas affiché.
- */
 export default function Ring() {
   const { euro } = useFormat();
   const { overview } = useLoaderData({
@@ -65,10 +60,7 @@ export default function Ring() {
       })) ?? [])
     : overview;
 
-  // Les arcs se placent bout à bout, donc chacun a besoin du cumul de ceux qui
-  // le précèdent. L'accumulateur reste dans cette boucle plutôt que dans un
-  // `map` : réassigner depuis un callback fait échouer `react/immutability`,
-  // le compilateur ne pouvant pas prouver qu'il ne survit pas au rendu.
+  // Keep accumulation in the loop so React Compiler can prove it is render-local.
   const overviewArcs: OverviewArc[] = [];
   let rotation = 0;
   for (const { id, totalAmount, name, color, icon } of elements) {
@@ -95,8 +87,6 @@ export default function Ring() {
         const { id, arc, rotationZ, color, icon, name, totalAmount } =
           overviewArc;
         const labelName = getCategoryLabel(name);
-        // La teinte résolue vaut pour l'arc *et* pour son intitulé : la valeur
-        // brute est le pas clair, faux sur surface sombre.
         const resolvedColor = resolveColor(color);
         const shouldDisplayName = arc > Math.PI / 32;
 
@@ -178,9 +168,6 @@ function RingBackButton({ onClick }: { onClick: () => void }) {
     >
       <ArrowLeftIcon className="size-3" aria-hidden />
       Toutes catégories
-      {/* La touche est *aussi* une voie de sortie, mais elle ne s'annonçait
-          nulle part : la maquette la fait dire par le bouton plutôt que
-          d'ajouter une mention à part. */}
       <kbd className="border-border bg-surface-2 num text-subtle text-label ml-0.5 flex h-4 items-center rounded-sm border px-1 font-medium tracking-[0.02em]">
         Esc
       </kbd>

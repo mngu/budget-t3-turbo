@@ -1,8 +1,3 @@
-// Catégorisation des transactions sans catégorie de l'espace, en deux temps :
-// une transaction déjà catégorisée qui lui ressemble (même contrepartie ou
-// libellé proche) donne sa catégorie sans appel ; sinon le LLM choisit parmi
-// les catégories de l'espace, avec les ressemblances trouvées en exemples.
-// Idempotente (garde `IS NULL` partout) et sérialisée par espace.
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod/v4";
@@ -18,8 +13,6 @@ export interface CategorizeResult {
   remaining: number;
 }
 
-// Ce que le LLM voit d'une transaction : la banque et la contrepartie y
-// sont, aucune identité n'est codée dans le prompt.
 const txnSchema = z.object({
   id: z.number().int(),
   description: z.string(),
@@ -42,12 +35,8 @@ const similarSchema = z.object({
 export type Similar = z.infer<typeof similarSchema>;
 
 const SIMILAR_LIMIT = 5;
-// Calibré sur les données réelles : en dessous de 0,5 deux libellés partagent
-// la même catégorie parente à peine plus souvent que le hasard (le boilerplate
-// « CB … FACT … » suffit à atteindre 0,4) ; au-delà de 0,6, deux fois sur
-// trois. Le premier seuil admet un exemple, le second autorise à classer sans
-// LLM - une ligne classée devient elle-même exemple au run suivant, une
-// erreur d'autorité se propagerait.
+// Auto-assignment needs a stricter threshold than examples: assigned rows become
+// future examples, so weak matches would propagate errors.
 const EXAMPLE_THRESHOLD = 0.5;
 const SHORTCUT_THRESHOLD = 0.7;
 const LLM_BATCH_SIZE = 100;
@@ -70,16 +59,9 @@ async function uncategorized(organizationId: string): Promise<Txn[]> {
   return txnSchema.array().parse(result.rows);
 }
 
-// Même espace (un exemple d'un autre foyer serait une fuite et un mauvais
-// indice) et même sens : un remboursement et un achat chez la même enseigne
-// ne vont pas dans la même catégorie. La similarité prime sur la source, mais
-// entre candidats d'une même bande (arrondi à 0,1) une correction manuelle
-// passe devant - mesuré : trier manuel d'abord faisait tomber le meilleur
-// exemple de 91 % à 70 % de bonne catégorie parente.
-//
-// `coalesce(…, false)` sur les deux booléens : Postgres refuse une constante
-// dans ORDER BY (contrepartie nulle), et un NULL passerait en tête d'un tri
-// DESC.
+// Keep examples in the same space and direction. Rank similarity before manual
+// provenance; prioritizing manual corrections reduced matching accuracy.
+// Coalesce nullable comparisons so NULL does not sort first under DESC.
 async function findSimilar(
   organizationId: string,
   txn: Txn,
@@ -108,8 +90,7 @@ async function findSimilar(
   return similarSchema.array().parse(result.rows);
 }
 
-// Court-circuit : les candidats sûrs (même contrepartie, ou libellé au-dessus
-// du seuil haut) sont unanimes. Un seul suffit ; un désaccord passe au LLM.
+// One safe candidate is enough; disagreement requires the LLM.
 export function unanimousCategory(
   similars: Similar[],
   counterparty: string | null,
@@ -124,9 +105,7 @@ export function unanimousCategory(
   return first !== undefined && rest.every((n) => n === first) ? first : null;
 }
 
-// Le prompt ne connaît que les catégories réellement en base : une règle qui
-// en citerait une absente faisait répondre hors liste, et la ligne restait
-// sans catégorie pour toujours.
+// Never hard-code category names: only this space's actual categories are valid.
 export function buildSystemPrompt(categoryNames: string[]): string {
   return `Tu catégorises des transactions bancaires personnelles pour le budget d'un ménage français.
 
@@ -163,18 +142,14 @@ export function buildUserMessage(
     .join("\n\n---\n\n");
 }
 
-// Ne valide que la forme : un z.enum(categoryNames) ferait échouer le parsing
-// de tout le lot dès qu'une réponse cite une catégorie hors liste. Le tri
-// réel est dans `validResults`. `null` est la réponse légitime quand rien ne
-// convient - sans elle le LLM est contraint d'inventer un nom.
+// Validate names per result, not with an enum that would reject the whole batch.
+// Null lets the model decline when no category fits.
 const outputSchema = z.object({
   resultats: z.array(
     z.object({ id: z.number().int(), categorie: z.string().nullable() }),
   ),
 });
 
-// Défense en profondeur derrière les structured outputs : rien qui ne soit
-// pas une catégorie de l'espace, sur une ligne du lot, n'atteint la base.
 export function validResults(
   resultats: { id: number; categorie: string | null }[],
   batchIds: Set<number>,
@@ -254,8 +229,7 @@ async function runCategorization(
   }
   const client = new Anthropic();
   const system = buildSystemPrompt([...categoryIdByName.keys()]);
-  // Lots séquentiels : un lot écrit ses résultats avant que le suivant parte,
-  // un échec au quatrième garde les trois premiers.
+  // Persist each batch before the next so later failures preserve earlier results.
   for (let i = 0; i < llmRows.length; i += LLM_BATCH_SIZE) {
     const batch = llmRows.slice(i, i + LLM_BATCH_SIZE);
     const response = await client.messages.parse({

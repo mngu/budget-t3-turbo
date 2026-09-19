@@ -8,8 +8,7 @@ export const auth = initAuth({
   baseUrl: getBaseUrl(),
   secret: env.AUTH_SECRET,
 
-  // Autorise l'app Expo en mode web (Metro, port variable) à appeler l'API
-  // d'auth en local — jamais en production, où seule l'origine du site compte.
+  // Allow cross-port localhost clients in development only.
   trustedOrigins:
     env.NODE_ENV === "production" ? undefined : ["http://localhost:*"],
 

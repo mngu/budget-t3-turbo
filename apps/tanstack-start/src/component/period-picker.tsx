@@ -38,13 +38,7 @@ const monthFr = new Intl.DateTimeFormat("fr-FR", {
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-// « Juillet 2026 » quand les bornes couvrent exactement un cycle mensuel, sinon
-// la plage complète : les flèches posent toujours un cycle entier, mais le
-// calendrier permet une période quelconque et l'intitulé doit rester honnête.
-//
-// Le cycle est nommé d'après le mois de son *milieu* et non de son début : un
-// mois qui commence le 28 juin est « Juillet » pour qui l'a réglé ainsi. Avec un
-// départ au 1er, milieu et début tombent dans le même mois — rien ne change.
+// Name full cycles by their midpoint's month: a cycle starting June 28 is July.
 function periodLabel(from?: Date, to?: Date, startDay = 1) {
   if (!from || !to) return "Toute la période";
   const cycle = cycleOf(from, startDay);
@@ -67,14 +61,7 @@ interface Preset {
   to: Date;
 }
 
-/**
- * Raccourcis de la colonne de gauche, tous ancrés sur la période **affichée** et
- * non sur aujourd'hui — y compris « 30 derniers jours », que la maquette fait
- * finir à la fin du mois affiché (`new Date(y, m, end.getDate() - 29)` → `end`).
- * Sur le mois en cours les deux lectures coïncident ; sur un mois passé, le
- * raccourci reste dans la période qu'on est en train de regarder au lieu de
- * ramener brutalement à aujourd'hui.
- */
+// Anchor shortcuts to the displayed period so browsing history does not jump to today.
 function buildPresets(anchor: Date, startDay: number): Preset[] {
   const current = cycleOf(anchor, startDay);
   const previous = cycleOf(subDays(current.start, 1), startDay);
@@ -102,29 +89,19 @@ export function PeriodPicker() {
   const { search, setSearch } = useRevueSearch();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<Date | null>(null);
-  // Lu au premier rendu comme le fait `ThemeProvider` : le serveur n'a pas le
-  // réglage et rend le mois calendaire, le client corrige — la réécriture d'URL
-  // qui suit rejoue les loaders sur le bon cycle.
+  // SSR cannot read the saved pay cycle; the client corrects the URL and reloads data.
   const [startDay, setStartDay] = useState(monthStartDay);
 
   const from = search.dateFrom ? parseISO(search.dateFrom) : undefined;
   const to = search.dateTo ? parseISO(search.dateTo) : undefined;
   const anchor = from ?? new Date();
 
-  // Bornes du sélecteur. La haute est aujourd'hui — il n'y a rien à regarder
-  // après. La basse est la première transaction de l'espace, et son absence
-  // (espace encore vide) vaut « pas de borne basse » plutôt que « rien n'est
-  // cliquable ». Elle vient du loader du layout de la revue, seul endroit d'où
-  // l'en-tête monte ce sélecteur (garde `isRevue` d'`AppHeader`) : elle est
-  // donc là dès la première image, il n'y a plus de fenêtre « requête en vol ».
   const { earliestDate: earliest } = useLoaderData({
     from: "/_authed/_period-overview",
   });
   const today = new Date();
   const min = earliest ? parseISO(earliest) : undefined;
-  // Comparé au *cycle* et non au jour : un mois est atteignable dès qu'il
-  // intersecte les bornes, sinon le mois de la première transaction et le mois
-  // en cours seraient l'un et l'autre inatteignables.
+  // Any overlap keeps the first and current months reachable.
   const monthReachable = (date: Date) => {
     const cycle = cycleOf(date, startDay);
     return (!min || cycle.end >= min) && cycle.start <= today;
@@ -136,26 +113,19 @@ export function PeriodPicker() {
     setSearch({ dateFrom: toISODate(start), dateTo: toISODate(end) });
   };
 
-  // Un pas se prend sur les *bords* du cycle affiché et non par `addMonths` :
-  // avec un départ au 29 ou plus, le décalage d'un mois est écrêté en février et
-  // ne se rejoue pas à l'envers — la période dériverait à chaque aller-retour.
+  // Step from cycle boundaries: addMonths clamps short months and causes round-trip drift.
   const stepTarget = (delta: number) => {
     const cycle = cycleOf(anchor, startDay);
     return delta < 0 ? subDays(cycle.start, 1) : addDays(cycle.end, 1);
   };
 
-  // La garde est ici et pas seulement sur le bouton : une URL fabriquée à la
-  // main ou un signet périmé peut poser un `dateFrom` hors bornes, et le pas
-  // suivant repartirait de là.
+  // Bookmarks and manual URLs can start outside the picker bounds.
   const shiftMonth = (delta: number) => {
     const target = stepTarget(delta);
     if (!monthReachable(target)) return;
     setSearch(monthBounds(target, startDay));
   };
 
-  // Changer le départ recale la période affichée sur le cycle correspondant :
-  // le réglage n'a d'effet visible que là, et un écran resté sur l'ancienne
-  // plage laisserait croire qu'il n'a rien fait.
   const changeStartDay = (day: number) => {
     setStartDay(day);
     setMonthStartDay(day);
@@ -174,8 +144,7 @@ export function PeriodPicker() {
         open={open}
         onOpenChange={(next) => {
           setOpen(next);
-          // Une borne de début restée seule ne survit pas à la fermeture :
-          // rouvrir doit repartir de la période réellement en vigueur.
+          // Discard incomplete selections when closing.
           if (!next) setDraft(null);
         }}
       >
@@ -185,8 +154,7 @@ export function PeriodPicker() {
               type="button"
               title="Choisir une période"
               className="num hover:text-foreground min-h-8 min-w-0 text-center font-medium tracking-[-0.01em]"
-              // Le serveur ignore le jour de départ : l'intitulé rendu par SSR
-              // peut différer de celui du client jusqu'à la réécriture d'URL.
+              // SSR does not know the browser's pay-cycle preference.
               suppressHydrationWarning
               {...props}
             >
@@ -209,11 +177,7 @@ export function PeriodPicker() {
                   !!to &&
                   isSameDay(preset.from, from) &&
                   isSameDay(preset.to, to);
-                // Désactivé, jamais rogné : un raccourci dont on aurait déplacé
-                // la borne mentirait sur ce qu'il vient de sélectionner. Un
-                // raccourci qui *chevauche* les bornes reste bon — « Ce mois »
-                // sur le mois en cours finit après aujourd'hui, et c'est le mois
-                // entier qu'on veut (les budgets comptent en mois pleins).
+                // Preserve full periods for monthly budgets; disable rather than clip.
                 const reachable =
                   (!min || preset.to >= min) && preset.from <= today;
                 return (
@@ -234,9 +198,6 @@ export function PeriodPicker() {
                 );
               })}
 
-              {/* Cycle de paie : « mon mois commence le 28 ». Un `<select>`
-                  natif — 31 valeurs, aucune saisie à valider. Les jours 29 à 31
-                  sont ramenés au dernier jour des mois plus courts. */}
               <label className="border-border text-subtle text-label mt-2 flex flex-col gap-1 border-t pt-2">
                 Le mois commence le
                 <select
@@ -254,18 +215,12 @@ export function PeriodPicker() {
             </div>
 
             <div className="flex flex-col">
-              {/* Le calendrier est celui du design system, pas la grille de 42
-                  cellules dessinée à la main dans la maquette : mêmes gestes,
-                  mêmes états, et le style de la plage suit les jetons de l'app. */}
               <Calendar
                 mode="range"
                 locale={fr}
                 numberOfMonths={1}
                 defaultMonth={anchor}
-                // `endMonth` est la *fin* du mois en cours et non aujourd'hui :
-                // le mois courant doit rester entièrement visible et
-                // sélectionnable comme mois plein. Ce sont les jours d'après
-                // qu'on grise, pas le mois.
+                // Keep the full current month visible while disabling future days.
                 startMonth={min ? startOfMonth(min) : undefined}
                 endMonth={endOfMonth(today)}
                 disabled={

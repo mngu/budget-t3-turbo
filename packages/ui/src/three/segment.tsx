@@ -7,19 +7,14 @@ import { useState } from "react";
 
 import { RING_RADIUS, TUBE_RADIUS, useTuning } from "./tuning";
 
-// La carte HTML au centre de l'anneau. Un composant et non un réexport de
-// `Html` : rendu depuis un fichier de l'app, `Html` recevrait le
-// `data-insp-path` du plugin de dev et le reverserait dans son `group` (voir
-// vite.config.ts) ; ici la prop tombe sur un composant React et s'y arrête.
+// The wrapper keeps code-inspector's injected props from reaching Html's Three group.
 export function SegmentDetail({ children }: { children: ReactNode }) {
   return <Html center>{children}</Html>;
 }
 
-/** Partagé par le tore et ses bouchons : voir plus bas. */
 const RADIAL_SEGMENTS = 24;
 
-// Aucun prop n'est reversé dans le `mesh` : ce qu'un plugin de dev injecte
-// dans `<Segment>` (`data-insp-path`) ferait tomber R3F. Voir vite.config.ts.
+// Do not spread props onto meshes: injected data-insp-path props crash R3F.
 type SegmentProps = {
   color: string;
   arc: number;
@@ -29,7 +24,6 @@ type SegmentProps = {
   onClick?: () => void;
 };
 
-/** Partagé par le tube et ses deux bouchons. */
 function SegmentMaterial({ color }: { color: string }) {
   const tuning = useTuning();
 
@@ -63,9 +57,6 @@ export function Segment({
   useCursor(hovered);
 
   return (
-    // `Select` inscrit le tube, ses bouchons et le trait de l'intitulé dans le
-    // `SelectiveBloom` du composeur : le halo se dessine dans la teinte de
-    // l'arc, sans toucher à sa matière.
     <Select enabled={hovered}>
       <animated.mesh
         scale={scale}
@@ -78,9 +69,7 @@ export function Segment({
           onPointerOver?.();
         }}
         onPointerOut={() => setHovered(false)}
-        // Comme pour le survol : sans `stopPropagation`, R3F livre le clic à
-        // chaque arc traversé par le rayon, et c'est le dernier — celui de
-        // derrière — qui écrirait l'URL.
+        // Prevent arcs behind this one from also handling the raycast click.
         onClick={(e) => {
           e.stopPropagation();
           onClick?.();
@@ -96,21 +85,13 @@ export function Segment({
           ]}
         />
         <SegmentMaterial color={color} />
-        {/* `torusGeometry` laisse un arc partiel ouvert aux deux bouts : sans ces
-          disques on regarde à l'intérieur du tube. Un disque et non une sphère :
-          l'ouverture est plate, une sphère déborderait d'un rayon de tube entier
-          — bien plus que le jour entre deux arcs — et les bouchons voisins se
-          traverseraient, ce qui donne la jonction bombée qu'on voyait avant.
-          Le `RADIAL_SEGMENTS` est le même que celui du tore : les sommets du
-          bord tombent alors sur ceux de l'ouverture, sans couture ni z-fight.
-          Le `group` porte la rotation autour de l'anneau et le `mesh` celle du
-          disque : trois rotations dans un seul Euler s'appliqueraient dans
-          l'ordre Rx·Ry·Rz, pas dans celui qu'on lit. */}
+        {/* Flat caps close the torus without overlapping neighboring arcs.
+            Match radial segments to avoid seams; separate rotations preserve their order. */}
         {[0, arc].map((angle, i) => (
           <group key={angle} rotation-z={angle}>
             <mesh
               position={[RING_RADIUS, 0, 0]}
-              // Les faces sont simples : chaque bouchon doit tourner le dos au tube.
+              // Single-sided caps must face away from the tube.
               rotation-x={i === 0 ? Math.PI / 2 : -Math.PI / 2}
             >
               <circleGeometry args={[TUBE_RADIUS, RADIAL_SEGMENTS]} />

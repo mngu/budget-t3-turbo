@@ -30,8 +30,6 @@ export function CategoryDeleteDialog({
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
 }) {
-  // Chiffres d'abord, phrase ensuite : ce qui décide, c'est le nombre de
-  // transactions qui vont redevenir sans catégorie.
   const facts = target
     ? [
         target.childCount > 0 && {

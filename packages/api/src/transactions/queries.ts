@@ -1,5 +1,4 @@
 import type { StatsInputSchema, TransactionsSearch } from "./schemas";
-// Lectures et corrections manuelles sur la table des transactions.
 import type { SQL } from "@budget/db";
 
 import { and, eq, exists, sql } from "@budget/db";
@@ -17,41 +16,19 @@ import {
   transactionRowSchema,
 } from "./schemas";
 
-// Nom de banque affiché : display_name choisi par l'utilisateur, sinon nom
-// ASPSP. `ba` est l'alias de bank_accounts partout où il s'écrit. Jamais
-// `account_id` : deux comptes partageant un libellé sont indissociables dans
-// l'UI, c'est donc le libellé que le sélecteur de comptes filtre.
+// The picker filters display labels, so accounts sharing a label form one group.
 const bankLabel = sql`coalesce(ba.display_name, ba.bank_name)`;
 
-/**
- * Le périmètre commun à toutes les lectures de transactions — et **le point de
- * passage du cloisonnement** : `ba.organization_id` y est posé avant tout
- * filtre venu de l'URL. La période, le sens, les comptes affichés, et par
- * défaut jamais les lignes écartées à la main.
- *
- * Le **filtre de comptes** est ce qui a manqué à la première écriture, et rien
- * à l'écran ne le réclame — sans lui la revue décrit tous les comptes sous une
- * sélection, donc affiche des chiffres, juste faux.
- *
- * Il expose `filtered_transactions`, un CTE de composites (`(t).amount`,
- * `(c).name`, `(p).name`) plus la colonne `bank_name`, le libellé ci-dessus.
- */
 export function filterTransactions(
   organizationId: string,
   query: Partial<TransactionsSearch>,
-  // Le défaut doit être sûr : un agrégat écrit demain écarte les exclues sans
-  // y penser. Seuls le relevé et les pastilles de comptes (qui annoncent ce
-  // que le relevé affichera) les redemandent — c'est le seul endroit d'où les
-  // reprendre.
+  // Aggregates omit excluded rows by default; the statement and its counts opt in.
   { includeExcluded = false } = {},
 ) {
   const { dateFrom, dateTo, direction, bank } = query;
-  // Une liste vide vaut « tous les comptes », comme `undefined` — même lecture
-  // que `selectedBanks` côté client.
   const banks = Array.isArray(bank) ? bank : bank ? [bank] : [];
 
-  // Ternaires explicites : `direction && sql\`…\`` glisse `undefined` dans le
-  // gabarit quand le sens n'est pas précisé.
+  // Empty SQL fragments avoid interpolating undefined for missing filters.
   return sql`
     WITH filtered_transactions AS (
       SELECT t, c, p, ${bankLabel} AS bank_name
@@ -68,10 +45,6 @@ export function filterTransactions(
   `;
 }
 
-// Une catégorie **racine** (sans parent) est son propre poste : c'est elle qui
-// en porte le nom, l'icône, la couleur et le budget. Sans ce repli, un
-// `GROUP BY (p).name` rassemble toutes les racines — et les transactions sans
-// catégorie du tout — dans un seul seau `null`.
 const parentBudget = sql`CASE
         WHEN COALESCE((p).budget_detailed, (c).budget_detailed)
           THEN (SELECT SUM(k.budget_amount) FROM categories k WHERE k.parent_id = COALESCE((p).id, (c).id))
@@ -111,9 +84,7 @@ export async function globalStats(
   return globalStatsSchema.parse(result.rows[0]);
 }
 
-// Les filtres propres au relevé, posés **après** le CTE et non dedans :
-// `category` y partitionnerait l'overview, qui agrège justement *par*
-// catégorie. Un parent choisi inclut ses sous-catégories (2 niveaux).
+// Apply content filters after the shared CTE so they do not narrow period aggregates.
 function statementFilters({ status, category, q }: TransactionsSearch) {
   const statusCondition = status ? sql`AND (t).status = ${status}` : sql``;
   const categoryCondition =
@@ -128,9 +99,6 @@ function statementFilters({ status, category, q }: TransactionsSearch) {
   return sql`WHERE true ${statusCondition} ${categoryCondition} ${qCondition}`;
 }
 
-// `limit` déroge à PAGE_SIZE pour les écrans qui ne paginent pas (« À revoir »,
-// zoom catégorie) : ils affichent une tranche plus large d'un coup plutôt que de
-// faire naviguer l'utilisateur. La pagination reste le cas par défaut.
 export async function listTransactions(
   organizationId: string,
   input: TransactionsSearch,
@@ -141,9 +109,7 @@ export async function listTransactions(
   });
   const filters = statementFilters(input);
 
-  // Tri par montant **signé** : les plus gros débits en tête en `desc`. Le
-  // départage sur `(t).id` rend la pagination stable à date égale. `order` est
-  // un enum validé par zod, `sql.raw` ne reçoit jamais une valeur libre.
+  // Break ties by ID for stable pagination; sql.raw receives only fixed direction literals.
   const sortColumn =
     input.sort === "amount"
       ? sql`CASE WHEN (t).direction = 'debit' THEN -(t).amount ELSE (t).amount END`
@@ -194,12 +160,7 @@ export async function listBankLabels(organizationId: string) {
     SELECT DISTINCT ${bankLabel} AS "bankName"
     FROM bank_accounts ba
     WHERE ba.organization_id = ${organizationId}
-      -- Un compte décoché au wizard n'est jamais importé : le nommer ici
-      -- ajouterait au panneau une ligne à 0 qui ne peut rien filtrer.
-      -- Mais s'il a déjà des transactions (décoché *après* un import), son
-      -- libellé doit rester : ses lignes pèsent dans les agrégats tant que
-      -- bank est indéfini, et sans case à cocher elles disparaîtraient au
-      -- premier décochage sans que rien ne l'explique.
+      -- Disabled accounts with imported transactions must remain selectable.
       AND (ba.enabled OR EXISTS (SELECT 1 FROM transactions t WHERE t.account_id = ba.id))
     ORDER BY 1
   `);
@@ -209,16 +170,7 @@ export async function listBankLabels(organizationId: string) {
     .map((r) => r.bankName);
 }
 
-/**
- * Date de la transaction la plus ancienne de l'espace, ou `null` s'il n'y en a
- * aucune — borne basse du sélecteur de période.
- *
- * **Sans aucun filtre, `bank` compris**, alors que la search en porte un : la
- * borne d'un calendrier ne peut pas dépendre des comptes cochés, sinon décocher
- * un compte rendrait illégale une période déjà choisie, sur un clic qui ne
- * parlait pas de dates. Le périmètre est l'espace, via `bank_accounts` —
- * `transactions` ne porte pas d'`organization_id`.
- */
+// Account filters must not change calendar bounds and invalidate a selected period.
 export async function earliestTransactionDate(organizationId: string) {
   const result = await db.execute(sql`
     SELECT min(t.booking_date)::text AS date
@@ -229,15 +181,11 @@ export async function earliestTransactionDate(organizationId: string) {
   return earliestDateSchema.parse(result.rows[0]).date;
 }
 
-// Nombre de transactions par banque pour les pastilles de la barre de filtres.
-// `bank` est retiré du filtre : sinon sélectionner une banque mettrait les
-// autres à zéro et on ne saurait plus vers quoi basculer.
+// Ignore the selected bank so other accounts retain meaningful picker counts.
 export async function bankCounts(
   organizationId: string,
   input: TransactionsSearch,
 ) {
-  // La pastille annonce des lignes, pas de l'argent : elle compte ce que le
-  // relevé affichera une fois le compte coché, exclusions comprises.
   const scope = filterTransactions(
     organizationId,
     { ...input, bank: undefined },
@@ -254,13 +202,7 @@ export async function bankCounts(
   return bankCountSchema.array().parse(result.rows);
 }
 
-// Une correction manuelle écrase la valeur précédente (LLM ou manuelle) ; le
-// garde IS NULL de categorization.ts empêche le LLM d'y retoucher ensuite.
-//
-// Les **deux** côtés portent l'espace, et c'est le point à ne pas alléger : la
-// catégorie parce que son nom n'est unique que dans l'espace, la transaction
-// parce que son id vient du client — sans le `EXISTS`, l'id d'une ligne d'un
-// autre foyer serait recatégorisé sans un mot.
+// Check both transaction and category ownership to prevent cross-space assignment.
 export async function setTransactionCategory(
   organizationId: string,
   id: number,
@@ -272,10 +214,6 @@ export async function setTransactionCategory(
     .where(and(eq(transactions.id, id), ownedByOrganization(organizationId)));
 }
 
-// Exclusion manuelle : la ligne sort de tous les agrégats (revue, budgets,
-// historique, suggestions) et reste dans le relevé, seul endroit d'où la
-// reprendre. Aucun traitement ne la pose ni ne la retire — voir le commentaire
-// de la colonne.
 export async function setTransactionExcluded(
   organizationId: string,
   id: number,
@@ -287,11 +225,7 @@ export async function setTransactionExcluded(
     .where(and(eq(transactions.id, id), ownedByOrganization(organizationId)));
 }
 
-/**
- * « Cette transaction est bien dans l'espace. » À poser sur toute écriture
- * ciblée par un id venu du client — l'`UPDATE` n'a pas de `FROM bank_accounts` où
- * accrocher la condition, d'où le `EXISTS` corrélé.
- */
+// Writes by client-supplied ID inherit organization scope through the bank account.
 function ownedByOrganization(organizationId: string): SQL {
   return exists(
     db

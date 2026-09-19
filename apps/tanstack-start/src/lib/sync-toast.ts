@@ -6,7 +6,6 @@ import { useState } from "react";
 import { toast } from "@budget/ui/toast";
 import { useTRPCClient } from "~/lib/trpc";
 
-// Toast de fin de synchronisation, commun au bouton Sync et au wizard.
 export function toastSyncOutcome(
   { expired, rateLimited }: SyncOutcome,
   successMessage = "Synchronisation terminée.",
@@ -27,9 +26,7 @@ export function toastSyncOutcome(
   else toast.success(successMessage);
 }
 
-// sync.run touche aux sessions bancaires réelles et déclenche une SCA : ses
-// deux déclencheurs (bouton de /banques, menu des comptes) passent par ici,
-// jamais par un effet de bord.
+// Run only on user action: bank synchronization may trigger strong authentication.
 export function useSync() {
   const router = useRouter();
   const trpcClient = useTRPCClient();

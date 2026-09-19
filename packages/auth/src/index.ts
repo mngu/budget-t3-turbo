@@ -12,29 +12,13 @@ import { member, organization as orgTable } from "@budget/db/schema";
 
 import { sendMagicLinkEmail } from "./email";
 
-/** Validité d'un lien de connexion. Annoncée dans l'email, à garder alignée. */
 const MAGIC_LINK_MINUTES = 15;
 
-/**
- * L'« espace » de l'app (un utilisateur seul, ou un foyer) est une organization
- * better-auth : le plugin apporte les tables organization/member/invitation, et
- * surtout `session.activeOrganizationId`, qui fait vivre l'espace courant dans
- * la session plutôt que dans l'URL — d'où l'absence de diff sur les routes.
- *
- * Tout ce qui est propre à un espace (comptes bancaires, catégories, et donc
- * transactions) porte son `organization_id` ; `app_settings`, credentials
- * Enable Banking de l'installation, reste hors espace.
- */
-
-// Le slug n'est affiché nulle part : le suffixe aléatoire évite d'avoir à
-// gérer les collisions sur une valeur que personne ne lit.
 export const slugify = (name: string) =>
   `${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${randomUUID().slice(0, 8)}`;
 
-// Espace personnel créé à l'inscription. Sans lui, la session d'un nouvel
-// utilisateur n'aurait aucun espace actif et l'app entière lui répondrait
-// FORBIDDEN — y compris à un invité, dont l'adhésion n'est créée qu'à
-// l'acceptation de l'invitation, donc après la création du compte.
+// Every new user needs a space before orgProcedure can authorize requests,
+// including invitees who have not yet accepted their invitation.
 async function createPersonalOrganization(newUser: {
   id: string;
   name: string;
@@ -70,14 +54,9 @@ export function initAuth(options: {
     }),
     baseURL: options.baseUrl,
     secret: options.secret,
-    // Pas de `emailAndPassword` : la seule voie d'entrée est le lien de
-    // connexion, plus bas. Les mots de passe des comptes créés avant sont
-    // restés en base (table `account`) et n'ont plus aucun appelant.
     user: {
       additionalFields: {
-        // Configuration Enable Banking = celle de l'installation : seul un
-        // admin peut l'écraser (voir `adminProcedure`). Faux par défaut,
-        // posé à la main sur le compte propriétaire de l'instance.
+        // Installation admins are granted manually, never through user input.
         isAdmin: {
           type: "boolean",
           defaultValue: false,
@@ -88,9 +67,6 @@ export function initAuth(options: {
     databaseHooks: {
       user: {
         create: {
-          // Inscription ouverte : n'importe qui peut créer un compte, et
-          // repart avec son seul espace personnel. Une invitation ne donne
-          // plus le droit d'exister, seulement l'adhésion à un espace partagé.
           after: createPersonalOrganization,
         },
       },
@@ -113,15 +89,9 @@ export function initAuth(options: {
       },
     },
     plugins: [
-      // Connexion par lien, et rien d'autre. Le lien fait trois choses d'un
-      // coup : il connecte, il inscrit si l'adresse est inconnue
-      // (`disableSignUp` laissé à false — c'est l'inscription ouverte), et il
-      // prouve l'adresse. Cette troisième est ce qui remplace la vérification
-      // d'email supprimée avec les mots de passe : sans elle, `spaces.incoming`
-      // montrerait les invitations d'une adresse qu'il suffirait de déclarer.
+      // Magic links prove email ownership, required before exposing incoming invitations.
       magicLink({
-        // 5 minutes par défaut, trop court pour un aller-retour par email
-        // ouvert sur un téléphone.
+        // Allow time to open the email on another device.
         expiresIn: MAGIC_LINK_MINUTES * 60,
         sendMagicLink: ({ email, url }) =>
           sendMagicLinkEmail({
@@ -134,10 +104,7 @@ export function initAuth(options: {
         schema: {
           organization: {
             additionalFields: {
-              // Un espace personnel ne se déduit pas de son nombre de membres :
-              // un espace partagé dont on n'a encore invité personne lui
-              // ressemblerait trait pour trait, alors qu'il ne se comporte pas
-              // pareil (suppression, conversion). D'où le drapeau explicite.
+              // Member count cannot distinguish a personal space from a new shared one.
               isPersonal: {
                 type: "boolean",
                 defaultValue: false,

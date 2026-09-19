@@ -1,5 +1,5 @@
-# Réutilise l'instance Postgres locale de budget-tracker (même conteneur, même volume).
-# La base de CE projet est `budget_t3` — la base `budget` appartient à l'ancien repo.
+# Shares the legacy project's PostgreSQL instance and volume.
+# This project's database is budget_t3; budget belongs to the legacy repository.
 name: budget-tracker
 
 services:
@@ -10,11 +10,10 @@ services:
       POSTGRES_PASSWORD: budget
       POSTGRES_DB: budget_t3
     ports:
-      # 5436 côté hôte : 5432-5435 occupés par d'autres projets locaux
       - "5436:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-      # Scripts exécutés uniquement à la création initiale du volume (voir docker-initdb/).
+      # Initialization scripts run only on a new volume.
       - ./docker-initdb:/docker-entrypoint-initdb.d
 
 volumes:

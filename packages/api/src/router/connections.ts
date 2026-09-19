@@ -31,9 +31,7 @@ export const connectionsRouter = {
       startAuth(ctx.organizationId, ctx.session.user.id, input),
     ),
 
-  // Pas d'`orgProcedure` : l'espace de destination vient de la demande
-  // d'autorisation (`auth_requests`), consommée par `completeAuth`. L'espace
-  // actif de la session peut avoir changé pendant le détour par la banque.
+  // Use the auth request's space: the active session space may change during bank authorization.
   complete: protectedProcedure
     .input(z.object({ code: z.string().min(1), state: z.string().min(1) }))
     .mutation(({ input }) => completeAuth(input.code, input.state)),

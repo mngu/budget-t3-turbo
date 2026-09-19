@@ -1,13 +1,7 @@
 import type { SpaceRole } from "./schemas";
 
-// Écritures de l'écran « Espaces ».
-//
-// Ces mutations écrivent directement les tables du plugin `organization`
-// (organization / member / invitation) plutôt que de passer par les endpoints
-// better-auth : tout le reste de l'app parle à la base par tRPC + Drizzle, et
-// remettre l'API auth dans le contexte tRPC casse le build de déclarations
-// (voir le commentaire de `createTRPCContext`). Le seul geste qui reste côté
-// better-auth est `setActive`, qui touche la session — donc côté client.
+// Write organization tables directly: putting Better Auth's API in the tRPC
+// context exceeds TypeScript's declaration serialization limit.
 import { randomUUID } from "node:crypto";
 
 import { sendInvitationEmail, slugify } from "@budget/auth";
@@ -17,7 +11,7 @@ import { invitation, member, organization, user } from "@budget/db/schema";
 
 import { hasRole, membershipGuards } from "./queries";
 
-/** Durée de vie d'un lien d'invitation. Annoncée à l'écran, à garder alignée. */
+// Keep the lifetime aligned with the invitation UI.
 const INVITATION_DAYS = 7;
 
 const expiry = () => new Date(Date.now() + INVITATION_DAYS * 24 * 3600 * 1000);
@@ -40,7 +34,6 @@ function cleanName(name: string): string {
   return trimmed;
 }
 
-/** Espace partagé neuf — vide, c'est tout son propos (voir `shareSpace`). */
 export async function createSpace(
   userId: string,
   name: string,
@@ -64,16 +57,8 @@ export async function createSpace(
   return { id };
 }
 
-/**
- * Convertit l'espace personnel en espace partagé : il change de nom et cesse
- * d'être personnel, **rien d'autre ne bouge**. C'est la réponse au seul vrai
- * trou du parcours — les comptes, catégories et transactions d'un espace ne
- * peuvent pas être déplacés vers un autre, alors c'est l'espace lui-même qui
- * s'ouvre.
- *
- * Sans retour possible, et c'est dit à l'écran : rien ne recrée un espace
- * personnel, le hook d'inscription ne s'exécutant qu'une fois.
- */
+// Share the existing space to preserve its data; accounts cannot move between spaces.
+// This is irreversible: the signup hook does not recreate personal spaces.
 export async function shareSpace(
   userId: string,
   organizationId: string,
@@ -99,12 +84,6 @@ export async function renameSpace(
     .where(eq(organization.id, organizationId));
 }
 
-/**
- * Supprime un espace **et tout ce qu'il contient** : les `ON DELETE CASCADE`
- * de `organization_id` emportent comptes, catégories, budgets et transactions.
- * L'espace personnel en est exclu — il naît avec le compte et disparaît avec
- * lui, l'écran propose la conversion à la place.
- */
 export async function deleteSpace(
   userId: string,
   organizationId: string,
@@ -139,8 +118,7 @@ export async function inviteMember(
     );
   if (already) throw new Error("Cette personne est déjà membre de l'espace.");
 
-  // Une seule invitation vivante par adresse et par espace : ré-inviter
-  // prolonge la précédente au lieu d'empiler des liens tous valides.
+  // Reuse pending invitations instead of issuing multiple valid links.
   const [pending] = await db
     .select({ id: invitation.id })
     .from(invitation)
@@ -169,7 +147,6 @@ export async function inviteMember(
   await notify(id);
 }
 
-/** Repousse l'échéance et renvoie le mail — même lien, nouvelle validité. */
 export async function resendInvitation(
   userId: string,
   invitationId: string,
@@ -205,11 +182,7 @@ export async function cancelInvitation(
     .where(eq(invitation.id, invitationId));
 }
 
-/**
- * Retire un membre. Rien n'est supprimé : les comptes appartiennent à l'espace,
- * pas à la personne — elle perd l'accès, l'espace garde tout. L'effet est
- * immédiat, `orgProcedure` revérifiant l'appartenance à chaque requête.
- */
+// Removing membership preserves space data; orgProcedure checks access on every request.
 export async function removeMember(
   userId: string,
   organizationId: string,
@@ -229,13 +202,7 @@ export async function removeMember(
     );
 }
 
-/**
- * Quitter un espace. Deux gardes, pour deux impasses différentes :
- * — le dernier propriétaire laisserait un espace que plus personne ne peut
- *   administrer (ni inviter, ni supprimer) ;
- * — son dernier espace laisserait l'utilisateur sans espace actif, donc face à
- *   un `FORBIDDEN` sur chaque écran de l'app.
- */
+// Keep an owner in every space and at least one accessible space per user.
 export async function leaveSpace(
   userId: string,
   organizationId: string,
@@ -262,11 +229,7 @@ export async function leaveSpace(
     );
 }
 
-/**
- * Accepte une invitation. L'adresse du compte connecté doit être celle qui a
- * été invitée : le lien seul ne suffit pas, sinon un lien transféré ouvrirait
- * l'espace à n'importe qui.
- */
+// Match the authenticated email: possession of a forwarded invitation is not authorization.
 export async function acceptInvitation(
   userId: string,
   userEmail: string,
@@ -319,7 +282,6 @@ export async function acceptInvitation(
   return { organizationId: row.organizationId };
 }
 
-/** Refus explicite — le lien cesse de valoir, sans rejoindre l'espace. */
 export async function declineInvitation(
   userEmail: string,
   invitationId: string,
@@ -336,9 +298,7 @@ export async function declineInvitation(
     );
 }
 
-// L'email est best-effort : une invitation créée mais non notifiée reste
-// utilisable (le propriétaire peut la renvoyer), alors qu'une erreur d'envoi
-// qui remonterait ferait croire que rien n'a été créé.
+// Preserve invitations if delivery fails; the owner can resend them.
 async function notify(invitationId: string): Promise<void> {
   const [row] = await db
     .select({

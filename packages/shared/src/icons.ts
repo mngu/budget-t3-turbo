@@ -1,20 +1,9 @@
-// Jeu fermé d'icônes des catégories parentes — pendant de `colors.ts` : une
-// catégorie principale s'identifie par sa teinte *et* son icône, et les deux se
-// choisissent au même endroit (page /categories).
-//
-// Ce fichier ne contient que des **noms Lucide et des mots-clés français**,
-// jamais de composant : `@budget/shared` n'a que `zod` en dépendance runtime et
-// c'est la raison d'être du package (voir CLAUDE.md). La résolution nom →
-// composant se fait côté app, où `lucide-react` vit déjà.
-//
-// Les mots-clés servent la recherche du sélecteur : l'utilisateur tape en
-// français (« courses », « essence », « impôts »), le nom Lucide anglais reste
-// accepté en second recours.
+// Keep icon metadata dependency-free; the app resolves names to Lucide components.
 
 export interface CategoryIcon {
-  /** Nom Lucide en kebab-case — c'est lui qui est stocké dans `categories.icon`. */
+  /** Lucide kebab-case name stored in categories.icon. */
   name: string;
-  /** Mots-clés français, séparés par des espaces, pour la recherche. */
+  /** Space-separated French search keywords. */
   keywords: string;
 }
 
@@ -31,8 +20,6 @@ const group = (
   icons: icons.map(([name, keywords]) => ({ name, keywords })),
 });
 
-// 6 familles de 9 icônes. Le découpage thématique n'est qu'un ordre
-// d'affichage : la recherche traverse tous les groupes.
 const CATEGORY_ICON_GROUPS: readonly CategoryIconGroup[] = [
   group("Alimentation", [
     ["shopping-cart", "courses supermarché caddie"],
@@ -106,9 +93,6 @@ export const CATEGORY_ICON_NAMES: string[] = CATEGORY_ICON_GROUPS.flatMap((g) =>
   g.icons.map((i) => i.name),
 );
 
-// Recherche du sélecteur : mots-clés français d'abord, nom Lucide anglais en
-// second recours. Une requête vide rend le jeu complet, groupes inclus ; les
-// groupes devenus vides disparaissent (l'appelant n'a rien à filtrer).
 export function searchCategoryIcons(query: string): CategoryIconGroup[] {
   const q = query.trim().toLowerCase();
   if (q.length === 0) return [...CATEGORY_ICON_GROUPS];

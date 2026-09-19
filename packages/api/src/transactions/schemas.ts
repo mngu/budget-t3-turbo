@@ -2,16 +2,9 @@ import { z } from "zod/v4";
 
 export const PAGE_SIZE = 20;
 
-// Schéma des query params de la table de transactions — partagé entre
-// validateSearch (web) et l'input tRPC (api).
 export const transactionsSearchSchema = z.object({
   page: z.coerce.number().int().min(1).catch(1),
-  // Une banque, ou plusieurs : le panneau de comptes de l'en-tête coche et
-  // décoche chaque compte indépendamment. La forme scalaire est conservée — les
-  // liens et l'app mobile n'en posent jamais qu'une — et `undefined` veut dire
-  // « tous les comptes », jamais la liste complète : la matérialiser ferait
-  // apparaître les trois banques dans chaque URL et changerait à chaque
-  // connexion ajoutée.
+  // Undefined means all accounts, including any connected later.
   bank: z
     .union([z.string(), z.array(z.string())])
     .optional()
@@ -68,9 +61,6 @@ export const bankCountSchema = z.object({
 export const earliestDateSchema = z.object({ date: z.string().nullable() });
 export const totalSchema = z.object({ total: z.number().int() });
 
-// Une ligne du relevé, telle que `listTransactions` la lit en SQL brut. Le
-// schéma est ce qui garantit les alias camelCase : un `AS bookingDate` non
-// quoté sort en minuscules, et un cast de type mentirait sans rien lever.
 export const transactionRowSchema = z.object({
   id: z.number().int(),
   bookingDate: z.string(),
@@ -80,26 +70,19 @@ export const transactionRowSchema = z.object({
   raw: z.object({
     debtor: z.object({ name: z.string().nullish() }).nullish(),
   }),
-  // numeric : pg le rend en chaîne, et la table le formate elle-même.
+  // pg returns numeric columns as strings to preserve precision.
   amount: z.string(),
   currency: z.string(),
   direction: z.enum(["debit", "credit"]),
   status: z.enum(["booked", "pending"]),
-  /** Catégorie feuille — c'est elle que `updateCategory` réécrit. */
   category: z.string().nullable(),
-  /**
-   * Qui a posé la catégorie : `manual` = corrigée à la main, le seul état que
-   * la table signale (pastille « modifiée »). `llm` / `auto` sont le régime
-   * normal et n'ont rien à dire au lecteur ; `null` = aucune catégorie.
-   */
   categorySource: z.enum(["llm", "manual", "auto"]).nullable(),
   categoryId: z.number().int().nullable(),
-  /** Chemin affiché : « Parent › Enfant », ou « Parent » seul. */
+  /** Parent name, optionally followed by the child name. */
   categoryPath: z.string().nullable(),
-  /** Couleur de la catégorie *parente* : les lignes se lisent par famille. */
+  /** Parent category color, shared by the family. */
   categoryColor: z.string().nullable(),
   categoryIcon: z.string().nullable(),
-  /** Exclue à la main des agrégats — elle reste dans ce relevé, et là seulement. */
   excluded: z.boolean(),
 });
 

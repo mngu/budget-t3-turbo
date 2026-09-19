@@ -59,13 +59,7 @@ import {
 
 import { cn } from "@budget/ui";
 
-// Résolution nom Lucide → composant. La table vit ici et non dans
-// `@budget/shared`, qui ne porte que les noms et leurs mots-clés : y importer
-// `lucide-react` ferait entrer la librairie dans un package dont la seule
-// dépendance runtime est `zod` (voir le commentaire de shared/src/icons.ts).
-//
-// Table explicite plutôt qu'un `import * as lucide` indexé par nom : celui-ci
-// embarquerait les ~1500 icônes de la librairie dans le bundle client.
+// Keep shared metadata dependency-free and import icons explicitly for tree shaking.
 const ICONS: Record<string, LucideIcon> = {
   "shopping-cart": ShoppingCartIcon,
   utensils: UtensilsIcon,
@@ -123,11 +117,6 @@ const ICONS: Record<string, LucideIcon> = {
   sparkles: SparklesIcon,
 };
 
-/**
- * Icône d'une catégorie parente. `name` nul (ou hors jeu, cas d'une donnée
- * héritée) rend la **pastille creuse** de la maquette : c'est l'état « aucune
- * icône choisie », où la couleur travaille seule — pas un carré vide à cacher.
- */
 export function CategoryIcon({
   name,
   className,

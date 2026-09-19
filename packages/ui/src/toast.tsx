@@ -13,7 +13,6 @@ import { Toaster as Sonner } from "sonner";
 import { useTheme } from "./theme";
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  // Suit le provider de theme.tsx (et non next-themes, absent de ce monorepo).
   const { resolvedTheme } = useTheme();
 
   return (

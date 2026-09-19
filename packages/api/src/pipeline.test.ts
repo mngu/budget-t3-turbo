@@ -5,9 +5,7 @@ import { categorizeUncategorized } from "./categorization";
 import { performImport, performSync } from "./pipeline";
 import { importTransactions } from "./transactions/import";
 
-// Mocks explicites (avec factory) plutôt que l'automock de vi.mock(path) seul :
-// l'automock importerait le vrai module pour en inspecter la forme, ce qui
-// chargerait src/db/client.ts et exigerait DATABASE_URL.
+// Explicit factories avoid loading the database client and requiring POSTGRES_URL.
 vi.mock("./banking/fetch-transactions", () => ({ syncBanks: vi.fn() }));
 vi.mock("./transactions/import", () => ({ importTransactions: vi.fn() }));
 vi.mock("./categorization", () => ({ categorizeUncategorized: vi.fn() }));
@@ -87,9 +85,6 @@ describe("performSync", () => {
   });
 
   it("ne bloque pas un autre espace pendant une synchronisation", async () => {
-    // Le verrou protège les lignes d'un espace ; deux espaces écrivent dans des
-    // lignes disjointes. Un verrou global ferait attendre un foyer pour un
-    // autre, avec un message qu'il n'a pas provoqué.
     let resolveFirst!: (value: {
       expired: string[];
       rateLimited: string[];
@@ -135,8 +130,6 @@ describe("performSync", () => {
   });
 
   it("n'échoue pas si l'appariement échoue (best-effort)", async () => {
-    // Même contrat que la catégorisation : un import réussi ne doit jamais être
-    // invalidé par une étape d'enrichissement.
     syncMock.mockResolvedValue({ expired: [], rateLimited: [] });
     runImportMock.mockResolvedValue(false);
     runCategorizeMock.mockResolvedValue({ categorized: 0, remaining: 0 });
@@ -169,8 +162,6 @@ describe("performImport", () => {
       categorized: 3,
       remaining: 1,
     });
-    // L'intérêt de cet endpoint est précisément de ne pas toucher aux sessions
-    // bancaires (pas de SCA, pas de consommation du quota PSD2).
     expect(syncMock).not.toHaveBeenCalled();
   });
 

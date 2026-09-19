@@ -2,23 +2,8 @@ import { useEffect, useRef } from "react";
 
 import { useTheme } from "@budget/ui/theme";
 
-/**
- * Fond animé de `/login` — port de « GradientWaves » (React Bits,
- * DavidHDev/react-bits, MIT) tel que `Connexion.dc.html` le monte : une houle
- * en raymarching, calculée par pixel dans un shader.
- *
- * Le GLSL est repris **mot pour mot** de la source ; seule la couche OGL
- * (Renderer/Program/Mesh/Triangle) est remplacée par du WebGL2 brut, pour ne
- * pas faire entrer une librairie 3D dans le bundle pour un seul écran. Les
- * uniformes qui ne bougent jamais sont posés une fois à l'initialisation, pas
- * à chaque image comme dans la source.
- *
- * Deux écarts avec la maquette :
- * - `prefers-reduced-motion` **arrête** la boucle après une image (et coupe la
- *   parallaxe), là où la source gèle le temps et continue de repeindre ;
- * - sans WebGL2, le canvas reste transparent : il ne reste que le voile sur
- *   `--background`, l'écran est intact.
- */
+// Adapted from GradientWaves (DavidHDev/react-bits, MIT).
+// Native WebGL2 avoids a 3D dependency for the login background.
 
 // prettier-ignore
 const VERT = `#version 300 es
@@ -134,10 +119,6 @@ void main() {
 }
 `;
 
-/**
- * `speed` et `tilt` viennent des attributs de la maquette, le reste des valeurs
- * par défaut de la source — que la maquette ne redéfinit pas.
- */
 const FIXED: Record<string, number> = {
   uSpeed: 0.28,
   uTilt: 1.16,
@@ -154,14 +135,7 @@ const FIXED: Record<string, number> = {
   uParallax: 0.5,
 };
 
-/**
- * Houle dérivée de l'indigo de la marque plutôt que du rose d'origine. En thème
- * clair elle doit être **plus sombre** que la page : une crête blanche sur un
- * fond quasi blanc ne se verrait pas — d'où la crête lavande et le creux
- * indigo. Et c'est la profondeur de brouillard, pas la couleur, qui commande la
- * présence à l'écran (`alpha = fogDepth / distance`) : il en faut bien plus en
- * clair pour que la houle existe.
- */
+// Light surfaces need darker waves and more fog depth for visible contrast.
 const PALETTE = {
   light: {
     horizon: "#7d86dd",
@@ -220,13 +194,11 @@ export function GradientWavesBg() {
     gl.linkProgram(prog);
     gl.useProgram(prog);
 
-    // Le shader sort une couleur prémultipliée : la houle se fond dans le fond
-    // de la page au lieu de le recouvrir.
+    // Match the shader's premultiplied output to blend with the page background.
     gl.clearColor(0, 0, 0, 0);
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
-    // Triangle plein écran — l'équivalent du `Triangle` d'OGL.
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
     gl.bufferData(
       gl.ARRAY_BUFFER,
@@ -268,8 +240,6 @@ export function GradientWavesBg() {
       gl.viewport(0, 0, canvas.width, canvas.height);
     };
 
-    // La parallaxe suit le curseur avec retard : le déplacement de la caméra
-    // reste doux même sur un geste sec.
     const cur = { x: 0.5, y: 0.5 };
     const target = { x: 0.5, y: 0.5 };
 

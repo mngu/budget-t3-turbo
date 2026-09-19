@@ -1,5 +1,3 @@
-// Normalisation d'une transaction Enable Banking brute vers une ligne `transactions`.
-
 import type { NewTransaction } from "@budget/db/schema";
 
 export interface EbTransaction {
@@ -38,7 +36,6 @@ export function normalizeTransaction(
     );
 
   const direction = raw.credit_debit_indicator === "DBIT" ? "debit" : "credit";
-  // Pour un débit l'argent va au créancier ; pour un crédit il vient du débiteur.
   const counterparty =
     (direction === "debit" ? raw.creditor?.name : raw.debtor?.name) ?? null;
   const joined = (raw.remittance_information ?? []).join(" ").trim();
@@ -49,13 +46,11 @@ export function normalizeTransaction(
     amount: raw.transaction_amount.amount,
     currency: raw.transaction_amount.currency,
     direction,
-    // Seul BOOK est « comptabilisée » ; OTHR, PDNG et tout statut inconnu restent « en attente »
-    // (mieux vaut sous-afficher que de présenter à tort une transaction comme comptabilisée).
+    // Unknown statuses must not be presented as settled transactions.
     status: raw.status === "BOOK" ? "booked" : "pending",
     bookingDate,
     valueDate: raw.value_date,
-    // `||` volontaire, pas `??` : `joined` est une chaîne (vide quand
-    // remittance_information est absent) et doit retomber sur la contrepartie.
+    // Empty remittance text must fall back too, so use || rather than ??.
     // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
     description: joined || counterparty || "(sans libellé)",
     counterparty,

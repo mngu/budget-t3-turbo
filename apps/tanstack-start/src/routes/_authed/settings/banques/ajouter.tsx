@@ -112,16 +112,11 @@ function StepBanque() {
   const connect = async (aspsp: AspspOption) => {
     setConnecting(`${aspsp.name}-${aspsp.country}`);
     try {
-      // Redirection pleine page vers la banque : le SCA se fait dans l'app bancaire,
-      // puis la banque nous ramène sur /callback.
       const { url } = await trpcClient.connections.start.mutate({
         name: aspsp.name,
         country: aspsp.country,
       });
-      // Faux positif du compilateur React (react-hooks/immutability) : l'assignation est sans risque
-      // (redirection immédiate de toute la page). Le même pattern dans use-renew.ts n'est pas
-      // signalé ; ici le handler est enveloppé dans un .map(), ce qui change l'heuristique de l'analyse
-      // de mémoïsation. Comportement runtime inchangé vs la source.
+      // Intentional document navigation, not a mutation of React state.
       // eslint-disable-next-line react-hooks/immutability
       window.location.href = url;
     } catch (err) {
@@ -240,9 +235,7 @@ function StepComptes() {
     }
   };
 
-  // `sync.run` est une seule mutation attendue, sans flux de progression : la
-  // maquette montre un compteur de transactions et une barre à 58 %, qui
-  // n'auraient aucune source. Attente indéterminée, donc.
+  // Sync has no progress stream, so the pending indicator is indeterminate.
   if (phase === "syncing") {
     return (
       <div className="px-5 py-8">

@@ -17,12 +17,10 @@ import { TransactionPreviewDrawer } from "./-components/transaction-preview-draw
 import { usePreview } from "./-lib/use-preview";
 
 export const Route = createFileRoute("/_authed/settings/categories/")({
-  // Sans dates : les compteurs décrivent tout l'espace, pas un mois.
+  // Counts cover the whole space, not a single period.
   loader: async ({ context }) => {
     const all = await context.trpcClient.categories.overview.query();
-    // Le poste des transactions sans catégorie appartient à la revue, pas aux
-    // réglages : cet écran ne montre que ce qui se gère. Son compteur, lui,
-    // dit ce qu'il reste à catégoriser.
+    // The uncategorized bucket has no editable settings.
     const overview = all.filter(isManagedCategory);
     const uncategorizedCount =
       all.find((c) => c.name === NO_CATEGORY_NAME)?.transactionCount ?? 0;
@@ -90,7 +88,7 @@ function UncategorizedBanner({ count }: { count: number }) {
         err instanceof Error ? err.message : "Échec de la catégorisation.",
       );
     } finally {
-      // Même en échec : la similarité a déjà écrit ce qu'elle a trouvé.
+      // Refresh even on failure: similarity matches may already have been saved.
       await router.invalidate();
       setRunning(false);
     }
@@ -134,10 +132,6 @@ function UncategorizedBanner({ count }: { count: number }) {
   );
 }
 
-// Compteurs de l'en-tête et données dérivées du choix de teinte. « Teintes
-// prises » compte les teintes *distinctes* : à 13 teintes pour un nombre
-// illimité de parentes, la collision est un état normal — signalée, jamais
-// interdite (voir CategoryIdentityDialog).
 export function computeStats(tree: ManagedCategory[]) {
   const ownersByColor = new Map<string, string[]>();
   const usageByIcon = new Map<string, number>();

@@ -4,17 +4,8 @@ import { useState } from "react";
 
 import { cn } from "@budget/ui";
 
-/**
- * Vignette d'un établissement. Deux replis, tous les deux constatés sur les
- * données réelles d'Enable Banking : `logo` absent, et `logo` présent mais
- * inexploitable (l'`<img>` cassée laissait un carré vide dans la liste du
- * wizard). La maquette donne une teinte par banque ; la base n'en connaît
- * aucune, et en inventer une ferait varier l'écran d'un rendu à l'autre.
- *
- * Fond blanc quel que soit le thème : les logos de banque sont dessinés pour un
- * fond clair — celui de Revolut, noir sur transparent, disparaissait purement et
- * simplement sur la carte en thème sombre.
- */
+// Bank logos may be missing or broken. Keep a white background in both themes
+// so dark artwork on transparent logos remains visible.
 export function BankLogo({
   name,
   logoUrl,

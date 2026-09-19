@@ -7,7 +7,7 @@ import { useRun } from "~/lib/use-run";
 export interface DeleteTarget {
   id: number;
   name: string;
-  /** Total cumulé — sous-catégories comprises pour une parente. */
+  /** Includes child categories when the target is a parent. */
   transactionCount: number;
   childCount: number;
   childNames: string[];
@@ -20,10 +20,6 @@ export interface IdentityTarget {
   icon: string | null;
 }
 
-/**
- * La gestion courante de l'arborescence : créer, renommer, supprimer, et
- * l'identité (teinte + icône) d'une parente.
- */
 export function useCategoryCrud() {
   const trpcClient = useTRPCClient();
   const run = useRun();
@@ -59,8 +55,6 @@ export function useCategoryCrud() {
     closeIdentity: () => setIdentityTarget(null),
     closeDelete: () => setDeleteTarget(null),
 
-    // La cible est remise à jour localement avant la mutation : la modale
-    // reflète le choix tout de suite, le loader confirmera.
     changeColor: (color: string) => {
       if (!identityTarget) return;
       setIdentityTarget({ ...identityTarget, color });

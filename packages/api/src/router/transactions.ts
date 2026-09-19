@@ -20,8 +20,7 @@ import { orgProcedure } from "../trpc";
 
 export const transactionsRouter = {
   list: orgProcedure
-    // `limit` n'est pas dans le schéma partagé : ce n'est pas un filtre, il ne
-    // va pas dans l'URL et l'app mobile n'en a pas l'usage.
+    // Preview limits are API-only, not URL filters.
     .input(
       transactionsSearchSchema.extend({
         limit: z.number().int().min(1).max(200).optional(),
@@ -41,8 +40,6 @@ export const transactionsRouter = {
 
   banks: orgProcedure.query(({ ctx }) => listBankLabels(ctx.organizationId)),
 
-  // Sans input, comme `banks` : la borne basse du sélecteur de période ne suit
-  // ni les comptes cochés ni la période affichée.
   earliestDate: orgProcedure.query(({ ctx }) =>
     earliestTransactionDate(ctx.organizationId),
   ),
@@ -62,8 +59,6 @@ export const transactionsRouter = {
       setTransactionCategory(ctx.organizationId, input.id, input.categoryId),
     ),
 
-  // « Cette ligne ne me concerne pas » : la sort des agrégats, la laisse dans
-  // le relevé. Réversible, d'où le booléen plutôt que deux procédures.
   setExcluded: orgProcedure
     .input(z.object({ id: z.number().int().positive(), excluded: z.boolean() }))
     .mutation(({ ctx, input }) =>

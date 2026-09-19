@@ -23,7 +23,6 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
   const [copied, setCopied] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  // Suggestion par défaut : l'URL de callback de cette instance de l'app.
   useEffect(() => {
     if (!redirectUrl) setRedirectUrl(`${window.location.origin}/callback`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -135,8 +134,6 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
           <FieldDescription>
             fichier .pem téléchargé sur enablebanking.com
           </FieldDescription>
-          {/* Pas de composant `textarea` dans le package : le seul de l'app,
-              il garde son gabarit et emprunte celui de `Input`. */}
           <textarea
             id="private-key"
             value={privateKeyPem}

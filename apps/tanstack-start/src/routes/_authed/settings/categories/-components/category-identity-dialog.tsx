@@ -26,29 +26,15 @@ import { softCategoryColor, useCategoryColor } from "~/lib/category-color";
 interface CategoryIdentityDialogProps {
   target: IdentityTarget | null;
   onOpenChange: (open: boolean) => void;
-  /** Nom de la (des) autre(s) parente(s) portant chaque teinte. */
+  /** Other parent categories using each color. */
   ownersByColor: Map<string, string[]>;
-  /** Nombre de parentes portant chaque icône — sert la pastille « déjà prise ». */
+  /** Parent category count per icon, for the usage badge. */
   usageByIcon: Map<string, number>;
   onColorChange: (hex: string) => void;
   onIconChange: (icon: string | null) => void;
 }
 
-/**
- * Identité d'une catégorie parente : sa teinte et son icône, choisies ici et
- * nulle part ailleurs. Les deux se complètent — la couleur porte l'identité là
- * où il n'y a pas la place d'une icône (segments de barre, pastilles), l'icône
- * partout où il y a au moins 20 px.
- *
- * Deux règles de la maquette à ne pas défaire :
- *  - la palette est **fermée à 13 teintes** et il y a plus de catégories que de
- *    teintes possibles : choisir une teinte déjà prise est donc *permis*, pas
- *    une erreur. La collision est signalée (pastille, note de bas de modale) et
- *    c'est l'icône qui distingue les deux catégories ;
- *  - le gris de repli n'est **pas sélectionnable** : c'est l'état « aucune
- *    couleur choisie », pas une 14e couleur (voir colors.ts, il échoue les
- *    seuils de séparation de la palette).
- */
+// Color collisions are allowed: the palette is finite, and icons distinguish categories.
 export function CategoryIdentityDialog({
   target,
   onOpenChange,
@@ -200,8 +186,6 @@ export function CategoryIdentityDialog({
                 <div className="grid grid-cols-9 gap-1.5">
                   {group.icons.map((icon) => {
                     const selected = target?.icon === icon.name;
-                    // « Déjà prise » ne bloque pas : deux catégories peuvent
-                    // partager une icône si leurs teintes diffèrent.
                     const duplicate =
                       !selected && (usageByIcon.get(icon.name) ?? 0) > 0;
                     return (

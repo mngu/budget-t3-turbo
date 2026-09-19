@@ -47,7 +47,6 @@ export function SpaceCard({
   actions,
 }: {
   space: Space;
-  /** Brouillon du formulaire d'invitation de *cette* carte. */
   invite: { email: string; role: SpaceRole };
   onInviteChange: (next: { email: string; role: SpaceRole }) => void;
   actions: SpaceCardActions;
@@ -114,7 +113,6 @@ export function SpaceCard({
                 )}
                 {member.role === "owner" ? "Propriétaire" : "Membre"}
               </span>
-              {/* Se retirer soi-même, c'est « Quitter », dans le menu. */}
               {owner && !member.isMe && (
                 <Button
                   variant="link"
@@ -175,13 +173,7 @@ export function SpaceCard({
   );
 }
 
-/**
- * Le menu « … » d'une carte. Ses entrées dépendent de la nature de l'espace :
- * seul un espace personnel se partage, seul un espace partagé se quitte. La
- * suppression y figure toujours — pour l'espace personnel elle ouvre le
- * dialogue qui explique pourquoi elle n'aura pas lieu, plutôt que de laisser
- * chercher une entrée absente.
- */
+// Keep deletion discoverable for personal spaces; its dialog explains why it is unavailable.
 function SpaceMenu({
   space,
   actions,

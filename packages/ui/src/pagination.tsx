@@ -40,8 +40,6 @@ function PaginationItem({ ...props }: React.ComponentProps<"li">) {
 
 type PaginationLinkProps = {
   isActive?: boolean;
-  // L'élément rendu : `<a>` par défaut, ou le `Link` du routeur pour une
-  // navigation côté client — la pagination vit dans les search params.
   render?: React.ReactElement<Record<string, unknown>>;
 } & Pick<React.ComponentProps<typeof Button>, "size"> &
   React.ComponentProps<"a">;

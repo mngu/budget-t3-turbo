@@ -1,15 +1,7 @@
 import { createContext, useContext } from "react";
 
-/**
- * Les réglages que `CanvasContainer` expose dans leva et qui doivent redescendre
- * dans les arcs et leurs intitulés. Ils passent par un contexte plutôt que par
- * un `useControls` local : `Segment` est monté une fois par catégorie, et leva
- * pose un panneau par appel.
- *
- * ponytail: leva part au bundle de production. À passer derrière
- * `import.meta.env.DEV`, ou à retirer avec ce contexte, le jour où l'anneau 3D
- * remplace le SVG.
- */
+// Share controls through context to avoid creating a Leva panel per segment.
+// TODO: restrict Leva to development or remove it once tuning values are fixed.
 export const RING_RADIUS = 5;
 export const TUBE_RADIUS = 1;
 
@@ -19,10 +11,10 @@ export type Tuning = {
   materialClearcoat: number;
   materialClearcoatRoughness: number;
   materialIridescence: number;
-  /** Mélange de la teinte vers le premier plan - 0 = teinte pure, illisible. */
+  /** Blend toward the foreground; zero leaves the raw category color. */
   labelBlend: number;
   labelSize: number;
-  /** Décalage en z : c'est lui qui décolle les intitulés du plan de l'anneau. */
+  /** Z offset above the ring plane. */
   labelLift: number;
   labelRadius: number;
 };

@@ -2,20 +2,13 @@ import type { TransactionRow } from "@budget/api";
 
 export const dateFr = new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium" });
 
-// Sans l'année : les écrans de la revue sont déjà bornés à un mois, la répéter
-// sur chaque ligne fait passer la colonne de date sur deux lignes.
 export const dayMonthFr = new Intl.DateTimeFormat("fr-FR", {
   day: "2-digit",
   month: "short",
 });
 
-// Les contreparties arrivent des banques en capitales (« CAMILLE DURAND »),
-// ce qui crie au milieu d'une colonne de 11,5 px. La maquette les repasse en
-// casse de titre ; les libellés de transaction, eux, n'y touchent pas — ce sont
-// des chaînes bancaires brutes, que réécrire rendrait moins reconnaissables.
+// Normalize uppercase counterparty names, but keep transaction descriptions untouched.
 export function titleCase(value: string) {
-  // Le trait d'union compte comme une frontière de mot, sinon « DURAND »
-  // ressort en « Durand ». L'apostrophe, non : elle produirait « L'Oreal ».
   return value
     .toLocaleLowerCase("fr-FR")
     .replace(
@@ -30,7 +23,7 @@ const percentFr = new Intl.NumberFormat("fr-FR", {
   maximumFractionDigits: 0,
 });
 
-// Un montant non nul ne doit jamais s'afficher « 0 % » : ça se lit comme un bug.
+// Keep nonzero amounts distinguishable from zero after rounding.
 export function sharePercent(part: number, whole: number) {
   if (whole === 0 || part === 0) return percentFr.format(0);
   const share = part / whole;

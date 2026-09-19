@@ -12,22 +12,6 @@ import { Spinner } from "@budget/ui/spinner";
 import { authClient } from "~/auth/client";
 import { GradientWavesBg } from "~/component/gradient-waves-bg";
 
-/**
- * Portage de `Connexion.dc.html` (Claude Design, projet « Revue du mois »).
- *
- * **Le lien de connexion est la seule voie d'entrée** : ni mot de passe, ni
- * inscription séparée — une adresse inconnue reçoit un lien qui crée le compte
- * (plugin `magicLink`, `@budget/auth`). L'écran s'est donc réduit à un champ.
- *
- * De la maquette, restent non portés le lien « Oublié ? » (il n'y a plus rien à
- * oublier), le décompte « il vous reste 4 tentatives » (rien ne compte les
- * essais côté app — la limite est celle du plugin, 5 par minute, invisible
- * d'ici), et le séparateur « ou » qui coiffait le second chemin de connexion,
- * lequel est devenu le seul.
- *
- * Le panneau « États de la maquette » est un dispositif de maquette : le thème
- * vient de `ThemeProvider`, l'état vient du formulaire.
- */
 export const Route = createFileRoute("/login")({
   validateSearch: z.object({
     redirect: z.string().optional().catch(undefined),
@@ -45,10 +29,6 @@ function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
 
-  // Le lien reçu par email ramène sur `redirect` : c'est une navigation de
-  // document complète, donc le rechargement que `reloadDocument` assurait
-  // autrefois — l'espace actif vit dans la session, le cache des loaders du
-  // routeur servirait sinon celui d'avant la connexion.
   const requestLink = async (e: React.FormEvent) => {
     e.preventDefault();
     setPending(true);
@@ -68,8 +48,7 @@ function LoginPage() {
     <main className="relative flex h-dvh overflow-hidden">
       <div className="pointer-events-none absolute inset-0 z-0">
         <GradientWavesBg />
-        {/* Le voile ne borde que les coins, d'où l'arrêt à 99 % : plus tôt, il
-            se répandrait sur toute la houle au lieu de l'y fondre. */}
+        {/* Fade only the corners so the overlay does not obscure the waves. */}
         <div
           className="absolute inset-0"
           style={{

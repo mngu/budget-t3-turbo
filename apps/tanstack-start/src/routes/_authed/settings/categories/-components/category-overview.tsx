@@ -136,7 +136,6 @@ export function CategoryOverview({
                         />
                       </div>
 
-                      {/* Sous `md`, compteur et budget passent sous le nom. */}
                       <div className="flex basis-full items-center justify-end gap-2 md:basis-auto">
                         <CountButton
                           count={transactionCount}
@@ -253,10 +252,6 @@ export function CategoryOverview({
                                     preview.openCategory({
                                       name: name,
                                       includesChildren: false,
-                                      // Palier de la teinte du parent, et son icône : une
-                                      // sous-catégorie n'a ni l'une ni l'autre en propre. Le
-                                      // fond reste l'aplat de la parente (voir
-                                      // PreviewRequest.soft).
                                       color: shade,
                                       soft,
                                       icon: icon,

@@ -7,10 +7,6 @@ type ConsentLevel = "ok" | "warning" | "expired" | "revoked";
 
 export type ConsentTone = "ok" | "warn" | "bad";
 
-/**
- * Variante de `Badge` / `Alert` correspondant à chaque ton. `bad` passe par
- * `destructive` : `--destructive` a exactement la valeur de `--bad`.
- */
 export const TONE_VARIANT: Record<ConsentTone, "ok" | "warn" | "destructive"> =
   {
     ok: "ok",
@@ -18,8 +14,6 @@ export const TONE_VARIANT: Record<ConsentTone, "ok" | "warn" | "destructive"> =
     bad: "destructive",
   };
 
-/** Tailwind ne génère que les classes écrites en toutes lettres : les rôles de
- *  couleur de la maquette se traduisent par une table, pas par interpolation. */
 export const CONSENT_TONE: Record<
   ConsentTone,
   { text: string; bg: string; border: string; fill: string }
@@ -46,21 +40,16 @@ export const CONSENT_TONE: Record<
 
 export interface ConsentView {
   level: ConsentLevel;
-  /** La synchronisation est menacée ou déjà arrêtée : la carte se met en avant. */
+  /** Sync is at risk or stopped; highlight the card. */
   critical: boolean;
   tone: ConsentTone;
   badge: string;
   meta: string;
-  /** Part restante de la fenêtre de consentement, pour la barre de la carte. */
+  /** Remaining share of the consent window. */
   pct: number;
 }
 
-/**
- * `ConnectionSummary.badge` renvoie `{ level: "expired" }` pour toute connexion
- * non active : une révoquée y est indiscernable d'une expirée. C'est `status`
- * qu'il faut lire en premier, sinon les deux copies de la maquette (« n'est plus
- * connectée » / « a été révoquée ») fusionnent en silence.
- */
+// Check status first: the badge reports both revoked and expired connections as expired.
 export function consentView(connection: ConnectionSummary): ConsentView {
   const until = new Date(connection.validUntil);
 
@@ -113,10 +102,7 @@ const URGENCY: Record<ConsentLevel, number> = {
   ok: 0,
 };
 
-/**
- * Une seule bannière, pour la connexion la plus urgente : c'est un appel à
- * l'action, pas une liste — chaque carte porte déjà son propre état.
- */
+// Highlight only the most urgent connection; individual cards show the rest.
 export function consentAlert(
   connections: ConnectionSummary[],
 ): ConsentAlert | null {

@@ -1,6 +1,5 @@
 import type { ConsentBadge } from "./domain";
 
-// Gestion des connexions bancaires Enable Banking (sessions PSD2 en DB).
 import { randomUUID } from "node:crypto";
 
 import {
@@ -36,10 +35,7 @@ export interface AspspOption {
   logo: string | null;
 }
 
-// Les noms d'ASPSP d'Enable Banking sont sans accent (« Caisse d'Epargne Ile De
-// France », « Societe Generale ») alors que tout le reste de l'app les écrit
-// accentués — à commencer par `bankAccounts.bank_name`, d'où part le lien
-// « Connecter … » des comptes orphelins. Comparer sans accent des deux côtés.
+// Legacy bank names may contain accents missing from Enable Banking's ASPSP names.
 function fold(s: string): string {
   return s
     .normalize("NFD")
@@ -79,7 +75,6 @@ export async function startAuth(
   const settings = await requireSettings();
   const jwt = appJwt(settings);
 
-  // Purge des demandes abandonnées (SCA refusé, onglet fermé…).
   await db
     .delete(authRequests)
     .where(lt(authRequests.createdAt, sql`now() - interval '1 hour'`));
@@ -105,9 +100,7 @@ export async function startAuth(
     }),
   });
 
-  // L'espace voyage dans la demande et non dans la session : au retour de la
-  // banque, le callback n'a que le `state`, et l'espace actif peut avoir changé
-  // entre-temps (autre onglet, autre appareil).
+  // Persist scope with the request: the active space may change before the callback.
   await db.insert(authRequests).values({
     state,
     organizationId,
@@ -129,10 +122,7 @@ export async function completeAuth(
   code: string,
   state: string,
 ): Promise<CompleteAuthResult> {
-  // Pas de paramètre d'espace : il vient de la demande consommée ci-dessous,
-  // seule source fiable ici.
-  // Consommation atomique du state : un delete...returning échoue à la seconde
-  // tentative (replay, double effet React) sans fenêtre de course.
+  // Consume state atomically to prevent replay; its stored organization is authoritative.
   const [request] = await db
     .delete(authRequests)
     .where(eq(authRequests.state, state))
@@ -192,9 +182,7 @@ export async function completeAuth(
   }
 
   const discovered = parseSessionAccounts(session.accounts);
-  // Rapprochement dans le seul espace de la demande : le même compte joint
-  // connecté par deux membres d'un couple, chacun chez lui, donne deux comptes
-  // — un rapprochement global les fusionnerait en volant la ligne à l'autre.
+  // Match within this space: the same joint account may exist independently in another.
   const existing = await db
     .select({
       id: bankAccounts.id,
@@ -232,11 +220,8 @@ export interface AccountSummary {
   iban: string | null;
   displayName: string | null;
   enabled: boolean;
-  /** Transactions déjà importées pour ce compte (0 pour un compte tout juste découvert). */
   transactionCount: number;
-  /** Import le plus récent sur ce compte — pas la dernière *synchronisation* :
-   *  une synchro qui ne ramène rien ne le fait pas bouger (voir la note du
-   *  bloc d'état de /banques). */
+  /** Last import, not last sync: syncs without new transactions do not change it. */
   lastImportedAt: string | null;
 }
 
@@ -245,7 +230,6 @@ interface AccountStats {
   lastImportedAt: string | null;
 }
 
-// Un seul agrégat pour toute la page plutôt qu'une requête par compte.
 async function accountStats(
   accountIds: number[],
 ): Promise<Map<number, AccountStats>> {
@@ -287,8 +271,6 @@ export interface ConnectionSummary {
 export async function listConnections(
   organizationId: string,
 ): Promise<ConnectionSummary[]> {
-  // Bascule paresseuse : les connexions actives dont la validité est passée
-  // deviennent expired (pas de tâche planifiée nécessaire).
   await db
     .update(bankConnections)
     .set({ status: "expired" })
@@ -346,19 +328,13 @@ export interface OrphanBankGroup {
   transactionCount: number;
 }
 
-/**
- * Comptes sans connexion (`bankAccounts.connection_id IS NULL`) : historiques d'avant
- * le wizard, ou dont la connexion n'a jamais été rétablie. Ils portent des
- * transactions mais plus aucune autorisation — regroupés par banque, c'est le
- * nom qu'il faut reconnecter.
- */
 export async function listOrphanAccounts(
   organizationId: string,
 ): Promise<OrphanBankGroup[]> {
   const rows = await db
     .select({
       bankName: bankAccounts.bankName,
-      // countDistinct : la jointure sur les transactions duplique la ligne compte.
+      // The transaction join repeats each account row.
       accountCount: countDistinct(bankAccounts.id),
       transactionCount: count(transactions.id),
     })
@@ -428,8 +404,6 @@ export async function revokeConnection(
   organizationId: string,
   connectionId: number,
 ): Promise<void> {
-  // Révoquer coupe une autorisation bancaire réelle : la vérification d'espace
-  // est ici la garde qui compte, l'id venant du client.
   const [conn] = await db
     .select()
     .from(bankConnections)
@@ -447,7 +421,7 @@ export async function revokeConnection(
       method: "DELETE",
     });
   } catch (err) {
-    // Session déjà invalide côté Enable Banking : on marque quand même révoquée.
+    // An already-invalid bank session can still be marked revoked locally.
     console.warn(
       `⚠️  Révocation Enable Banking échouée (session déjà invalide ?) :`,
       err,

@@ -1,4 +1,3 @@
-// Accès à l'API Enable Banking : settings (DB), appels HTTP signés, cache ASPSPs.
 import { db } from "@budget/db/client";
 import { appSettings } from "@budget/db/schema";
 
@@ -77,7 +76,6 @@ export interface Aspsp {
   maximum_consent_validity?: number;
 }
 
-// La liste complète (~2700 banques) change rarement — cache mémoire 24 h.
 let aspspsCache: { at: number; list: Aspsp[] } | null = null;
 
 export async function getAllAspsps(jwt: string): Promise<Aspsp[]> {

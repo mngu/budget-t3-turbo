@@ -14,12 +14,10 @@ export const env = createEnv({
   },
   server: {
     POSTGRES_URL: z.url(),
-    // `SITE_URL` vient d'`authEnv()` : les emails envoyés depuis @budget/auth
-    // en ont besoin, et deux déclarations pourraient diverger.
+    // SITE_URL is shared with auth emails through authEnv().
   },
   client: {},
   runtimeEnv: process.env,
-  // Voir `authEnv()` : une clé présente mais vide vaut absente.
   emptyStringAsUndefined: true,
   skipValidation:
     !!process.env.CI || process.env.npm_lifecycle_event === "lint",

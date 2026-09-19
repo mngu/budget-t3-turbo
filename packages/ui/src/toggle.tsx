@@ -3,10 +3,6 @@
 import { cva } from "class-variance-authority";
 
 const toggleVariants = cva(
-  // L'état enfoncé sort de la sortie de `shadcn add`, qui le pose sur
-  // `bg-muted` : dans cette palette, `--muted` est à 2 % de `--card` et la
-  // sélection est invisible. `accent-soft` + `primary` est le vocabulaire de
-  // « choisi » du reste de l'app.
   "group/toggle text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-accent-soft aria-invalid:border-destructive aria-invalid:ring-destructive/20 aria-pressed:bg-accent-soft aria-pressed:text-primary data-[state=on]:bg-accent-soft data-[state=on]:text-primary dark:aria-invalid:ring-destructive/40 text-control inline-flex items-center justify-center gap-1 rounded-md whitespace-nowrap transition-all outline-none focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-40 aria-pressed:font-semibold [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {

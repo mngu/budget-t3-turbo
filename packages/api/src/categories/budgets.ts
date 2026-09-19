@@ -1,25 +1,10 @@
-// Budgets mensuels par catégorie — écran /settings/categories.
-//
-// Un budget est un montant mensuel posé sur une catégorie, sans dimension de
-// mois : `set` écrase, rien à versionner. Une parente peut être « détaillée » :
-// ce sont alors ses sous-catégories qui portent les montants et son budget
-// **est** leur somme — elle n'en garde aucun à elle (CHECK
-// `categories_detailed_no_amount`), ce qui rend l'invariant vrai par
-// construction plutôt que par un trigger.
+// Budgets are recurring monthly amounts, not per-month records.
 import { and, eq, isNull } from "@budget/db";
 import { db } from "@budget/db/client";
 import { categories } from "@budget/db/schema";
 
-/**
- * Bascule Global / Détaillé d'une parente. Passer en détaillé **efface** son
- * montant global : le CHECK l'exige, et c'est ce qui garantit que son budget
- * affiché est toujours la somme de ses enfants. L'aller-retour ne le rend donc
- * pas — les montants des enfants, eux, dorment en base et reviennent.
- *
- * Le `parent_id IS NULL` a la même raison qu'`updateCategoryIdentity` : le drapeau
- * n'a aucun sens sur une sous-catégorie, et posé là il lui effacerait son
- * montant.
- */
+// Detailed mode clears the parent's amount to enforce a budget derived from children.
+// Switching back preserves child amounts, but does not restore the old parent amount.
 export async function setCategoryDetailed(
   organizationId: string,
   categoryId: number,
@@ -39,9 +24,6 @@ export async function setCategoryDetailed(
   if (updated.length === 0) throw new Error("Catégorie parente introuvable.");
 }
 
-// Le `WHERE` porte l'espace : un id venu du client et appartenant à un autre
-// foyer ne touche aucune ligne. Un `UPDATE` à zéro ligne ne lève pas, d'où le
-// `returning` — l'écran attend une confirmation.
 export async function setCategoryBudget(
   organizationId: string,
   categoryId: number,
@@ -52,12 +34,8 @@ export async function setCategoryBudget(
     .update(categories)
     .set({
       budgetAmount: value,
-      // Poser un montant sur une catégorie, c'est dire qu'elle porte son propre
-      // budget : le drapeau tombe avec. Sans ça une parente détaillée puis
-      // vidée de ses sous-catégories reste `detailed` en base alors que l'écran
-      // la rend globale — son champ accepte la saisie et le CHECK la refuse, et
-      // la bascule est hors de portée (l'entrée de menu est cachée sans
-      // sous-catégorie). Vider un montant, lui, ne dé-détaille rien.
+      // A parent with all children deleted may still be detailed; clear the flag
+      // when setting an amount so the database constraint accepts it.
       ...(value !== null && { budgetDetailed: false }),
     })
     .where(

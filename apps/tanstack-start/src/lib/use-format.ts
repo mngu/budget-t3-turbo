@@ -28,7 +28,7 @@ export function setCents(on: boolean) {
   try {
     localStorage.setItem(CENTS_KEY, String(on));
   } catch {
-    // localStorage indisponible : le réglage ne survivra pas au rechargement.
+    // Keep the in-memory preference when localStorage is unavailable.
   }
   listeners.forEach((listener) => listener());
 }

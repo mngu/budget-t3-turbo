@@ -14,12 +14,10 @@ describe("monthBounds", () => {
   });
 
   it("rend le cycle qui contient la date", () => {
-    // Avant le jour de départ : on est encore dans le cycle précédent.
     expect(bounds("2026-07-15", 28)).toEqual({
       dateFrom: "2026-06-28",
       dateTo: "2026-07-27",
     });
-    // Le jour de départ lui-même ouvre le cycle suivant.
     expect(bounds("2026-07-28", 28)).toEqual({
       dateFrom: "2026-07-28",
       dateTo: "2026-08-27",
@@ -44,8 +42,6 @@ describe("monthBounds", () => {
       expect(dateFrom <= dateTo).toBe(true);
       const next = new Date(`${dateTo}T12:00:00`);
       next.setDate(next.getDate() + 1);
-      // Le lendemain de la fin doit ouvrir le cycle suivant, pas retomber dans
-      // celui qu'on vient de quitter.
       expect(monthBounds(next, 29).dateFrom > dateFrom).toBe(true);
       cursor = next;
     }

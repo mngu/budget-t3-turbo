@@ -37,12 +37,6 @@ declare module "@tanstack/react-router" {
   }
 }
 
-/**
- * Les écrans de réglages, dans l'ordre du menu de l'engrenage. Une seule table
- * pour les trois usages : l'intitulé « Réglages › … » de l'en-tête, les entrées
- * du menu, et le test « suis-je sur un écran de réglages ». La route est
- * toujours `/<page>`, il n'y a donc rien de plus à déclarer.
- */
 const SETTINGS_PAGES = [
   {
     page: "categories",
@@ -64,43 +58,16 @@ const SETTINGS_PAGES = [
   },
 ] as const;
 
-/**
- * En-tête unique de l'application — portage de `AppHeader.dc.html` (Claude
- * Design, projet fc13100e-7ea1-4dac-8d2f-6614e40a7209, importé le 2026-08-01).
- *
- * Il remplace les *deux* barres précédentes : celle de la revue et celle des
- * réglages (`SettingsHeader`, supprimée). C'est le sens de la maquette, qui
- * traite `categories` et `banques` comme deux valeurs de son `page` (`espaces`
- * s'y est ajoutée depuis, d'où `SETTINGS_PAGES` plutôt qu'un ternaire) : la rangée
- * de marque et d'utilitaires ne bouge plus d'un écran à l'autre, seul le milieu
- * change — période et comptes sur la revue, intitulé « Réglages › … » ailleurs.
- *
- * Deux éléments de la maquette ne sont pas portés. Le bouton « ◱ États » est un
- * commutateur d'états de maquette (`statesDisplay` suit la présence de la prop
- * `onStates`), sans objet ici. Et `monthOnly`, qui réduit les raccourcis à trois
- * mois entiers : un en-tête unique ne peut pas diverger d'une route à l'autre,
- * et `Transactions.dc.html` ne le pose pas non plus.
- */
 export function AppHeader({ title }: { title?: string }) {
   const isSettings = title !== undefined;
 
-  // **Garde positive, et elle doit le rester.** L'absence de titre a longtemps
-  // servi de « je suis sur la revue » ; c'est faux sur `/callback`, qui vit
-  // sous `_authed` sans en poser un. Les deux sélecteurs s'y montaient donc
-  // hors du layout `_period-overview` — sans conséquence tant qu'ils lisaient
-  // un cache react-query, mais ils lisent désormais le loader de ce layout,
-  // et `useLoaderData` lève quand le match n'existe pas.
+  // Check the layout match: selectors read its loader and throw outside it.
   const isRevue = useMatches({
     select: (m) => m.some((x) => x.routeId === "/_authed/_period-overview"),
   });
 
-  // Appelé inconditionnellement (règle des hooks) mais lu seulement sur la
-  // revue : ailleurs, `useSearch({ strict: false })` renvoie la search de
-  // *cette* route, qui n'est pas une `TransactionsSearch`.
+  // Only read this search on overview routes; other routes use different schemas.
   const { search } = useRevueSearch();
-  // Hors de la revue, la search en vigueur n'est pas la sienne : les liens de
-  // la rangée repartent donc des défauts, que `stripSearchParams` retire de
-  // l'URL et que `defaultToCurrentMonth` complète par le mois courant.
   const linkSearch = isRevue ? search : SEARCH_DEFAULTS;
 
   return (
@@ -112,11 +79,6 @@ export function AppHeader({ title }: { title?: string }) {
           : "flex h-13",
       )}
     >
-      {/* La marque *est* le retour à la revue. C'est le seul lien de la barre
-          depuis que la rangée de navigation en est partie : les liens entre les
-          deux écrans de la revue vivent maintenant dans la zone centrale, mais
-          les trois écrans de réglages n'ont rien d'autre pour rentrer. La
-          search est intégralement conservée — c'est le même périmètre. */}
       <Link
         to="/"
         search={linkSearch}
@@ -157,27 +119,11 @@ export function AppHeader({ title }: { title?: string }) {
   );
 }
 
-/**
- * Menu de l'engrenage : les écrans de réglages, le choix du thème, l'espace
- * actif et la déconnexion.
- *
- * **Aucun `className` ici** : la mise en forme des menus appartient à
- * `@budget/ui/dropdown-menu`, y compris le marquage de l'écran courant
- * (`aria-current`) et celui de l'option retenue. Le sélecteur de thème est
- * `ThemePicker`, monté nu — il porte son propre gabarit.
- * Voir `docs/adr/0001-le-design-appartient-au-package-ui.md`.
- *
- * L'ouverture n'est pas dupliquée dans un `useState` (le déclencheur porte
- * `aria-expanded`, dont la variante `ghost` du bouton se sert) et une entrée
- * referme le menu d'elle-même, d'où la disparition des `onNavigate`.
- */
 function SettingsMenu({ page }: { page?: string }) {
   const navigate = useNavigate();
   const { cents } = useFormat();
 
-  // `reloadDocument` comme à la connexion (`/login`) : la session est lue dans
-  // le `beforeLoad` de `_authed` via le client tRPC, un rechargement complet est
-  // le seul moyen sûr de repartir sans aucun cache de l'utilisateur sortant.
+  // Reload to discard loader data belonging to the signed-out user.
   const signOut = async () => {
     await authClient.signOut();
     await navigate({ to: "/login", reloadDocument: true });
@@ -185,10 +131,6 @@ function SettingsMenu({ page }: { page?: string }) {
 
   return (
     <DropdownMenu>
-      {/* `render` est l'équivalent Base UI d'`asChild` : il *remplace* l'élément
-          du composant. Sous sa forme élément, les enfants restent portés par le
-          composant et les props sont fusionnées automatiquement — la forme
-          fonction `(props) => …` oblige à les réétaler soi-même. */}
       <DropdownMenuTrigger
         render={
           <Button
@@ -201,9 +143,6 @@ function SettingsMenu({ page }: { page?: string }) {
       >
         <SettingsIcon />
       </DropdownMenuTrigger>
-      {/* Chaque intitulé est *dans* son groupe : `DropdownMenuLabel` est un
-          `Menu.GroupLabel`, que Base UI associe au groupe qui l'entoure et qui
-          lève sans lui. Radix tolérait un intitulé isolé, pas Base UI. */}
       <DropdownMenuContent align="end">
         <DropdownMenuGroup>
           <DropdownMenuLabel>Réglages</DropdownMenuLabel>
@@ -239,7 +178,6 @@ function SettingsMenu({ page }: { page?: string }) {
 
         <DropdownMenuSeparator />
 
-        {/* Base UI n'a pas d'`onSelect` : l'entrée est cliquable, c'est `onClick`. */}
         <DropdownMenuItem onClick={() => void signOut()}>
           <LogOutIcon />
           Se déconnecter
@@ -249,22 +187,8 @@ function SettingsMenu({ page }: { page?: string }) {
   );
 }
 
-/**
- * Bascule d'espace — un espace personnel, ou un foyer partagé.
- *
- * Ne s'affiche qu'à partir de deux espaces : tant qu'il n'y en a qu'un, la
- * liste ne proposerait que l'endroit où l'on est déjà. Ce composant vit sous
- * `DropdownMenuContent`, qui ne se monte qu'à l'ouverture — ses requêtes ne
- * partent donc pas au rendu de chaque page.
- *
- * Le changement d'espace **recharge le document**. Le périmètre ne vit pas dans
- * l'URL mais dans la session : sans rechargement, les loaders resteraient sur
- * leurs matches déjà chargés — mêmes route, params et `loaderDeps`, donc les
- * transactions de l'espace qu'on vient de quitter. Même geste qu'à la connexion
- * et à la déconnexion, pour la même raison. (La justification visait react-query
- * jusqu'au 2026-08-28 ; elle vaut à l'identique pour le cache du routeur, qui
- * est désormais le seul.)
- */
+// Switching spaces requires a document reload: organization scope lives in the
+// session, so unchanged URLs would retain the previous space's loader data.
 function SpacePicker() {
   const { data: spaces } = authClient.useListOrganizations();
   const { data: active } = authClient.useActiveOrganization();
@@ -282,8 +206,6 @@ function SpacePicker() {
       <DropdownMenuSeparator />
       <DropdownMenuRadioGroup
         value={active?.id ?? ""}
-        // `Menu.RadioItem.value` est typé `any` chez Base UI : on annote plutôt
-        // que de laisser un `any` traverser jusqu'à l'appel réseau.
         onValueChange={(id: string) => void select(id)}
       >
         <DropdownMenuLabel>Espace</DropdownMenuLabel>

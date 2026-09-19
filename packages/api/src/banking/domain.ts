@@ -1,11 +1,9 @@
-// Logique métier Enable Banking pure — aucun accès DB ni réseau, testable en isolation.
 import { createSign } from "node:crypto";
 
 import { CONSENT_DAYS } from "./schemas";
 
 const CONSENT_WARNING_DAYS = 30;
 
-// JWT RS256 signé avec la clé privée de l'application (sans dépendance, via node:crypto).
 export function makeJwt(
   applicationId: string,
   privateKeyPem: string,
@@ -30,7 +28,6 @@ export function makeJwt(
   return `${header}.${payload}.${signature}`;
 }
 
-// Bornée par le maximum_consent_validity de l'ASPSP quand il l'annonce.
 export function clampValidUntil(
   maximumConsentValiditySeconds: number | null | undefined,
   now: Date,
@@ -61,8 +58,7 @@ export interface DiscoveredAccount {
   iban: string | null;
 }
 
-// Les sessions Enable Banking renvoient les comptes sous forme de string (uid)
-// ou d'objet.
+// Enable Banking may return either account UIDs or account objects.
 export function parseSessionAccounts(
   raw: unknown[] | undefined,
 ): DiscoveredAccount[] {
@@ -86,8 +82,7 @@ export interface AccountReconciliation {
   creates: DiscoveredAccount[];
 }
 
-// Au renouvellement (~180 j), Enable Banking attribue de nouveaux uid aux comptes.
-// L'IBAN sert de pivot de continuité (cf. commentaire du schéma) ; à défaut, l'uid.
+// Account UIDs can change on renewal; prefer IBAN to preserve account continuity.
 export function reconcileAccounts(
   existing: ExistingAccount[],
   discovered: DiscoveredAccount[],

@@ -1,6 +1,5 @@
 import type { EbTransaction } from "./normalize";
 
-// Import idempotent des JSON Enable Banking (data/) vers PostgreSQL.
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
@@ -11,12 +10,7 @@ import { bankAccounts, transactions } from "@budget/db/schema";
 import { orgDataDir } from "../lib/data-dir";
 import { normalizeTransaction } from "./normalize";
 
-// Retourne true si au moins un fichier n'a pas pu être traité (l'import des
-// autres se poursuit) — l'appelant décide quoi en faire.
-//
-// Le périmètre est double et les deux moitiés doivent s'accorder : les fichiers
-// du répertoire de l'espace, et les comptes de l'espace. Élargir l'un sans
-// l'autre ne ferait que des « compte inconnu en base » silencieux.
+// Scope both source files and destination accounts to the same organization.
 export async function importTransactions(
   organizationId: string,
 ): Promise<boolean> {
@@ -28,8 +22,7 @@ export async function importTransactions(
     .where(eq(bankAccounts.organizationId, organizationId));
   const uidToAccountId = new Map(dbAccounts.map((a) => [a.uid, a.id]));
 
-  // Le répertoire n'existe pas tant que l'espace n'a jamais synchronisé :
-  // rien à importer, ce n'est pas une erreur.
+  // A space with no prior sync has no directory yet.
   if (!existsSync(DATA)) return false;
   const txnFiles = readdirSync(DATA).filter(
     (f) => f.startsWith("transactions-") && f.endsWith(".json"),
@@ -72,8 +65,7 @@ export async function importTransactions(
       continue;
     }
 
-    // Upsert : ON CONFLICT met à jour uniquement si un champ significatif a changé
-    // (ex. pending → booked). xmax = 0 distingue insertion et mise à jour.
+    // xmax = 0 distinguishes inserts from updates in the upsert result.
     const result = await db
       .insert(transactions)
       .values(rows)

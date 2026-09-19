@@ -19,17 +19,6 @@ import { useTRPCClient } from "~/lib/trpc";
 import { useFormat } from "~/lib/use-format";
 import { useRun } from "~/lib/use-run";
 
-/**
- * Exclusion manuelle d'une transaction, posée dans le même emplacement que
- * `TransferBadge` et sur le même modèle : une marque à côté du libellé, qui
- * ouvre un dialogue expliquant ce que la ligne cesse de peser.
- *
- * Une différence : la marque doit exister **avant** l'exclusion, sinon rien ne
- * permettrait de la poser. Tant que la ligne compte, le bouton n'apparaît qu'au
- * survol de la ligne (`group-hover`, le `group` est sur la ligne elle-même) ;
- * une fois exclue, il reste visible — c'est ce qui explique un montant absent
- * des totaux.
- */
 export function ExcludeBadge({ row }: { row: TransactionRow }) {
   const [open, setOpen] = useState(false);
 
@@ -45,7 +34,7 @@ export function ExcludeBadge({ row }: { row: TransactionRow }) {
         }
         className={cn(
           "text-label touch-target flex flex-none items-center gap-0.5 rounded-full border px-1.5 py-px leading-3.5",
-          // Le survol n'existe pas au doigt : sous `md` la marque reste visible.
+          // Keep the action visible on touch screens, where hover is unavailable.
           row.excluded
             ? "border-border bg-surface-2 text-subtle"
             : "border-border text-subtle md:opacity-0 md:group-hover:opacity-100",

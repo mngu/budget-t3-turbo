@@ -18,14 +18,6 @@ import {
 import { Spinner } from "@budget/ui/spinner";
 import { DialogFacts } from "~/component/dialog-facts";
 
-/**
- * Confirmation de révocation — un `AlertDialog` et non un `Dialog` : le geste
- * est irréversible côté banque, le composant pose le rôle `alertdialog`, retient
- * le focus sur l'annulation et ignore le clic à côté.
- *
- * Chiffres d'abord, phrase ensuite : ce qui décide, c'est le nombre de comptes
- * qui cessent d'être synchronisés — et le fait que rien n'est supprimé.
- */
 export function RevokeDialog({
   connection,
   revoking,

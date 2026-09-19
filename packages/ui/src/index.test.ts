@@ -2,17 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import { cn } from "./index";
 
-/**
- * Les neuf crans typographiques vivent dans l'espace de noms `text-*`, que
- * `tailwind-merge` traite par défaut comme des **couleurs** : sans la
- * déclaration de `index.ts`, il rangeait `text-hero` avec `text-bad` et gardait
- * la dernière des deux.
- *
- * La panne était silencieuse — les classes existaient bien dans le CSS émis,
- * elles n'arrivaient simplement jamais sur l'élément — et généralisée : le
- * solde du bandeau, les montants de flux et toute la colonne des postes
- * retombaient à la taille héritée. Rien ne l'aurait rattrapée sauf l'écran.
- */
 describe("cn : les crans typographiques ne sont pas des couleurs", () => {
   const CRANS = [
     "text-hero",

@@ -22,14 +22,6 @@ const ICON = {
   revoked: UnplugIcon,
 };
 
-/**
- * Bandeau d'échéance de consentement, en tête de `/banques`.
- *
- * La sévérité vit dans la **variante** de l'`Alert` ; le bouton en est un
- * ordinaire. Avant, la teinte était peinte à trois endroits de cet écran
- * (cadre, pastille d'icône, fond du bouton) — voir
- * `docs/adr/0001-le-design-appartient-au-package-ui.md`.
- */
 export function ConsentAlert({ alert }: { alert: ConsentAlertData }) {
   const Icon = ICON[alert.level];
   const { renew, busy } = useRenewConnection();

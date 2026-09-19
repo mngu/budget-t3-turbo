@@ -7,7 +7,7 @@ import { Spinner } from "@budget/ui/spinner";
 import { toast } from "@budget/ui/toast";
 import { useTRPCClient } from "~/lib/trpc";
 
-// Cible de la redirection Enable Banking (déclarée dans le Control Panel).
+// Must match the callback registered in the Enable Banking Control Panel.
 export const Route = createFileRoute("/_authed/callback")({
   validateSearch: z.object({
     code: z.string().optional().catch(undefined),

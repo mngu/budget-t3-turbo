@@ -41,11 +41,6 @@ export const Route = createFileRoute("/_authed/settings/espaces/")({
   component: EspacesPage,
 });
 
-/**
- * Le geste en cours de confirmation. Un seul état pour tous les dialogues : ils
- * s'excluent, et porter la cible dans la variante évite d'avoir à retrouver
- * « quel espace, déjà ? » au moment de confirmer.
- */
 type Action =
   | { kind: "share"; space: Space }
   | { kind: "rename"; space: Space }
@@ -59,12 +54,6 @@ type Action =
 const CREATE_EMPTY = "vide";
 const CREATE_CONVERT = "convertir";
 
-/**
- * La création, posée dans la rangée de titre par le layout
- * (`staticData.aside`). Le geste vit donc ici et non parmi ceux d'EspacesPage :
- * l'aside est rendu *au-dessus* de la page, aucun état de la page ne lui est
- * atteignable. Il n'en a pas besoin — le loader lui suffit.
- */
 function EspacesAside() {
   const { spaces } = Route.useLoaderData();
   const trpcClient = useTRPCClient();
@@ -77,9 +66,7 @@ function EspacesAside() {
   const [busy, setBusy] = useState(false);
 
   const confirm = async () => {
-    // Deux chemins, une seule décision : ouvrir l'espace qu'on a déjà, ou en
-    // créer un vide. Le premier garde comptes, catégories et historique —
-    // c'est le seul moyen, rien ne déplace un compte d'un espace à l'autre.
+    // Sharing preserves existing data; accounts cannot move between spaces.
     const convert = choice === CREATE_CONVERT ? personal : undefined;
     setBusy(true);
     const ok = await runMutation<unknown>(
@@ -130,8 +117,6 @@ function EspacesPage() {
   const runMutation = useRun();
 
   const [action, setAction] = useState<Action | null>(null);
-  // Saisie du dialogue : nom de l'espace, ou nom retapé pour confirmer une
-  // suppression. Un seul champ à la fois, jamais deux dans le même dialogue.
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [invites, setInvites] = useState<
@@ -153,8 +138,6 @@ function EspacesPage() {
     setBusy(false);
     return ok;
   };
-
-  // ── Gestes ───────────────────────────────────────────────────────────────
 
   const confirm = async () => {
     if (!action) return;
@@ -189,9 +172,7 @@ function EspacesPage() {
           () => trpcClient.spaces.remove.mutate({ id: action.space.id }),
           "Échec de la suppression.",
         );
-        // L'espace supprimé pouvait être l'espace actif : la session pointe
-        // alors sur une organisation qui n'existe plus, et toute l'app
-        // répondrait FORBIDDEN. Le rechargement complet en repart proprement.
+        // The deleted space may be active; reload to resolve a valid session scope.
         if (ok) {
           toast.success("Espace supprimé.");
           if (action.space.isActive) window.location.reload();
@@ -258,17 +239,13 @@ function EspacesPage() {
     }
   };
 
-  // Même geste que la bascule de l'en-tête : l'espace vit dans la session, le
-  // cache des loaders du routeur servirait sinon celui de l'espace quitté.
+  // Scope lives in the session; reload to discard the previous space's loader cache.
   const switchTo = async (space: Space) => {
     setBusy(true);
     await authClient.organization.setActive({ organizationId: space.id });
     window.location.reload();
   };
 
-  // Répondre à une invitation reçue. Pas de dialogue de confirmation, même
-  // pour le refus : le lien devient inerte mais l'espace peut ré-inviter la
-  // même adresse (une invitation refusée n'est plus « pending »).
   const respond = async (invitation: IncomingInvitation, accept: boolean) => {
     const ok = await run(
       () =>
@@ -300,8 +277,6 @@ function EspacesPage() {
     if (ok !== null)
       toast.success(`Invitation renvoyée à ${invitation.email}.`);
   };
-
-  // ── Rendu ────────────────────────────────────────────────────────────────
 
   return (
     <>
@@ -393,7 +368,6 @@ function EspacesPage() {
   );
 }
 
-/** Le dialogue de création. Hors de `describe` : son geste vit dans l'aside. */
 function createSpec(ctx: {
   personal: Space | undefined;
   draft: string;
@@ -444,11 +418,6 @@ function createSpec(ctx: {
   };
 }
 
-/**
- * Le contenu du dialogue pour un geste. Fonction pure : elle ne décide rien,
- * elle formule — l'exécution est dans `confirm`. Les deux se lisent côte à
- * côte, ce que fait chaque geste et ce qu'il en dit.
- */
 function describe(
   action: Action,
   ctx: {
@@ -509,8 +478,6 @@ function describe(
         footnote: "Vos comptes chez la banque ne sont pas touchés.",
         cta: "Supprimer définitivement",
         cancel: "Annuler",
-        // La frappe du nom est la seule garde : le bouton reste inerte tant
-        // qu'elle ne correspond pas exactement.
         disabled: draft.trim() !== action.space.name,
       };
     case "deletePersonal":

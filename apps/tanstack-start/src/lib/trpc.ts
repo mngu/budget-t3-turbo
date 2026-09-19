@@ -49,16 +49,7 @@ export const makeTRPCClient = createIsomorphicFn()
     });
   });
 
-/**
- * Le client tRPC des composants. Il vit dans le contexte du routeur (voir
- * `router.tsx`), qui est le seul endroit où il est construit une fois par
- * requête — un singleton de module serait faux au SSR, où chaque rendu doit
- * porter les en-têtes de *sa* requête (`unstable_localLink`).
- *
- * Remplace le hook homonyme de `@trpc/tanstack-react-query`, supprimé avec
- * react-query : les lectures passent par les loaders, il ne restait de ce
- * package que ce hook.
- */
+// Use the router's per-request client so SSR retains the current request's headers.
 export function useTRPCClient() {
   return useRouter().options.context.trpcClient;
 }

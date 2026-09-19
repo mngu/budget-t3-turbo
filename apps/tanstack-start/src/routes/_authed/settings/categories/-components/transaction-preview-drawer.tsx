@@ -87,10 +87,6 @@ export function TransactionPreviewDrawer({
                       {category ?? "Sans catégorie"}
                     </div>
                   </div>
-                  {/* Le montant reste signé : la maquette ne montre que des
-                      débits et préfixe un « − » d'office, ce qui rendrait un
-                      crédit indiscernable d'une dépense. C'est la catégorie
-                      absente, et elle seule, qui passe la ligne en warn. */}
                   <span
                     className={cn(
                       "num text-meta text-right",

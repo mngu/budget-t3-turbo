@@ -1,18 +1,6 @@
-// Envoi d'emails — le strict minimum, deux usages : le lien de connexion et
-// l'invitation à un espace. Le module vit ici plutôt que dans `@budget/api`
-// parce que le lien de connexion est déclenché par better-auth lui-même
-// (plugin `magicLink`) et que la dépendance va api → auth : l'inverse serait
-// un cycle.
-//
-// Pas de dépendance ni de gabarit : un POST à l'API Resend suffit, et le corps
-// est du texte.
-//
-// **L'email est devenu le seul moyen de se connecter** (il n'y a plus de mot
-// de passe) : une clé absente n'est plus une dégradation, c'est une app
-// inaccessible. D'où les deux régimes de `send` — en développement le lien
-// part dans les logs, ce qui suffit à travailler sans domaine d'envoi ; en
-// production l'absence de clé lève, pour que l'écran de connexion ne puisse
-// pas annoncer un email que personne n'a envoyé.
+// Email lives in auth to avoid an auth -> api dependency cycle.
+// Missing credentials may log links in development, but must fail in production:
+// email is the only login method, so reporting unsent mail as success locks users out.
 
 import { authEnv } from "../env";
 
@@ -51,20 +39,10 @@ async function send(mail: Mail): Promise<void> {
   }
 }
 
-/** L'URL publique de l'app, base des liens envoyés par email. */
 function appUrl(): string {
   return authEnv().SITE_URL ?? "http://localhost:3000";
 }
 
-/**
- * Le lien de connexion — l'unique voie d'entrée. Il vaut aussi inscription
- * (le plugin crée le compte si l'adresse est inconnue) et preuve d'adresse :
- * c'est ce qui referme, sans mécanisme séparé, le trou qu'ouvrirait sinon
- * `spaces.incoming`, où l'on verrait les invitations d'une adresse qu'on se
- * contenterait de déclarer.
- *
- * L'URL est fournie entière par better-auth : pas d'`appUrl()` ici.
- */
 export async function sendMagicLinkEmail(input: {
   to: string;
   url: string;
