@@ -25,6 +25,12 @@ interface BreakdownRow {
   drillable: boolean;
 }
 
+// A detailed parent holds no amount of its own: its budget is its children's sum.
+const familyBudget = (cat: CategoryOverviewType[number]) =>
+  cat.budgetDetailed
+    ? sumBy(cat.children ?? [], (child) => child.budgetAmount ?? 0) || null
+    : cat.budgetAmount;
+
 export function BreakdownList({ overview }: BreakdownListProps) {
   const { euro } = useFormat();
   const { search, setSearch } = useRevueSearch();
@@ -52,7 +58,7 @@ export function BreakdownList({ overview }: BreakdownListProps) {
     : overview.map((cat) => ({
         label: getCategoryLabel(cat.name),
         value: cat.totalAmount ?? 0,
-        budget: cat.budgetAmount,
+        budget: familyBudget(cat),
         iconName: cat.icon,
         color: resolveColor(cat.color),
         drillable: (cat.children?.length ?? 0) > 0,
@@ -61,17 +67,12 @@ export function BreakdownList({ overview }: BreakdownListProps) {
   const totalAmount = sumBy(rows, (row) => row.value);
   const childCount = sumBy(overview, (cat) => cat.children?.length ?? 0);
 
-  // Child budgets only contribute when the parent uses detailed budgeting.
-  const selectedCategoryBudget = selectedCategory?.budgetAmount ?? null;
+  const selectedCategoryBudget = selectedCategory
+    ? familyBudget(selectedCategory)
+    : null;
   const totalBudget = selectedCategory
-    ? selectedCategory.budgetDetailed
-      ? sumBy(rows, (row) => row.budget ?? 0)
-      : selectedCategory.budgetAmount
-    : sumBy(overview, (cat) =>
-        cat.budgetDetailed
-          ? sumBy(cat.children ?? [], (child) => child.budgetAmount ?? 0)
-          : (cat.budgetAmount ?? 0),
-      );
+    ? selectedCategoryBudget
+    : sumBy(overview, (cat) => familyBudget(cat) ?? 0);
 
   const max = Math.max(totalAmount, totalBudget ?? 0);
 
@@ -85,7 +86,7 @@ export function BreakdownList({ overview }: BreakdownListProps) {
             value={selectedCategory.totalAmount ?? 0}
             max={Math.max(
               selectedCategory.totalAmount ?? 0,
-              selectedCategory.budgetAmount ?? 0,
+              selectedCategoryBudget ?? 0,
             )}
             label={selectedCategory.name}
             iconName={selectedCategory.icon}
