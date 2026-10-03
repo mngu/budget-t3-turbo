@@ -1,0 +1,19 @@
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/transactions-table.tsx
+  s_54e4c1348c07e3::t_eda27858dc0358 233-234
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "9492c9002411543476808f47744dcb0346e5bc9a",
+  "prompts": {},
+  "sessions": {
+    "s_54e4c1348c07e3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "782d6ce0-83ef-4ba1-a2cc-89814a30cd4a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
