@@ -25,7 +25,7 @@
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
     "ui-add": "turbo run ui-add",
-    "knip": "knip"
+    "knip": "dotenv -e .env -- knip"
   },
   "devDependencies": {
     "@types/node": "catalog:",

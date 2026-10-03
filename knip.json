@@ -2,6 +2,12 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "tags": ["-lintignore"],
   "workspaces": {
-    ".": {}
+    ".": {},
+    "apps/tanstack-start": {
+      "entry": ["src/**/*.test.ts", "e2e/**/*.ts"]
+    },
+    "packages/auth": {
+      "entry": ["script/auth-cli.ts"]
+    }
   }
 }
