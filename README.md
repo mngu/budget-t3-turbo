@@ -19,7 +19,7 @@ packages
   ├─ auth             Better Auth — email/mot de passe + plugin organization (les « espaces »)
   ├─ db               schéma Drizzle + client pg, base budget_t3
   ├─ shared           schémas Zod, palette, icônes — zod comme seule dépendance runtime
-  └─ ui               composants Base UI
+  └─ ui               cn, ThemeProvider, primitives de l'anneau 3D
 tooling
   ├─ eslint · prettier · typescript · github
 docs

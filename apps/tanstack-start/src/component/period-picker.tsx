@@ -151,12 +151,9 @@ export function PeriodPicker() {
         <ChevronLeftIcon />
       </Button>
       <Popover isOpen={open} onOpenChange={setOpen}>
-        <Button
-          variant="ghost"
-          size="sm"
-          aria-label="Choisir une période"
-          className="min-w-0"
-        >
+        <Button variant="ghost" size="sm" className="min-w-0">
+          {/* An aria-label would hide the period itself from screen readers. */}
+          <span className="sr-only">Choisir une période : </span>
           {/* SSR does not know the browser's pay-cycle preference. */}
           <span className="truncate sm:hidden" suppressHydrationWarning>
             {periodLabel(from, to, startDay, dayMonthNumFr, dateNumFr)}

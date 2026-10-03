@@ -40,7 +40,11 @@ export function TransactionsTable({
           onSortChange={({ column, direction }) =>
             setSearch({
               sort: column === "amount" ? "amount" : "date",
-              order: direction === "ascending" ? "asc" : "desc",
+              // React Aria starts a new column ascending; ours open on the largest values.
+              order:
+                column === (search.sort ?? "date") && direction === "ascending"
+                  ? "asc"
+                  : "desc",
             })
           }
         >

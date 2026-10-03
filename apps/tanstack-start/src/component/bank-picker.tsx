@@ -3,7 +3,6 @@
 import { Button, Dropdown, Header, Label } from "@heroui/react";
 import { useLoaderData } from "@tanstack/react-router";
 import { ChevronDownIcon, LandmarkIcon, RefreshCwIcon } from "lucide-react";
-import { useState } from "react";
 
 import { cn } from "@budget/ui";
 import { sumBy } from "~/lib/sum";
@@ -12,7 +11,6 @@ import { selectedBanks } from "~/lib/transactions-search";
 import { useRevueSearch } from "~/lib/use-revue-search";
 
 export function BankPicker() {
-  const [open, setOpen] = useState(false);
   const { search, setSearch } = useRevueSearch();
   const { sync, state } = useSync();
   const syncing = state === "running";
@@ -23,7 +21,11 @@ export function BankPicker() {
   });
 
   const selected = selectedBanks(search);
-  const included = selected.length === 0 ? banks : selected;
+  // A shared URL or a space switch can name banks this space does not have.
+  const included =
+    selected.length === 0
+      ? banks
+      : banks.filter((bank) => selected.includes(bank));
   const offCount = banks.length - included.length;
 
   const total = sumBy(
@@ -32,12 +34,9 @@ export function BankPicker() {
   );
 
   return (
-    <Dropdown isOpen={open} onOpenChange={setOpen}>
-      <Button
-        variant={offCount > 0 ? "secondary" : "outline"}
-        size="sm"
-        aria-label="Comptes inclus"
-      >
+    <Dropdown>
+      <Button variant={offCount > 0 ? "secondary" : "outline"} size="sm">
+        <span className="sr-only">Comptes inclus : </span>
         <LandmarkIcon className="sm:hidden" />
         {offCount > 0
           ? `${banks.length - offCount}/${banks.length}`

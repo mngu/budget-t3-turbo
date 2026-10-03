@@ -1,6 +1,6 @@
 # `apps/tanstack-start`
 
-Détail de l'app web. La règle des crans typographiques (qui touche aussi `packages/ui`) reste dans le `CLAUDE.md` de la racine ; les décisions de design system partagées sont dans `docs/adr/0001-le-design-appartient-au-package-ui.md`.
+Détail de l'app web. La règle des crans typographiques (qui touche aussi `packages/ui`) reste dans le `CLAUDE.md` de la racine.
 
 ## Routes
 
@@ -41,7 +41,7 @@ L'anneau SVG et sa séquence de forage (`category-ring.tsx`, `use-drill.ts`, `Re
 - **Les couleurs sont celles de HeroUI** (`accent`, `surface`, `overlay`, `muted`, `default`, `success` / `warning` / `danger` et leurs `-soft`). `src/styles.css` ne définit plus que le verre de l'anneau (`--glass`). Le vocabulaire d'états de l'app suit celui de HeroUI : un ton vaut `success`, `warning` ou `danger` et se passe tel quel au `color` / `status` d'un composant.
 - **Tout ce qui occupe de la place est un multiple de 4** (règle n°9 du handoff, adoptée le 2026-08-11 en abandonnant le facteur ~0,77 qui avait produit les `gap-[11px]`, `size-[17px]`, `text-[11.5px]`). Les valeurs de la maquette se reprennent **telles quelles** ; les écrans sont plus aérés qu'avant, c'est la densité voulue. Le critère de relecture est mécanique — **aucune valeur arbitraire `[…px]`** dans un `className`. Trois familles restent en arbitraire, et c'est conforme : les **traits** (`border-[1.5px]`, `w-[1.5px]`) que §1.1 exclut de la grille ; les **valeurs d'animation** de §1.7 (`duration-[560ms]`, `backdrop-blur-[14px]`) ; et le `clamp()` de la gouttière du bandeau, qu'aucun jeton n'exprime.
 - **L'échelle typographique par défaut de Tailwind est supprimée** (`--text-*: initial`, en tête du bloc `@theme`), puis seuls `text-xs` à `text-4xl` sont redéclarés, parce que la CSS de HeroUI les applique. Le code de l'app s'en tient aux neuf crans. Les neuf crans sont `hero` · `title` · `amount` · `heading` · `subheading` · `body` · `control` · `meta` · `label` (44 · 24 · 19 · 16 · 14 · 13 · 12 · 11 · 10). Les cinq du haut portent leur graisse, les quatre du bas non — ceux-là en admettent deux selon l'emploi. L'interlettrage de `label` vit dans `.label-caps` : le cran 10 sert aussi de légende de jauge chiffrée, qui n'en veut pas.
-- **Ce qui est un composant d'app (`src/component/`) et non de `@budget/ui`** porte une décision de _cette_ application : `AppHeader`, `BankPicker`, `PeriodPicker`, `CategoryIcon` (table nom Lucide → composant, explicite plutôt qu'un `import * as lucide`), `Stat` (compteur d'en-tête des réglages), `ThemePicker`. Examiné puis écarté : un composant « vignette teintée de catégorie » — présent en quatre tailles et trois rayons, il coûterait trois props pour envelopper un `<span>`, et le vrai partage (`softCategoryColor()` + `CategoryIcon`) existe déjà.
+- **Ce qui est un composant d'app (`src/component/`) et non de `@budget/ui`** porte une décision de _cette_ application : `AppHeader`, `BankPicker`, `PeriodPicker`, `CategoryIcon` (table nom Lucide → composant, explicite plutôt qu'un `import * as lucide`), `Stat` (compteur d'en-tête des réglages). Examiné puis écarté : un composant « vignette teintée de catégorie » — présent en quatre tailles et trois rayons, il coûterait trois props pour envelopper un `<span>`, et le vrai partage (`softCategoryColor()` + `CategoryIcon`) existe déjà.
 
 ## Banques (`/settings/banques`)
 
