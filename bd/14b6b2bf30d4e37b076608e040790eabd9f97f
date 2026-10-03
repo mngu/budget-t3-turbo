@@ -1,0 +1,21 @@
+package.json
+  s_54e4c1348c07e3::t_a06818f19f03c1 28
+knip.json
+  s_54e4c1348c07e3::t_a06818f19f03c1 5-11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "bd14b6b2bf30d4e37b076608e040790eabd9f97f",
+  "prompts": {},
+  "sessions": {
+    "s_54e4c1348c07e3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "782d6ce0-83ef-4ba1-a2cc-89814a30cd4a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
