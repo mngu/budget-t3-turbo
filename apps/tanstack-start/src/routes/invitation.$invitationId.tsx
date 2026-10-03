@@ -209,7 +209,7 @@ function InvitationPage() {
       {signedInAsInvited ? (
         <div className="border-border flex items-center gap-2.5 border-b px-5 py-3.5">
           <UserIcon className="text-subtle size-3.5 flex-none" />
-          <div className="text-muted-foreground text-control min-w-0">
+          <div className="text-muted text-control min-w-0">
             Connecté en tant que{" "}
             <span className="text-foreground font-medium">
               {invitation.email}
@@ -292,7 +292,7 @@ function Shell({
               {icon}
             </span>
             <div className="text-heading mt-3 text-pretty">{title}</div>
-            <div className="text-muted-foreground text-control mt-1.5 text-pretty">
+            <div className="text-muted text-control mt-1.5 text-pretty">
               {body}
             </div>
           </div>

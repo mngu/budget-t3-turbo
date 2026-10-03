@@ -103,7 +103,7 @@ export function RefineBar({
           title="Retirer le filtre de catégorie"
           aria-label="Retirer le filtre de catégorie"
           onClick={() => setSearch({ category: undefined })}
-          className="text-subtle hover:bg-accent hover:text-foreground text-meta touch-target flex size-6 flex-none items-center justify-center rounded-md"
+          className="text-subtle hover:bg-default hover:text-foreground text-meta hit-area flex size-6 flex-none items-center justify-center rounded-md"
         >
           ✕
         </button>

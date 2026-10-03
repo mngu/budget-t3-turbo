@@ -63,6 +63,6 @@ function describe(
     meta: lastImportedAt
       ? `dernier import le ${dateFr.format(new Date(lastImportedAt))}`
       : "aucun import pour l'instant",
-    tone: "text-muted-foreground",
+    tone: "text-muted",
   };
 }

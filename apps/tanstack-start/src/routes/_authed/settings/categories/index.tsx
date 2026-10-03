@@ -104,7 +104,7 @@ function UncategorizedBanner({ count }: { count: number }) {
           <span className="num">{count.toLocaleString("fr-FR")}</span>{" "}
           transaction{count > 1 ? "s" : ""} sans catégorie
         </div>
-        <div className="text-muted-foreground text-control mt-1 max-w-165 text-pretty">
+        <div className="text-muted text-control mt-1 max-w-165 text-pretty">
           Les lignes que rien ne décrit restent sans catégorie : créez la
           catégorie manquante, puis relancez.
         </div>

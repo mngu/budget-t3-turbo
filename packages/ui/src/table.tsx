@@ -49,7 +49,7 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
     <tfoot
       data-slot="table-footer"
       className={cn(
-        "bg-muted/50 border-t font-medium [&>tr]:last:border-b-0",
+        "bg-surface-secondary/50 border-t font-medium [&>tr]:last:border-b-0",
         className,
       )}
       {...props}
@@ -62,7 +62,7 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
     <tr
       data-slot="table-row"
       className={cn(
-        "hover:bg-accent has-aria-expanded:bg-accent data-[state=selected]:bg-accent border-b transition-colors",
+        "hover:bg-default has-aria-expanded:bg-default data-[state=selected]:bg-default border-b transition-colors",
         className,
       )}
       {...props}
@@ -103,7 +103,7 @@ function TableCaption({
   return (
     <caption
       data-slot="table-caption"
-      className={cn("text-meta text-muted-foreground mt-4", className)}
+      className={cn("text-meta text-muted mt-4", className)}
       {...props}
     />
   );

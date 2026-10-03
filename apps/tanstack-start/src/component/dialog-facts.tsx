@@ -20,9 +20,7 @@ export function DialogFacts({
           >
             {fact.n}
           </span>
-          <span className="text-muted-foreground text-control">
-            {fact.label}
-          </span>
+          <span className="text-muted text-control">{fact.label}</span>
         </div>
       ))}
     </div>

@@ -79,7 +79,7 @@ function BanquesPage() {
 
   return (
     <>
-      <p className="text-muted-foreground text-control mt-2 max-w-155 text-pretty">
+      <p className="text-muted text-control mt-2 max-w-155 text-pretty">
         Vos identifiants bancaires ne passent jamais par cette application :
         chaque connexion est autorisée chez votre banque et vaut environ six
         mois.
@@ -108,7 +108,7 @@ function BanquesPage() {
               <p className="text-body font-semibold">
                 Aucune banque connectée pour l'instant
               </p>
-              <p className="text-muted-foreground text-control mx-auto mt-1.5 max-w-105 text-pretty">
+              <p className="text-muted text-control mx-auto mt-1.5 max-w-105 text-pretty">
                 La configuration est en place. Ajoutez une première banque :
                 vous serez redirigé vers elle pour autoriser l'accès, puis
                 ramené ici.
@@ -170,7 +170,7 @@ function OrphanBanner({
       <Link
         to="/settings/banques/ajouter"
         search={{ step: "banque", q: orphan.bankName }}
-        className="border-border-strong hover:bg-accent text-control flex h-8 items-center rounded-md border px-3.5 font-medium whitespace-nowrap"
+        className="border-border-strong hover:bg-default text-control flex h-8 items-center rounded-md border px-3.5 font-medium whitespace-nowrap"
       >
         Connecter {orphan.bankName}
       </Link>

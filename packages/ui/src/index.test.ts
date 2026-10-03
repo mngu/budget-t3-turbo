@@ -1,3 +1,4 @@
+import { modalVariants } from "@heroui/styles";
 import { describe, expect, it } from "vitest";
 
 import { cn } from "./index";
@@ -26,5 +27,13 @@ describe("cn : les crans typographiques ne sont pas des couleurs", () => {
 
   it("départage toujours deux couleurs entre elles", () => {
     expect(cn("text-subtle", "text-bad")).toBe("text-bad");
+  });
+});
+
+describe("HeroUI : son tailwind-merge connaît les mêmes crans", () => {
+  it("garde la couleur et le cran passés à un composant", () => {
+    expect(
+      modalVariants().footer({ className: "text-subtle text-meta" }),
+    ).toContain("text-subtle text-meta");
   });
 });

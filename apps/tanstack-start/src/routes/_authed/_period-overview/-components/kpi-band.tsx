@@ -76,7 +76,7 @@ function KpiBar({ value, budget, max, color, label }: KpiBarProps) {
       <div className="flex-1">
         <Gauge value={value} budget={budget} max={max} color={color} />
       </div>
-      <span className="num text-amount text-muted-foreground w-30 flex-none text-right">
+      <span className="num text-amount text-muted w-30 flex-none text-right">
         {euro.format(value)}
       </span>
     </div>

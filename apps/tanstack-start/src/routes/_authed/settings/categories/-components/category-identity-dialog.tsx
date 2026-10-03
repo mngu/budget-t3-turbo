@@ -89,7 +89,7 @@ export function CategoryIdentityDialog({
         <div className="min-h-0 flex-1 scrollbar-thin overflow-y-auto p-4">
           <div className="flex items-baseline gap-2.5">
             <span className="label-caps">Couleur</span>
-            <span className="text-muted-foreground text-meta">
+            <span className="text-muted text-meta">
               {takenCount >= CATEGORY_COLOR_PALETTE.length
                 ? `les ${CATEGORY_COLOR_PALETTE.length} teintes sont prises — toute nouvelle parente partagera une teinte`
                 : `${takenCount} teintes prises sur ${CATEGORY_COLOR_PALETTE.length}`}
@@ -125,7 +125,7 @@ export function CategoryIdentityDialog({
                     {mine && "✓"}
                   </span>
                   {others.length > 0 && (
-                    <span className="bg-card text-muted-foreground border-border text-label absolute top-1 right-1 flex size-3 items-center justify-center rounded-full border leading-none">
+                    <span className="bg-card text-muted border-border text-label absolute top-1 right-1 flex size-3 items-center justify-center rounded-full border leading-none">
                       ●
                     </span>
                   )}
@@ -134,7 +134,7 @@ export function CategoryIdentityDialog({
             })}
           </div>
 
-          <p className="text-muted-foreground text-control mt-2.5 flex items-start gap-2.5">
+          <p className="text-muted text-control mt-2.5 flex items-start gap-2.5">
             <InfoIcon className="mt-px size-3.5 flex-none" />
             <span className="min-w-0 text-pretty">
               Un point sur une teinte signale qu'elle est déjà portée par une
@@ -162,7 +162,7 @@ export function CategoryIdentityDialog({
 
           <div className="flex flex-wrap items-baseline gap-2.5">
             <span className="label-caps">Icône</span>
-            <span className="text-muted-foreground text-meta">
+            <span className="text-muted text-meta">
               {target?.icon
                 ? "jeu thématique de 54 icônes Lucide · recherche en français"
                 : "aucune icône — pastille creuse"}
@@ -200,7 +200,7 @@ export function CategoryIdentityDialog({
                           "relative flex h-9 items-center justify-center rounded-md border",
                           selected
                             ? "border-primary bg-accent-soft text-primary"
-                            : "border-border bg-background text-muted-foreground hover:border-border-strong hover:text-foreground",
+                            : "border-border bg-background text-muted hover:border-border-strong hover:text-foreground",
                         )}
                       >
                         <CategoryIcon name={icon.name} />
@@ -214,7 +214,7 @@ export function CategoryIdentityDialog({
               </div>
             ))}
             {groups.length === 0 && (
-              <p className="text-muted-foreground text-control text-pretty">
+              <p className="text-muted text-control text-pretty">
                 Aucune icône pour « {query} ». La recherche accepte les mots
                 français du jeu thématique et les noms Lucide en anglais (
                 <span className="font-mono">piggy-bank</span>,{" "}
@@ -226,7 +226,7 @@ export function CategoryIdentityDialog({
           <button
             type="button"
             onClick={() => onIconChange(null)}
-            className="border-border-strong text-muted-foreground hover:bg-accent hover:text-foreground text-control mt-3 flex w-full items-center gap-2.5 rounded-md border border-dashed px-2.5 py-1.5"
+            className="border-border-strong text-muted hover:bg-default hover:text-foreground text-control mt-3 flex w-full items-center gap-2.5 rounded-md border border-dashed px-2.5 py-1.5"
           >
             <span className="border-border-strong flex size-6 flex-none items-center justify-center rounded-md border border-dashed">
               <CategoryIcon name={null} className="size-3.5" />

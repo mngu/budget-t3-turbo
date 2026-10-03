@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@heroui/styles";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
@@ -17,6 +18,24 @@
 
   /* Replace Tailwind's default scale with the nine semantic roles below. */
   --text-*: initial;
+
+  /* HeroUI's component CSS applies Tailwind's default sizes; app code keeps to the roles below. */
+  --text-xs: 0.75rem;
+  --text-xs--line-height: calc(1 / 0.75);
+  --text-sm: 0.875rem;
+  --text-sm--line-height: calc(1.25 / 0.875);
+  --text-base: 1rem;
+  --text-base--line-height: calc(1.5 / 1);
+  --text-lg: 1.125rem;
+  --text-lg--line-height: calc(1.75 / 1.125);
+  --text-xl: 1.25rem;
+  --text-xl--line-height: calc(1.75 / 1.25);
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: calc(2 / 1.5);
+  --text-3xl: 1.875rem;
+  --text-3xl--line-height: calc(2.25 / 1.875);
+  --text-4xl: 2.25rem;
+  --text-4xl--line-height: calc(2.5 / 2.25);
 
   /* Keep role names aligned with extendTailwindMerge in @budget/ui.
      Font families are separate from size tokens; use .num for numeric text. */
@@ -47,7 +66,6 @@
   --color-surface-2: var(--surface-2);
   --color-subtle: var(--subtle);
   --color-tint: var(--tint);
-  --color-overlay: var(--overlay);
   --color-border-strong: var(--border-strong);
   --color-track: var(--track);
   --color-glass: var(--glass);
@@ -58,7 +76,6 @@
   --color-warn-soft: var(--warn-soft);
   --color-bad: var(--bad);
   --color-bad-soft: var(--bad-soft);
-  --color-accent-soft: var(--accent-soft);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -76,10 +93,6 @@
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
@@ -104,8 +117,10 @@
     0 1px 2px oklch(0 0 0 / 0.05), 0 22px 44px -22px oklch(0.25 0.03 265 / 0.4);
 }
 
-/* --primary is the brand color; --accent retains shadcn's neutral hover role. */
 :root {
+  /* HeroUI's brand role is --accent; pointing it at --primary keeps one brand color across both. */
+  --accent: var(--primary);
+  --accent-foreground: var(--primary-foreground);
   --background: oklch(0.992 0.003 95);
   --foreground: oklch(0.155 0.01 250);
   --card: oklch(1 0 0);
@@ -114,16 +129,9 @@
   --popover-foreground: oklch(0.155 0.01 250);
   --primary: oklch(0.455 0.2 265);
   --primary-foreground: oklch(0.99 0 0);
-  /* Tinted selection is distinct from the neutral --accent hover surface. */
   --tint: oklch(0.965 0.006 265);
-  /* Overlays darken the page in both themes. */
-  --overlay: oklch(0.15 0.01 265 / 0.28);
   --secondary: oklch(0.977 0.004 95);
   --secondary-foreground: oklch(0.155 0.01 250);
-  --muted: oklch(0.977 0.004 95);
-  --muted-foreground: oklch(0.455 0.014 250);
-  --accent: oklch(0.953 0.005 250);
-  --accent-foreground: oklch(0.155 0.01 250);
   --destructive: oklch(0.555 0.19 25);
   --border: oklch(0.91 0.006 250);
   --input: oklch(0.91 0.006 250);
@@ -140,7 +148,6 @@
   --track: oklch(0.935 0.005 250);
   --glass: oklch(1 0 0 / 72%);
   --glass-border: oklch(1 0 0 / 90%);
-  --accent-soft: oklch(0.954 0.03 265);
   --ok: oklch(0.555 0.14 150);
   --ok-soft: oklch(0.954 0.045 152);
   --warn: oklch(0.635 0.15 62);
@@ -169,10 +176,6 @@
   --tint: oklch(0.298 0.013 265);
   --secondary: oklch(0.285 0.012 265);
   --secondary-foreground: oklch(0.905 0.005 265);
-  --muted: oklch(0.285 0.012 265);
-  --muted-foreground: oklch(0.712 0.011 265);
-  --accent: oklch(0.298 0.013 265);
-  --accent-foreground: oklch(0.905 0.005 265);
   --destructive: oklch(0.718 0.125 25);
   --border: oklch(1 0 0 / 7.5%);
   /* Inputs need stronger contrast than passive borders, including bg-input/30 fills. */
@@ -190,7 +193,6 @@
   --track: oklch(1 0 0 / 9%);
   --glass: oklch(0.3 0.012 265 / 62%);
   --glass-border: oklch(1 0 0 / 12%);
-  --accent-soft: oklch(0.335 0.07 266);
   --ok: oklch(0.752 0.11 152);
   --ok-soft: oklch(0.328 0.055 152);
   --warn: oklch(0.79 0.11 72);
@@ -216,8 +218,9 @@
   }
 }
 
-/* Expand touch targets toward 44px without changing layout or shrinking larger buttons. */
-@utility touch-target {
+/* Expand touch targets toward 44px without changing layout or shrinking larger buttons.
+   Not named touch-target: HeroUI ships an unconditional utility of that name that would merge in. */
+@utility hit-area {
   @media (pointer: coarse) {
     position: relative;
     &::after {

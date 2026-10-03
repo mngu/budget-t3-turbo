@@ -89,7 +89,7 @@ function DropdownMenuItem({
       data-variant={variant}
       className={cn(
         "aria-[current]:font-semibold",
-        "group/dropdown-menu-item focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive dark:data-[variant=destructive]:focus:bg-destructive/20 data-[variant=destructive]:*:[svg]:text-destructive text-control relative flex cursor-default items-center gap-2 rounded-md p-2 outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-40 data-inset:pl-7 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "group/dropdown-menu-item focus:bg-default focus:text-default-foreground not-data-[variant=destructive]:focus:**:text-default-foreground data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive dark:data-[variant=destructive]:focus:bg-destructive/20 data-[variant=destructive]:*:[svg]:text-destructive text-control relative flex cursor-default items-center gap-2 rounded-md p-2 outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-40 data-inset:pl-7 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className,
       )}
       {...props}
@@ -111,7 +111,7 @@ function DropdownMenuCheckboxItem({
       data-slot="dropdown-menu-checkbox-item"
       data-inset={inset}
       className={cn(
-        "focus:bg-accent focus:text-accent-foreground focus:**:text-accent-foreground text-control relative flex cursor-default items-center gap-2 rounded-md py-2 pr-8 pl-2 outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-40 data-inset:pl-7 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "focus:bg-default focus:text-default-foreground focus:**:text-default-foreground text-control relative flex cursor-default items-center gap-2 rounded-md py-2 pr-8 pl-2 outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-40 data-inset:pl-7 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className,
       )}
       checked={checked}
@@ -156,7 +156,7 @@ function DropdownMenuRadioItem({
       data-inset={inset}
       data-variant={variant}
       className={cn(
-        "focus:bg-accent focus:text-accent-foreground focus:**:text-accent-foreground text-control relative flex cursor-default items-center gap-2 rounded-md py-2 pr-8 pl-2 outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-40 data-inset:pl-7 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "focus:bg-default focus:text-default-foreground focus:**:text-default-foreground text-control relative flex cursor-default items-center gap-2 rounded-md py-2 pr-8 pl-2 outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-40 data-inset:pl-7 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         variant === "tile" &&
           "data-checked:bg-accent-soft data-checked:text-primary text-control min-w-0 flex-col justify-center gap-1 p-2 data-checked:font-semibold",
         className,
@@ -199,7 +199,7 @@ function DropdownMenuShortcut({
     <span
       data-slot="dropdown-menu-shortcut"
       className={cn(
-        "text-muted-foreground group-focus/dropdown-menu-item:text-accent-foreground text-meta ml-auto",
+        "text-muted group-focus/dropdown-menu-item:text-default-foreground text-meta ml-auto",
         className,
       )}
       {...props}

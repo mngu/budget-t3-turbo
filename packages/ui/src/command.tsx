@@ -4,7 +4,6 @@ import type * as React from "react";
 
 import { Command as CommandPrimitive } from "cmdk";
 import { CheckIcon, SearchIcon } from "lucide-react";
-import { useRef } from "react";
 
 import { cn } from "@budget/ui";
 
@@ -45,26 +44,22 @@ function CommandDialog({
   className?: string;
   children: React.ReactNode;
 }) {
-  const commandRef = useRef<HTMLDivElement>(null);
-
   return (
     <Dialog {...props}>
-      <DialogContent
-        // Without an input, focus the list itself so arrow keys keep working.
-        initialFocus={() =>
-          commandRef.current?.querySelector<HTMLElement>("[cmdk-input]") ??
-          commandRef.current
-        }
-        className={cn(
-          "top-1/3 translate-y-0 overflow-hidden rounded-xl! p-0",
-          className,
-        )}
-      >
+      <DialogContent padded={false} className={className}>
         <DialogHeader className="sr-only">
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
-        <Command ref={commandRef} tabIndex={-1} className="outline-none">
+        <Command
+          // Focus the input, or the list when there is none so arrow keys keep working. Refs
+          // attach before React Aria's dialog grabs focus, which then leaves focus where it is.
+          ref={(node) =>
+            (node?.querySelector<HTMLElement>("[cmdk-input]") ?? node)?.focus()
+          }
+          tabIndex={-1}
+          className="outline-none"
+        >
           {children}
         </Command>
       </DialogContent>
@@ -132,7 +127,7 @@ function CommandGroup({
     <CommandPrimitive.Group
       data-slot="command-group"
       className={cn(
-        "text-foreground **:[[cmdk-group-heading]]:text-muted-foreground **:[[cmdk-group-heading]]:text-label overflow-hidden p-1 **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:py-1.5 **:[[cmdk-group-heading]]:uppercase",
+        "text-foreground **:[[cmdk-group-heading]]:text-muted **:[[cmdk-group-heading]]:text-label overflow-hidden p-1 **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:py-1.5 **:[[cmdk-group-heading]]:uppercase",
         className,
       )}
       {...props}
@@ -162,7 +157,7 @@ function CommandItem({
     <CommandPrimitive.Item
       data-slot="command-item"
       className={cn(
-        "group/command-item data-selected:bg-muted data-selected:text-foreground data-selected:*:[svg]:text-foreground text-control relative flex cursor-default items-center gap-2 rounded-md p-2 outline-hidden select-none in-data-[slot=dialog-content]:rounded-md! data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "group/command-item data-selected:bg-surface-secondary data-selected:text-foreground data-selected:*:[svg]:text-foreground text-control relative flex cursor-default items-center gap-2 rounded-md p-2 outline-hidden select-none in-data-[slot=dialog-content]:rounded-md! data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className,
       )}
       {...props}
@@ -181,7 +176,7 @@ function CommandShortcut({
     <span
       data-slot="command-shortcut"
       className={cn(
-        "text-muted-foreground group-data-selected/command-item:text-foreground text-meta ml-auto",
+        "text-muted group-data-selected/command-item:text-foreground text-meta ml-auto",
         className,
       )}
       {...props}

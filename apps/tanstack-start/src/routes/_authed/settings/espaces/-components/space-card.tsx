@@ -105,7 +105,7 @@ export function SpaceCard({
                   {member.email}
                 </div>
               </div>
-              <span className="text-muted-foreground text-control flex items-center gap-1.5">
+              <span className="text-muted text-control flex items-center gap-1.5">
                 {member.role === "owner" ? (
                   <KeyRoundIcon className="text-primary size-3.5" />
                 ) : (

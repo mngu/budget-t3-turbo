@@ -1,9 +1,10 @@
 import { cx } from "class-variance-authority";
 import { extendTailwindMerge } from "tailwind-merge";
+import { defaultConfig } from "tailwind-variants";
 
 // Keep these roles aligned with styles.css. Otherwise tailwind-merge treats
 // custom text sizes as colors and drops them when a text color follows.
-const twMerge = extendTailwindMerge({
+const twMergeConfig = {
   extend: {
     classGroups: {
       "font-size": [
@@ -19,6 +20,15 @@ const twMerge = extendTailwindMerge({
       ],
     },
   },
-});
+};
+
+const twMerge = extendTailwindMerge(twMergeConfig);
 
 export const cn = (...inputs: Parameters<typeof cx>) => twMerge(cx(inputs));
+
+// HeroUI merges className through tailwind-variants' own tailwind-merge, which would drop
+// the same classes. Its components captured this object at import, so it is filled in place.
+defaultConfig.twMergeConfig = Object.assign(
+  defaultConfig.twMergeConfig ?? {},
+  twMergeConfig,
+);

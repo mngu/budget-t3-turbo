@@ -64,7 +64,7 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
             une seule fois, à l'installation
           </span>
         </div>
-        <p className="text-muted-foreground text-control mt-1.5 max-w-155 text-pretty">
+        <p className="text-muted text-control mt-1.5 max-w-155 text-pretty">
           Ce sont les identifiants de{" "}
           <span className="text-foreground font-medium">votre</span> compte
           agrégateur, pas ceux d'une banque. Aucune banque ne vous demandera
@@ -97,8 +97,8 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
               type="button"
               onClick={copyRedirect}
               className={cn(
-                "border-border-strong hover:bg-accent text-control h-7 rounded-md border px-2.5 whitespace-nowrap",
-                copied ? "text-ok" : "text-muted-foreground",
+                "border-border-strong hover:bg-default text-control h-7 rounded-md border px-2.5 whitespace-nowrap",
+                copied ? "text-ok" : "text-muted",
               )}
             >
               {copied ? "✓ Copiée" : "Copier"}
@@ -166,7 +166,7 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
             <p className="text-bad text-control font-semibold">
               L'API Enable Banking a refusé la configuration
             </p>
-            <p className="text-muted-foreground num text-meta mt-1.5 break-words">
+            <p className="text-muted num text-meta mt-1.5 break-words">
               {setup.error}
             </p>
           </div>
@@ -196,7 +196,7 @@ const FIELD =
 function Step({ n, children }: { n: string; children: React.ReactNode }) {
   return (
     <li className="grid grid-cols-[22px_minmax(0,1fr)] items-start gap-3">
-      <span className="border-border-strong text-muted-foreground num text-meta flex size-6 items-center justify-center rounded-full border">
+      <span className="border-border-strong text-muted num text-meta flex size-6 items-center justify-center rounded-full border">
         {n}
       </span>
       <div className="text-control min-w-0 pt-px">{children}</div>

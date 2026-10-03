@@ -129,7 +129,7 @@ export function BreakdownList({ overview }: BreakdownListProps) {
               key={index}
               type="button"
               disabled={!row.drillable}
-              className="not-aria-disabled:hover:bg-accent focus-visible:ring-accent-soft flex flex-none cursor-pointer flex-col justify-center gap-1.5 rounded-lg p-2 transition-colors outline-none focus-visible:ring-3 focus-visible:ring-inset motion-reduce:transition-none"
+              className="not-aria-disabled:hover:bg-default focus-visible:ring-accent-soft flex flex-none cursor-pointer flex-col justify-center gap-1.5 rounded-lg p-2 transition-colors outline-none focus-visible:ring-3 focus-visible:ring-inset motion-reduce:transition-none"
               onClick={() => setSearch({ category: row.label })}
             >
               <BudgetGauge

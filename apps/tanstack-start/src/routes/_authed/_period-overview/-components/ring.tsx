@@ -164,7 +164,7 @@ function RingBackButton({ onClick }: { onClick: () => void }) {
         event.stopPropagation();
         onClick();
       }}
-      className="border-border-strong bg-card text-muted-foreground hover:border-subtle hover:text-foreground text-control pointer-events-auto mt-3 flex h-6 items-center gap-1.5 rounded-full border pr-2.5 pl-2 font-semibold whitespace-nowrap"
+      className="border-border-strong bg-card text-muted hover:border-subtle hover:text-foreground text-control pointer-events-auto mt-3 flex h-6 items-center gap-1.5 rounded-full border pr-2.5 pl-2 font-semibold whitespace-nowrap"
     >
       <ArrowLeftIcon className="size-3" aria-hidden />
       Toutes catégories

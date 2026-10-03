@@ -56,14 +56,14 @@ export function TransactionPreviewDrawer({
               {title}
             </DialogTitle>
           </div>
-          <DialogDescription className="text-muted-foreground text-control mt-1.5 text-pretty">
+          <DialogDescription className="text-muted text-control mt-1.5 text-pretty">
             {description}
           </DialogDescription>
         </DialogHeader>
 
         <div className="min-h-0 flex-1 overflow-y-auto">
           {transactions.length === 0 ? (
-            <p className="text-muted-foreground text-control px-4 py-5">
+            <p className="text-muted text-control px-4 py-5">
               Aucune transaction.
             </p>
           ) : (

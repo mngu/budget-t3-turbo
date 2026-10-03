@@ -78,7 +78,7 @@ export function SpaceDialog({
               {spec.title}
             </DialogTitle>
           </div>
-          <div className="text-muted-foreground text-control mt-2.5 text-pretty">
+          <div className="text-muted text-control mt-2.5 text-pretty">
             {spec.body}
           </div>
 
@@ -110,7 +110,7 @@ export function SpaceDialog({
                       <span className="text-control block font-semibold tracking-[-0.01em]">
                         {choice.label}
                       </span>
-                      <span className="text-muted-foreground text-control mt-1 block text-pretty">
+                      <span className="text-muted text-control mt-1 block text-pretty">
                         {choice.description}
                       </span>
                       {active && choice.warning && (
@@ -140,8 +140,11 @@ export function SpaceDialog({
           )}
         </div>
 
-        <DialogFooter>
-          <span className="min-w-0 flex-1 text-pretty">{spec.footnote}</span>
+        <DialogFooter className="flex-wrap">
+          {/* HeroUI's touch-sized buttons leave the footnote no room beside them on phones. */}
+          <span className="min-w-0 flex-1 basis-full text-pretty sm:basis-0">
+            {spec.footnote}
+          </span>
           {spec.cancel && (
             <Button variant="ghost" className="flex-none" onClick={onClose}>
               {spec.cancel}

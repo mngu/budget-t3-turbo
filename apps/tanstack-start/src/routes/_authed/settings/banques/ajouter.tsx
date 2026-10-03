@@ -55,7 +55,7 @@ function AjouterBanquePage() {
       <header className="bg-sunken flex items-center gap-3 border-b px-4.5 py-3">
         <Link
           to="/settings/banques"
-          className="text-muted-foreground hover:text-foreground text-control"
+          className="text-muted hover:text-foreground text-control"
         >
           ‹ Retour
         </Link>
@@ -146,7 +146,7 @@ function StepBanque() {
       {aspsps.length === 0 ? (
         <div className="border-border-strong mt-3.5 rounded-xl border border-dashed px-4.5 py-6 text-center">
           <p className="text-control font-medium">Aucune banque trouvée</p>
-          <p className="text-muted-foreground text-control mt-1">
+          <p className="text-muted text-control mt-1">
             Aucun établissement ne correspond à votre recherche. Essayez le nom
             officiel de l'établissement.
           </p>
@@ -245,7 +245,7 @@ function StepComptes() {
             Synchronisation initiale en cours…
           </span>
         </div>
-        <p className="text-muted-foreground text-control mx-auto mt-2 max-w-125 text-center text-pretty">
+        <p className="text-muted text-control mx-auto mt-2 max-w-125 text-center text-pretty">
           Nous récupérons l'historique des comptes suivis. Comptez une à deux
           minutes la première fois.
         </p>
@@ -258,7 +258,7 @@ function StepComptes() {
   return (
     <div className="px-5 pt-4.5 pb-5">
       <h2 className="text-body font-semibold">Vos comptes</h2>
-      <p className="text-muted-foreground text-control mt-1">
+      <p className="text-muted text-control mt-1">
         Comptes découverts — nommez-les et choisissez lesquels suivre.
       </p>
 

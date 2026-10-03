@@ -37,7 +37,7 @@ export function OverviewHeader({ overview }: OverviewHeaderProps) {
           title="Revenir à toutes les catégories"
           aria-label="Revenir à toutes les catégories"
           onClick={() => setSearch({ category: undefined })}
-          className="touch-target flex size-7 flex-none items-center justify-center rounded-lg hover:opacity-70"
+          className="hit-area flex size-7 flex-none items-center justify-center rounded-lg hover:opacity-70"
           style={{
             background: softCategoryColor(selectedColor),
             color: selectedColor,
@@ -65,7 +65,7 @@ export function OverviewHeader({ overview }: OverviewHeaderProps) {
         to={isTable ? "/" : "/transactions"}
         search={search}
         title={isTable ? "Retour" : "Ouvrir la liste des transactions"}
-        className="border-border bg-card text-muted-foreground hover:border-subtle hover:text-foreground hover:bg-accent text-control ml-auto flex h-7 flex-none items-center gap-1.5 rounded-full border pr-2 pl-3 font-medium whitespace-nowrap"
+        className="border-border bg-card text-muted hover:border-subtle hover:text-foreground hover:bg-default text-control ml-auto flex h-7 flex-none items-center gap-1.5 rounded-full border pr-2 pl-3 font-medium whitespace-nowrap"
       >
         {isTable ? (
           <>

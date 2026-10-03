@@ -204,7 +204,7 @@ export function PeriodPicker() {
                       "text-control py-1 text-left disabled:pointer-events-none disabled:opacity-40",
                       active
                         ? "text-primary font-semibold"
-                        : "text-muted-foreground hover:text-foreground",
+                        : "text-muted hover:text-foreground",
                     )}
                   >
                     {preset.label}
@@ -297,7 +297,7 @@ function StepButton({
       aria-label={label}
       onClick={onClick}
       disabled={disabled}
-      className="text-subtle hover:bg-accent hover:text-foreground text-body touch-target flex size-6 items-center justify-center rounded-sm disabled:pointer-events-none disabled:opacity-30 sm:size-8"
+      className="text-subtle hover:bg-default hover:text-foreground text-body hit-area flex size-6 items-center justify-center rounded-sm disabled:pointer-events-none disabled:opacity-30 sm:size-8"
     >
       {glyph}
     </button>

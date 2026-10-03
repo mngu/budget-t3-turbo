@@ -21,7 +21,7 @@ export function BankLogo({
     return (
       <span
         className={cn(
-          "bg-sunken text-muted-foreground flex items-center justify-center rounded-md border font-semibold",
+          "bg-sunken text-muted flex items-center justify-center rounded-md border font-semibold",
           className,
         )}
       >

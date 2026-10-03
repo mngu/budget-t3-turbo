@@ -280,7 +280,7 @@ function EspacesPage() {
 
   return (
     <>
-      <p className="text-muted-foreground text-control mt-2 max-w-160 text-pretty">
+      <p className="text-muted text-control mt-2 max-w-160 text-pretty">
         Un espace contient des comptes bancaires, des catégories et des
         transactions ; deux espaces ne voient rien l'un de l'autre. Partager un
         compte, c'est ajouter un membre à l'espace qui le contient.
@@ -300,7 +300,7 @@ function EspacesPage() {
                 <div className="text-body font-semibold tracking-[-0.015em]">
                   {invitation.invitedBy} vous invite dans {invitation.spaceName}
                 </div>
-                <div className="text-muted-foreground text-control mt-1 max-w-165 text-pretty">
+                <div className="text-muted text-control mt-1 max-w-165 text-pretty">
                   En acceptant, vous verrez tous les comptes, toutes les
                   catégories et tout l'historique de cet espace, comme{" "}
                   {invitation.role === "owner" ? "propriétaire" : "membre"}.

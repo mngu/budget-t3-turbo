@@ -33,7 +33,7 @@ export function ExcludeBadge({ row }: { row: TransactionRow }) {
             : "Exclure des analyses"
         }
         className={cn(
-          "text-label touch-target flex flex-none items-center gap-0.5 rounded-full border px-1.5 py-px leading-3.5",
+          "text-label hit-area flex flex-none items-center gap-0.5 rounded-full border px-1.5 py-px leading-3.5",
           // Keep the action visible on touch screens, where hover is unavailable.
           row.excluded
             ? "border-border bg-surface-2 text-subtle"
@@ -93,7 +93,7 @@ function ExcludeDialog({
           {row.excluded ? "Réintégrer aux analyses" : "Exclure des analyses"}
         </DialogTitle>
         <div className="text-control p-3.5">
-          <p className="text-muted-foreground">
+          <p className="text-muted">
             <span className="num">{signedEuro.format(signedAmount(row))}</span>{" "}
             · {row.description}
           </p>

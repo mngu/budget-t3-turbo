@@ -97,7 +97,7 @@ export function TransactionsTable({
                 <Link to="." search={(prev) => ({ ...prev, page: page - 1 })} />
               }
               aria-disabled={page <= 1}
-              className="touch-target aria-disabled:pointer-events-none aria-disabled:opacity-40"
+              className="hit-area aria-disabled:pointer-events-none aria-disabled:opacity-40"
             />
           </PaginationItem>
         </PaginationContent>
@@ -111,7 +111,7 @@ export function TransactionsTable({
                 <Link to="." search={(prev) => ({ ...prev, page: page + 1 })} />
               }
               aria-disabled={page >= pageCount}
-              className="touch-target aria-disabled:pointer-events-none aria-disabled:opacity-40"
+              className="hit-area aria-disabled:pointer-events-none aria-disabled:opacity-40"
             />
           </PaginationItem>
         </PaginationContent>
@@ -142,7 +142,7 @@ function Row({
       <TableCell
         className={cn(
           "num text-meta",
-          repeatsDate ? "text-subtle" : "text-muted-foreground",
+          repeatsDate ? "text-subtle" : "text-muted",
         )}
       >
         {dayMonthFr.format(new Date(row.bookingDate))}
@@ -231,7 +231,7 @@ function SortableHead({
       <button
         type="button"
         // Preflight resets text-transform on buttons; keep the header's caps.
-        className="touch-target uppercase hover:underline"
+        className="hit-area uppercase hover:underline"
         onClick={() =>
           setSearch({
             sort: sortKey,

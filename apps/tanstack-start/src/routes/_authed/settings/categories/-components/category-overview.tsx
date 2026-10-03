@@ -297,7 +297,7 @@ export function CategoryOverview({
                       <Button
                         variant="ghost"
                         onClick={() => crud.onAddChild(id)}
-                        className="border-border-strong text-muted-foreground hover:bg-accent hover:text-foreground text-control mt-1 ml-18 flex items-center gap-2 rounded-md border border-dashed px-2.5 py-1"
+                        className="border-border-strong text-muted hover:bg-default hover:text-foreground text-control mt-1 ml-18 flex items-center gap-2 rounded-md border border-dashed px-2.5 py-1"
                       >
                         <PlusIcon className="size-3" />
                         Ajouter une sous-catégorie
@@ -310,7 +310,7 @@ export function CategoryOverview({
             <button
               type="button"
               onClick={crud.onAddParent}
-              className="text-muted-foreground hover:bg-surface-2 hover:text-foreground text-control flex w-full items-center gap-2.5 px-3 py-2.5"
+              className="text-muted hover:bg-surface-2 hover:text-foreground text-control flex w-full items-center gap-2.5 px-3 py-2.5"
             >
               <span className="border-border-strong flex size-8 items-center justify-center rounded-md border border-dashed">
                 <PlusIcon className="size-3.5" />
@@ -402,7 +402,7 @@ function CountButton({
       disabled={count === 0}
       className={cn(
         "num hover:text-primary text-control text-right whitespace-nowrap disabled:pointer-events-none",
-        count === 0 ? "text-subtle" : "text-muted-foreground",
+        count === 0 ? "text-subtle" : "text-muted",
       )}
     >
       {count} txns
