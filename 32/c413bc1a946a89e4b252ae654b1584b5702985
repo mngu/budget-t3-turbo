@@ -1,0 +1,20 @@
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/breakdown-list.tsx
+  s_54e4c1348c07e3::t_ad4d6d913bed38 31
+  s_54e4c1348c07e3::t_2ae9a49809456b 28-30,32-33,61,70-72,74-75,89
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "32c413bc1a946a89e4b252ae654b1584b5702985",
+  "prompts": {},
+  "sessions": {
+    "s_54e4c1348c07e3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "782d6ce0-83ef-4ba1-a2cc-89814a30cd4a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
