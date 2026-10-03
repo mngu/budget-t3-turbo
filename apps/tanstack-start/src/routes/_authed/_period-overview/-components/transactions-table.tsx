@@ -230,7 +230,8 @@ function SortableHead({
     <Head className={className}>
       <button
         type="button"
-        className="touch-target hover:underline"
+        // Preflight resets text-transform on buttons; keep the header's caps.
+        className="touch-target uppercase hover:underline"
         onClick={() =>
           setSearch({
             sort: sortKey,
