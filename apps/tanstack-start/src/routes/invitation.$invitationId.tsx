@@ -16,6 +16,7 @@ import { Input } from "@budget/ui/input";
 import { Spinner } from "@budget/ui/spinner";
 import { toast } from "@budget/ui/toast";
 import { authClient } from "~/auth/client";
+import { Logo } from "~/component/logo";
 import { useTRPCClient } from "~/lib/trpc";
 
 // Public route: invitees may need to create an account before joining.
@@ -274,9 +275,9 @@ function Shell({
     <main className="flex min-h-dvh justify-center px-6 pt-14 pb-20">
       <div className="w-full max-w-118">
         <div className="flex items-center justify-center gap-2.5">
-          <div className="bg-primary size-2.5 rounded-xs" />
+          <Logo className="size-4" />
           <span className="text-body font-semibold tracking-[-0.02em]">
-            Budget
+            Jar
           </span>
         </div>
 

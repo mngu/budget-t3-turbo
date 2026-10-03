@@ -50,7 +50,7 @@ export async function sendMagicLinkEmail(input: {
 }): Promise<void> {
   await send({
     to: input.to,
-    subject: "Votre lien de connexion à Budget",
+    subject: "Votre lien de connexion à Jar",
     text: [
       "Voici votre lien de connexion :",
       "",
@@ -74,7 +74,7 @@ export async function sendInvitationEmail(input: {
     to: input.to,
     subject: `${input.invitedBy} vous invite dans l'espace « ${input.spaceName} »`,
     text: [
-      `${input.invitedBy} vous invite à rejoindre l'espace « ${input.spaceName} » sur Budget.`,
+      `${input.invitedBy} vous invite à rejoindre l'espace « ${input.spaceName} » sur Jar.`,
       "",
       "En acceptant, vous verrez les comptes bancaires, les catégories et les",
       "transactions de cet espace, comme les autres membres.",

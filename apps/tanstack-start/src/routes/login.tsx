@@ -11,6 +11,7 @@ import { Input } from "@budget/ui/input";
 import { Spinner } from "@budget/ui/spinner";
 import { authClient } from "~/auth/client";
 import { GradientWavesBg } from "~/component/gradient-waves-bg";
+import { Logo } from "~/component/logo";
 
 export const Route = createFileRoute("/login")({
   validateSearch: z.object({
@@ -65,9 +66,9 @@ function LoginPage() {
             "slide-in-from-bottom-[10px] mb-5 flex items-center gap-2 duration-500",
           )}
         >
-          <div className="bg-primary size-3 rounded-xs" />
+          <Logo className="size-5" />
           <span className="text-amount font-semibold tracking-[-0.02em]">
-            Budget
+            Jar
           </span>
         </div>
 

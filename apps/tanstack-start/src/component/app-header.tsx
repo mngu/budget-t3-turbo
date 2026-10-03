@@ -25,6 +25,7 @@ import {
 } from "@budget/ui/dropdown-menu";
 import { authClient } from "~/auth/client";
 import { BankPicker } from "~/component/bank-picker";
+import { Logo } from "~/component/logo";
 import { PeriodPicker } from "~/component/period-picker";
 import { ThemePicker } from "~/component/theme-picker";
 import { SEARCH_DEFAULTS } from "~/lib/transactions-search";
@@ -84,9 +85,9 @@ export function AppHeader({ title }: { title?: string }) {
         title="Revue du mois"
         className="flex items-center gap-2.5 justify-self-start hover:opacity-60"
       >
-        <div className="bg-primary size-2.5 rounded-xs" />
+        <Logo className="size-4" />
         <span className="text-body hidden font-semibold tracking-[-0.02em] sm:inline">
-          Budget
+          Jar
         </span>
       </Link>
 
