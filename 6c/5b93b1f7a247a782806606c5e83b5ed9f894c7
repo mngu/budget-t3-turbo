@@ -1,0 +1,29 @@
+apps/tanstack-start/src/component/period-picker.tsx
+  s_54e4c1348c07e3::t_59b1f81e9332cf 31-37
+  s_54e4c1348c07e3::t_953ab3faf2f073 300
+  s_54e4c1348c07e3::t_c0164924faede8 43-49,60-62,143,163,166-175,177
+apps/tanstack-start/src/component/bank-picker.tsx
+  s_54e4c1348c07e3::t_c0c56dc3ff8458 59
+apps/tanstack-start/src/lib/format.ts
+  s_54e4c1348c07e3::t_59b1f81e9332cf 10-26
+apps/tanstack-start/src/component/app-header.tsx
+  s_54e4c1348c07e3::t_c0c56dc3ff8458 76,108
+  s_54e4c1348c07e3::t_a1c48b164b95b9 77-78
+  s_54e4c1348c07e3::t_e8a20b45ba8bef 103
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "6c5b93b1f7a247a782806606c5e83b5ed9f894c7",
+  "prompts": {},
+  "sessions": {
+    "s_54e4c1348c07e3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "782d6ce0-83ef-4ba1-a2cc-89814a30cd4a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
