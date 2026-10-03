@@ -1,0 +1,19 @@
+packages/ui/src/command.tsx
+  s_54e4c1348c07e3::t_5fd7826ad9e631 7,48-49,53-57,67-69
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "572602063710c9a1a754d3da653325fe4196e588",
+  "prompts": {},
+  "sessions": {
+    "s_54e4c1348c07e3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "782d6ce0-83ef-4ba1-a2cc-89814a30cd4a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
