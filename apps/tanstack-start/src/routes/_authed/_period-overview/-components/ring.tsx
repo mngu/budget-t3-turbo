@@ -5,7 +5,7 @@ import { ArrowLeftIcon } from "lucide-react";
 import { useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
-import { NO_CATEGORY_NAME } from "@budget/api/schemas";
+import { getCategoryLabel, NO_CATEGORY_NAME } from "@budget/api/schemas";
 import { CanvasContainer } from "@budget/ui/canvas-container";
 import { Segment, SegmentDetail } from "@budget/ui/segment";
 import { SegmentLabel } from "@budget/ui/segment-label";
@@ -15,8 +15,6 @@ import { sharePercent } from "~/lib/format";
 import { sumBy } from "~/lib/sum";
 import { useFormat } from "~/lib/use-format";
 import { useRevueSearch } from "~/lib/use-revue-search";
-
-import { getCategoryLabel } from "../-lib/breakdown";
 
 type OverviewArc = Pick<
   CategoryOverviewElementType,

@@ -3,13 +3,13 @@ import type { CategoryOverviewType } from "@budget/api/schemas";
 import { Button, Toolbar } from "@heroui/react";
 import { LayersIcon } from "lucide-react";
 
+import { familyBudget, getCategoryLabel } from "@budget/api/schemas";
 import { cn } from "@budget/ui";
 import { useCategoryColor, useShadeCategoryColor } from "~/lib/category-color";
 import { sumBy } from "~/lib/sum";
 import { useFormat } from "~/lib/use-format";
 import { useRevueSearch } from "~/lib/use-revue-search";
 
-import { getCategoryLabel } from "../-lib/breakdown";
 import { BudgetGauge } from "./budget-gauge";
 
 interface BreakdownListProps {
@@ -24,12 +24,6 @@ interface BreakdownRow {
   color: string;
   drillable: boolean;
 }
-
-// A detailed parent holds no amount of its own: its budget is its children's sum.
-const familyBudget = (cat: CategoryOverviewType[number]) =>
-  cat.budgetDetailed
-    ? sumBy(cat.children ?? [], (child) => child.budgetAmount ?? 0) || null
-    : cat.budgetAmount;
 
 export function BreakdownList({ overview }: BreakdownListProps) {
   const { euro } = useFormat();

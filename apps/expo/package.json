@@ -12,6 +12,7 @@
   "dependencies": {
     "@better-auth/expo": "catalog:",
     "@budget/api": "workspace:*",
+    "@budget/shared": "workspace:*",
     "@gorhom/bottom-sheet": "^5.2.14",
     "@tanstack/react-query": "^5.104.1",
     "@trpc/client": "catalog:",
@@ -26,6 +27,7 @@
     "expo-system-ui": "~57.0.4",
     "expo-web-browser": "~57.0.3",
     "heroui-native": "1.0.10",
+    "lucide-react-native": "1.25.0",
     "react": "catalog:react19",
     "react-native": "0.86.3",
     "react-native-gesture-handler": "~2.32.0",

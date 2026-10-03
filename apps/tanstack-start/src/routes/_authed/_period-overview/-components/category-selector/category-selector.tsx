@@ -9,10 +9,8 @@ import {
 } from "@heroui/react";
 import { useLoaderData } from "@tanstack/react-router";
 
-import { NO_CATEGORY_NAME } from "@budget/api/schemas";
+import { getCategoryLabel, NO_CATEGORY_NAME } from "@budget/api/schemas";
 import { CategoryIcon } from "~/component/category-icon";
-
-import { getCategoryLabel } from "../../-lib/breakdown";
 
 export type SelectedCategory = {
   parent: Pick<CategoryOverviewElementType, "id" | "name" | "color" | "icon">;

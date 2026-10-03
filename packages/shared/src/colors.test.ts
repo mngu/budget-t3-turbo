@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { shadeHex } from "./category-color";
+import { shadeHex } from "./colors";
 
 describe("shadeHex", () => {
   it("rend le premier palier tel quel, hex compris", () => {
