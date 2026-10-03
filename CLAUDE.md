@@ -58,6 +58,8 @@ Les scripts sont dans `package.json` (`lint` = oxlint, `format` = oxfmt, `test` 
 - `pnpm -F @budget/tanstack-start dev` — http://localhost:3000, port aligné sur l'URL de callback Enable Banking `http://localhost:3000/callback`.
 - `docker compose up -d` — Postgres 17 local (port hôte 5436). **Instance partagée avec l'ancien repo `budget-tracker`** (même conteneur, même volume).
 - `pnpm db:generate` puis `pnpm db:migrate`. **`push` a été supprimé le 2026-08-12** : il modifiait la base sans laisser de fichier, donc sans rien à rejouer au déploiement — la prod n'a pas de TTY et sa base ne publie aucun port. Voir « Migrations » plus bas.
+- `pnpm db:seed` - reconstruit l'espace « Démo » (`demo@jar.test`, 3 comptes, ~6 mois de transactions Faker à graine fixe, budgets et cas limites de l'UI) et affiche un lien de connexion valable 15 min, sans email. Ne touche que les lignes de l'espace `demo-org`, et refuse toute base autre que `localhost:5436` : la prod s'appelle aussi `budget_t3` (`packages/api/script/seed-demo.ts`).
+- `pnpm -F @budget/tanstack-start e2e` - Playwright (360, 375, desktop). Le projet `setup` relance le seed et se connecte par ce lien, donc chaque run part du même espace ; démarre `pnpm dev` s'il ne tourne pas. Les specs sont en `*.e2e.ts` pour rester hors du glob de Vitest. Hors CI pour l'instant : il faudrait Postgres dans le workflow.
 - Lint : un seul `.oxlintrc.json` à la racine, catégorie `correctness` seule ; les règles type-aware de l'ancien typescript-eslint (`no-floating-promises`, `no-unsafe-*`) ne sont **pas** actives — le commentaire en tête du fichier dit ce qu'il faudrait pour les rétablir.
 
 **Il n'existe plus de commande CLI métier** : tout se déclenche depuis la webapp, via les mutations tRPC.

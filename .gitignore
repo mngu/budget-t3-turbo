@@ -59,3 +59,10 @@ dist/
 data/
 # Unpublished design mockups
 design_handoff_budget/
+
+# playwright
+test-results/
+playwright-report/
+blob-report/
+# Holds a live session token for the demo user.
+apps/tanstack-start/e2e/.auth/

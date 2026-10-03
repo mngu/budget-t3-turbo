@@ -2,7 +2,7 @@
 
 Détail du package API. Le `CLAUDE.md` de la racine garde la vue d'ensemble et les règles transverses (espaces, base de données, commandes).
 
-- **Tout est piloté depuis la webapp, il n'y a aucun script CLI.** Organisation en dossiers par domaine sous `src/` :
+- **Tout est piloté depuis la webapp, il n'y a aucun script CLI métier** (`script/seed-demo.ts` est un outil de dev, voir `pnpm db:seed` à la racine). Organisation en dossiers par domaine sous `src/` :
   - `router/` — adaptateurs tRPC uniquement (`auth`, `transactions`, `categories`, `connections`, `settings`, `spaces`, `sync`) : schéma zod d'entrée + délégation, aucune requête SQL. **Y remettre de la logique métier est une régression.**
   - `banking/` — Enable Banking : `client.ts`, `domain.ts`, `settings.ts`, `connections.ts`, `fetch-transactions.ts`.
   - `transactions/` — `normalize.ts`, `import.ts`, `queries.ts`, `schemas.ts` (`transactionsSearchSchema`, `PAGE_SIZE`, `globalStatsSchema`/`budgetStatsSchema`).

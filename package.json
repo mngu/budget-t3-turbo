@@ -13,6 +13,7 @@
     "auth:generate": "pnpm -F @budget/auth generate",
     "db:generate": "turbo -F @budget/db generate",
     "db:migrate": "turbo -F @budget/db migrate",
+    "db:seed": "pnpm -F @budget/api seed:demo",
     "db:studio": "turbo -F @budget/db studio",
     "dev": "turbo watch dev --continue",
     "format": "oxfmt --check .",

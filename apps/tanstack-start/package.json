@@ -9,7 +9,8 @@
     "start": "vite start",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "with-env": "dotenv -e ../../.env --"
+    "with-env": "dotenv -e ../../.env --",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@budget/api": "workspace:*",
@@ -40,6 +41,7 @@
   },
   "devDependencies": {
     "@budget/tsconfig": "workspace:*",
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/vite": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:react19",
