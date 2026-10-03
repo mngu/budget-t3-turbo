@@ -4,6 +4,7 @@ import type * as React from "react";
 
 import { Command as CommandPrimitive } from "cmdk";
 import { CheckIcon, SearchIcon } from "lucide-react";
+import { useRef } from "react";
 
 import { cn } from "@budget/ui";
 
@@ -44,9 +45,16 @@ function CommandDialog({
   className?: string;
   children: React.ReactNode;
 }) {
+  const commandRef = useRef<HTMLDivElement>(null);
+
   return (
     <Dialog {...props}>
       <DialogContent
+        // Without an input, focus the list itself so arrow keys keep working.
+        initialFocus={() =>
+          commandRef.current?.querySelector<HTMLElement>("[cmdk-input]") ??
+          commandRef.current
+        }
         className={cn(
           "top-1/3 translate-y-0 overflow-hidden rounded-xl! p-0",
           className,
@@ -56,7 +64,9 @@ function CommandDialog({
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
-        <Command>{children}</Command>
+        <Command ref={commandRef} tabIndex={-1} className="outline-none">
+          {children}
+        </Command>
       </DialogContent>
     </Dialog>
   );

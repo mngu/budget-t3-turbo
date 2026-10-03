@@ -8,9 +8,7 @@ import { cn } from "@budget/ui";
 import { Button } from "@budget/ui/button";
 import {
   CommandDialog,
-  CommandEmpty,
   CommandGroup,
-  CommandInput,
   CommandItem,
   CommandList,
   CommandSeparator,
@@ -66,12 +64,7 @@ export function BankPicker() {
         description="Choisissez les comptes à inclure dans la revue."
         className="max-w-120"
       >
-        <CommandInput
-          placeholder="Rechercher un compte…"
-          aria-label="Rechercher un compte"
-        />
         <CommandList>
-          <CommandEmpty>Aucun résultat.</CommandEmpty>
           <CommandGroup
             heading={`Comptes inclus · ${total} transaction${total > 1 ? "s" : ""}`}
           >
@@ -79,7 +72,6 @@ export function BankPicker() {
               <CommandItem
                 key={bank}
                 value={`bank:${bank}`}
-                keywords={[bank]}
                 data-checked={isOn(bank)}
                 aria-label={`${bank}, ${isOn(bank) ? "inclus" : "exclu"}`}
                 onSelect={() =>
