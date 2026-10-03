@@ -1,0 +1,185 @@
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/refine-bar.tsx
+  s_745661800b60dc::t_cdb8e1b0a55cb8 9-15,70,74-77,84-86,88,90-91,104,106-107,111-114,117,120-126
+apps/tanstack-start/src/routes/_authed/settings/espaces/-components/space-dialog.tsx
+  s_745661800b60dc::t_be93d6a787a852 63,65
+  s_745661800b60dc::t_47281d3aa3d3d4 4-13,17,38-41,58-62,66-69,71-88,92-96,98-99,102-108,110-125,127-130
+apps/tanstack-start/src/styles.css
+  s_745661800b60dc::t_287a5ca979db18 38,66,71,84,109
+apps/tanstack-start/src/routes/_authed/settings/categories/index.tsx
+  s_745661800b60dc::t_769ea7192dcc3d 114,118
+  s_745661800b60dc::t_d7a55b3a626241 97-98
+  s_745661800b60dc::t_89420066e2844a 86
+  s_745661800b60dc::t_ec7d04d340722c 3
+apps/tanstack-start/src/routes/_authed/settings/banques/-components/connection-card.tsx
+  s_745661800b60dc::t_d7a55b3a626241 37,46,85,110,115,123,131,137
+  s_745661800b60dc::t_7dc887896acc48 5-6,9,24,43,45,50,52-53,56-60,66,68-69,71,76
+apps/tanstack-start/src/routes/_authed/settings/banques/-components/onboarding.tsx
+  s_745661800b60dc::t_d7a55b3a626241 62-63,65,69,99,135,167,187,209-212,220
+  s_745661800b60dc::t_be93d6a787a852 129,131
+  s_745661800b60dc::t_d44d2bd47712b6 5-15,102-105,108,118-128,132,152-162,172-174,176
+apps/tanstack-start/src/routes/_authed/settings/categories/-lib/use-category-crud.ts
+  s_745661800b60dc::t_ec7d04d340722c 1
+apps/tanstack-start/src/component/bank-picker.tsx
+  s_745661800b60dc::t_d358483a649774 3,11,17-18,26-27,30,35,38-39,50-65,67-69,71-74,77,79-84,86-87,89-103
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/kpi-band.tsx
+  s_745661800b60dc::t_d7a55b3a626241 29
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/exclude-badge.tsx
+  s_745661800b60dc::t_cdb8e1b0a55cb8 5,80-114
+  s_745661800b60dc::t_d7a55b3a626241 32-33
+apps/tanstack-start/src/routes/_authed/settings/banques/-components/bank-logo.tsx
+  s_745661800b60dc::t_d7a55b3a626241 24
+apps/tanstack-start/src/routes/_authed/settings/banques/-components/sync-status.tsx
+  s_745661800b60dc::t_1be284a11080c0 3,34-38
+  s_745661800b60dc::t_d7a55b3a626241 55,62
+apps/tanstack-start/src/component/app-header.tsx
+  s_745661800b60dc::t_f5658e5d16d449 3-5,10-11,13,19,101,107-113,116-118,126-128,135-143,145-219
+  s_745661800b60dc::t_110ec4e4afc3a6 144
+CLAUDE.md
+  s_745661800b60dc::t_5fc52d4565cbb9 17-20,24
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/transactions-table.tsx
+  s_745661800b60dc::t_8985f0b1ae7243 5,27,31-47,49-57,59-60,62-63,65-66,72-95,97-159
+  s_745661800b60dc::t_f0f9a038573183 48,58,61,64,96
+  s_745661800b60dc::t_1f3ce0cdba73a6 67-71
+  s_745661800b60dc::t_d7a55b3a626241 191
+apps/tanstack-start/src/routes/_authed/settings/banques/ajouter.tsx
+  s_745661800b60dc::t_be93d6a787a852 3
+  s_745661800b60dc::t_89420066e2844a 118,220
+  s_745661800b60dc::t_d7a55b3a626241 49-50,84,91-92,138,152,163,180,234,260,283,294
+  s_745661800b60dc::t_c09de133bbc037 5
+  s_745661800b60dc::t_ca3d708b1d55ac 131-135,168-169,171,263-264,266-270,275,299
+apps/tanstack-start/src/routes/__root.tsx
+  s_745661800b60dc::t_a5f5703680f4fc 2,6,12
+  s_745661800b60dc::t_110ec4e4afc3a6 48,65-66
+  s_745661800b60dc::t_1584b9c1210f75 45-47,49-52,54-55,63-64,67-71
+.oxfmtrc.json
+  s_745661800b60dc::t_583d2130d960b6 6
+apps/tanstack-start/package.json
+  s_745661800b60dc::t_89420066e2844a 22,24-26,40-41
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/category-selector/category-selector.tsx
+  s_745661800b60dc::t_7824aafae1d5cf 12,15,27-29,37,47,75,82,84-87
+  s_745661800b60dc::t_e99b566be61677 3-10,32-36,38-41,44-46,48-49,59-62,65-74,76-81,83,88-106
+  s_745661800b60dc::t_10ebfca765d223 51-58
+  s_745661800b60dc::t_f0f9a038573183 50
+  s_745661800b60dc::t_852ab74fa342ea 63-64
+  s_745661800b60dc::t_ebdd44d48133bb 30
+apps/tanstack-start/CLAUDE.md
+  s_745661800b60dc::t_5fc52d4565cbb9 27,41,43
+  s_745661800b60dc::t_1f3ce0cdba73a6 26
+packages/ui/src/index.ts
+  s_745661800b60dc::t_92f1414686ea44 24
+apps/tanstack-start/src/routes/_authed/settings/banques/-components/revoke-dialog.tsx
+  s_745661800b60dc::t_d7a55b3a626241 25,30
+  s_745661800b60dc::t_1be284a11080c0 5,36-67
+apps/tanstack-start/src/routes/login.tsx
+  s_745661800b60dc::t_d82fa23f1e30a5 1
+  s_745661800b60dc::t_d7a55b3a626241 74
+  s_745661800b60dc::t_1bd9dcfcef6fb6 82-91,94-98,103-111,115-116
+apps/tanstack-start/src/component/search-input.tsx
+  s_745661800b60dc::t_ca3d708b1d55ac 3,12-14,19-22,54,56-65
+apps/tanstack-start/src/routes/_authed/settings/espaces/index.tsx
+  s_745661800b60dc::t_24f17ae41fcb05 91,311-312,317-318
+  s_745661800b60dc::t_89420066e2844a 348
+  s_745661800b60dc::t_be93d6a787a852 10
+  s_745661800b60dc::t_47281d3aa3d3d4 381,433,452,468,485,493,504,516,526
+  s_745661800b60dc::t_d7a55b3a626241 293,295
+apps/tanstack-start/e2e/revue.e2e.ts
+  s_745661800b60dc::t_adbe3cfc8d78a3 67,70
+  s_745661800b60dc::t_a76c0f22f844f1 30-32,39,41-43
+apps/tanstack-start/e2e/auth.setup.ts
+  s_745661800b60dc::t_a76c0f22f844f1 16-18
+apps/tanstack-start/src/routes/_authed/settings/espaces/-components/space-card.tsx
+  s_745661800b60dc::t_1aa6954ecfc410 11-18,68-76,81,103,105,122-123,125,147-149,154-156,191-196,199-232,252,255-264,267-272,277
+  s_745661800b60dc::t_d7a55b3a626241 56,58,108,114,116,246
+  s_745661800b60dc::t_2b7061e527756c 10
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/overview-header.tsx
+  s_745661800b60dc::t_d7a55b3a626241 49,57,68,72,78
+apps/tanstack-start/src/routes/_authed/settings/banques/-lib/use-renew.ts
+  s_745661800b60dc::t_89420066e2844a 24
+  s_745661800b60dc::t_be93d6a787a852 5
+apps/tanstack-start/src/lib/category-color.ts
+  s_745661800b60dc::t_d7a55b3a626241 58
+apps/tanstack-start/src/routes/_authed/settings/banques/-components/consent-alert.tsx
+  s_745661800b60dc::t_7dc887896acc48 5,13-27
+apps/tanstack-start/src/routes/_authed/settings/categories/-lib/use-preview.tsx
+  s_745661800b60dc::t_d7a55b3a626241 78-79
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/budget-gauge.tsx
+  s_745661800b60dc::t_d7a55b3a626241 44,47
+  s_745661800b60dc::t_93cfc1e5606bb3 36
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/ring.tsx
+  s_745661800b60dc::t_d7a55b3a626241 167,171
+apps/tanstack-start/src/routes/_authed/settings/categories/-components/category-overview.tsx
+  s_745661800b60dc::t_d7a55b3a626241 125,155,450
+  s_745661800b60dc::t_082727c4d351c3 5-12,75-76,101-102,104-110,139-140,167-172,175-214,217-222,225-293,296-298,300-311,316-320,382,389-390,393-394,397-403,406,448
+  s_745661800b60dc::t_cb396bc2becb67 4
+apps/tanstack-start/src/component/dialog-facts.tsx
+  s_745661800b60dc::t_d7a55b3a626241 18
+apps/tanstack-start/src/routes/_authed/settings/categories/-components/category-identity-dialog.tsx
+  s_745661800b60dc::t_0f67e24ac45239 5,49-50,56-79,81-89,91-111,113-117,119-127,129-137,139-149,153,155-162,164-175,177-210,212-221,223-226,228-258
+apps/tanstack-start/src/routes/_authed/_period-overview/route.tsx
+  s_745661800b60dc::t_d7a55b3a626241 70
+packages/ui/package.json
+  s_745661800b60dc::t_178ff8cf452ae3 10,30
+apps/tanstack-start/src/routes/_authed/settings/banques/index.tsx
+  s_745661800b60dc::t_d7a55b3a626241 106,127,150-151,158,168
+  s_745661800b60dc::t_be93d6a787a852 3
+  s_745661800b60dc::t_ca3d708b1d55ac 39-42,45,115-118,121
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/breakdown-list.tsx
+  s_745661800b60dc::t_49976dd6506232 123-124
+  s_745661800b60dc::t_227dbf16c2bf23 3,134-135
+  s_745661800b60dc::t_f0f9a038573183 136
+  s_745661800b60dc::t_c1e9631e2634ba 120,129,131-133,137,147,149
+  s_745661800b60dc::t_d7a55b3a626241 108
+apps/tanstack-start/src/component/period-picker.tsx
+  s_745661800b60dc::t_3a05750a787291 3-11,24,142-149,151-155,157,159-181,183-185,187-211,214-259
+  s_745661800b60dc::t_f0f9a038573183 156
+  s_745661800b60dc::t_3fb39c3e57e537 158
+apps/tanstack-start/src/lib/use-run.ts
+  s_745661800b60dc::t_89420066e2844a 1,17
+apps/tanstack-start/src/routes/_authed/settings/categories/-components/category-delete-dialog.tsx
+  s_745661800b60dc::t_769ea7192dcc3d 5,37-73
+apps/tanstack-start/src/routes/_authed/_period-overview/transactions.tsx
+  s_745661800b60dc::t_d7a55b3a626241 28
+apps/tanstack-start/src/routes/invitation.$invitationId.tsx
+  s_745661800b60dc::t_d82fa23f1e30a5 1
+  s_745661800b60dc::t_6f8884df357ffa 46,87,94,105,117,127,143,149,166,190,196,217-224,236-238,259-260,297,302-303
+  s_745661800b60dc::t_89420066e2844a 63,79
+  s_745661800b60dc::t_d7a55b3a626241 207,225,274,293,310
+apps/tanstack-start/src/routes/_authed/settings/banques/-lib/consent.ts
+  s_745661800b60dc::t_852ab74fa342ea 9
+  s_745661800b60dc::t_7dc887896acc48 8,30,41,52,62,96,107,117
+apps/tanstack-start/src/component/logo.tsx
+  s_745661800b60dc::t_d7a55b3a626241 10
+apps/tanstack-start/src/component/stat.tsx
+  s_745661800b60dc::t_d7a55b3a626241 27
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/gauge.tsx
+  s_745661800b60dc::t_d7a55b3a626241 19,32
+apps/tanstack-start/src/routes/_authed/callback.tsx
+  s_745661800b60dc::t_be93d6a787a852 1
+  s_745661800b60dc::t_89420066e2844a 30
+  s_745661800b60dc::t_bf1f0b7b2074c9 65,67,69
+apps/tanstack-start/src/routes/_authed/settings/categories/-components/transaction-preview-drawer.tsx
+  s_745661800b60dc::t_ec7d04d340722c 6-7,33-42,44-74,76-83,85-88,90-95
+docs/adr/0001-le-design-appartient-au-package-ui.md
+  s_745661800b60dc::t_5fc52d4565cbb9 4
+apps/tanstack-start/src/lib/sync-toast.ts
+  s_745661800b60dc::t_89420066e2844a 44
+  s_745661800b60dc::t_be93d6a787a852 3
+pnpm-lock.yaml
+  s_745661800b60dc::t_923459f4c78158 107-109,113-121,161-166,349-351,5724,8758-8759,10104
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "0d44edd077c76085d273667b66482a0dfff895d0",
+  "prompts": {},
+  "sessions": {
+    "s_745661800b60dc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0c3326dc-f926-4e8f-b076-05d6bc57218c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
