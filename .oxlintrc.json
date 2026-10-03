@@ -16,7 +16,8 @@
   "ignorePatterns": [
     "**/routeTree.gen.ts",
     "**/*.config.*",
-    "design_handoff_budget/**"
+    "design_handoff_budget/**",
+    ".claude/skills/**"
   ],
   "rules": {
     "turbo/no-undeclared-env-vars": "error",

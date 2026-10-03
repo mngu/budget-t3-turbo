@@ -16,6 +16,7 @@
     "db:seed": "pnpm -F @budget/api seed:demo",
     "db:studio": "turbo -F @budget/db studio",
     "dev": "turbo watch dev --continue",
+    "mobile": "pnpm -F @budget/expo ios",
     "format": "oxfmt --check .",
     "format:fix": "oxfmt .",
     "lint": "oxlint",

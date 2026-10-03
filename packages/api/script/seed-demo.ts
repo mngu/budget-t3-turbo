@@ -550,8 +550,8 @@ async function seed() {
   const token = randomUUID();
   await db.insert(verification).values({
     id: randomUUID(),
-    identifier: token,
-    value: JSON.stringify({ email: DEMO.email }),
+    identifier: `magic-link:${token}`,
+    value: JSON.stringify({ type: "magic-link", email: DEMO.email }),
     expiresAt: new Date(Date.now() + 15 * 60_000),
   });
 

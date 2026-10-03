@@ -5,7 +5,12 @@
   "sortTailwindcss": {
     "functions": ["cn"]
   },
-  "ignorePatterns": ["**/routeTree.gen.ts", "packages/db/drizzle/meta/**"],
+  "ignorePatterns": [
+    "**/routeTree.gen.ts",
+    "packages/db/drizzle/meta/**",
+    ".claude/skills/**",
+    "apps/expo/uniwind-types.d.ts"
+  ],
   "sortImports": {
     "internalPattern": ["@budget/", "~/"],
     "groups": [

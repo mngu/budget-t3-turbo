@@ -36,6 +36,13 @@
       "when": 1787749813765,
       "tag": "0004_drop_transfer_pairing",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791047252984,
+      "tag": "0005_better_auth_1_7",
+      "breakpoints": true
     }
   ]
 }

@@ -9,18 +9,19 @@
   "license": "MIT",
   "scripts": {
     "clean": "git clean -xdf .cache .turbo dist node_modules",
-    "generate": "dotenv -e ../../.env -- pnpx @better-auth/cli generate --config script/auth-cli.ts --output ../db/src/auth-schema.ts",
+    "generate": "dotenv -e ../../.env -- auth generate --config script/auth-cli.ts --output ../db/src/auth-schema.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@better-auth/expo": "catalog:",
     "@budget/db": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
     "better-auth": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@better-auth/cli": "catalog:",
     "@budget/tsconfig": "workspace:*",
+    "auth": "catalog:",
     "typescript": "catalog:"
   }
 }

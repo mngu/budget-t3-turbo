@@ -23,11 +23,20 @@ This is a pnpm + Turborepo monorepo (migrated from the single-package `budget-tr
   - Une règle du design system dépasse l'app et reste ici, parce qu'elle vise un fichier de `packages/ui` : l'échelle typographique est fermée à 9 crans nommés par rôle, déclarés dans `src/styles.css`.
     - **Un cran ajouté doit l'être à deux endroits** : `styles.css` _et_ la liste `font-size` de `packages/ui/src/index.ts`, qui sert à la fois au `cn` de l'app et au tailwind-merge interne de HeroUI (`tailwind-variants`). Le groupe `text-color` de `tailwind-merge` accepte n'importe quel mot après `text-` : sans la déclaration, il range `text-hero` parmi les couleurs et le **supprime** dès qu'une couleur suit dans le même `cn()`. La panne est silencieuse et générale — `cn("num text-hero", "text-bad")` ne rend que `text-bad`, le CSS émis reste parfaitement correct, et c'est tout le bandeau qui retombe à la taille héritée. `packages/ui/src/index.test.ts` la verrouille ; ne pas la supprimer.
 
-### App mobile — supprimée le 2026-08-07
+### App mobile - `apps/expo` (depuis le 2026-10-03)
 
-`apps/expo` (gluestack-ui v5 + nativewind) était en suspens depuis le 2026-07-23 : l'objectif restait une vraie app universelle web+native, ce que gluestack ne permet pas correctement. Elle a été supprimée avec `tooling/tailwind`. `git log` la rend : partir de là plutôt que de la réécrire, mais **sans reprendre gluestack**, qui est la raison du gel.
+App React Native (Expo SDK 57, Expo Router) construite sur **HeroUI Native** (`heroui-native` + Uniwind), le pendant natif de `@heroui/react` côté web.
+Ce n'est **pas** une app universelle : les deux bibliothèques ont des API différentes (Drawer/BottomSheet, Dropdown/Menu, pas de Table ni de calendrier en natif), donc les écrans s'écrivent deux fois et seul ce qui est sous l'UI se partage (types `@budget/api`, schémas `@budget/api/schemas`).
+L'ancienne app (gluestack, supprimée le 2026-08-07) reste dans `git log`, sans intérêt à reprendre.
 
-Deux traces subsistent volontairement, sans consommateur aujourd'hui : le CORS + `trustedOrigins` better-auth ouverts à `localhost:*` en dev (`apps/tanstack-start/src/lib/cors.ts`, `src/auth/server.ts`) et le `host: true` du `vite.config.ts`, qui laissaient le téléphone atteindre l'API en LAN. Inoffensifs en dev, et exactement ce qu'il faudrait remettre.
+- **Données** : TanStack Query + `@trpc/tanstack-react-query`, faute de loaders dans Expo Router. La règle « pas de React Query » ne vaut que pour l'app web. `httpBatchLink` et non `httpBatchStreamLink` : le `fetch` de React Native ne lit pas un corps en flux.
+- **Session** : pas de cookie jar natif. Le plugin `expoClient` garde le cookie dans SecureStore et le client tRPC le renvoie dans l'en-tête `cookie`.
+- **Connexion par lien magique** : le lien s'ouvre dans le navigateur, et c'est le plugin serveur `expo()` (`@budget/auth`) qui renvoie vers le scheme de l'app avec le cookie de session en paramètre (`jar://auth?cookie=…`, `exp://…/--/auth?cookie=…` sous Expo Go). La route `src/app/auth.tsx` le lit dans l'**URL brute** : les paramètres d'Expo Router le décodent une seconde fois, ce qui peut casser sa signature (observé sur une connexion sur deux pendant les tests). `jar://` est dans les `trustedOrigins` de toutes les installations ; `exp://` n'y est ajouté qu'en développement, par le plugin lui-même.
+- **Versions** : Expo Go n'accepte que les versions natives qu'il embarque. Le catalogue `react19` suit donc la version de React exigée par le SDK Expo, et les modules natifs se mettent à jour avec `npx expo install --check` (TypeScript en est exclu volontairement).
+- **Tester sans boîte mail** : `pnpm db:seed` affiche un lien de vérification ; en remplaçant son `callbackURL` par `exp://127.0.0.1:8081/--/auth`, le `Location` renvoyé par le serveur s'ouvre dans le simulateur avec `xcrun simctl openurl booted "<location>"`.
+- **Limite connue** : le lien envoyé par email porte la `baseURL` du serveur, `localhost` en développement, donc il ne s'ouvre que sur le simulateur, pas sur un vrai téléphone en LAN.
+
+Le CORS + `trustedOrigins` ouverts à `localhost:*` en dev (`apps/tanstack-start/src/lib/cors.ts`, `src/auth/server.ts`) et le `host: true` du `vite.config.ts` servent l'app en LAN ; le natif n'envoie pas d'`Origin`, seul Expo web en aurait besoin.
 
 Pipeline métier inchangé : connexions bancaires configurées dans l'app (`/settings/banques` : onboarding Enable Banking, wizard d'ajout, callback OAuth sur `/callback`, sessions stockées en DB) → sync → `data/<orgId>/*.json` (racine du monorepo, un répertoire par espace) → import (`packages/api/src/transactions/import.ts`) → PostgreSQL → tRPC (`@budget/api` routers) → revue et table des transactions (`apps/tanstack-start`).
 
@@ -59,6 +68,7 @@ L'app est multi-utilisateurs depuis le 2026-08-05. L'unité de cloisonnement est
 Les scripts sont dans `package.json` (`lint` = oxlint, `format` = oxfmt, `test` = vitest par package, `knip`). Ce qui ne s'y lit pas :
 
 - `pnpm -F @budget/tanstack-start dev` — http://localhost:3000, port aligné sur l'URL de callback Enable Banking `http://localhost:3000/callback`.
+- `pnpm mobile` - Metro + Expo Go sur le simulateur iOS. L'app appelle l'API du serveur web : garder `pnpm dev` lancé à côté.
 - `docker compose up -d` — Postgres 17 local (port hôte 5436). **Instance partagée avec l'ancien repo `budget-tracker`** (même conteneur, même volume).
 - `pnpm db:generate` puis `pnpm db:migrate`. **`push` a été supprimé le 2026-08-12** : il modifiait la base sans laisser de fichier, donc sans rien à rejouer au déploiement — la prod n'a pas de TTY et sa base ne publie aucun port. Voir « Migrations » plus bas.
 - `pnpm db:seed` - reconstruit l'espace « Démo » (`demo@jar.test`, 3 comptes, ~6 mois de transactions Faker à graine fixe, budgets et cas limites de l'UI) et affiche un lien de connexion valable 15 min, sans email. Ne touche que les lignes de l'espace `demo-org`, et refuse toute base autre que `localhost:5436` : la prod s'appelle aussi `budget_t3` (`packages/api/script/seed-demo.ts`).

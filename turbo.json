@@ -52,7 +52,8 @@
     "EMAIL_FROM",
     "PORT",
     "SITE_URL",
-    "DATA_DIR"
+    "DATA_DIR",
+    "EXPO_PUBLIC_API_URL"
   ],
   "globalPassThroughEnv": [
     "NODE_ENV",

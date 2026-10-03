@@ -21,7 +21,7 @@
 
 ## Boundaries that matter
 
-- The only app is TanStack Start: route loaders fetch through `context.trpcClient`, mutations refresh with `router.invalidate()`; do not introduce React Query alongside this flow.
+- In the TanStack Start app, route loaders fetch through `context.trpcClient` and mutations refresh with `router.invalidate()`; do not introduce React Query there. The Expo app (`apps/expo`, HeroUI Native) has no loaders and uses TanStack Query; see root `CLAUDE.md`.
 - Browser value imports from the API must use `@budget/api/schemas`; use only `import type` from `@budget/api` in client code to avoid bundling DB/auth/LLM dependencies.
 - API `src/router/` contains tRPC validation and delegation; business logic lives in domain modules and `pipeline.ts`.
 - Keep `authApi` out of the tRPC context: Better Auth's organization plugin makes its type too large for API declaration emission.

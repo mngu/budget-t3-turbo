@@ -16,13 +16,15 @@ allowBuilds:
   utf-8-validate: set this to true or false
 
 catalog:
-  "@better-auth/cli": 1.4.0-beta.9
+  "@better-auth/expo": 1.7.7
   "@tailwindcss/vite": ^4.2.0
-  "@trpc/client": ^11.7.1
-  "@trpc/server": ^11.7.1
+  "@trpc/client": ^11.19.0
+  "@trpc/server": ^11.19.0
+  "@trpc/tanstack-react-query": ^11.19.0
   "@types/node": 22.18.12
   "@vitejs/plugin-react": 5.1.0
-  better-auth: 1.4.0-beta.9
+  auth: 1.7.7
+  better-auth: 1.7.7
   tailwindcss: 4.3.3
   typescript: 7.0.2
   vite: 7.1.12
@@ -30,10 +32,10 @@ catalog:
 
 catalogs:
   react19:
-    "@types/react": ~19.1.0
-    "@types/react-dom": ~19.1.0
-    react: 19.1.4
-    react-dom: 19.1.4
+    "@types/react": ~19.2.0
+    "@types/react-dom": ~19.2.0
+    react: 19.2.3
+    react-dom: 19.2.3
 
 linkWorkspacePackages: true
 

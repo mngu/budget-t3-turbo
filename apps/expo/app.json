@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "Jar",
+    "slug": "jar",
+    "scheme": "jar",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "fr.jar.app"
+    },
+    "android": {
+      "package": "fr.jar.app"
+    },
+    "plugins": ["expo-router", "expo-secure-store", "expo-web-browser"],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "updates": {
+      "enabled": false
+    }
+  }
+}

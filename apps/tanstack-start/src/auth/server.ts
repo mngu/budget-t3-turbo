@@ -1,4 +1,4 @@
-import { reactStartCookies } from "better-auth/react-start";
+import { tanstackStartCookies } from "better-auth/tanstack-start";
 
 import { initAuth } from "@budget/auth";
 import { env } from "~/env";
@@ -12,5 +12,5 @@ export const auth = initAuth({
   trustedOrigins:
     env.NODE_ENV === "production" ? undefined : ["http://localhost:*"],
 
-  extraPlugins: [reactStartCookies()],
+  extraPlugins: [tanstackStartCookies()],
 });

@@ -2,6 +2,7 @@ import type { BetterAuthOptions, BetterAuthPlugin } from "better-auth";
 
 import { randomUUID } from "node:crypto";
 
+import { expo } from "@better-auth/expo";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { magicLink, organization } from "better-auth/plugins";
@@ -13,6 +14,8 @@ import { member, organization as orgTable } from "@budget/db/schema";
 import { sendMagicLinkEmail } from "./email";
 
 const MAGIC_LINK_MINUTES = 15;
+// Must match the scheme in apps/expo/app.json.
+const MOBILE_ORIGIN = "jar://";
 
 export const slugify = (name: string) =>
   `${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${randomUUID().slice(0, 8)}`;
@@ -114,9 +117,11 @@ export function initAuth(options: {
           },
         },
       }),
+      // Hands the session to the mobile app when a magic link redirects to its scheme.
+      expo(),
       ...(options.extraPlugins ?? []),
     ],
-    trustedOrigins: options.trustedOrigins ?? [],
+    trustedOrigins: [MOBILE_ORIGIN, ...(options.trustedOrigins ?? [])],
     onAPIError: {
       onError(error, ctx) {
         console.error("BETTER AUTH API ERROR", error, ctx);
