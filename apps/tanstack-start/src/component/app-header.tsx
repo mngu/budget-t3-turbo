@@ -73,10 +73,9 @@ export function AppHeader({ title }: { title?: string }) {
   return (
     <header
       className={cn(
-        "bg-background relative z-30 flex-none items-center gap-x-3 px-4 transition-shadow duration-200 sm:gap-x-3.5 sm:px-5",
-        isRevue
-          ? "grid h-26 grid-cols-2 grid-rows-2 md:h-13 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:grid-rows-1"
-          : "flex h-13",
+        "bg-background relative z-30 flex h-13 flex-none items-center gap-x-2 px-4 transition-shadow duration-200 sm:gap-x-3.5 sm:px-5",
+        // Centre the picker on the page once the side clusters have room to balance.
+        isRevue && "md:grid md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]",
       )}
     >
       <Link
@@ -101,17 +100,12 @@ export function AppHeader({ title }: { title?: string }) {
       )}
 
       {isRevue && (
-        <div className="col-span-2 row-start-2 flex min-w-0 justify-center md:col-span-1 md:col-start-2 md:row-start-1">
+        <div className="flex min-w-0 flex-1 justify-center">
           <PeriodPicker />
         </div>
       )}
 
-      <div
-        className={cn(
-          "ml-auto flex items-center gap-3",
-          isRevue && "col-start-2 row-start-1 md:col-start-3",
-        )}
-      >
+      <div className="ml-auto flex items-center gap-2 sm:gap-3">
         {isRevue && <BankPicker />}
         <SettingsMenu page={title} />
       </div>

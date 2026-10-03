@@ -7,6 +7,23 @@ export const dayMonthFr = new Intl.DateTimeFormat("fr-FR", {
   month: "short",
 });
 
+export const monthFr = new Intl.DateTimeFormat("fr-FR", {
+  month: "long",
+  year: "numeric",
+});
+
+// Numeric variants keep date ranges short enough for the mobile header.
+export const dayMonthNumFr = new Intl.DateTimeFormat("fr-FR", {
+  day: "2-digit",
+  month: "2-digit",
+});
+
+export const dateNumFr = new Intl.DateTimeFormat("fr-FR", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "2-digit",
+});
+
 // Normalize uppercase counterparty names, but keep transaction descriptions untouched.
 export function titleCase(value: string) {
   return value

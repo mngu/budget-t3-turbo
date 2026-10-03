@@ -28,18 +28,25 @@ import {
   setMonthStartDay,
   toISODate,
 } from "~/lib/date";
-import { dateFr, dayMonthFr } from "~/lib/format";
+import {
+  dateFr,
+  dateNumFr,
+  dayMonthFr,
+  dayMonthNumFr,
+  monthFr,
+} from "~/lib/format";
 import { useRevueSearch } from "~/lib/use-revue-search";
-
-const monthFr = new Intl.DateTimeFormat("fr-FR", {
-  month: "long",
-  year: "numeric",
-});
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 // Name full cycles by their midpoint's month: a cycle starting June 28 is July.
-function periodLabel(from?: Date, to?: Date, startDay = 1) {
+function periodLabel(
+  from: Date | undefined,
+  to: Date | undefined,
+  startDay: number,
+  dayMonth = dayMonthFr,
+  date = dateFr,
+) {
   if (!from || !to) return "Toute la période";
   const cycle = cycleOf(from, startDay);
   if (isSameDay(cycle.start, from) && isSameDay(cycle.end, to))
@@ -50,9 +57,9 @@ function periodLabel(from?: Date, to?: Date, startDay = 1) {
     );
   const start =
     from.getFullYear() === to.getFullYear()
-      ? dayMonthFr.format(from)
-      : dateFr.format(from);
-  return `${start} – ${dateFr.format(to)}`;
+      ? dayMonth.format(from)
+      : date.format(from);
+  return `${start} – ${date.format(to)}`;
 }
 
 interface Preset {
@@ -133,7 +140,7 @@ export function PeriodPicker() {
   };
 
   return (
-    <div className="grid w-72 max-w-full grid-cols-[2rem_minmax(0,1fr)_2rem] items-center gap-1">
+    <div className="grid w-72 max-w-full grid-cols-[1.5rem_minmax(0,1fr)_1.5rem] items-center gap-1 sm:grid-cols-[2rem_minmax(0,1fr)_2rem]">
       <StepButton
         label="Période précédente"
         onClick={() => shiftMonth(-1)}
@@ -153,14 +160,21 @@ export function PeriodPicker() {
             <button
               type="button"
               title="Choisir une période"
-              className="num hover:text-foreground min-h-8 min-w-0 text-center font-medium tracking-[-0.01em]"
-              // SSR does not know the browser's pay-cycle preference.
-              suppressHydrationWarning
+              className="num hover:text-foreground flex min-h-8 min-w-0 items-center justify-center font-medium tracking-[-0.01em]"
               {...props}
             >
-              <span>{periodLabel(from, to, startDay)}</span>
+              {/* SSR does not know the browser's pay-cycle preference. */}
+              <span className="truncate sm:hidden" suppressHydrationWarning>
+                {periodLabel(from, to, startDay, dayMonthNumFr, dateNumFr)}
+              </span>
               <span
-                className="text-subtle text-label ml-1.5"
+                className="hidden truncate sm:inline"
+                suppressHydrationWarning
+              >
+                {periodLabel(from, to, startDay)}
+              </span>
+              <span
+                className="text-subtle text-label ml-1.5 flex-none"
                 aria-hidden="true"
               >
                 ▾
@@ -283,7 +297,7 @@ function StepButton({
       aria-label={label}
       onClick={onClick}
       disabled={disabled}
-      className="text-subtle hover:bg-accent hover:text-foreground text-body touch-target flex size-8 items-center justify-center rounded-sm disabled:pointer-events-none disabled:opacity-30"
+      className="text-subtle hover:bg-accent hover:text-foreground text-body touch-target flex size-6 items-center justify-center rounded-sm disabled:pointer-events-none disabled:opacity-30 sm:size-8"
     >
       {glyph}
     </button>

@@ -56,7 +56,7 @@ export function BankPicker() {
         <span className="hidden sm:inline">
           compte{banks.length > 1 ? "s" : ""}
         </span>
-        <ChevronDownIcon />
+        <ChevronDownIcon className="hidden sm:block" />
       </Button>
 
       <CommandDialog
