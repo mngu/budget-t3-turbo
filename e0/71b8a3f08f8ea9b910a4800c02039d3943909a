@@ -1,0 +1,33 @@
+apps/tanstack-start/src/routes/__root.tsx
+  s_54e4c1348c07e3::t_c937f077049b8e 25-29
+apps/tanstack-start/src/component/logo.tsx
+  s_54e4c1348c07e3::t_ff4f4b7e9eb0e0 1-17
+apps/tanstack-start/src/component/app-header.tsx
+  s_54e4c1348c07e3::t_c937f077049b8e 28,88,90
+apps/tanstack-start/src/routes/invitation.$invitationId.tsx
+  s_54e4c1348c07e3::t_c937f077049b8e 278,280
+  s_54e4c1348c07e3::t_acfbb57848275e 19
+apps/tanstack-start/src/routes/login.tsx
+  s_54e4c1348c07e3::t_acfbb57848275e 14
+  s_54e4c1348c07e3::t_c937f077049b8e 69,71
+packages/auth/src/email.ts
+  s_54e4c1348c07e3::t_c937f077049b8e 53,77
+apps/tanstack-start/public/favicon.svg
+  s_54e4c1348c07e3::t_ce55d089eb7cc0 1-9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "e071b8a3f08f8ea9b910a4800c02039d3943909a",
+  "prompts": {},
+  "sessions": {
+    "s_54e4c1348c07e3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "782d6ce0-83ef-4ba1-a2cc-89814a30cd4a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
