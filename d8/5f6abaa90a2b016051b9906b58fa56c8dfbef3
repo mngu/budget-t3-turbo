@@ -1,0 +1,128 @@
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/kpi-band.tsx
+  s_745661800b60dc::t_80290d0cf980b8 79
+apps/tanstack-start/src/routes/_authed/settings/banques/-components/bank-logo.tsx
+  s_745661800b60dc::t_80290d0cf980b8 24
+apps/tanstack-start/src/routes/_authed/settings/categories/-components/transaction-preview-drawer.tsx
+  s_745661800b60dc::t_80290d0cf980b8 59,66
+packages/ui/src/alert-dialog.tsx
+  s_745661800b60dc::t_80290d0cf980b8 90,106,138
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/refine-bar.tsx
+  s_745661800b60dc::t_e22ffd7983b891 106
+apps/tanstack-start/src/routes/_authed/settings/espaces/index.tsx
+  s_745661800b60dc::t_80290d0cf980b8 283,303
+apps/tanstack-start/src/routes/_authed/callback.tsx
+  s_745661800b60dc::t_80290d0cf980b8 68
+packages/ui/src/toggle.tsx
+  s_745661800b60dc::t_80290d0cf980b8 6
+apps/tanstack-start/src/component/dialog-facts.tsx
+  s_745661800b60dc::t_97ccbe4fc459d6 23
+apps/tanstack-start/src/routes/invitation.$invitationId.tsx
+  s_745661800b60dc::t_80290d0cf980b8 212,295
+apps/tanstack-start/src/routes/_authed/settings/banques/-components/onboarding.tsx
+  s_745661800b60dc::t_80290d0cf980b8 67,100-101,169,199
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/ring.tsx
+  s_745661800b60dc::t_80290d0cf980b8 167
+packages/ui/src/accordion.tsx
+  s_745661800b60dc::t_80290d0cf980b8 36
+apps/tanstack-start/src/styles.css
+  s_745661800b60dc::t_bfc7415a10d64a 2
+  s_745661800b60dc::t_1bf4da3987542e 221-222
+  s_745661800b60dc::t_38f5d383d662aa 121-123
+  s_745661800b60dc::t_40b820225715db 22-39
+  s_745661800b60dc::t_e22ffd7983b891 223
+apps/tanstack-start/src/routes/_authed/settings/espaces/-components/space-dialog.tsx
+  s_745661800b60dc::t_5a00875cdf12cb 143-144
+  s_745661800b60dc::t_0c88fecd7ea257 145-147
+  s_745661800b60dc::t_80290d0cf980b8 81,113
+packages/ui/src/index.ts
+  s_745661800b60dc::t_d1677e36dca66b 3,7,23-25,28-30
+  s_745661800b60dc::t_496600b239d2be 31-34
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/transactions-table.tsx
+  s_745661800b60dc::t_e22ffd7983b891 100,114,234
+  s_745661800b60dc::t_80290d0cf980b8 145
+packages/ui/package.json
+  s_745661800b60dc::t_d1a1200a7ca98e 43-47,56-57
+  s_745661800b60dc::t_530dd01f8ee532 61
+apps/tanstack-start/src/routes/_authed/settings/banques/ajouter.tsx
+  s_745661800b60dc::t_80290d0cf980b8 58,149,248,261
+packages/ui/src/alert.tsx
+  s_745661800b60dc::t_80290d0cf980b8 61
+packages/ui/src/dialog.tsx
+  s_745661800b60dc::t_c033f9d3347082 3,8-10,13-14,20-24,38-40,46,48-49,52,56-60,62-66,68-70,72-74,78,80,97,99,102-103
+  s_745661800b60dc::t_38f5d383d662aa 15-18,47,50-51,53,61,71,79,84-85,87,98
+  s_745661800b60dc::t_0c88fecd7ea257 89
+  s_745661800b60dc::t_97ccbe4fc459d6 4,26-28
+  s_745661800b60dc::t_6910ec24e6f4eb 81-82
+packages/ui/src/table.tsx
+  s_745661800b60dc::t_80290d0cf980b8 52,65,106
+apps/tanstack-start/src/routes/_authed/settings/categories/-components/category-overview.tsx
+  s_745661800b60dc::t_80290d0cf980b8 300,313,405
+packages/ui/src/command.tsx
+  s_745661800b60dc::t_826b0e11d87fef 54,60-62
+  s_745661800b60dc::t_ae3f284a4d220a 49
+  s_745661800b60dc::t_871936a0b51218 55-59
+  s_745661800b60dc::t_80290d0cf980b8 130,160,179
+apps/tanstack-start/src/routes/_authed/settings/banques/index.tsx
+  s_745661800b60dc::t_80290d0cf980b8 82,111,173
+packages/ui/src/dropdown-menu.tsx
+  s_745661800b60dc::t_80290d0cf980b8 92,114,159,202
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/overview-header.tsx
+  s_745661800b60dc::t_80290d0cf980b8 68
+  s_745661800b60dc::t_e22ffd7983b891 40
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/breakdown-list.tsx
+  s_745661800b60dc::t_80290d0cf980b8 132
+apps/tanstack-start/src/routes/_authed/settings/espaces/-components/space-card.tsx
+  s_745661800b60dc::t_80290d0cf980b8 108
+packages/ui/src/calendar.tsx
+  s_745661800b60dc::t_80290d0cf980b8 86,92,101,112,117,121,125,211
+  s_745661800b60dc::t_97ccbe4fc459d6 128
+apps/tanstack-start/package.json
+  s_745661800b60dc::t_97ccbe4fc459d6 22
+packages/ui/src/field.tsx
+  s_745661800b60dc::t_80290d0cf980b8 63
+apps/tanstack-start/src/routes/_authed/settings/categories/index.tsx
+  s_745661800b60dc::t_80290d0cf980b8 107
+packages/ui/src/popover.tsx
+  s_745661800b60dc::t_80290d0cf980b8 78
+apps/tanstack-start/src/component/period-picker.tsx
+  s_745661800b60dc::t_80290d0cf980b8 207
+  s_745661800b60dc::t_e22ffd7983b891 300
+apps/tanstack-start/src/routes/_authed/settings/categories/-components/category-identity-dialog.tsx
+  s_745661800b60dc::t_80290d0cf980b8 92,128,137,165,203,217,229
+packages/ui/src/index.test.ts
+  s_745661800b60dc::t_a496d065d37820 1,32-37
+  s_745661800b60dc::t_7f7eab8269df45 38-39
+packages/ui/src/button.tsx
+  s_745661800b60dc::t_1d4e3e2f276534 54-55
+  s_745661800b60dc::t_c105b4558e5574 5,9-10,31,59
+  s_745661800b60dc::t_554f2fc4ce81bb 2-4,11-17,19-30,32-35,38-52
+packages/ui/src/input.tsx
+  s_745661800b60dc::t_80290d0cf980b8 13
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/exclude-badge.tsx
+  s_745661800b60dc::t_80290d0cf980b8 96
+  s_745661800b60dc::t_e22ffd7983b891 36
+apps/tanstack-start/src/routes/_authed/settings/banques/-components/sync-status.tsx
+  s_745661800b60dc::t_80290d0cf980b8 66
+packages/ui/src/badge.tsx
+  s_745661800b60dc::t_80290d0cf980b8 22,24
+packages/ui/src/input-group.tsx
+  s_745661800b60dc::t_80290d0cf980b8 27
+pnpm-lock.yaml
+  s_745661800b60dc::t_704fc99442f2d3 107-109,312-326,351-356,366-368,401-418,1267-1283,1309-1317,2133-2145,2322-2330,2374-2404,2433-2444,2489-2500,2631-2644,2656-2658,3467-3469,3710-3712,4438-4443,5371-5382,5443-5447,5458-5463,5792-5803,6410-6436,7265-7295,7313-7324,7871-7884,8053-8058,8090-8126,8160-8173,8238-8250,8337-8353,8362-8365,9304-9305,9495-9499,10193-10197,11179-11204,11258-11267,11276-11284,11641-11645
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "d85f6abaa90a2b016051b9906b58fa56c8dfbef3",
+  "prompts": {},
+  "sessions": {
+    "s_745661800b60dc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0c3326dc-f926-4e8f-b076-05d6bc57218c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
