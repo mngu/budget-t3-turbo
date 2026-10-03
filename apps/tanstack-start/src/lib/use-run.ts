@@ -1,6 +1,5 @@
+import { toast } from "@heroui/react";
 import { useRouter } from "@tanstack/react-router";
-
-import { toast } from "@budget/ui/toast";
 
 /** Returns null on failure; resolves only after loaders refresh so pending UI stays visible. */
 export function useRun() {
@@ -15,7 +14,7 @@ export function useRun() {
       await router.invalidate();
       return result;
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : fallbackMessage);
+      toast.danger(err instanceof Error ? err.message : fallbackMessage);
       return null;
     }
   };

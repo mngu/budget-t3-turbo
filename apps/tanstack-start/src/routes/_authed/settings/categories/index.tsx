@@ -1,12 +1,11 @@
 import type { ManagedCategory } from "@budget/api/schemas";
 
+import { Button, toast } from "@heroui/react";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { SparklesIcon } from "lucide-react";
 import { useState } from "react";
 
 import { isManagedCategory, NO_CATEGORY_NAME } from "@budget/api/schemas";
-import { Button } from "@budget/ui/button";
-import { toast } from "@budget/ui/toast";
 import { Stat } from "~/component/stat";
 import { sumBy } from "~/lib/sum";
 import { useTRPCClient } from "~/lib/trpc";
@@ -84,7 +83,7 @@ function UncategorizedBanner({ count }: { count: number }) {
           `${categorized} catégorisée(s), ${remaining} restante(s).`,
         );
     } catch (err) {
-      toast.error(
+      toast.danger(
         err instanceof Error ? err.message : "Échec de la catégorisation.",
       );
     } finally {
@@ -95,8 +94,8 @@ function UncategorizedBanner({ count }: { count: number }) {
   };
 
   return (
-    <div className="border-border-strong bg-surface-2 mb-5 flex flex-wrap items-center gap-4 rounded-lg border px-5 py-4">
-      <span className="bg-card border-border-strong text-primary flex size-8 flex-none items-center justify-center rounded-md border">
+    <div className="border-border bg-surface-secondary mb-5 flex flex-wrap items-center gap-4 rounded-lg border px-5 py-4">
+      <span className="bg-surface border-border text-accent flex size-8 flex-none items-center justify-center rounded-md border">
         <SparklesIcon className="size-4" />
       </span>
       <div className="min-w-70 flex-1">
@@ -112,11 +111,11 @@ function UncategorizedBanner({ count }: { count: number }) {
       <div className="flex flex-none gap-2">
         <Button
           variant="outline"
-          onClick={() => preview.openUncategorized(count)}
+          onPress={() => void preview.openUncategorized(count)}
         >
           Voir
         </Button>
-        <Button disabled={running} onClick={categorize}>
+        <Button isDisabled={running} onPress={() => void categorize()}>
           {running ? "Catégorisation…" : "Catégoriser"}
         </Button>
       </div>

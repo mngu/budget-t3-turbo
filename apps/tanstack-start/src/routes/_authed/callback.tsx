@@ -1,10 +1,8 @@
+import { buttonVariants, Spinner, toast } from "@heroui/react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod/v4";
 
-import { Button } from "@budget/ui/button";
-import { Spinner } from "@budget/ui/spinner";
-import { toast } from "@budget/ui/toast";
 import { useTRPCClient } from "~/lib/trpc";
 
 // Must match the callback registered in the Enable Banking Control Panel.
@@ -29,7 +27,7 @@ function CallbackPage() {
     ran.current = true;
 
     if (error || !code || !state) {
-      toast.error(
+      toast.danger(
         error
           ? `Autorisation refusée par la banque (${error}).`
           : "Autorisation incomplète — aucun code reçu.",
@@ -64,11 +62,11 @@ function CallbackPage() {
     <main className="mx-auto flex max-w-xl flex-col items-center gap-4 p-16 text-center">
       {failure ? (
         <>
-          <p className="text-red-600">❌ La connexion à la banque a échoué.</p>
+          <p className="text-danger">❌ La connexion à la banque a échoué.</p>
           <p className="text-muted text-body">{failure}</p>
-          <Button render={<Link to="/settings/banques" />}>
+          <Link to="/settings/banques" className={buttonVariants()}>
             Retour aux banques
-          </Button>
+          </Link>
         </>
       ) : (
         <>

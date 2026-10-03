@@ -24,7 +24,7 @@ export function Stat({
         className={cn(
           "num font-medium",
           tile ? "text-body" : "text-heading",
-          warn && "text-warn",
+          warn && "text-warning",
         )}
       >
         {typeof value === "number" ? value.toLocaleString("fr-FR") : value}

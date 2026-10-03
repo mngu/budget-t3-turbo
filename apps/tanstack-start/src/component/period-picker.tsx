@@ -1,25 +1,29 @@
 "use client";
 
+import {
+  Button,
+  Label,
+  ListBox,
+  Popover,
+  RangeCalendar,
+  Select,
+} from "@heroui/react";
+import { parseDate } from "@internationalized/date";
 import { useLoaderData } from "@tanstack/react-router";
 import {
   addDays,
   differenceInCalendarDays,
-  endOfMonth,
   endOfQuarter,
   endOfYear,
   isSameDay,
   parseISO,
-  startOfMonth,
   startOfQuarter,
   startOfYear,
   subDays,
 } from "date-fns";
-import { fr } from "date-fns/locale";
+import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useState } from "react";
 
-import { cn } from "@budget/ui";
-import { Calendar } from "@budget/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@budget/ui/popover";
 import {
   cycleOf,
   MONTH_START_DAYS,
@@ -89,13 +93,9 @@ function buildPresets(anchor: Date, startDay: number): Preset[] {
   ];
 }
 
-/**
- * Keep incomplete ranges local so the loaders only run once both dates are chosen.
- */
 export function PeriodPicker() {
   const { search, setSearch } = useRevueSearch();
   const [open, setOpen] = useState(false);
-  const [draft, setDraft] = useState<Date | null>(null);
   // SSR cannot read the saved pay cycle; the client corrects the URL and reloads data.
   const [startDay, setStartDay] = useState(monthStartDay);
 
@@ -115,7 +115,6 @@ export function PeriodPicker() {
   };
 
   const commit = (start: Date, end: Date) => {
-    setDraft(null);
     setOpen(false);
     setSearch({ dateFrom: toISODate(start), dateTo: toISODate(end) });
   };
@@ -140,166 +139,124 @@ export function PeriodPicker() {
   };
 
   return (
-    <div className="grid w-72 max-w-full grid-cols-[1.5rem_minmax(0,1fr)_1.5rem] items-center gap-1 sm:grid-cols-[2rem_minmax(0,1fr)_2rem]">
-      <StepButton
-        label="Période précédente"
-        onClick={() => shiftMonth(-1)}
-        disabled={!monthReachable(stepTarget(-1))}
-        glyph="‹"
-      />
-      <Popover
-        open={open}
-        onOpenChange={(next) => {
-          setOpen(next);
-          // Discard incomplete selections when closing.
-          if (!next) setDraft(null);
-        }}
+    <div className="flex max-w-full items-center gap-1">
+      <Button
+        variant="ghost"
+        size="sm"
+        isIconOnly
+        aria-label="Période précédente"
+        isDisabled={!monthReachable(stepTarget(-1))}
+        onPress={() => shiftMonth(-1)}
       >
-        <PopoverTrigger
-          render={(props) => (
-            <button
-              type="button"
-              title="Choisir une période"
-              className="num hover:text-foreground flex min-h-8 min-w-0 items-center justify-center font-medium tracking-[-0.01em]"
-              {...props}
-            >
-              {/* SSR does not know the browser's pay-cycle preference. */}
-              <span className="truncate sm:hidden" suppressHydrationWarning>
-                {periodLabel(from, to, startDay, dayMonthNumFr, dateNumFr)}
-              </span>
-              <span
-                className="hidden truncate sm:inline"
-                suppressHydrationWarning
-              >
-                {periodLabel(from, to, startDay)}
-              </span>
-              <span
-                className="text-subtle text-label ml-1.5 flex-none"
-                aria-hidden="true"
-              >
-                ▾
-              </span>
-            </button>
-          )}
-        />
-        <PopoverContent align="center" className="w-auto gap-0 p-3.5">
-          <div className="flex gap-4">
-            <div className="flex w-28 flex-none flex-col gap-0.5 pt-0.5">
-              {buildPresets(anchor, startDay).map((preset) => {
-                const active =
-                  !!from &&
-                  !!to &&
-                  isSameDay(preset.from, from) &&
-                  isSameDay(preset.to, to);
-                // Preserve full periods for monthly budgets; disable rather than clip.
-                const reachable =
-                  (!min || preset.to >= min) && preset.from <= today;
-                return (
-                  <button
-                    key={preset.label}
-                    type="button"
-                    disabled={!reachable}
-                    onClick={() => commit(preset.from, preset.to)}
-                    className={cn(
-                      "text-control py-1 text-left disabled:pointer-events-none disabled:opacity-40",
-                      active
-                        ? "text-primary font-semibold"
-                        : "text-muted hover:text-foreground",
-                    )}
-                  >
-                    {preset.label}
-                  </button>
-                );
-              })}
-
-              <label className="border-border text-subtle text-label mt-2 flex flex-col gap-1 border-t pt-2">
-                Le mois commence le
-                <select
-                  value={startDay}
-                  onChange={(e) => changeStartDay(Number(e.target.value))}
-                  className="border-border bg-card text-foreground text-control rounded-md border px-1.5 py-1"
-                >
-                  {MONTH_START_DAYS.map((day) => (
-                    <option key={day} value={day}>
-                      {day}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-
-            <div className="flex flex-col">
-              <Calendar
-                mode="range"
-                locale={fr}
-                numberOfMonths={1}
-                defaultMonth={anchor}
-                // Keep the full current month visible while disabling future days.
-                startMonth={min ? startOfMonth(min) : undefined}
-                endMonth={endOfMonth(today)}
-                disabled={
-                  min ? { before: min, after: today } : { after: today }
-                }
-                selected={
-                  draft ? { from: draft } : from ? { from, to } : undefined
-                }
-                onSelect={(_range, day) => {
-                  if (!draft) {
-                    setDraft(day);
-                    return;
+        <ChevronLeftIcon />
+      </Button>
+      <Popover isOpen={open} onOpenChange={setOpen}>
+        <Button
+          variant="ghost"
+          size="sm"
+          aria-label="Choisir une période"
+          className="min-w-0"
+        >
+          {/* SSR does not know the browser's pay-cycle preference. */}
+          <span className="truncate sm:hidden" suppressHydrationWarning>
+            {periodLabel(from, to, startDay, dayMonthNumFr, dateNumFr)}
+          </span>
+          <span className="hidden truncate sm:inline" suppressHydrationWarning>
+            {periodLabel(from, to, startDay)}
+          </span>
+        </Button>
+        <Popover.Content>
+          <Popover.Dialog className="flex gap-4">
+            <div className="flex w-32 flex-none flex-col gap-1">
+              {buildPresets(anchor, startDay).map((preset) => (
+                <Button
+                  key={preset.label}
+                  size="sm"
+                  variant={
+                    from &&
+                    to &&
+                    isSameDay(preset.from, from) &&
+                    isSameDay(preset.to, to)
+                      ? "secondary"
+                      : "ghost"
                   }
-                  const [start, end] =
-                    day < draft ? [day, draft] : [draft, day];
-                  commit(start, end);
-                }}
-                className="p-0"
-              />
-
-              <div className="mt-2.5 flex items-center gap-2.5">
-                <button
-                  type="button"
-                  className="text-primary text-control ml-auto"
-                  onClick={() => setOpen(false)}
+                  // Preserve full periods for monthly budgets; disable rather than clip.
+                  isDisabled={(!!min && preset.to < min) || preset.from > today}
+                  onPress={() => commit(preset.from, preset.to)}
                 >
-                  Fermer
-                </button>
-              </div>
+                  {preset.label}
+                </Button>
+              ))}
+
+              <Select
+                className="mt-2"
+                value={startDay}
+                onChange={(day) => changeStartDay(Number(day))}
+              >
+                <Label>Le mois commence le</Label>
+                <Select.Trigger>
+                  <Select.Value />
+                  <Select.Indicator />
+                </Select.Trigger>
+                <Select.Popover>
+                  <ListBox>
+                    {MONTH_START_DAYS.map((day) => (
+                      <ListBox.Item key={day} id={day} textValue={String(day)}>
+                        {day}
+                        <ListBox.ItemIndicator />
+                      </ListBox.Item>
+                    ))}
+                  </ListBox>
+                </Select.Popover>
+              </Select>
             </div>
-          </div>
-        </PopoverContent>
+
+            <RangeCalendar
+              aria-label="Période"
+              value={
+                from && to
+                  ? {
+                      start: parseDate(toISODate(from)),
+                      end: parseDate(toISODate(to)),
+                    }
+                  : null
+              }
+              onChange={({ start, end }) =>
+                commit(parseISO(start.toString()), parseISO(end.toString()))
+              }
+              defaultFocusedValue={parseDate(toISODate(anchor))}
+              minValue={min ? parseDate(toISODate(min)) : undefined}
+              maxValue={parseDate(toISODate(today))}
+            >
+              <RangeCalendar.Header>
+                <RangeCalendar.Heading />
+                <RangeCalendar.NavButton slot="previous" />
+                <RangeCalendar.NavButton slot="next" />
+              </RangeCalendar.Header>
+              <RangeCalendar.Grid>
+                <RangeCalendar.GridHeader>
+                  {(day) => (
+                    <RangeCalendar.HeaderCell>{day}</RangeCalendar.HeaderCell>
+                  )}
+                </RangeCalendar.GridHeader>
+                <RangeCalendar.GridBody>
+                  {(date) => <RangeCalendar.Cell date={date} />}
+                </RangeCalendar.GridBody>
+              </RangeCalendar.Grid>
+            </RangeCalendar>
+          </Popover.Dialog>
+        </Popover.Content>
       </Popover>
-
-      <StepButton
-        label="Période suivante"
-        onClick={() => shiftMonth(1)}
-        disabled={!monthReachable(stepTarget(1))}
-        glyph="›"
-      />
+      <Button
+        variant="ghost"
+        size="sm"
+        isIconOnly
+        aria-label="Période suivante"
+        isDisabled={!monthReachable(stepTarget(1))}
+        onPress={() => shiftMonth(1)}
+      >
+        <ChevronRightIcon />
+      </Button>
     </div>
-  );
-}
-
-function StepButton({
-  label,
-  glyph,
-  onClick,
-  disabled,
-}: {
-  label: string;
-  glyph: string;
-  onClick: () => void;
-  disabled?: boolean;
-}) {
-  return (
-    <button
-      type="button"
-      title={label}
-      aria-label={label}
-      onClick={onClick}
-      disabled={disabled}
-      className="text-subtle hover:bg-default hover:text-foreground text-body hit-area flex size-6 items-center justify-center rounded-sm disabled:pointer-events-none disabled:opacity-30 sm:size-8"
-    >
-      {glyph}
-    </button>
   );
 }

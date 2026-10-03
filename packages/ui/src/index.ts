@@ -1,4 +1,3 @@
-import { cx } from "class-variance-authority";
 import { extendTailwindMerge } from "tailwind-merge";
 import { defaultConfig } from "tailwind-variants";
 
@@ -22,9 +21,7 @@ const twMergeConfig = {
   },
 };
 
-const twMerge = extendTailwindMerge(twMergeConfig);
-
-export const cn = (...inputs: Parameters<typeof cx>) => twMerge(cx(inputs));
+export const cn = extendTailwindMerge(twMergeConfig);
 
 // HeroUI merges className through tailwind-variants' own tailwind-merge, which would drop
 // the same classes. Its components captured this object at import, so it is filled in place.

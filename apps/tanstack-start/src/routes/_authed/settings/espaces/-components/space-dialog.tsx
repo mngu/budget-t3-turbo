@@ -1,20 +1,20 @@
 "use client";
 
-import { cn } from "@budget/ui";
-import { Button } from "@budget/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogTitle,
-} from "@budget/ui/dialog";
-import { Field, FieldDescription, FieldLabel } from "@budget/ui/field";
-import { Input } from "@budget/ui/input";
-import { Spinner } from "@budget/ui/spinner";
+  Button,
+  Description,
+  Input,
+  Label,
+  Modal,
+  Radio,
+  RadioGroup,
+  Spinner,
+  TextField,
+} from "@heroui/react";
 
 export interface SpaceDialogSpec {
   icon: React.ReactNode;
-  tone: "primary" | "warn" | "bad";
+  tone: "accent" | "warning" | "danger";
   title: string;
   body: string;
   choices?: {
@@ -35,13 +35,10 @@ export interface SpaceDialogSpec {
   disabled?: boolean;
 }
 
-const TONE: Record<
-  "primary" | "warn" | "bad",
-  { chip: string; cta: "default" | "destructive" }
-> = {
-  primary: { chip: "bg-accent-soft text-primary", cta: "default" },
-  warn: { chip: "bg-warn-soft text-warn", cta: "default" },
-  bad: { chip: "bg-bad-soft text-bad", cta: "destructive" },
+const ICON_TONE = {
+  accent: "bg-accent-soft text-accent-soft-foreground",
+  warning: "bg-warning-soft text-warning-soft-foreground",
+  danger: "bg-danger-soft text-danger-soft-foreground",
 };
 
 export function SpaceDialog({
@@ -56,111 +53,80 @@ export function SpaceDialog({
   onClose: () => void;
 }) {
   if (!spec) return null;
-  const tone = TONE[spec.tone];
 
   return (
-    <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent
-        padded={false}
-        className="border-border-strong max-w-130 overflow-hidden"
-      >
-        <div className="px-5 pt-4 pb-4">
-          <div className="flex items-center gap-2.5">
-            <span
-              className={cn(
-                "flex size-8 flex-none items-center justify-center rounded-md",
-                tone.chip,
-              )}
-            >
+    <Modal.Backdrop isOpen onOpenChange={(open) => !open && onClose()}>
+      <Modal.Container>
+        <Modal.Dialog>
+          <Modal.CloseTrigger />
+          <Modal.Header>
+            <Modal.Icon className={ICON_TONE[spec.tone]}>
               {spec.icon}
-            </span>
-            <DialogTitle className="text-heading min-w-0 text-pretty">
-              {spec.title}
-            </DialogTitle>
-          </div>
-          <div className="text-muted text-control mt-2.5 text-pretty">
-            {spec.body}
-          </div>
+            </Modal.Icon>
+            <Modal.Heading>{spec.title}</Modal.Heading>
+          </Modal.Header>
+          <Modal.Body className="flex flex-col gap-4">
+            <p>{spec.body}</p>
 
-          {spec.choices && (
-            <div className="mt-3.5 flex flex-col gap-2.5">
-              {spec.choices.map((choice) => {
-                const active = spec.choice === choice.key;
-                return (
-                  <button
-                    key={choice.key}
-                    type="button"
-                    onClick={() => spec.onChoice?.(choice.key)}
-                    className={cn(
-                      "grid w-full grid-cols-[16px_minmax(0,1fr)] items-start gap-2.5 rounded-md border p-3 text-left",
-                      active
-                        ? "border-primary bg-accent-soft"
-                        : "border-border",
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        "mt-0.5 size-3.5 rounded-full border-[1.5px]",
-                        active
-                          ? "border-primary bg-primary ring-card ring-2 ring-inset"
-                          : "border-border-strong",
-                      )}
-                    />
-                    <span className="min-w-0">
-                      <span className="text-control block font-semibold tracking-[-0.01em]">
-                        {choice.label}
-                      </span>
-                      <span className="text-muted text-control mt-1 block text-pretty">
-                        {choice.description}
-                      </span>
-                      {active && choice.warning && (
-                        <span className="text-warn text-control mt-1.5 block text-pretty">
+            {spec.choices && (
+              <RadioGroup
+                aria-label={spec.title}
+                value={spec.choice}
+                onChange={(key) => spec.onChoice?.(key)}
+              >
+                {spec.choices.map((choice) => (
+                  <Radio key={choice.key} value={choice.key}>
+                    <Radio.Content>
+                      <Radio.Control>
+                        <Radio.Indicator />
+                      </Radio.Control>
+                      {choice.label}
+                    </Radio.Content>
+                    <Description>
+                      {choice.description}
+                      {spec.choice === choice.key && choice.warning && (
+                        <span className="text-warning block">
                           {choice.warning}
                         </span>
                       )}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
+                    </Description>
+                  </Radio>
+                ))}
+              </RadioGroup>
+            )}
 
-          {spec.input && (
-            <Field className="mt-3.5">
-              <FieldLabel htmlFor="space-name">{spec.input.label}</FieldLabel>
-              <Input
-                id="space-name"
+            {spec.input && (
+              <TextField
                 autoFocus
                 value={spec.input.value}
-                onChange={(e) => spec.onInput?.(e.target.value)}
-                placeholder={spec.input.placeholder}
-              />
-              {spec.hint && <FieldDescription>{spec.hint}</FieldDescription>}
-            </Field>
-          )}
-        </div>
+                onChange={(value) => spec.onInput?.(value)}
+              >
+                <Label>{spec.input.label}</Label>
+                <Input placeholder={spec.input.placeholder} />
+                {spec.hint && <Description>{spec.hint}</Description>}
+              </TextField>
+            )}
 
-        <DialogFooter className="flex-wrap">
-          {/* HeroUI's touch-sized buttons leave the footnote no room beside them on phones. */}
-          <span className="min-w-0 flex-1 basis-full text-pretty sm:basis-0">
-            {spec.footnote}
-          </span>
-          {spec.cancel && (
-            <Button variant="ghost" className="flex-none" onClick={onClose}>
-              {spec.cancel}
+            {spec.footnote && <p className="text-muted">{spec.footnote}</p>}
+          </Modal.Body>
+          <Modal.Footer>
+            {spec.cancel && (
+              <Button slot="close" variant="tertiary">
+                {spec.cancel}
+              </Button>
+            )}
+            <Button
+              variant={spec.tone === "danger" ? "danger" : "primary"}
+              isDisabled={spec.disabled}
+              isPending={busy}
+              onPress={onConfirm}
+            >
+              {busy && <Spinner color="current" size="sm" />}
+              {spec.cta}
             </Button>
-          )}
-          <Button
-            variant={tone.cta}
-            className="flex-none"
-            disabled={spec.disabled ?? busy}
-            onClick={onConfirm}
-          >
-            {busy && <Spinner />}
-            {spec.cta}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          </Modal.Footer>
+        </Modal.Dialog>
+      </Modal.Container>
+    </Modal.Backdrop>
   );
 }

@@ -55,5 +55,5 @@ export function useShadeCategoryColor(): (
 }
 
 export function softCategoryColor(color: string) {
-  return `color-mix(in oklab, ${color} 22%, var(--card))`;
+  return `color-mix(in oklab, ${color} 22%, var(--surface))`;
 }

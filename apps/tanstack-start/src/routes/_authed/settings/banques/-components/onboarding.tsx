@@ -2,15 +2,21 @@
 
 import type { SetupStatus } from "@budget/api";
 
+import {
+  Alert,
+  Button,
+  Description,
+  Input,
+  Label,
+  Spinner,
+  TextArea,
+  TextField,
+  toast,
+} from "@heroui/react";
 import { KeyRoundIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { cn } from "@budget/ui";
-import { Button } from "@budget/ui/button";
-import { Field, FieldDescription, FieldLabel } from "@budget/ui/field";
-import { Input } from "@budget/ui/input";
-import { Spinner } from "@budget/ui/spinner";
-import { toast } from "@budget/ui/toast";
 import { useTRPCClient } from "~/lib/trpc";
 import { useRun } from "~/lib/use-run";
 
@@ -53,14 +59,14 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
   };
 
   return (
-    <section className="border-border-strong bg-card mt-5 overflow-hidden rounded-lg border">
-      <header className="bg-sunken border-b px-5 py-3.5">
+    <section className="border-border bg-surface mt-5 overflow-hidden rounded-lg border">
+      <header className="bg-background-secondary border-b px-5 py-3.5">
         <div className="flex items-center gap-2.5">
-          <KeyRoundIcon className="text-primary size-3.5" />
+          <KeyRoundIcon className="text-accent size-3.5" />
           <h2 className="text-body font-semibold">
             Configuration Enable Banking
           </h2>
-          <span className="text-subtle text-control ml-auto">
+          <span className="text-muted text-control ml-auto">
             une seule fois, à l'installation
           </span>
         </div>
@@ -90,19 +96,16 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
           Déclarez cette URL de redirection dans le Control Panel de votre
           application :
           <div className="mt-1.5 flex items-center gap-2">
-            <span className="bg-sunken num text-meta truncate rounded-md border px-2.5 py-1">
+            <span className="bg-background-secondary num text-meta truncate rounded-md border px-2.5 py-1">
               {redirectUrl}
             </span>
-            <button
-              type="button"
-              onClick={copyRedirect}
-              className={cn(
-                "border-border-strong hover:bg-default text-control h-7 rounded-md border px-2.5 whitespace-nowrap",
-                copied ? "text-ok" : "text-muted",
-              )}
+            <Button
+              size="sm"
+              variant="outline"
+              onPress={() => void copyRedirect()}
             >
               {copied ? "✓ Copiée" : "Copier"}
-            </button>
+            </Button>
           </div>
         </Step>
         <Step n="3">
@@ -112,40 +115,24 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
       </ol>
 
       <div className="flex flex-col gap-3.5 px-5 pt-3.5 pb-4.5">
-        <Field>
-          <FieldLabel htmlFor="application-id">Application ID</FieldLabel>
-          <Input
-            id="application-id"
-            value={applicationId}
-            onChange={(e) => setApplicationId(e.target.value)}
-            placeholder="00000000-0000-0000-0000-000000000000"
-          />
-        </Field>
-        <Field>
-          <FieldLabel htmlFor="redirect-url">URL de redirection</FieldLabel>
-          <Input
-            id="redirect-url"
-            value={redirectUrl}
-            onChange={(e) => setRedirectUrl(e.target.value)}
-          />
-        </Field>
-        <Field>
-          <FieldLabel htmlFor="private-key">Clé privée</FieldLabel>
-          <FieldDescription>
+        <TextField value={applicationId} onChange={setApplicationId}>
+          <Label>Application ID</Label>
+          <Input placeholder="00000000-0000-0000-0000-000000000000" />
+        </TextField>
+        <TextField value={redirectUrl} onChange={setRedirectUrl}>
+          <Label>URL de redirection</Label>
+          <Input />
+        </TextField>
+        <TextField value={privateKeyPem} onChange={setPrivateKeyPem}>
+          <Label>Clé privée</Label>
+          <TextArea rows={4} placeholder="-----BEGIN PRIVATE KEY-----" />
+          <Description>
             fichier .pem téléchargé sur enablebanking.com
-          </FieldDescription>
-          <textarea
-            id="private-key"
-            value={privateKeyPem}
-            onChange={(e) => setPrivateKeyPem(e.target.value)}
-            rows={4}
-            placeholder="-----BEGIN PRIVATE KEY-----"
-            className={cn(FIELD, "h-auto resize-y py-2.5 leading-normal")}
-          />
-        </Field>
+          </Description>
+        </TextField>
       </div>
 
-      <div className="bg-surface-2 border-t px-5 py-3.5">
+      <div className="bg-surface-secondary border-t px-5 py-3.5">
         <div className="flex flex-col gap-2.5">
           <Check
             ok={setup.settingsPresent}
@@ -162,27 +149,31 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
         </div>
 
         {setup.error && (
-          <div className="border-bad bg-bad-soft mt-3 rounded-md border px-3 py-2.5">
-            <p className="text-bad text-control font-semibold">
-              L'API Enable Banking a refusé la configuration
-            </p>
-            <p className="text-muted num text-meta mt-1.5 break-words">
-              {setup.error}
-            </p>
-          </div>
+          <Alert status="danger" className="mt-3">
+            <Alert.Indicator />
+            <Alert.Content>
+              <Alert.Title>
+                L'API Enable Banking a refusé la configuration
+              </Alert.Title>
+              <Alert.Description className="num break-words">
+                {setup.error}
+              </Alert.Description>
+            </Alert.Content>
+          </Alert>
         )}
       </div>
 
       <div className="flex items-center gap-3 border-t px-5 py-3">
-        <span className="text-subtle text-control min-w-0 flex-1">
+        <span className="text-muted text-control min-w-0 flex-1">
           Rien n'est envoyé à votre banque à cette étape.
         </span>
         <Button
           className="flex-none"
-          disabled={saving || !applicationId || !privateKeyPem}
-          onClick={submit}
+          isDisabled={!applicationId || !privateKeyPem}
+          isPending={saving}
+          onPress={() => void submit()}
         >
-          {saving && <Spinner />}
+          {saving && <Spinner color="current" size="sm" />}
           Valider la configuration
         </Button>
       </div>
@@ -190,13 +181,10 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
   );
 }
 
-const FIELD =
-  "border-input bg-background focus:border-primary num h-8 w-full max-w-110 rounded-md border px-2.5 text-control outline-none";
-
 function Step({ n, children }: { n: string; children: React.ReactNode }) {
   return (
     <li className="grid grid-cols-[22px_minmax(0,1fr)] items-start gap-3">
-      <span className="border-border-strong text-muted num text-meta flex size-6 items-center justify-center rounded-full border">
+      <span className="border-border text-muted num text-meta flex size-6 items-center justify-center rounded-full border">
         {n}
       </span>
       <div className="text-control min-w-0 pt-px">{children}</div>
@@ -218,10 +206,10 @@ function Check({
     <div className="grid grid-cols-[16px_minmax(0,1fr)] items-center gap-2.5">
       <span
         className={cn(
-          "text-primary-foreground text-label flex size-4 items-center justify-center rounded-full border-[1.5px]",
-          bad && "border-bad bg-bad",
-          ok && "border-ok bg-ok",
-          pending && "border-border-strong",
+          "text-accent-foreground text-label flex size-4 items-center justify-center rounded-full border-[1.5px]",
+          bad && "border-danger bg-danger",
+          ok && "border-success bg-success",
+          pending && "border-border",
         )}
       >
         {bad ? "✕" : ok ? "✓" : ""}
@@ -229,7 +217,7 @@ function Check({
       <span
         className={cn(
           "text-control",
-          pending ? "text-subtle" : "text-foreground",
+          pending ? "text-muted" : "text-foreground",
         )}
       >
         {children}

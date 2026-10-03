@@ -164,11 +164,11 @@ function RingBackButton({ onClick }: { onClick: () => void }) {
         event.stopPropagation();
         onClick();
       }}
-      className="border-border-strong bg-card text-muted hover:border-subtle hover:text-foreground text-control pointer-events-auto mt-3 flex h-6 items-center gap-1.5 rounded-full border pr-2.5 pl-2 font-semibold whitespace-nowrap"
+      className="border-border bg-surface text-muted hover:border-muted hover:text-foreground text-control pointer-events-auto mt-3 flex h-6 items-center gap-1.5 rounded-full border pr-2.5 pl-2 font-semibold whitespace-nowrap"
     >
       <ArrowLeftIcon className="size-3" aria-hidden />
       Toutes catégories
-      <kbd className="border-border bg-surface-2 num text-subtle text-label ml-0.5 flex h-4 items-center rounded-sm border px-1 font-medium tracking-[0.02em]">
+      <kbd className="border-border bg-surface-secondary num text-muted text-label ml-0.5 flex h-4 items-center rounded-sm border px-1 font-medium tracking-[0.02em]">
         Esc
       </kbd>
     </button>

@@ -1,9 +1,9 @@
 import type { CategoryOverviewType } from "@budget/api/schemas";
 
+import { Button, Toolbar } from "@heroui/react";
 import { LayersIcon } from "lucide-react";
 
 import { cn } from "@budget/ui";
-import { Toolbar } from "@budget/ui/toolbar";
 import { useCategoryColor, useShadeCategoryColor } from "~/lib/category-color";
 import { sumBy } from "~/lib/sum";
 import { useFormat } from "~/lib/use-format";
@@ -105,7 +105,7 @@ export function BreakdownList({ overview }: BreakdownListProps) {
                 {euro.format(totalAmount)}
               </strong>
             </div>
-            <div className="text-subtle text-meta flex justify-end">
+            <div className="text-muted text-meta flex justify-end">
               {overview.length} poste{overview.length > 1 ? "s" : ""} de dépense
               · {childCount} sous-catégorie{childCount > 1 ? "s" : ""}
             </div>
@@ -117,20 +117,24 @@ export function BreakdownList({ overview }: BreakdownListProps) {
         <hr className="w-64" />
       </div>
 
-      <Toolbar.Root
+      <Toolbar
         orientation="vertical"
         aria-label="Répartition par poste"
-        className="flex min-h-0 flex-1 scrollbar-thin flex-col overflow-y-auto"
+        // HeroUI lays toolbars out as a content-sized grid; the gauges must span the column.
+        className="flex min-h-0 w-full flex-1 scrollbar-thin flex-col overflow-y-auto"
       >
         {rows
           .filter((row) => row.value > 0)
           .map((row, index) => (
-            <Toolbar.Button
+            <Button
               key={index}
-              type="button"
-              disabled={!row.drillable}
-              className="not-aria-disabled:hover:bg-default focus-visible:ring-accent-soft flex flex-none cursor-pointer flex-col justify-center gap-1.5 rounded-lg p-2 transition-colors outline-none focus-visible:ring-3 focus-visible:ring-inset motion-reduce:transition-none"
-              onClick={() => setSearch({ category: row.label })}
+              variant="ghost"
+              fullWidth
+              isDisabled={!row.drillable}
+              // A gauge row is taller than a button; rows without sub-categories are not drillable
+              // but still carry data, so they must not fade like a disabled control.
+              className="h-auto min-w-0 flex-none flex-col items-stretch gap-1.5 rounded-lg p-2 whitespace-normal disabled:opacity-100"
+              onPress={() => setSearch({ category: row.label })}
             >
               <BudgetGauge
                 value={row.value}
@@ -140,9 +144,9 @@ export function BreakdownList({ overview }: BreakdownListProps) {
                 color={row.color}
                 max={max}
               />
-            </Toolbar.Button>
+            </Button>
           ))}
-      </Toolbar.Root>
+      </Toolbar>
     </div>
   );
 }

@@ -5,38 +5,8 @@ import { dateFr } from "~/lib/format";
 
 type ConsentLevel = "ok" | "warning" | "expired" | "revoked";
 
-export type ConsentTone = "ok" | "warn" | "bad";
-
-export const TONE_VARIANT: Record<ConsentTone, "ok" | "warn" | "destructive"> =
-  {
-    ok: "ok",
-    warn: "warn",
-    bad: "destructive",
-  };
-
-export const CONSENT_TONE: Record<
-  ConsentTone,
-  { text: string; bg: string; border: string; fill: string }
-> = {
-  ok: {
-    text: "text-ok",
-    bg: "bg-ok-soft",
-    border: "border-ok",
-    fill: "bg-ok",
-  },
-  warn: {
-    text: "text-warn",
-    bg: "bg-warn-soft",
-    border: "border-warn",
-    fill: "bg-warn",
-  },
-  bad: {
-    text: "text-bad",
-    bg: "bg-bad-soft",
-    border: "border-bad",
-    fill: "bg-bad",
-  },
-};
+// HeroUI's status colors, so a tone goes straight to a Chip, Alert or ProgressBar.
+type ConsentTone = "success" | "warning" | "danger";
 
 export interface ConsentView {
   level: ConsentLevel;
@@ -57,7 +27,7 @@ export function consentView(connection: ConnectionSummary): ConsentView {
     return {
       level: "revoked",
       critical: true,
-      tone: "bad",
+      tone: "danger",
       badge: "Révoqué",
       meta: "l'accès a été annulé chez votre banque",
       pct: 0,
@@ -68,7 +38,7 @@ export function consentView(connection: ConnectionSummary): ConsentView {
     return {
       level: "expired",
       critical: true,
-      tone: "bad",
+      tone: "danger",
       badge: "Consentement expiré",
       meta: `depuis le ${dateFr.format(until)} · aucune transaction importée depuis`,
       pct: 0,
@@ -79,7 +49,7 @@ export function consentView(connection: ConnectionSummary): ConsentView {
   return {
     level: level === "warning" ? "warning" : "ok",
     critical: level === "warning",
-    tone: level === "warning" ? "warn" : "ok",
+    tone: level === "warning" ? "warning" : "success",
     badge: `Expire dans ${daysLeft} j`,
     meta: `jusqu'au ${dateFr.format(until)}`,
     pct: Math.min(100, Math.round((daysLeft / CONSENT_DAYS) * 100)),
@@ -89,7 +59,7 @@ export function consentView(connection: ConnectionSummary): ConsentView {
 export interface ConsentAlert {
   connection: ConnectionSummary;
   level: Exclude<ConsentLevel, "ok">;
-  tone: Exclude<ConsentTone, "ok">;
+  tone: Exclude<ConsentTone, "success">;
   title: string;
   body: string;
   cta: string;
@@ -123,7 +93,7 @@ export function consentAlert(
     return {
       connection,
       level: "revoked",
-      tone: "bad",
+      tone: "danger",
       title: `${name} a été révoquée`,
       body: "Vous avez annulé cette autorisation. Les transactions déjà importées restent disponibles ; les nouvelles ne le sont plus.",
       cta: "Reconnecter",
@@ -134,7 +104,7 @@ export function consentAlert(
     return {
       connection,
       level: "expired",
-      tone: "bad",
+      tone: "danger",
       title: `${name} n'est plus connectée`,
       body: `L'autorisation a expiré le ${until}. Aucune transaction n'a été importée depuis : réautoriser récupérera l'historique manquant.`,
       cta: "Réautoriser",
@@ -144,7 +114,7 @@ export function consentAlert(
   return {
     connection,
     level: "warning",
-    tone: "warn",
+    tone: "warning",
     title: `${name} doit être réautorisée avant le ${until}`,
     body: `L'autorisation arrive à échéance dans ${connection.badge.daysLeft} jours. Passé ce délai, les transactions cessent d'être importées sans message d'erreur — un mois de retard se rattrape mal.`,
     cta: "Réautoriser maintenant",

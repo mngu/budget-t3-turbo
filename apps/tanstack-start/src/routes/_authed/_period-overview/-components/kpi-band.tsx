@@ -26,7 +26,7 @@ export function KpiBand({ budgetStats, globalStats }: KpiBandProps) {
         <div
           className={cn(
             "num text-hero mt-0.5",
-            balance < 0 ? "text-bad" : "text-ok",
+            balance < 0 ? "text-danger" : "text-success",
           )}
         >
           {signedEuro.format(balance)}

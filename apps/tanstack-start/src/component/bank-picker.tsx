@@ -1,27 +1,21 @@
 "use client";
 
+import { Button, Dropdown, Header, Label } from "@heroui/react";
 import { useLoaderData } from "@tanstack/react-router";
 import { ChevronDownIcon, LandmarkIcon, RefreshCwIcon } from "lucide-react";
 import { useState } from "react";
 
 import { cn } from "@budget/ui";
-import { Button } from "@budget/ui/button";
-import {
-  CommandDialog,
-  CommandGroup,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-  CommandShortcut,
-} from "@budget/ui/command";
 import { sumBy } from "~/lib/sum";
 import { useSync } from "~/lib/sync-toast";
-import { selectedBanks, toggleBank } from "~/lib/transactions-search";
+import { selectedBanks } from "~/lib/transactions-search";
 import { useRevueSearch } from "~/lib/use-revue-search";
 
 export function BankPicker() {
   const [open, setOpen] = useState(false);
   const { search, setSearch } = useRevueSearch();
+  const { sync, state } = useSync();
+  const syncing = state === "running";
 
   // Use the full roster so accounts without transactions remain selectable.
   const { banks, bankCounts } = useLoaderData({
@@ -29,23 +23,20 @@ export function BankPicker() {
   });
 
   const selected = selectedBanks(search);
-  const isOn = (bank: string) =>
-    selected.length === 0 || selected.includes(bank);
-  const offCount = banks.filter((bank) => !isOn(bank)).length;
+  const included = selected.length === 0 ? banks : selected;
+  const offCount = banks.length - included.length;
 
   const total = sumBy(
-    bankCounts.filter((entry) => isOn(entry.bank)),
+    bankCounts.filter((entry) => included.includes(entry.bank)),
     (entry) => entry.count,
   );
 
   return (
-    <>
+    <Dropdown isOpen={open} onOpenChange={setOpen}>
       <Button
         variant={offCount > 0 ? "secondary" : "outline"}
-        size="xs"
-        title="Comptes inclus"
-        aria-haspopup="dialog"
-        onClick={() => setOpen(true)}
+        size="sm"
+        aria-label="Comptes inclus"
       >
         <LandmarkIcon className="sm:hidden" />
         {offCount > 0
@@ -56,73 +47,59 @@ export function BankPicker() {
         </span>
         <ChevronDownIcon className="hidden sm:block" />
       </Button>
-
-      <CommandDialog
-        open={open}
-        onOpenChange={setOpen}
-        title="Comptes inclus"
-        description="Choisissez les comptes à inclure dans la revue."
-        className="max-w-120"
-      >
-        <CommandList>
-          <CommandGroup
-            heading={`Comptes inclus · ${total} transaction${total > 1 ? "s" : ""}`}
+      <Dropdown.Popover placement="bottom end">
+        <Dropdown.Menu aria-label="Comptes inclus">
+          <Dropdown.Section
+            selectionMode="multiple"
+            // An empty selection would mean every account, including ones connected later.
+            disallowEmptySelection
+            shouldCloseOnSelect={false}
+            selectedKeys={included}
+            onSelectionChange={(keys) => {
+              const next = banks.filter(
+                (bank) => keys === "all" || keys.has(bank),
+              );
+              setSearch({
+                bank: next.length === banks.length ? undefined : next,
+              });
+            }}
           >
+            <Header>
+              Comptes inclus · {total} transaction{total > 1 ? "s" : ""}
+            </Header>
             {banks.map((bank) => (
-              <CommandItem
-                key={bank}
-                value={`bank:${bank}`}
-                data-checked={isOn(bank)}
-                aria-label={`${bank}, ${isOn(bank) ? "inclus" : "exclu"}`}
-                onSelect={() =>
-                  setSearch({ bank: toggleBank(search, bank, banks) })
-                }
-              >
-                {bank}
-                <span>
+              <Dropdown.Item key={bank} id={bank} textValue={bank}>
+                <Dropdown.ItemIndicator />
+                <Label>{bank}</Label>
+                <span className="text-muted num ms-auto">
                   {bankCounts.find((entry) => entry.bank === bank)?.count ?? 0}
                 </span>
-              </CommandItem>
+              </Dropdown.Item>
             ))}
-            {banks.length === 0 && (
-              <CommandItem disabled>Aucun compte connecté.</CommandItem>
-            )}
-          </CommandGroup>
-          <CommandSeparator />
-          <CommandGroup>
-            {offCount > 0 && (
-              <CommandItem
-                value="Tout inclure"
-                onSelect={() => setSearch({ bank: undefined })}
+          </Dropdown.Section>
+          <Dropdown.Section>
+            {offCount > 0 ? (
+              <Dropdown.Item
+                textValue="Tout inclure"
+                onAction={() => setSearch({ bank: undefined })}
               >
-                Tout inclure
-                <CommandShortcut>
+                <Label>Tout inclure</Label>
+                <span className="text-muted ms-auto">
                   {offCount} exclu{offCount > 1 ? "s" : ""}
-                </CommandShortcut>
-              </CommandItem>
-            )}
-            <SyncItem onDone={() => setOpen(false)} />
-          </CommandGroup>
-        </CommandList>
-      </CommandDialog>
-    </>
-  );
-}
-
-function SyncItem({ onDone }: { onDone: () => void }) {
-  const { sync, state } = useSync();
-  const syncing = state === "running";
-
-  return (
-    <CommandItem
-      value="Synchroniser"
-      disabled={syncing}
-      onSelect={async () => {
-        if (await sync()) onDone();
-      }}
-    >
-      <RefreshCwIcon className={cn(syncing && "animate-spin")} />
-      {syncing ? "Synchronisation…" : "Synchroniser"}
-    </CommandItem>
+                </span>
+              </Dropdown.Item>
+            ) : null}
+            <Dropdown.Item
+              textValue="Synchroniser"
+              isDisabled={syncing}
+              onAction={() => void sync()}
+            >
+              <RefreshCwIcon className={cn(syncing && "animate-spin")} />
+              <Label>{syncing ? "Synchronisation…" : "Synchroniser"}</Label>
+            </Dropdown.Item>
+          </Dropdown.Section>
+        </Dropdown.Menu>
+      </Dropdown.Popover>
+    </Dropdown>
   );
 }

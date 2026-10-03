@@ -1,9 +1,9 @@
 "use client";
 
+import { Button } from "@heroui/react";
 import { RefreshCwIcon } from "lucide-react";
 
 import { cn } from "@budget/ui";
-import { Button } from "@budget/ui/button";
 import { dateFr } from "~/lib/format";
 import { useSync } from "~/lib/sync-toast";
 
@@ -31,7 +31,11 @@ export function SyncStatus({
         <div className="label-caps mt-0.5">{meta}</div>
       </div>
 
-      <Button variant="outline" disabled={state === "running"} onClick={sync}>
+      <Button
+        variant="outline"
+        isDisabled={state === "running"}
+        onPress={() => void sync()}
+      >
         <RefreshCwIcon className={cn(state === "running" && "animate-spin")} />
         Synchroniser
       </Button>
@@ -48,14 +52,14 @@ function describe(
     return {
       value: "Synchronisation…",
       meta: "appels bancaires en cours",
-      tone: "text-primary",
+      tone: "text-accent",
     };
   }
   if (state === "failed") {
     return {
       value: "Échec",
       meta: "dernière tentative — voir le message d'erreur",
-      tone: "text-bad",
+      tone: "text-danger",
     };
   }
   return {

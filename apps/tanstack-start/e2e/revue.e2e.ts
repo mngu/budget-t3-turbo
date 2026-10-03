@@ -27,18 +27,20 @@ const hydrated = { waitUntil: "networkidle" } as const;
 test("la revue s'ouvre sur le mois courant", async ({ page }) => {
   await page.goto("/", hydrated);
 
-  await expect(page.getByTitle("Choisir une période")).toContainText(
-    monthLabel(now),
-  );
+  await expect(
+    page.getByRole("button", { name: "Choisir une période" }),
+  ).toContainText(monthLabel(now));
   await expect(page.getByText("Solde")).toBeVisible();
 });
 
 test("le sélecteur de période recule d'un mois", async ({ page }) => {
   await page.goto("/", hydrated);
 
-  await page.getByTitle("Période précédente").click();
+  await page.getByRole("button", { name: "Période précédente" }).click();
 
-  await expect(page.getByTitle("Choisir une période")).toContainText(
+  await expect(
+    page.getByRole("button", { name: "Choisir une période" }),
+  ).toContainText(
     monthLabel(new Date(now.getFullYear(), now.getMonth() - 1, 1)),
   );
 });
@@ -62,10 +64,10 @@ test("la table liste les transactions de la période", async ({ page }) => {
 
 test("le sélecteur de comptes exclut un compte", async ({ page }) => {
   await page.goto("/", hydrated);
-  const picker = page.getByTitle("Comptes inclus");
+  const picker = page.getByRole("button", { name: "Comptes inclus" });
 
   await picker.click();
-  await page.getByRole("option", { name: /^Revolut/ }).click();
+  await page.getByRole("menuitemcheckbox", { name: /^Revolut/ }).click();
   await page.keyboard.press("Escape");
 
   await expect(picker).toContainText("2/3");

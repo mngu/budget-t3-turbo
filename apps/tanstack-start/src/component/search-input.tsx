@@ -1,21 +1,25 @@
 "use client";
 
+import { SearchField } from "@heroui/react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useDebounce } from "@uidotdev/usehooks";
 import { useEffect, useRef, useState } from "react";
-
-import { InputGroupInput } from "@budget/ui/input-group";
 
 export function SearchInput({
   param,
   delay = 300,
   resetParams,
-  ...props
+  placeholder,
+  className,
+  "aria-label": ariaLabel,
 }: {
   param: string;
   delay?: number;
   resetParams?: Record<string, unknown>;
-} & Omit<React.ComponentProps<typeof InputGroupInput>, "value" | "onChange">) {
+  placeholder: string;
+  className?: string;
+  "aria-label"?: string;
+}) {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   const search = useSearch({ strict: false }) as Record<string, unknown>;
   const navigate = useNavigate();
@@ -47,11 +51,17 @@ export function SearchInput({
   }, [urlValue]);
 
   return (
-    <InputGroupInput
-      ref={inputRef}
+    <SearchField
       value={text}
-      onChange={(e) => setText(e.target.value)}
-      {...props}
-    />
+      onChange={setText}
+      aria-label={ariaLabel ?? placeholder}
+      className={className}
+    >
+      <SearchField.Group>
+        <SearchField.SearchIcon />
+        <SearchField.Input ref={inputRef} placeholder={placeholder} />
+        <SearchField.ClearButton />
+      </SearchField.Group>
+    </SearchField>
   );
 }

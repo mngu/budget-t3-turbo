@@ -2,24 +2,9 @@
 
 import type { TransactionRow } from "@budget/api";
 
-import { Link } from "@tanstack/react-router";
+import { Pagination, Table } from "@heroui/react";
 
 import { cn } from "@budget/ui";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationNext,
-  PaginationPrevious,
-} from "@budget/ui/pagination";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@budget/ui/table";
 import { dayMonthFr, signedAmount, titleCase } from "~/lib/format";
 import { useFormat } from "~/lib/use-format";
 import { useRevueSearch } from "~/lib/use-revue-search";
@@ -39,143 +24,139 @@ export function TransactionsTable({
   pageCount: number;
   total: number;
 }) {
-  const { search } = useRevueSearch();
-
-  // Dim repeated dates only under date sorting, where they indicate day groups.
-  const grouped = search.sort === "date";
-
-  return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      <Table
-        containerClassName="min-h-0 flex-1 scrollbar-thin overflow-y-auto pr-2"
-        // Collapsed borders do not move with sticky header cells.
-        className="table-fixed border-separate border-spacing-0"
-      >
-        <TableHeader className="label-caps sticky top-0 z-[2]">
-          <TableRow className="hover:bg-transparent">
-            <SortableHead
-              label="Date"
-              sortKey="date"
-              className="w-14 md:w-18"
-            />
-            <Head>Libellé</Head>
-            <Head className="hidden w-40 md:table-cell">Compte</Head>
-            <Head className="hidden w-44 md:table-cell">Tiers</Head>
-            <Head className="hidden w-60 md:table-cell">Catégorie</Head>
-            <SortableHead
-              label="Montant"
-              sortKey="amount"
-              className="w-28 text-right"
-            />
-          </TableRow>
-        </TableHeader>
-
-        <TableBody className="[&_td]:border-border [&_td]:border-b">
-          {rows.map((row, index) => (
-            <Row
-              key={row.id}
-              row={row}
-              repeatsDate={
-                grouped && rows[index - 1]?.bookingDate === row.bookingDate
-              }
-            />
-          ))}
-        </TableBody>
-      </Table>
-
-      {rows.length === 0 && (
-        <p className="text-subtle text-control py-15 text-center">
-          Aucune transaction ne correspond à ces filtres.
-        </p>
-      )}
-
-      <Pagination className="text-subtle text-control items-center gap-3 p-4">
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              render={
-                <Link to="." search={(prev) => ({ ...prev, page: page - 1 })} />
-              }
-              aria-disabled={page <= 1}
-              className="hit-area aria-disabled:pointer-events-none aria-disabled:opacity-40"
-            />
-          </PaginationItem>
-        </PaginationContent>
-        <span>
-          Page {page} sur {pageCount} — {total} transactions
-        </span>
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationNext
-              render={
-                <Link to="." search={(prev) => ({ ...prev, page: page + 1 })} />
-              }
-              aria-disabled={page >= pageCount}
-              className="hit-area aria-disabled:pointer-events-none aria-disabled:opacity-40"
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
-    </div>
-  );
-}
-
-const HEAD = "border-border-strong bg-background h-8 border-b px-2 font-medium";
-
-function Head(props: React.ComponentProps<"th">) {
-  return <TableHead {...props} className={cn(HEAD, props.className)} />;
-}
-
-function Row({
-  row,
-  repeatsDate,
-}: {
-  row: TransactionRow;
-  repeatsDate: boolean;
-}) {
+  const { search, setSearch } = useRevueSearch();
   const { signedEuro } = useFormat(2);
-  const signed = signedAmount(row);
-  const debtor = row.raw.debtor?.name ?? row.counterparty;
 
   return (
-    <TableRow className={cn("group h-11", row.excluded && "opacity-50")}>
-      <TableCell
-        className={cn(
-          "num text-meta",
-          repeatsDate ? "text-subtle" : "text-muted",
-        )}
-      >
-        {dayMonthFr.format(new Date(row.bookingDate))}
-      </TableCell>
+    <Table className="min-h-0 flex-1">
+      <Table.ScrollContainer className="min-h-0 flex-1 scrollbar-thin overflow-y-auto">
+        <Table.Content
+          aria-label="Transactions"
+          className="table-fixed"
+          sortDescriptor={{
+            column: search.sort ?? "date",
+            direction: search.order === "asc" ? "ascending" : "descending",
+          }}
+          onSortChange={({ column, direction }) =>
+            setSearch({
+              sort: column === "amount" ? "amount" : "date",
+              order: direction === "ascending" ? "asc" : "desc",
+            })
+          }
+        >
+          <Table.Header className="sticky top-0 z-[2]">
+            <Table.Column id="date" allowsSorting className="w-22 md:w-24">
+              {({ sortDirection }) => (
+                <Table.SortableColumnHeader sortDirection={sortDirection}>
+                  Date
+                </Table.SortableColumnHeader>
+              )}
+            </Table.Column>
+            <Table.Column id="description" isRowHeader>
+              Libellé
+            </Table.Column>
+            <Table.Column id="bank" className="hidden w-36 md:table-cell">
+              Compte
+            </Table.Column>
+            <Table.Column id="debtor" className="hidden w-32 md:table-cell">
+              Tiers
+            </Table.Column>
+            <Table.Column id="category" className="hidden w-48 md:table-cell">
+              Catégorie
+            </Table.Column>
+            <Table.Column
+              id="amount"
+              allowsSorting
+              className="w-28 text-right md:w-32"
+            >
+              {({ sortDirection }) => (
+                <Table.SortableColumnHeader sortDirection={sortDirection}>
+                  Montant
+                </Table.SortableColumnHeader>
+              )}
+            </Table.Column>
+          </Table.Header>
 
-      <TableCell>
-        <span className="flex min-w-0 items-center gap-1.5">
-          <span className="text-body truncate">{row.description}</span>
-          <ExcludeBadge row={row} />
-        </span>
-        <span className="mt-1 flex md:hidden">
-          <CategoryCell row={row} />
-        </span>
-      </TableCell>
+          <Table.Body
+            renderEmptyState={() => (
+              <p className="text-muted py-15 text-center">
+                Aucune transaction ne correspond à ces filtres.
+              </p>
+            )}
+          >
+            {rows.map((row) => {
+              const signed = signedAmount(row);
+              const debtor = row.raw.debtor?.name ?? row.counterparty;
+              return (
+                <Table.Row
+                  key={row.id}
+                  id={row.id}
+                  className={cn(row.excluded && "opacity-50")}
+                >
+                  <Table.Cell className="num text-muted whitespace-nowrap">
+                    {dayMonthFr.format(new Date(row.bookingDate))}
+                  </Table.Cell>
+                  <Table.Cell>
+                    <span className="flex min-w-0 items-center gap-1.5">
+                      <span className="truncate">{row.description}</span>
+                      <ExcludeBadge row={row} />
+                    </span>
+                    <span className="mt-1 flex md:hidden">
+                      <CategoryCell row={row} />
+                    </span>
+                  </Table.Cell>
+                  <Table.Cell className="text-muted hidden truncate md:table-cell">
+                    {row.bankName}
+                  </Table.Cell>
+                  <Table.Cell className="text-muted hidden truncate md:table-cell">
+                    {debtor && titleCase(debtor)}
+                  </Table.Cell>
+                  <Table.Cell className="hidden md:table-cell">
+                    <CategoryCell row={row} />
+                  </Table.Cell>
+                  <Table.Cell
+                    className={cn(
+                      "num text-right",
+                      signed > 0 && "text-success",
+                    )}
+                  >
+                    {signedEuro.format(signed)}
+                  </Table.Cell>
+                </Table.Row>
+              );
+            })}
+          </Table.Body>
+        </Table.Content>
+      </Table.ScrollContainer>
 
-      <TableCell className="text-subtle text-control hidden truncate md:table-cell">
-        {row.bankName}
-      </TableCell>
-
-      <TableCell className="text-subtle text-control hidden truncate md:table-cell">
-        {debtor && titleCase(debtor)}
-      </TableCell>
-
-      <TableCell className="hidden md:table-cell">
-        <CategoryCell row={row} />
-      </TableCell>
-
-      <TableCell
-        className={cn("num text-body text-right", signed > 0 && "text-ok")}
-      >
-        {signedEuro.format(signed)}
-      </TableCell>
-    </TableRow>
+      <Table.Footer>
+        <Pagination>
+          <Pagination.Summary>
+            Page {page} sur {pageCount} — {total} transactions
+          </Pagination.Summary>
+          <Pagination.Content>
+            <Pagination.Item>
+              <Pagination.Previous
+                isDisabled={page <= 1}
+                onPress={() => setSearch({ page: page - 1 })}
+              >
+                <Pagination.PreviousIcon />
+                <span>Précédent</span>
+              </Pagination.Previous>
+            </Pagination.Item>
+            <Pagination.Item>
+              <Pagination.Next
+                isDisabled={page >= pageCount}
+                onPress={() => setSearch({ page: page + 1 })}
+              >
+                <span>Suivant</span>
+                <Pagination.NextIcon />
+              </Pagination.Next>
+            </Pagination.Item>
+          </Pagination.Content>
+        </Pagination>
+      </Table.Footer>
+    </Table>
   );
 }
 
@@ -207,41 +188,10 @@ function CategoryCell({ row }: { row: TransactionRow }) {
       />
       {row.categorySource === "manual" && (
         <span
-          className="bg-primary size-1 flex-none rounded-full"
+          className="bg-accent size-1 flex-none rounded-full"
           title="Catégorie corrigée à la main"
         />
       )}
     </span>
-  );
-}
-
-function SortableHead({
-  label,
-  sortKey,
-  className,
-}: {
-  label: string;
-  sortKey: "date" | "amount";
-  className?: string;
-}) {
-  const { search, setSearch } = useRevueSearch();
-  const active = search.sort === sortKey;
-  return (
-    <Head className={className}>
-      <button
-        type="button"
-        // Preflight resets text-transform on buttons; keep the header's caps.
-        className="hit-area uppercase hover:underline"
-        onClick={() =>
-          setSearch({
-            sort: sortKey,
-            order: active && search.order === "desc" ? "asc" : "desc",
-          })
-        }
-      >
-        {label}
-        {active ? (search.order === "desc" ? " ↓" : " ↑") : ""}
-      </button>
-    </Head>
   );
 }

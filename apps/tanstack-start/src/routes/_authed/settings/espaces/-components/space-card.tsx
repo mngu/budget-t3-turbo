@@ -8,6 +8,15 @@ import type {
 } from "@budget/api";
 
 import {
+  Button,
+  Chip,
+  Dropdown,
+  Input,
+  Label,
+  ToggleButton,
+  ToggleButtonGroup,
+} from "@heroui/react";
+import {
   EllipsisIcon,
   KeyRoundIcon,
   LogOutIcon,
@@ -16,17 +25,6 @@ import {
   UserIcon,
   UsersIcon,
 } from "lucide-react";
-
-import { Badge } from "@budget/ui/badge";
-import { Button } from "@budget/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@budget/ui/dropdown-menu";
-import { Input } from "@budget/ui/input";
-import { ToggleGroup, ToggleGroupItem } from "@budget/ui/toggle-group";
 
 export interface SpaceCardActions {
   onSwitch: () => void;
@@ -55,9 +53,9 @@ export function SpaceCard({
   const owner = space.role === "owner";
 
   return (
-    <div className="bg-card border-border-strong overflow-hidden rounded-lg border">
+    <div className="bg-surface border-border overflow-hidden rounded-lg border">
       <div className="grid grid-cols-[36px_minmax(0,1fr)_auto] items-center gap-3.5 px-4 py-3.5">
-        <span className="bg-surface-2 text-subtle flex size-9 items-center justify-center rounded-md">
+        <span className="bg-surface-secondary text-muted flex size-9 items-center justify-center rounded-md">
           {shared ? (
             <UsersIcon className="size-4" />
           ) : (
@@ -67,14 +65,20 @@ export function SpaceCard({
 
         <div className="flex min-w-0 flex-wrap items-center gap-2.5">
           <span className="text-subheading">{space.name}</span>
-          {space.isActive && <Badge>Espace actif</Badge>}
-          <Badge variant="outline">{owner ? "Propriétaire" : "Membre"}</Badge>
-          {!shared && <Badge variant="secondary">Personnel</Badge>}
+          {space.isActive && (
+            <Chip color="accent" size="sm">
+              Espace actif
+            </Chip>
+          )}
+          <Chip size="sm" variant="tertiary">
+            {owner ? "Propriétaire" : "Membre"}
+          </Chip>
+          {!shared && <Chip size="sm">Personnel</Chip>}
         </div>
 
         <div className="flex items-center gap-2.5">
           {!space.isActive && (
-            <Button variant="outline" size="sm" onClick={actions.onSwitch}>
+            <Button variant="outline" size="sm" onPress={actions.onSwitch}>
               Basculer ici
             </Button>
           )}
@@ -96,29 +100,29 @@ export function SpaceCard({
                     {member.name}
                   </span>
                   {member.isMe && (
-                    <Badge variant="secondary" className="flex-none">
+                    <Chip size="sm" className="flex-none">
                       vous
-                    </Badge>
+                    </Chip>
                   )}
                 </div>
-                <div className="text-subtle text-control truncate">
+                <div className="text-muted text-control truncate">
                   {member.email}
                 </div>
               </div>
               <span className="text-muted text-control flex items-center gap-1.5">
                 {member.role === "owner" ? (
-                  <KeyRoundIcon className="text-primary size-3.5" />
+                  <KeyRoundIcon className="text-accent size-3.5" />
                 ) : (
-                  <UserIcon className="text-subtle size-3.5" />
+                  <UserIcon className="text-muted size-3.5" />
                 )}
                 {member.role === "owner" ? "Propriétaire" : "Membre"}
               </span>
               {owner && !member.isMe && (
                 <Button
-                  variant="link"
-                  size="xs"
+                  variant="ghost"
+                  size="sm"
                   className="justify-self-end"
-                  onClick={() => actions.onRemoveMember(member)}
+                  onPress={() => actions.onRemoveMember(member)}
                 >
                   Retirer
                 </Button>
@@ -140,16 +144,16 @@ export function SpaceCard({
                   {owner && (
                     <div className="flex items-center gap-3">
                       <Button
-                        variant="link"
-                        size="xs"
-                        onClick={() => actions.onResendInvitation(invitation)}
+                        variant="ghost"
+                        size="sm"
+                        onPress={() => actions.onResendInvitation(invitation)}
                       >
                         Renvoyer
                       </Button>
                       <Button
-                        variant="link"
-                        size="xs"
-                        onClick={() => actions.onCancelInvitation(invitation)}
+                        variant="ghost"
+                        size="sm"
+                        onPress={() => actions.onCancelInvitation(invitation)}
                       >
                         Annuler
                       </Button>
@@ -184,49 +188,48 @@ function SpaceMenu({
   const owner = space.role === "owner";
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            title="Actions"
-            aria-label={`Actions sur l'espace ${space.name}`}
-          />
-        }
+    <Dropdown>
+      <Button
+        variant="ghost"
+        size="sm"
+        isIconOnly
+        aria-label={`Actions sur l'espace ${space.name}`}
       >
         <EllipsisIcon />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        {owner && (
-          <DropdownMenuItem onClick={actions.onRename}>
-            <PencilIcon />
-            Renommer l&apos;espace
-          </DropdownMenuItem>
-        )}
-        {owner && space.isPersonal && (
-          <DropdownMenuItem onClick={actions.onShare}>
-            <UsersIcon />
-            Passer en espace partagé
-          </DropdownMenuItem>
-        )}
-        {!space.isPersonal && (
-          <DropdownMenuItem onClick={actions.onLeave}>
-            <LogOutIcon />
-            Quitter l&apos;espace
-          </DropdownMenuItem>
-        )}
-        {owner && (
-          <DropdownMenuItem
-            variant={space.isPersonal ? "default" : "destructive"}
-            onClick={actions.onDelete}
-          >
-            <Trash2Icon />
-            Supprimer l&apos;espace
-          </DropdownMenuItem>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </Button>
+      <Dropdown.Popover placement="bottom end">
+        <Dropdown.Menu aria-label={`Actions sur l'espace ${space.name}`}>
+          {owner && (
+            <Dropdown.Item textValue="Renommer" onAction={actions.onRename}>
+              <PencilIcon />
+              <Label>Renommer l&apos;espace</Label>
+            </Dropdown.Item>
+          )}
+          {owner && space.isPersonal && (
+            <Dropdown.Item textValue="Partager" onAction={actions.onShare}>
+              <UsersIcon />
+              <Label>Passer en espace partagé</Label>
+            </Dropdown.Item>
+          )}
+          {!space.isPersonal && (
+            <Dropdown.Item textValue="Quitter" onAction={actions.onLeave}>
+              <LogOutIcon />
+              <Label>Quitter l&apos;espace</Label>
+            </Dropdown.Item>
+          )}
+          {owner && (
+            <Dropdown.Item
+              textValue="Supprimer"
+              variant={space.isPersonal ? "default" : "danger"}
+              onAction={actions.onDelete}
+            >
+              <Trash2Icon />
+              <Label>Supprimer l&apos;espace</Label>
+            </Dropdown.Item>
+          )}
+        </Dropdown.Menu>
+      </Dropdown.Popover>
+    </Dropdown>
   );
 }
 
@@ -240,29 +243,38 @@ function InviteForm({
   onSubmit: () => void;
 }) {
   return (
-    <div className="border-border bg-surface-2 flex flex-wrap items-center gap-2.5 border-t px-4 py-3">
+    <div className="border-border bg-surface-secondary flex flex-wrap items-center gap-2.5 border-t px-4 py-3">
       <Input
         type="email"
         value={value.email}
         onChange={(e) => onChange({ ...value, email: e.target.value })}
         placeholder="adresse email"
+        aria-label="Adresse email à inviter"
         className="min-w-55 flex-1"
       />
-      <ToggleGroup
-        value={[value.role]}
-        onValueChange={([role]) =>
-          role && onChange({ ...value, role: role as SpaceRole })
-        }
+      <ToggleButtonGroup
+        aria-label="Rôle"
+        selectionMode="single"
+        disallowEmptySelection
+        selectedKeys={[value.role]}
+        onSelectionChange={(keys) => {
+          const [role] = keys;
+          onChange({ ...value, role: role as SpaceRole });
+        }}
+        size="sm"
         className="flex-none"
       >
-        <ToggleGroupItem value="member">Membre</ToggleGroupItem>
-        <ToggleGroupItem value="owner">Propriétaire</ToggleGroupItem>
-      </ToggleGroup>
+        <ToggleButton id="member">Membre</ToggleButton>
+        <ToggleButton id="owner">
+          <ToggleButtonGroup.Separator />
+          Propriétaire
+        </ToggleButton>
+      </ToggleButtonGroup>
       <Button
         variant="outline"
         size="sm"
         className="flex-none"
-        onClick={onSubmit}
+        onPress={onSubmit}
       >
         Envoyer l&apos;invitation
       </Button>

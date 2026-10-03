@@ -3,7 +3,7 @@
   "printWidth": 80,
   "sortPackageJson": false,
   "sortTailwindcss": {
-    "functions": ["cn", "cva"]
+    "functions": ["cn"]
   },
   "ignorePatterns": ["**/routeTree.gen.ts", "packages/db/drizzle/meta/**"],
   "sortImports": {

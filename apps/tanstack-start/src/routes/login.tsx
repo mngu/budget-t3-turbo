@@ -1,14 +1,9 @@
+import { Alert, Button, Input, Label, Spinner, TextField } from "@heroui/react";
 import { createFileRoute } from "@tanstack/react-router";
-import { CircleAlertIcon, MailCheckIcon } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod/v4";
 
 import { cn } from "@budget/ui";
-import { Alert, AlertDescription, AlertTitle } from "@budget/ui/alert";
-import { Button } from "@budget/ui/button";
-import { Field, FieldLabel } from "@budget/ui/field";
-import { Input } from "@budget/ui/input";
-import { Spinner } from "@budget/ui/spinner";
 import { authClient } from "~/auth/client";
 import { GradientWavesBg } from "~/component/gradient-waves-bg";
 import { Logo } from "~/component/logo";
@@ -76,7 +71,7 @@ function LoginPage() {
           onSubmit={requestLink}
           className={cn(
             RISE,
-            "slide-in-from-bottom-[10px] border-border bg-card/82 shadow-glass w-full max-w-93 rounded-lg border px-5 pt-5 pb-4 backdrop-blur-[14px] backdrop-saturate-130 delay-[60ms] duration-[560ms]",
+            "slide-in-from-bottom-[10px] border-border bg-surface/82 shadow-glass w-full max-w-93 rounded-lg border px-5 pt-5 pb-4 backdrop-blur-[14px] backdrop-saturate-130 delay-[60ms] duration-[560ms]",
           )}
         >
           <h1 className="text-amount font-semibold tracking-[-0.025em]">
@@ -84,39 +79,41 @@ function LoginPage() {
           </h1>
 
           <div className="flex flex-col gap-2">
-            <Field>
-              <FieldLabel htmlFor="email">Adresse e-mail</FieldLabel>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="vous@exemple.fr"
-                autoComplete="email"
-                aria-invalid={error !== null}
-              />
-            </Field>
+            <TextField
+              type="email"
+              value={email}
+              onChange={setEmail}
+              autoComplete="email"
+              isInvalid={error !== null}
+            >
+              <Label>Adresse e-mail</Label>
+              <Input placeholder="vous@exemple.fr" />
+            </TextField>
 
             {error && (
-              <Alert variant="destructive">
-                <CircleAlertIcon />
-                <AlertTitle>{error}</AlertTitle>
+              <Alert status="danger">
+                <Alert.Indicator />
+                <Alert.Content>
+                  <Alert.Title>{error}</Alert.Title>
+                </Alert.Content>
               </Alert>
             )}
 
             {sent && (
-              <Alert variant="ok">
-                <MailCheckIcon />
-                <AlertTitle>Lien envoyé à {email}</AlertTitle>
-                <AlertDescription>
-                  Ouvrez-le dans les 15 minutes — il vous connectera
-                  directement.
-                </AlertDescription>
+              <Alert status="success">
+                <Alert.Indicator />
+                <Alert.Content>
+                  <Alert.Title>Lien envoyé à {email}</Alert.Title>
+                  <Alert.Description>
+                    Ouvrez-le dans les 15 minutes — il vous connectera
+                    directement.
+                  </Alert.Description>
+                </Alert.Content>
               </Alert>
             )}
 
-            <Button type="submit" disabled={incomplete} className="mt-0.5">
-              {pending && <Spinner />}
+            <Button type="submit" isDisabled={incomplete} isPending={pending}>
+              {pending && <Spinner color="current" size="sm" />}
               {pending
                 ? "Envoi…"
                 : sent

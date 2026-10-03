@@ -33,7 +33,7 @@ export function BudgetGauge({
           <span className="text-subheading">{label}</span>
         </div>
         <span
-          className={cn("num text-amount", { "text-body": valueSize === "md" })}
+          className={cn("num text-amount", valueSize === "md" && "text-body")}
         >
           {euro.format(value)}
         </span>
@@ -41,10 +41,10 @@ export function BudgetGauge({
       <Gauge value={value} budget={budget} max={max} color={color} />
 
       {budget && (
-        <div className="text-subtle num text-label flex justify-between">
+        <div className="text-muted num text-label flex justify-between">
           <span>Budget: {euro.format(budget)}</span>
           {balance < 0 ? (
-            <span className="text-bad font-semibold">
+            <span className="text-danger font-semibold">
               +{euro.format(Math.abs(balance))}
             </span>
           ) : (

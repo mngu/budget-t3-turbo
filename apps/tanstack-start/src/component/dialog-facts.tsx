@@ -15,7 +15,7 @@ export function DialogFacts({
           <span
             className={cn(
               "num text-body text-right font-medium",
-              fact.tone ?? "text-destructive",
+              fact.tone ?? "text-danger",
             )}
           >
             {fact.n}

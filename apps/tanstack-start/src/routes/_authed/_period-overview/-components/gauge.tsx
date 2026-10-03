@@ -16,7 +16,7 @@ export function Gauge({ max, value, budget, color }: GaugeProps) {
   const budgetPct = pct(budget ?? 0);
 
   return (
-    <span className="bg-track relative block h-2 rounded-full">
+    <span className="bg-default relative block h-2 rounded-full">
       <span
         className="absolute inset-y-0 left-0 rounded-full transition-[width] duration-300 ease-in starting:w-0"
         style={
@@ -29,7 +29,7 @@ export function Gauge({ max, value, budget, color }: GaugeProps) {
       />
       {over && over > 0 ? (
         <span
-          className="bg-bad absolute inset-y-0 min-w-1 rounded-full"
+          className="bg-danger absolute inset-y-0 min-w-1 rounded-full"
           style={{
             left: `calc(${valuePct} + 2px)`,
             width: `calc(${overPct} - 2px)`,

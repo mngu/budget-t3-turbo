@@ -1,3 +1,4 @@
+import { Button, Input, Label, Spinner, TextField, toast } from "@heroui/react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   CircleCheckIcon,
@@ -10,11 +11,6 @@ import {
 import { useState } from "react";
 
 import { cn } from "@budget/ui";
-import { Button } from "@budget/ui/button";
-import { Field, FieldLabel } from "@budget/ui/field";
-import { Input } from "@budget/ui/input";
-import { Spinner } from "@budget/ui/spinner";
-import { toast } from "@budget/ui/toast";
 import { authClient } from "~/auth/client";
 import { Logo } from "~/component/logo";
 import { useTRPCClient } from "~/lib/trpc";
@@ -47,7 +43,7 @@ function InvitationPage() {
     return (
       <Shell
         icon={<ClockAlertIcon className="size-4" />}
-        tone="bad"
+        tone="danger"
         title="Cette invitation est introuvable"
         body="Le lien est incomplet ou l'invitation a été supprimée. Demandez-en un nouveau à la personne qui vous a invité."
         footnote="Rien n'a été créé."
@@ -64,7 +60,7 @@ function InvitationPage() {
       await authClient.organization.setActive({ organizationId });
       window.location.href = "/";
     } catch (err) {
-      toast.error(
+      toast.danger(
         err instanceof Error ? err.message : "Échec de l'acceptation.",
       );
       setPending(false);
@@ -80,7 +76,7 @@ function InvitationPage() {
       callbackURL: `/invitation/${invitationId}`,
     });
     setPending(false);
-    if (error) toast.error(error.message ?? "Envoi du lien impossible");
+    if (error) toast.danger(error.message ?? "Envoi du lien impossible");
     else setSent(true);
   };
 
@@ -88,14 +84,14 @@ function InvitationPage() {
     return (
       <Shell
         icon={<ClockAlertIcon className="size-4" />}
-        tone="bad"
+        tone="danger"
         title="Cette invitation a expiré"
         body={`Les liens d'invitation valent 7 jours. Demandez à ${invitation.invitedBy} d'en renvoyer un depuis l'écran Espaces — l'adresse invitée reste la même.`}
         note={`Invitation pour ${invitation.email}.`}
         footnote="Rien n'a été créé : votre compte n'existe pas encore."
         secondary={{
           label: "Retour à l'application",
-          onClick: () => void navigate({ to: "/login" }),
+          onPress: () => void navigate({ to: "/login" }),
         }}
       />
     );
@@ -106,7 +102,7 @@ function InvitationPage() {
     return (
       <Shell
         icon={<CircleCheckIcon className="size-4" />}
-        tone={used ? "ok" : "bad"}
+        tone={used ? "success" : "danger"}
         title={
           used ? "Ce lien a déjà été utilisé" : "Cette invitation a été annulée"
         }
@@ -118,7 +114,7 @@ function InvitationPage() {
         footnote="Un lien d'invitation ne sert qu'une fois."
         primary={{
           label: "Se connecter",
-          onClick: () => void navigate({ to: "/login" }),
+          onPress: () => void navigate({ to: "/login" }),
         }}
       />
     );
@@ -128,7 +124,7 @@ function InvitationPage() {
     return (
       <Shell
         icon={<MailCheckIcon className="size-4" />}
-        tone="primary"
+        tone="accent"
         title="Ouvrez le lien de connexion"
         body={`Un lien vient de partir à ${invitation.email}. Ouvrez-le dans les 15 minutes : il vous connectera et vous ramènera ici pour rejoindre ${invitation.spaceName}.`}
         note="C'est aussi ce lien qui crée votre compte — il n'y a pas de mot de passe."
@@ -144,13 +140,13 @@ function InvitationPage() {
     return (
       <Shell
         icon={<UserIcon className="size-4" />}
-        tone="bad"
+        tone="danger"
         title="Cette invitation vise une autre adresse"
         body={`Elle a été envoyée à ${invitation.email}, et vous êtes connecté avec ${email}. Déconnectez-vous pour l'accepter avec le bon compte.`}
         footnote="Un lien d'invitation ne vaut que pour l'adresse invitée."
         primary={{
           label: "Se déconnecter",
-          onClick: () => {
+          onPress: () => {
             void authClient.signOut().then(() => window.location.reload());
           },
         }}
@@ -167,7 +163,7 @@ function InvitationPage() {
           <UserPlusIcon className="size-4" />
         )
       }
-      tone="primary"
+      tone="accent"
       title={
         signedInAsInvited
           ? `${invitation.invitedBy} vous invite dans l'espace ${invitation.spaceName}`
@@ -191,13 +187,13 @@ function InvitationPage() {
         label: signedInAsInvited
           ? "Rejoindre l'espace"
           : "Recevoir mon lien de connexion",
-        onClick: () => void (signedInAsInvited ? join() : requestLink()),
+        onPress: () => void (signedInAsInvited ? join() : requestLink()),
       }}
       secondary={
         signedInAsInvited
           ? {
               label: "Refuser",
-              onClick: () => {
+              onPress: () => {
                 void trpcClient.spaces.declineInvitation
                   .mutate({ invitationId })
                   .then(() => navigate({ to: "/login" }));
@@ -208,7 +204,7 @@ function InvitationPage() {
     >
       {signedInAsInvited ? (
         <div className="border-border flex items-center gap-2.5 border-b px-5 py-3.5">
-          <UserIcon className="text-subtle size-3.5 flex-none" />
+          <UserIcon className="text-muted size-3.5 flex-none" />
           <div className="text-muted text-control min-w-0">
             Connecté en tant que{" "}
             <span className="text-foreground font-medium">
@@ -218,21 +214,15 @@ function InvitationPage() {
         </div>
       ) : (
         <div className="border-border flex flex-col gap-3 border-b px-5 py-4">
-          <Field>
-            <FieldLabel>Adresse email</FieldLabel>
-            <Input value={invitation.email} readOnly disabled />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor="name">Votre nom</FieldLabel>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Julie Rossi"
-              autoComplete="name"
-            />
-          </Field>
-          <div className="text-subtle text-control text-pretty">
+          <TextField value={invitation.email} isReadOnly isDisabled>
+            <Label>Adresse email</Label>
+            <Input />
+          </TextField>
+          <TextField value={name} onChange={setName} autoComplete="name">
+            <Label>Votre nom</Label>
+            <Input placeholder="Julie Rossi" />
+          </TextField>
+          <div className="text-muted text-control text-pretty">
             Pas de mot de passe : un lien de connexion part à cette adresse, et
             c'est lui qui crée votre compte.
           </div>
@@ -243,9 +233,9 @@ function InvitationPage() {
 }
 
 const TONE = {
-  primary: "bg-accent-soft text-primary",
-  ok: "bg-ok-soft text-ok",
-  bad: "bg-bad-soft text-bad",
+  accent: "bg-accent-soft text-accent",
+  success: "bg-success-soft text-success",
+  danger: "bg-danger-soft text-danger",
 };
 
 function Shell({
@@ -266,8 +256,8 @@ function Shell({
   body: string;
   note?: string;
   footnote: string;
-  primary?: { label: string; onClick: () => void };
-  secondary?: { label: string; onClick: () => void };
+  primary?: { label: string; onPress: () => void };
+  secondary?: { label: string; onPress: () => void };
   pending?: boolean;
   children?: React.ReactNode;
 }) {
@@ -281,7 +271,7 @@ function Shell({
           </span>
         </div>
 
-        <div className="border-border-strong bg-card mt-5 overflow-hidden rounded-lg border">
+        <div className="border-border bg-surface mt-5 overflow-hidden rounded-lg border">
           <div className="border-border border-b px-5 pt-5 pb-4">
             <span
               className={cn(
@@ -300,24 +290,24 @@ function Shell({
           {children}
 
           <div className="flex items-center gap-3 px-5 py-3.5">
-            <span className="text-subtle text-control min-w-0 flex-1 text-pretty">
+            <span className="text-muted text-control min-w-0 flex-1 text-pretty">
               {note}
             </span>
             {secondary && (
-              <Button variant="ghost" onClick={secondary.onClick}>
+              <Button variant="ghost" onPress={secondary.onPress}>
                 {secondary.label}
               </Button>
             )}
             {primary && (
-              <Button disabled={pending} onClick={primary.onClick}>
-                {pending && <Spinner />}
+              <Button isPending={pending} onPress={primary.onPress}>
+                {pending && <Spinner color="current" size="sm" />}
                 {primary.label}
               </Button>
             )}
           </div>
         </div>
 
-        <div className="text-subtle text-control mt-3.5 text-center text-pretty">
+        <div className="text-muted text-control mt-3.5 text-center text-pretty">
           {footnote}
         </div>
       </div>

@@ -1,9 +1,9 @@
 import type { SyncOutcome } from "@budget/api";
 
+import { toast } from "@heroui/react";
 import { useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 
-import { toast } from "@budget/ui/toast";
 import { useTRPCClient } from "~/lib/trpc";
 
 export function toastSyncOutcome(
@@ -41,7 +41,7 @@ export function useSync() {
       setState("idle");
       return true;
     } catch (err) {
-      toast.error(
+      toast.danger(
         err instanceof Error ? err.message : "Échec de la synchronisation.",
       );
       setState("failed");

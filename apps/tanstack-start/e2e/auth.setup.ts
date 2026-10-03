@@ -13,6 +13,8 @@ setup("seed the demo space and sign in", async ({ page }) => {
   if (!link) throw new Error(`Lien de connexion absent :\n${output}`);
 
   await page.goto(link);
-  await expect(page.getByTitle("Choisir une période")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Choisir une période" }),
+  ).toBeVisible();
   await page.context().storageState({ path: DEMO_STATE });
 });

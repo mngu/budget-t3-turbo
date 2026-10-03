@@ -1,7 +1,7 @@
 # ADR-0001 — Le design appartient à `@budget/ui`
 
 - **Date** : 2026-08-08
-- **Statut** : accepté
+- **Statut** : caduc depuis le 2026-10-03 — les composants viennent de HeroUI, utilisés avec leurs valeurs par défaut ; `@budget/ui` ne porte plus de composants d'interface
 - **Portée** : `packages/ui`, tous ses appelants dans `apps/tanstack-start`
 
 ## Contexte

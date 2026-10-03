@@ -1,12 +1,18 @@
 import type { CategoryOverviewElementType } from "@budget/api/schemas";
 
-import { TagIcon } from "lucide-react";
-import { useState } from "react";
+import {
+  Autocomplete,
+  Header,
+  ListBox,
+  SearchField,
+  useFilter,
+} from "@heroui/react";
+import { useLoaderData } from "@tanstack/react-router";
 
-import { Button } from "@budget/ui/button";
+import { NO_CATEGORY_NAME } from "@budget/api/schemas";
 import { CategoryIcon } from "~/component/category-icon";
 
-import { CategoryPathPicker } from "./category-path-picker";
+import { getCategoryLabel } from "../../-lib/breakdown";
 
 export type SelectedCategory = {
   parent: Pick<CategoryOverviewElementType, "id" | "name" | "color" | "icon">;
@@ -18,35 +24,85 @@ type CategorySelectorProps = {
   onChange: (selectedCategory?: SelectedCategory) => void;
 };
 
+// Category names are unique within a space, so they double as list keys;
+// the uncategorized row has no name and takes the API's sentinel.
+const keyOf = (name: string | null) => name ?? NO_CATEGORY_NAME;
+
 export function CategorySelector({ value, onChange }: CategorySelectorProps) {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const { overview } = useLoaderData({ from: "/_authed/_period-overview" });
+  const { contains } = useFilter({ sensitivity: "base" });
 
-  const label = !value
-    ? "Choisir une catégorie"
-    : `${value.child?.name ?? value.parent.name ?? "Sans catégorie"}`;
-
-  const labelIcon = !value ? (
-    <TagIcon className="size-3" />
-  ) : (
-    <CategoryIcon
-      name={value.parent.icon}
-      className="size-3"
-      color={value.parent.color}
-    />
-  );
+  const select = (key: unknown) => {
+    for (const parent of overview) {
+      if (keyOf(parent.name) === key) return onChange({ parent });
+      const child = parent.children?.find(({ name }) => name === key);
+      if (child) return onChange({ parent, child });
+    }
+  };
 
   return (
-    <>
-      <Button variant="secondary" onClick={() => setIsOpen(true)}>
-        {labelIcon} {label}
-        <span className="text-subtle text-label ml-auto flex-none">▾</span>
-      </Button>
-      <CategoryPathPicker
-        open={isOpen}
-        onOpenChange={setIsOpen}
-        current={value}
-        onPick={onChange}
-      />
-    </>
+    <Autocomplete
+      aria-label="Catégorie"
+      placeholder="Choisir une catégorie"
+      value={value && (value.child?.name ?? keyOf(value.parent.name))}
+      onChange={select}
+    >
+      <Autocomplete.Trigger className="whitespace-nowrap">
+        {/* A parent's own item reads « Toute la catégorie »; the trigger names the category. */}
+        <Autocomplete.Value>
+          {({ defaultChildren }) =>
+            value
+              ? (value.child?.name ?? getCategoryLabel(value.parent.name))
+              : defaultChildren
+          }
+        </Autocomplete.Value>
+        <Autocomplete.Indicator />
+      </Autocomplete.Trigger>
+      <Autocomplete.Popover>
+        <Autocomplete.Filter filter={contains}>
+          {/* The filter is what the popover opens for; typing must work at once. */}
+          {/* oxlint-disable-next-line jsx-a11y/no-autofocus */}
+          <SearchField autoFocus aria-label="Filtrer les catégories">
+            <SearchField.Group>
+              <SearchField.SearchIcon />
+              <SearchField.Input
+                placeholder={`Filtrer parmi ${overview.length} catégories…`}
+              />
+            </SearchField.Group>
+          </SearchField>
+          <ListBox renderEmptyState={() => "Aucune catégorie ne correspond."}>
+            {overview.map((parent) => (
+              <ListBox.Section key={keyOf(parent.name)}>
+                <Header className="flex items-center gap-1.5">
+                  <CategoryIcon
+                    name={parent.icon}
+                    className="size-3"
+                    color={parent.color}
+                  />
+                  {getCategoryLabel(parent.name)}
+                </Header>
+                <ListBox.Item
+                  id={keyOf(parent.name)}
+                  textValue={getCategoryLabel(parent.name)}
+                >
+                  Toute la catégorie
+                  <ListBox.ItemIndicator />
+                </ListBox.Item>
+                {(parent.children ?? []).map((child) => (
+                  <ListBox.Item
+                    key={child.name}
+                    id={child.name}
+                    textValue={`${parent.name} ${child.name}`}
+                  >
+                    {child.name}
+                    <ListBox.ItemIndicator />
+                  </ListBox.Item>
+                ))}
+              </ListBox.Section>
+            ))}
+          </ListBox>
+        </Autocomplete.Filter>
+      </Autocomplete.Popover>
+    </Autocomplete>
   );
 }

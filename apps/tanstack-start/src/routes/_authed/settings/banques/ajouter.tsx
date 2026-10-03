@@ -1,17 +1,12 @@
 import type { AccountSummary, AspspOption } from "@budget/api";
 
+import { Button, Checkbox, Input, Spinner, toast } from "@heroui/react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ExternalLinkIcon, RefreshCwIcon, SearchIcon } from "lucide-react";
+import { ExternalLinkIcon, RefreshCwIcon } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod/v4";
 
 import { cn } from "@budget/ui";
-import { Button } from "@budget/ui/button";
-import { Checkbox } from "@budget/ui/checkbox";
-import { Input } from "@budget/ui/input";
-import { InputGroup, InputGroupAddon } from "@budget/ui/input-group";
-import { Spinner } from "@budget/ui/spinner";
-import { toast } from "@budget/ui/toast";
 import { SearchInput } from "~/component/search-input";
 import { toastSyncOutcome } from "~/lib/sync-toast";
 import { useTRPCClient } from "~/lib/trpc";
@@ -51,8 +46,8 @@ function AjouterBanquePage() {
   const { step } = Route.useSearch();
 
   return (
-    <section className="border-border-strong bg-card mt-5 overflow-hidden rounded-lg border">
-      <header className="bg-sunken flex items-center gap-3 border-b px-4.5 py-3">
+    <section className="border-border bg-surface mt-5 overflow-hidden rounded-lg border">
+      <header className="bg-background-secondary flex items-center gap-3 border-b px-4.5 py-3">
         <Link
           to="/settings/banques"
           className="text-muted hover:text-foreground text-control"
@@ -86,15 +81,15 @@ function WizardStep({
     <span
       className={cn(
         "text-control inline-flex items-center gap-1.5",
-        current ? "text-foreground font-semibold" : "text-subtle",
+        current ? "text-foreground font-semibold" : "text-muted",
       )}
     >
       <span
         className={cn(
           "num text-label flex size-4 items-center justify-center rounded-full border",
           current
-            ? "border-primary bg-primary text-primary-foreground"
-            : "border-border-strong text-subtle",
+            ? "border-accent bg-accent text-accent-foreground"
+            : "border-border text-muted",
         )}
       >
         {n}
@@ -120,7 +115,7 @@ function StepBanque() {
       // eslint-disable-next-line react-hooks/immutability
       window.location.href = url;
     } catch (err) {
-      toast.error(
+      toast.danger(
         err instanceof Error
           ? err.message
           : "Échec du lancement de l'autorisation.",
@@ -133,18 +128,14 @@ function StepBanque() {
     <div className="px-5 pt-4.5 pb-5">
       <h2 className="text-body font-semibold">Choisissez votre banque</h2>
 
-      <InputGroup className="mt-3 max-w-120">
-        <InputGroupAddon>
-          <SearchIcon />
-        </InputGroupAddon>
-        <SearchInput
-          param="q"
-          placeholder="Rechercher une banque (ex : Caisse d'Epargne, Revolut…)"
-        />
-      </InputGroup>
+      <SearchInput
+        param="q"
+        placeholder="Rechercher une banque (ex : Caisse d'Epargne, Revolut…)"
+        className="mt-3 max-w-120"
+      />
 
       {aspsps.length === 0 ? (
-        <div className="border-border-strong mt-3.5 rounded-xl border border-dashed px-4.5 py-6 text-center">
+        <div className="border-border mt-3.5 rounded-xl border border-dashed px-4.5 py-6 text-center">
           <p className="text-control font-medium">Aucune banque trouvée</p>
           <p className="text-muted text-control mt-1">
             Aucun établissement ne correspond à votre recherche. Essayez le nom
@@ -158,7 +149,7 @@ function StepBanque() {
             return (
               <div
                 key={key}
-                className="hover:bg-surface-2 grid grid-cols-[32px_minmax(0,1fr)_auto] items-center gap-3 border-b px-3.5 py-2.5 last:border-b-0"
+                className="hover:bg-surface-secondary grid grid-cols-[32px_minmax(0,1fr)_auto] items-center gap-3 border-b px-3.5 py-2.5 last:border-b-0"
               >
                 <BankLogo
                   name={aspsp.name}
@@ -169,15 +160,15 @@ function StepBanque() {
                   <div className="text-control truncate font-medium">
                     {aspsp.name}
                   </div>
-                  <div className="text-subtle text-meta">{aspsp.country}</div>
+                  <div className="text-muted text-meta">{aspsp.country}</div>
                 </div>
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={connecting !== null}
-                  onClick={() => connect(aspsp)}
+                  isDisabled={connecting !== null}
+                  onPress={() => void connect(aspsp)}
                 >
-                  {connecting === key && <Spinner />}
+                  {connecting === key && <Spinner color="current" size="sm" />}
                   Connecter
                 </Button>
               </div>
@@ -186,7 +177,7 @@ function StepBanque() {
         </div>
       )}
 
-      <p className="text-subtle text-control mt-3.5 flex max-w-160 items-center gap-2.5 text-pretty">
+      <p className="text-muted text-control mt-3.5 flex max-w-160 items-center gap-2.5 text-pretty">
         <ExternalLinkIcon className="size-3.5 flex-none" />
         Vous serez redirigé vers votre banque pour autoriser l'accès
         (authentification forte), puis ramené ici automatiquement.
@@ -226,7 +217,7 @@ function StepComptes() {
         search: { page: 1, sort: "date", order: "desc" },
       });
     } catch (err) {
-      toast.error(
+      toast.danger(
         err instanceof Error
           ? err.message
           : "Échec de la synchronisation initiale.",
@@ -240,7 +231,7 @@ function StepComptes() {
     return (
       <div className="px-5 py-8">
         <div className="flex items-center justify-center gap-2.5">
-          <RefreshCwIcon className="text-primary size-4 animate-spin" />
+          <RefreshCwIcon className="text-accent size-4 animate-spin" />
           <span className="text-subheading">
             Synchronisation initiale en cours…
           </span>
@@ -266,17 +257,22 @@ function StepComptes() {
         {rows.map((account) => (
           <div
             key={account.id}
-            className="hover:bg-surface-2 grid grid-cols-[20px_minmax(120px,1fr)_max-content] items-center gap-3 border-b px-3.5 py-2.5 last:border-b-0"
+            className="hover:bg-surface-secondary grid grid-cols-[20px_minmax(120px,1fr)_max-content] items-center gap-3 border-b px-3.5 py-2.5 last:border-b-0"
           >
             <Checkbox
-              checked={account.enabled}
-              onCheckedChange={(enabled) => setRow(account.id, { enabled })}
+              isSelected={account.enabled}
+              onChange={(enabled) => setRow(account.id, { enabled })}
               aria-label={`Suivre ${account.displayName ?? account.iban ?? account.uid}`}
-            />
+            >
+              <Checkbox.Control>
+                <Checkbox.Indicator />
+              </Checkbox.Control>
+            </Checkbox>
 
             <Input
               value={account.displayName ?? ""}
               placeholder="Nom du compte (ex : Compte courant)"
+              aria-label="Nom du compte"
               onChange={(e) =>
                 setRow(account.id, { displayName: e.target.value || null })
               }
@@ -284,7 +280,7 @@ function StepComptes() {
 
             <span
               className={cn(
-                "text-subtle num text-meta whitespace-nowrap",
+                "text-muted num text-meta whitespace-nowrap",
                 account.enabled ? "" : "line-through",
               )}
             >
@@ -295,12 +291,12 @@ function StepComptes() {
       </div>
 
       <div className="mt-4 flex items-center gap-3">
-        <span className="text-subtle text-control min-w-0 flex-1">
+        <span className="text-muted text-control min-w-0 flex-1">
           {kept} compte{kept > 1 ? "s" : ""} suivi{kept > 1 ? "s" : ""} sur{" "}
           {rows.length} · les comptes décochés restent visibles mais ne sont pas
           importés
         </span>
-        <Button className="flex-none" onClick={save}>
+        <Button className="flex-none" onPress={() => void save()}>
           Enregistrer et synchroniser
         </Button>
       </div>

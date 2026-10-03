@@ -46,7 +46,7 @@ export function OverviewHeader({ overview }: OverviewHeaderProps) {
           <ArrowLeftIcon className="size-4" aria-hidden />
         </button>
       ) : (
-        <span className="bg-sunken text-subtle flex size-7 flex-none items-center justify-center rounded-lg">
+        <span className="bg-background-secondary text-muted flex size-7 flex-none items-center justify-center rounded-lg">
           <LayersIcon className="size-4" aria-hidden />
         </span>
       )}
@@ -54,7 +54,7 @@ export function OverviewHeader({ overview }: OverviewHeaderProps) {
         <span className="text-heading min-w-0 truncate">
           {selected ? selected.name : "Toutes catégories"}
         </span>
-        <span className="text-subtle text-control truncate lg:flex-none">
+        <span className="text-muted text-control truncate lg:flex-none">
           {selected
             ? `${subCount} sous-catégorie${subCount > 1 ? "s" : ""} · ${sharePercent(selected.totalAmount ?? 0, expenses)} des sorties`
             : `${postes} poste${postes > 1 ? "s" : ""} de dépense`}
@@ -65,17 +65,17 @@ export function OverviewHeader({ overview }: OverviewHeaderProps) {
         to={isTable ? "/" : "/transactions"}
         search={search}
         title={isTable ? "Retour" : "Ouvrir la liste des transactions"}
-        className="border-border bg-card text-muted hover:border-subtle hover:text-foreground hover:bg-default text-control ml-auto flex h-7 flex-none items-center gap-1.5 rounded-full border pr-2 pl-3 font-medium whitespace-nowrap"
+        className="border-border bg-surface text-muted hover:border-muted hover:text-foreground hover:bg-default text-control ml-auto flex h-7 flex-none items-center gap-1.5 rounded-full border pr-2 pl-3 font-medium whitespace-nowrap"
       >
         {isTable ? (
           <>
-            <ArrowLeftIcon className="text-subtle size-3.5" aria-hidden />
+            <ArrowLeftIcon className="text-muted size-3.5" aria-hidden />
             Retour
           </>
         ) : (
           <>
             Voir les transactions
-            <ArrowRightIcon className="text-subtle size-3.5" aria-hidden />
+            <ArrowRightIcon className="text-muted size-3.5" aria-hidden />
           </>
         )}
       </Link>

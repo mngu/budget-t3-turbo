@@ -34,23 +34,6 @@ export const selectedBanks = (search: Pick<TransactionsSearch, "bank">) =>
       ? search.bank
       : [search.bank];
 
-export function toggleBank(
-  search: Pick<TransactionsSearch, "bank">,
-  bank: string,
-  known: string[],
-): string[] | undefined {
-  const current = selectedBanks(search);
-  const base = current.length > 0 ? current : known;
-  const next = base.includes(bank)
-    ? base.filter((b) => b !== bank)
-    : [...base, bank];
-  // Keep at least one account selected.
-  if (next.length === 0) return base;
-  return next.length === known.length && known.every((b) => next.includes(b))
-    ? undefined
-    : next;
-}
-
 // Content filters must not change period totals or make a selected category 100% of the chart.
 export const wholePeriod = <T extends TransactionsSearch>(search: T) => ({
   ...search,

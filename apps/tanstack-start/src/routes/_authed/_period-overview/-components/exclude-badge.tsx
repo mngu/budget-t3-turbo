@@ -2,18 +2,11 @@
 
 import type { TransactionRow } from "@budget/api";
 
+import { Button, Modal, toast } from "@heroui/react";
 import { EyeOffIcon } from "lucide-react";
 import { useState } from "react";
 
 import { cn } from "@budget/ui";
-import { Button } from "@budget/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogTitle,
-} from "@budget/ui/dialog";
-import { toast } from "@budget/ui/toast";
 import { signedAmount } from "~/lib/format";
 import { useTRPCClient } from "~/lib/trpc";
 import { useFormat } from "~/lib/use-format";
@@ -36,8 +29,8 @@ export function ExcludeBadge({ row }: { row: TransactionRow }) {
           "text-label hit-area flex flex-none items-center gap-0.5 rounded-full border px-1.5 py-px leading-3.5",
           // Keep the action visible on touch screens, where hover is unavailable.
           row.excluded
-            ? "border-border bg-surface-2 text-subtle"
-            : "border-border text-subtle md:opacity-0 md:group-hover:opacity-100",
+            ? "border-border bg-surface-secondary text-muted"
+            : "border-border text-muted md:opacity-0 md:group-hover:opacity-100",
         )}
       >
         <EyeOffIcon className="size-2.5" />
@@ -84,39 +77,40 @@ function ExcludeDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        padded={false}
-        className="w-95 max-w-[calc(100vw-2rem)] rounded-lg"
-      >
-        <DialogTitle className="label-caps border-border text-meta border-b p-3.5 pr-10 font-normal">
-          {row.excluded ? "Réintégrer aux analyses" : "Exclure des analyses"}
-        </DialogTitle>
-        <div className="text-control p-3.5">
-          <p className="text-muted">
-            <span className="num">{signedEuro.format(signedAmount(row))}</span>{" "}
-            · {row.description}
-          </p>
-          <p className="text-subtle text-control mt-2">
-            {row.excluded
-              ? "Elle pèsera de nouveau dans les totaux, l'anneau, les moyennes et les budgets."
-              : "Elle ne pèsera plus dans les totaux, l'anneau, les moyennes ni les budgets, et restera dans ce relevé — c'est le seul endroit d'où la reprendre."}
-          </p>
-        </div>
-        <DialogFooter className="justify-end">
-          <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
-            Fermer
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={pending}
-            onClick={() => void toggle()}
-          >
-            {row.excluded ? "Réintégrer" : "Exclure"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <Modal.Backdrop isOpen={open} onOpenChange={onOpenChange}>
+      <Modal.Container size="sm">
+        <Modal.Dialog>
+          <Modal.CloseTrigger />
+          <Modal.Header>
+            <Modal.Heading>
+              {row.excluded
+                ? "Réintégrer aux analyses"
+                : "Exclure des analyses"}
+            </Modal.Heading>
+          </Modal.Header>
+          <Modal.Body>
+            <p className="text-muted">
+              <span className="num">
+                {signedEuro.format(signedAmount(row))}
+              </span>{" "}
+              · {row.description}
+            </p>
+            <p className="text-muted mt-2">
+              {row.excluded
+                ? "Elle pèsera de nouveau dans les totaux, l'anneau, les moyennes et les budgets."
+                : "Elle ne pèsera plus dans les totaux, l'anneau, les moyennes ni les budgets, et restera dans ce relevé — c'est le seul endroit d'où la reprendre."}
+            </p>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button slot="close" variant="tertiary">
+              Fermer
+            </Button>
+            <Button isPending={pending} onPress={() => void toggle()}>
+              {row.excluded ? "Réintégrer" : "Exclure"}
+            </Button>
+          </Modal.Footer>
+        </Modal.Dialog>
+      </Modal.Container>
+    </Modal.Backdrop>
   );
 }

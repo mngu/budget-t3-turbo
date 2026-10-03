@@ -2,6 +2,15 @@ import type { computeStats } from "..";
 import type { ManagedCategory } from "@budget/api/schemas";
 
 import {
+  Accordion,
+  Button,
+  Card,
+  Dropdown,
+  Input,
+  Label,
+  Separator,
+} from "@heroui/react";
+import {
   EllipsisIcon,
   ListTreeIcon,
   PlusIcon,
@@ -10,23 +19,6 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-import { cn } from "@budget/ui";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@budget/ui/accordion";
-import { Button } from "@budget/ui/button";
-import { Card, CardContent } from "@budget/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@budget/ui/dropdown-menu";
-import { Input } from "@budget/ui/input";
 import { CategoryIcon } from "~/component/category-icon";
 import {
   softCategoryColor,
@@ -80,8 +72,8 @@ export function CategoryOverview({
   return (
     <>
       <Card className="p-0">
-        <CardContent className="p-0">
-          <Accordion>
+        <Card.Content>
+          <Accordion allowsMultipleExpanded>
             {categoryOverview.map(
               ({
                 id,
@@ -106,17 +98,22 @@ export function CategoryOverview({
                   });
 
                 return (
-                  <AccordionItem key={id} value={id}>
-                    <div className="hover:bg-surface-2 flex w-full flex-wrap items-center justify-between gap-2 p-2">
+                  <Accordion.Item key={id} id={id}>
+                    <div className="flex w-full flex-wrap items-center justify-between gap-2 p-2">
                       <div className="flex min-w-0 grow basis-full items-center gap-2 md:basis-0">
-                        <AccordionTrigger />
+                        <Accordion.Heading>
+                          <Accordion.Trigger
+                            aria-label={`Sous-catégories de ${name}`}
+                          >
+                            <Accordion.Indicator />
+                          </Accordion.Trigger>
+                        </Accordion.Heading>
 
                         <button
                           type="button"
                           onClick={() =>
                             crud.onOpenIdentity({ id, name, color, icon })
                           }
-                          title="Couleur et icône"
                           aria-label={`Couleur et icône de ${name}`}
                           className="relative flex size-8 items-center justify-center rounded-md border"
                           style={{
@@ -125,7 +122,7 @@ export function CategoryOverview({
                         >
                           <CategoryIcon name={icon} color={resolvedColor} />
                           <span
-                            className="border-card absolute -right-0.5 -bottom-0.5 size-2 rounded-full border-[1.5px]"
+                            className="border-surface absolute -right-0.5 -bottom-0.5 size-2 rounded-full border-[1.5px]"
                             style={{ background: resolvedColor }}
                           />
                         </button>
@@ -139,8 +136,8 @@ export function CategoryOverview({
                       <div className="flex basis-full items-center justify-end gap-2 md:basis-auto">
                         <CountButton
                           count={transactionCount}
-                          onClick={previewParent}
-                          title="Voir les transactions directes"
+                          onPress={previewParent}
+                          label={`Voir les transactions de ${name}`}
                         />
 
                         <div className="flex w-40 items-center justify-end gap-2">
@@ -155,7 +152,7 @@ export function CategoryOverview({
                                 )}
                                 /mois
                               </span>
-                              <span className="text-subtle text-label whitespace-nowrap">
+                              <span className="text-muted text-label whitespace-nowrap">
                                 somme de {childNodes.length} sous-cat.
                               </span>
                             </div>
@@ -167,158 +164,160 @@ export function CategoryOverview({
                           )}
                         </div>
 
-                        <DropdownMenu>
-                          <DropdownMenuTrigger
-                            render={
-                              <Button
-                                variant="ghost"
-                                size="icon-sm"
-                                aria-label={`Actions sur ${name}`}
-                              />
-                            }
+                        <Dropdown>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            isIconOnly
+                            aria-label={`Actions sur ${name}`}
                           >
                             <EllipsisIcon />
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() => crud.onAddChild(id)}
-                            >
-                              <PlusIcon />
-                              Ajouter une sous-catégorie
-                            </DropdownMenuItem>
-                            {childNodes.length > 0 && (
-                              <DropdownMenuItem
-                                onClick={() =>
-                                  onSetDetailed(id, !budgetDetailed)
+                          </Button>
+                          <Dropdown.Popover placement="bottom end">
+                            <Dropdown.Menu aria-label={`Actions sur ${name}`}>
+                              <Dropdown.Item
+                                textValue="Ajouter une sous-catégorie"
+                                onAction={() => crud.onAddChild(id)}
+                              >
+                                <PlusIcon />
+                                <Label>Ajouter une sous-catégorie</Label>
+                              </Dropdown.Item>
+                              {childNodes.length > 0 && (
+                                <Dropdown.Item
+                                  textValue="Régime de budget"
+                                  onAction={() =>
+                                    void onSetDetailed(id, !budgetDetailed)
+                                  }
+                                >
+                                  <ListTreeIcon />
+                                  <Label>
+                                    {budgetDetailed
+                                      ? "Budget global pour la catégorie"
+                                      : "Détailler le budget par sous-catégorie"}
+                                  </Label>
+                                </Dropdown.Item>
+                              )}
+                              <Separator />
+                              <Dropdown.Item
+                                textValue="Supprimer la catégorie"
+                                variant="danger"
+                                onAction={() =>
+                                  crud.onDelete({
+                                    id: id,
+                                    name: name,
+                                    transactionCount: transactionCount,
+                                    childCount: childNodes.length,
+                                    childNames: childNodes.map(
+                                      (c) =>
+                                        `${c.name} · ${c.transactionCount}`,
+                                    ),
+                                  })
                                 }
                               >
-                                <ListTreeIcon />
-                                {budgetDetailed
-                                  ? "Budget global pour la catégorie"
-                                  : "Détailler le budget par sous-catégorie"}
-                              </DropdownMenuItem>
-                            )}
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              variant="destructive"
-                              onClick={() =>
-                                crud.onDelete({
-                                  id: id,
-                                  name: name,
-                                  transactionCount: transactionCount,
-                                  childCount: childNodes.length,
-                                  childNames: childNodes.map(
-                                    (c) => `${c.name} · ${c.transactionCount}`,
-                                  ),
-                                })
-                              }
-                            >
-                              <Trash2Icon />
-                              Supprimer la catégorie
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                                <Trash2Icon />
+                                <Label>Supprimer la catégorie</Label>
+                              </Dropdown.Item>
+                            </Dropdown.Menu>
+                          </Dropdown.Popover>
+                        </Dropdown>
                       </div>
                     </div>
-                    <AccordionContent>
-                      {childNodes.map(
-                        ({ id, name, transactionCount, budgetAmount }, i) => {
-                          const shade = shadeCategoryColor(
-                            resolvedColor,
-                            i,
-                            childNodes.length,
-                          );
-                          return (
-                            <div
-                              key={id}
-                              className="hover:bg-surface-2 flex min-h-10 flex-wrap items-center justify-between px-2 ps-16"
-                            >
-                              <div className="flex min-w-0 grow-2 basis-full items-center gap-2 md:basis-0">
-                                <span
-                                  className="size-2 rounded-full"
-                                  style={{ background: shade }}
-                                />
-                                <NameInput
-                                  name={name}
-                                  onRename={(newName) =>
-                                    crud.onRename(id, newName)
-                                  }
-                                />
-                              </div>
-                              <div className="flex basis-full items-center justify-end gap-2 md:grow md:basis-0">
-                                <CountButton
-                                  count={transactionCount}
-                                  onClick={() =>
-                                    preview.openCategory({
-                                      name: name,
-                                      includesChildren: false,
-                                      color: shade,
-                                      soft,
-                                      icon: icon,
-                                    })
-                                  }
-                                />
-                                <div className="flex w-40 items-center justify-end gap-2">
-                                  {budgetDetailed ? (
-                                    <AmountInput
-                                      value={budgetAmount}
-                                      onCommit={(amount) =>
-                                        onSetAmount(id, amount)
-                                      }
-                                    />
-                                  ) : (
-                                    "—"
-                                  )}
+                    <Accordion.Panel>
+                      <Accordion.Body>
+                        {childNodes.map(
+                          ({ id, name, transactionCount, budgetAmount }, i) => {
+                            const shade = shadeCategoryColor(
+                              resolvedColor,
+                              i,
+                              childNodes.length,
+                            );
+                            return (
+                              <div
+                                key={id}
+                                className="flex min-h-10 flex-wrap items-center justify-between px-2 ps-16"
+                              >
+                                <div className="flex min-w-0 grow-2 basis-full items-center gap-2 md:basis-0">
+                                  <span
+                                    className="size-2 rounded-full"
+                                    style={{ background: shade }}
+                                  />
+                                  <NameInput
+                                    name={name}
+                                    onRename={(newName) =>
+                                      crud.onRename(id, newName)
+                                    }
+                                  />
                                 </div>
-                                <Button
-                                  variant="ghost"
-                                  size="icon-sm"
-                                  aria-label={`Supprimer ${name}`}
-                                  title="Supprimer"
-                                  onClick={() =>
-                                    crud.onDelete({
-                                      id: id,
-                                      name: name,
-                                      transactionCount: transactionCount,
-                                      childCount: 0,
-                                      childNames: [],
-                                    })
-                                  }
-                                  className="text-subtle hover:bg-bad-soft hover:text-bad flex items-center justify-center rounded-md"
-                                >
-                                  <XIcon className="size-3" />
-                                </Button>
+                                <div className="flex basis-full items-center justify-end gap-2 md:grow md:basis-0">
+                                  <CountButton
+                                    count={transactionCount}
+                                    label={`Voir les transactions de ${name}`}
+                                    onPress={() =>
+                                      preview.openCategory({
+                                        name: name,
+                                        includesChildren: false,
+                                        color: shade,
+                                        soft,
+                                        icon: icon,
+                                      })
+                                    }
+                                  />
+                                  <div className="flex w-40 items-center justify-end gap-2">
+                                    {budgetDetailed ? (
+                                      <AmountInput
+                                        value={budgetAmount}
+                                        onCommit={(amount) =>
+                                          onSetAmount(id, amount)
+                                        }
+                                      />
+                                    ) : (
+                                      "—"
+                                    )}
+                                  </div>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    isIconOnly
+                                    aria-label={`Supprimer ${name}`}
+                                    onPress={() =>
+                                      crud.onDelete({
+                                        id: id,
+                                        name: name,
+                                        transactionCount: transactionCount,
+                                        childCount: 0,
+                                        childNames: [],
+                                      })
+                                    }
+                                  >
+                                    <XIcon />
+                                  </Button>
+                                </div>
                               </div>
-                            </div>
-                          );
-                        },
-                      )}
+                            );
+                          },
+                        )}
 
-                      <Button
-                        variant="ghost"
-                        onClick={() => crud.onAddChild(id)}
-                        className="border-border-strong text-muted hover:bg-default hover:text-foreground text-control mt-1 ml-18 flex items-center gap-2 rounded-md border border-dashed px-2.5 py-1"
-                      >
-                        <PlusIcon className="size-3" />
-                        Ajouter une sous-catégorie
-                      </Button>
-                    </AccordionContent>
-                  </AccordionItem>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onPress={() => crud.onAddChild(id)}
+                          className="ml-16"
+                        >
+                          <PlusIcon />
+                          Ajouter une sous-catégorie
+                        </Button>
+                      </Accordion.Body>
+                    </Accordion.Panel>
+                  </Accordion.Item>
                 );
               },
             )}
-            <button
-              type="button"
-              onClick={crud.onAddParent}
-              className="text-muted hover:bg-surface-2 hover:text-foreground text-control flex w-full items-center gap-2.5 px-3 py-2.5"
-            >
-              <span className="border-border-strong flex size-8 items-center justify-center rounded-md border border-dashed">
-                <PlusIcon className="size-3.5" />
-              </span>
-              Ajouter une catégorie parente
-            </button>
           </Accordion>
-        </CardContent>
+          <Button variant="ghost" onPress={crud.onAddParent} className="m-2">
+            <PlusIcon />
+            Ajouter une catégorie parente
+          </Button>
+        </Card.Content>
       </Card>
 
       <CategoryDeleteDialog
@@ -380,33 +379,31 @@ function NameInput({
         }
       }}
       aria-label={`Renommer ${name}`}
-      className="hover:border-border max-w-70 rounded-md border border-transparent bg-transparent"
+      className="max-w-70"
     />
   );
 }
 
 function CountButton({
   count,
-  onClick,
-  title,
+  onPress,
+  label,
 }: {
   count: number;
-  onClick: () => void;
-  title?: string;
+  onPress: () => void;
+  label: string;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      title={title}
-      disabled={count === 0}
-      className={cn(
-        "num hover:text-primary text-control text-right whitespace-nowrap disabled:pointer-events-none",
-        count === 0 ? "text-subtle" : "text-muted",
-      )}
+    <Button
+      variant="ghost"
+      size="sm"
+      onPress={onPress}
+      aria-label={label}
+      isDisabled={count === 0}
+      className="num"
     >
       {count} txns
-    </button>
+    </Button>
   );
 }
 
@@ -448,9 +445,9 @@ function AmountInput({
             e.currentTarget.blur();
           }
         }}
-        className="num w-24 px-2 pr-5 text-right"
+        className="num w-24 pr-5 text-right"
       />
-      <span className="text-subtle text-meta pointer-events-none absolute right-2">
+      <span className="text-muted text-meta pointer-events-none absolute right-2">
         €
       </span>
     </span>

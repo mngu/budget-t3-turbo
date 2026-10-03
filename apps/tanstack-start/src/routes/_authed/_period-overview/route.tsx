@@ -67,7 +67,7 @@ export const Route = createFileRoute("/_authed/_period-overview")({
   errorComponent: ({ error }) => (
     <main className="p-8">
       <p>❌ Impossible de charger la revue du mois.</p>
-      <pre className="text-subtle text-control mt-4">{error.message}</pre>
+      <pre className="text-muted text-control mt-4">{error.message}</pre>
     </main>
   ),
   component: RevueLayout,

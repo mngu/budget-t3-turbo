@@ -2,9 +2,9 @@
 
 import type { ConnectionSummary } from "@budget/api";
 
+import { toast } from "@heroui/react";
 import { useState } from "react";
 
-import { toast } from "@budget/ui/toast";
 import { useTRPCClient } from "~/lib/trpc";
 
 export function useRenewConnection() {
@@ -21,7 +21,7 @@ export function useRenewConnection() {
       });
       window.location.href = url;
     } catch (err) {
-      toast.error(
+      toast.danger(
         err instanceof Error
           ? err.message
           : "Échec du lancement de l'autorisation.",

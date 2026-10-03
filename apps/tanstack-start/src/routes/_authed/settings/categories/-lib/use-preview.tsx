@@ -75,8 +75,8 @@ export function usePreview() {
       description: `${count} transaction(s) sans catégorie, les ${PREVIEW_LIMIT} plus récentes.`,
       txns: result.rows,
       badge: {
-        color: "var(--warn)",
-        soft: "var(--warn-soft)",
+        color: "var(--warning)",
+        soft: "var(--warning-soft)",
         icon: <TagIcon className="size-3.5" />,
       },
     });

@@ -1,6 +1,6 @@
+import { toast } from "@heroui/react";
 import { useState } from "react";
 
-import { toast } from "@budget/ui/toast";
 import { useTRPCClient } from "~/lib/trpc";
 import { useRun } from "~/lib/use-run";
 

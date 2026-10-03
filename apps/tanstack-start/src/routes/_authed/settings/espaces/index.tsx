@@ -7,6 +7,7 @@ import type {
   SpaceRole,
 } from "@budget/api";
 
+import { Button, toast } from "@heroui/react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   LockIcon,
@@ -20,8 +21,6 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-import { Button } from "@budget/ui/button";
-import { toast } from "@budget/ui/toast";
 import { authClient } from "~/auth/client";
 import { useTRPCClient } from "~/lib/trpc";
 import { useRun } from "~/lib/use-run";
@@ -89,7 +88,7 @@ function EspacesAside() {
   return (
     <div className="ml-auto flex items-center gap-4">
       <Button
-        onClick={() => {
+        onPress={() => {
           setDraft("");
           setChoice(personal ? CREATE_CONVERT : CREATE_EMPTY);
           setCreating(true);
@@ -291,9 +290,9 @@ function EspacesPage() {
           {incoming.map((invitation) => (
             <div
               key={invitation.id}
-              className="border-border-strong bg-accent-soft flex flex-wrap items-center gap-4 rounded-lg border px-5 py-4"
+              className="border-border bg-accent-soft flex flex-wrap items-center gap-4 rounded-lg border px-5 py-4"
             >
-              <span className="bg-card border-border-strong text-primary flex size-8 flex-none items-center justify-center rounded-md border">
+              <span className="bg-surface border-border text-accent flex size-8 flex-none items-center justify-center rounded-md border">
                 <MailIcon className="size-4" />
               </span>
               <div className="min-w-70 flex-1">
@@ -309,14 +308,14 @@ function EspacesPage() {
               <div className="flex flex-none items-center gap-2">
                 <Button
                   variant="outline"
-                  disabled={busy}
-                  onClick={() => void respond(invitation, false)}
+                  isDisabled={busy}
+                  onPress={() => void respond(invitation, false)}
                 >
                   Refuser
                 </Button>
                 <Button
-                  disabled={busy}
-                  onClick={() => void respond(invitation, true)}
+                  isDisabled={busy}
+                  onPress={() => void respond(invitation, true)}
                 >
                   Rejoindre l&apos;espace
                 </Button>
@@ -346,7 +345,7 @@ function EspacesPage() {
               onLeave: () => open({ kind: "leave", space }),
               onInvite: (email, role) =>
                 email.trim().length === 0
-                  ? toast.error("Renseignez une adresse email.")
+                  ? toast.danger("Renseignez une adresse email.")
                   : open({ kind: "invite", space, email, role }),
               onRemoveMember: (member) =>
                 open({ kind: "removeMember", space, member }),
@@ -379,7 +378,7 @@ function createSpec(ctx: {
   const convert = choice === CREATE_CONVERT && personal !== undefined;
   return {
     icon: <UsersIcon className="size-4" />,
-    tone: "primary",
+    tone: "accent",
     title: "Créer un espace partagé",
     body: "Un espace partagé réunit plusieurs personnes sur les mêmes comptes, les mêmes catégories et le même historique. Deux façons d'y arriver — la première garde ce que vous avez déjà.",
     choices: personal
@@ -431,7 +430,7 @@ function describe(
     case "share":
       return {
         icon: <UsersIcon className="size-4" />,
-        tone: "primary",
+        tone: "accent",
         title: "Partager cet espace",
         body: `Tout ce que contient « ${action.space.name} » reste en place : ses comptes, ses catégories et son historique. L'espace change de nom et peut accueillir d'autres membres.`,
         input: {
@@ -450,7 +449,7 @@ function describe(
     case "rename":
       return {
         icon: <PencilIcon className="size-4" />,
-        tone: "primary",
+        tone: "accent",
         title: "Renommer l'espace",
         body: "Le nom sert à vous repérer dans la bascule d'espace. Il n'a pas d'effet sur les données.",
         input: {
@@ -466,7 +465,7 @@ function describe(
     case "delete":
       return {
         icon: <Trash2Icon className="size-4" />,
-        tone: "bad",
+        tone: "danger",
         title: `Supprimer ${action.space.name} ?`,
         body: "Comptes, catégories, budgets et historique sont effacés pour tous ses membres, définitivement. Il n'y a pas de corbeille.",
         input: {
@@ -483,7 +482,7 @@ function describe(
     case "deletePersonal":
       return {
         icon: <LockIcon className="size-4" />,
-        tone: "warn",
+        tone: "warning",
         title: "L'espace personnel ne se supprime pas",
         body: "Il est créé avec votre compte et disparaît avec lui. Pour ne plus rien y garder, supprimez les connexions bancaires depuis Banques, ou passez cet espace en espace partagé.",
         cta: "J'ai compris",
@@ -491,7 +490,7 @@ function describe(
     case "leave":
       return {
         icon: <LogOutIcon className="size-4" />,
-        tone: "warn",
+        tone: "warning",
         title: `Quitter ${action.space.name} ?`,
         body: "Vous perdrez l'accès aux comptes, aux catégories et à l'historique de cet espace. Il continue d'exister pour ses autres membres.",
         footnote:
@@ -502,7 +501,7 @@ function describe(
     case "invite":
       return {
         icon: <MailIcon className="size-4" />,
-        tone: "primary",
+        tone: "accent",
         title: `Inviter dans ${action.space.name}`,
         body: "Un email part avec un lien d'acceptation valable 7 jours. La personne verra tous les comptes et toutes les transactions de l'espace.",
         footnote: `Adresse : ${action.email} · rôle proposé : ${
@@ -514,7 +513,7 @@ function describe(
     case "removeMember":
       return {
         icon: <UserMinusIcon className="size-4" />,
-        tone: "bad",
+        tone: "danger",
         title: `Retirer ${action.member.name} de ${action.space.name} ?`,
         body: `${action.member.name} perdra l'accès aux comptes et aux transactions de cet espace. Rien n'est supprimé : les comptes appartiennent à l'espace, pas à la personne.`,
         footnote: "Vous pourrez l'inviter de nouveau.",
@@ -524,7 +523,7 @@ function describe(
     case "cancelInvitation":
       return {
         icon: <MailXIcon className="size-4" />,
-        tone: "warn",
+        tone: "warning",
         title: "Annuler l'invitation ?",
         body: `Le lien envoyé à ${action.invitation.email} cessera de fonctionner. Vous pourrez inviter cette adresse de nouveau.`,
         cta: "Annuler l'invitation",

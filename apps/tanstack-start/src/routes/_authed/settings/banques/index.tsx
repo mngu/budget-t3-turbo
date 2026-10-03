@@ -1,11 +1,10 @@
 import type { ConnectionSummary } from "@budget/api";
 
+import { buttonVariants, toast } from "@heroui/react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { UnlinkIcon } from "lucide-react";
 import { useState } from "react";
 
-import { Button } from "@budget/ui/button";
-import { toast } from "@budget/ui/toast";
 import { sumBy } from "~/lib/sum";
 import { useTRPCClient } from "~/lib/trpc";
 import { useRun } from "~/lib/use-run";
@@ -37,13 +36,13 @@ function BanquesAside() {
     <div className="ml-auto flex flex-wrap items-center justify-end gap-4">
       <SyncStatus totalTransactions={total} lastImportedAt={lastImportedAt} />
       {setup.configured && (
-        <Button
-          render={
-            <Link to="/settings/banques/ajouter" search={{ step: "banque" }} />
-          }
+        <Link
+          to="/settings/banques/ajouter"
+          search={{ step: "banque" }}
+          className={buttonVariants()}
         >
           Ajouter une banque
-        </Button>
+        </Link>
       )}
     </div>
   );
@@ -104,7 +103,7 @@ function BanquesPage() {
           ))}
 
           {connections.length === 0 && (
-            <div className="bg-card rounded-lg border px-5 py-11 text-center">
+            <div className="bg-surface rounded-lg border px-5 py-11 text-center">
               <p className="text-body font-semibold">
                 Aucune banque connectée pour l'instant
               </p>
@@ -113,23 +112,19 @@ function BanquesPage() {
                 vous serez redirigé vers elle pour autoriser l'accès, puis
                 ramené ici.
               </p>
-              <Button
-                className="mt-4"
-                render={
-                  <Link
-                    to="/settings/banques/ajouter"
-                    search={{ step: "banque" }}
-                  />
-                }
+              <Link
+                to="/settings/banques/ajouter"
+                search={{ step: "banque" }}
+                className={buttonVariants({ className: "mt-4" })}
               >
                 Ajouter une banque
-              </Button>
+              </Link>
             </div>
           )}
         </div>
       )}
 
-      <p className="text-subtle text-control mt-4 max-w-205 text-pretty">
+      <p className="text-muted text-control mt-4 max-w-205 text-pretty">
         Une autorisation bancaire dure environ 180 jours. Passé ce délai la
         synchronisation s'arrête sans prévenir : c'est pourquoi le compte à
         rebours est affiché en permanence et devient une alerte un mois avant
@@ -152,15 +147,15 @@ function OrphanBanner({
   orphan: { bankName: string; accountCount: number; transactionCount: number };
 }) {
   return (
-    <div className="border-border-strong flex flex-wrap items-center gap-3.5 rounded-lg border border-dashed px-4.5 py-3.5">
-      <UnlinkIcon className="text-subtle size-4 flex-none" />
+    <div className="border-border flex flex-wrap items-center gap-3.5 rounded-lg border border-dashed px-4.5 py-3.5">
+      <UnlinkIcon className="text-muted size-4 flex-none" />
       <div className="min-w-65 flex-1">
         <p className="text-control font-medium">
           {orphan.accountCount} compte
           {orphan.accountCount > 1 ? "s" : ""} détecté
           {orphan.accountCount > 1 ? "s" : ""} sans connexion
         </p>
-        <p className="text-subtle text-control mt-0.5">
+        <p className="text-muted text-control mt-0.5">
           {orphan.bankName} · {orphan.transactionCount} transaction
           {orphan.transactionCount > 1 ? "s" : ""} importée
           {orphan.transactionCount > 1 ? "s" : ""}, plus rattachée
@@ -170,7 +165,7 @@ function OrphanBanner({
       <Link
         to="/settings/banques/ajouter"
         search={{ step: "banque", q: orphan.bankName }}
-        className="border-border-strong hover:bg-default text-control flex h-8 items-center rounded-md border px-3.5 font-medium whitespace-nowrap"
+        className="border-border hover:bg-default text-control flex h-8 items-center rounded-md border px-3.5 font-medium whitespace-nowrap"
       >
         Connecter {orphan.bankName}
       </Link>
