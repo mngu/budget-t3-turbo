@@ -1,0 +1,23 @@
+CLAUDE.md
+  s_583e269cb9ebca::t_dd84ee77862b99 34
+apps/expo/src/app/auth.tsx
+  s_583e269cb9ebca::t_bf94ec4b63f167 6-7,11-12
+apps/expo/src/app/+native-intent.tsx
+  s_583e269cb9ebca::t_65c7d2ae51b1db 1-15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "8ad63172d3d814304fe054d498c1c7e67e77c7fd",
+  "prompts": {},
+  "sessions": {
+    "s_583e269cb9ebca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "18f94aa2-d22e-4e2a-9d1b-d8afdd7088dd",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
