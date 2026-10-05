@@ -28,7 +28,7 @@ export function Gauge({ value, budget, max, color }: GaugeProps) {
           />
         ) : (
           <View
-            className="bg-foreground absolute inset-y-0 w-0.5"
+            className="bg-foreground absolute inset-y-0 -ml-0.5 w-0.5"
             style={{ left: pct(budget) }}
           />
         ))}

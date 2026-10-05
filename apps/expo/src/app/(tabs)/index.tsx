@@ -2,7 +2,11 @@ import { router } from "expo-router";
 import { Spinner, Typography } from "heroui-native";
 import { ScrollView, View } from "react-native";
 
-import { familyBudget, getCategoryLabel } from "@budget/api/schemas";
+import {
+  familyBudget,
+  getCategoryLabel,
+  NO_CATEGORY_NAME,
+} from "@budget/api/schemas";
 import { Breakdown } from "~/components/breakdown";
 import { KpiBand } from "~/components/kpi-band";
 import { useCategoryColors } from "~/lib/category-color";
@@ -45,13 +49,11 @@ export default function Review() {
           color: resolveColor(category.color),
           value: category.totalAmount ?? 0,
           budget: familyBudget(category),
-          onPress: category.children?.length
-            ? () =>
-                router.push({
-                  pathname: "/categorie/[name]",
-                  params: { name: getCategoryLabel(category.name) },
-                })
-            : undefined,
+          onPress: () =>
+            router.push({
+              pathname: "/categorie/[name]",
+              params: { name: category.name ?? NO_CATEGORY_NAME },
+            }),
         }))}
       />
     </ScrollView>

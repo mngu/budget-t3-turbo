@@ -5,10 +5,10 @@ import { trpc } from "./trpc";
 
 // Same input as the web review: the whole period's expenses, without content filters.
 export function useOverview() {
-  const { range } = usePeriod();
+  const { scope } = usePeriod();
   return useQuery({
     ...trpc.categories.overview.queryOptions({
-      ...range,
+      ...scope,
       page: 1,
       sort: "date",
       order: "desc",

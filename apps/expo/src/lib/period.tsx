@@ -21,22 +21,38 @@ export const monthRange = (month: Date) => ({
   dateTo: isoDate(new Date(month.getFullYear(), month.getMonth() + 1, 0)),
 });
 
-// One period for every screen, as the web keeps it in the URL across the review and the table.
-const PeriodContext = createContext<[Date, Dispatch<SetStateAction<Date>>]>([
-  thisMonth(),
-  () => undefined,
-]);
+interface Period {
+  month: Date;
+  setMonth: Dispatch<SetStateAction<Date>>;
+  // Undefined means all accounts, including any connected later.
+  bank: string[] | undefined;
+  setBank: Dispatch<SetStateAction<string[] | undefined>>;
+}
+
+// One period and account selection for every screen, as the web keeps them in
+// the URL across the review and the table.
+const PeriodContext = createContext<Period>({
+  month: thisMonth(),
+  setMonth: () => undefined,
+  bank: undefined,
+  setBank: () => undefined,
+});
 
 export function PeriodProvider({ children }: { children: ReactNode }) {
-  return <PeriodContext value={useState(thisMonth)}>{children}</PeriodContext>;
+  const [month, setMonth] = useState(thisMonth);
+  const [bank, setBank] = useState<string[]>();
+  return (
+    <PeriodContext value={{ month, setMonth, bank, setBank }}>
+      {children}
+    </PeriodContext>
+  );
 }
 
 export function usePeriod() {
-  const [month, setMonth] = use(PeriodContext);
+  const period = use(PeriodContext);
   return {
-    month,
-    setMonth,
-    label: monthLabel.format(month),
-    range: monthRange(month),
+    ...period,
+    label: monthLabel.format(period.month),
+    scope: { ...monthRange(period.month), bank: period.bank },
   };
 }

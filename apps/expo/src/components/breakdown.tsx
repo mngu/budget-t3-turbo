@@ -13,7 +13,7 @@ export interface BreakdownRow {
   color: string;
   value: number;
   budget: number | null;
-  onPress?: () => void;
+  onPress: () => void;
 }
 
 // Shared by the review and a category's detail: a donut, then one gauge per row.
@@ -46,9 +46,9 @@ export function Breakdown({
         {spent.map((row, index) => (
           <Fragment key={row.label}>
             {index > 0 && <Separator className="mx-4" />}
-            <ListGroup.Item disabled={!row.onPress} onPress={row.onPress}>
+            <ListGroup.Item onPress={row.onPress}>
               <BudgetGauge {...row} max={max} />
-              {row.onPress ? <ListGroup.ItemSuffix /> : null}
+              <ListGroup.ItemSuffix />
             </ListGroup.Item>
           </Fragment>
         ))}

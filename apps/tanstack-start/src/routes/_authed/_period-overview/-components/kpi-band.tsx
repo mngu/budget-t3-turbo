@@ -16,8 +16,9 @@ export function KpiBand({ budgetStats, globalStats }: KpiBandProps) {
   const getColor = useCategoryColor();
   const { credit, debit } = globalStats;
   const balance = credit - debit;
-  const maxValue = Math.max(debit, credit);
   const { totalAmount, totalBudget } = budgetStats;
+  // Include the budget, or its marker lands past the gauge, over the amount.
+  const maxValue = Math.max(debit, credit, totalBudget);
 
   return (
     <div className="flex flex-col gap-4 lg:flex-row lg:gap-10">

@@ -10,17 +10,22 @@ import { trpc } from "~/lib/trpc";
 import { Gauge } from "./gauge";
 
 export function KpiBand() {
-  const { range } = usePeriod();
+  const { scope } = usePeriod();
   const { data } = useQuery({
-    ...trpc.transactions.globalStats.queryOptions(range),
+    ...trpc.transactions.globalStats.queryOptions(scope),
+    placeholderData: keepPreviousData,
+  });
+  const { data: budget } = useQuery({
+    ...trpc.transactions.budgetStats.queryOptions(scope),
     placeholderData: keepPreviousData,
   });
   const { resolve: resolveColor } = useCategoryColors();
-  if (!data) return null;
+  if (!data || !budget) return null;
 
   const { credit, debit } = data;
   const balance = credit - debit;
-  const max = Math.max(credit, debit);
+  // Include the budget, or its marker lands past the gauge, over the amount.
+  const max = Math.max(credit, debit, budget.totalBudget);
 
   return (
     <View className="gap-2">
@@ -36,7 +41,7 @@ export function KpiBand() {
           type="h1"
           className={`tabular-nums ${balance < 0 ? "text-danger" : "text-success"}`}
         >
-          {signedEuro.format(balance)}
+          {signedEuro(balance)}
         </Typography>
       </View>
       <KpiBar
@@ -51,6 +56,13 @@ export function KpiBand() {
         max={max}
         color={resolveColor("#fb2c36")}
       />
+      <KpiBar
+        label="Budget"
+        value={budget.totalAmount}
+        budget={budget.totalBudget}
+        max={max}
+        color="#888888"
+      />
     </View>
   );
 }
@@ -58,11 +70,13 @@ export function KpiBand() {
 function KpiBar({
   label,
   value,
+  budget,
   max,
   color,
 }: {
   label: string;
   value: number;
+  budget?: number;
   max: number;
   color: string;
 }) {
@@ -76,7 +90,7 @@ function KpiBar({
         {label}
       </Typography>
       <View className="flex-1">
-        <Gauge value={value} max={max} color={color} />
+        <Gauge value={value} budget={budget} max={max} color={color} />
       </View>
       <Typography className="w-28 text-right tabular-nums">
         {euro.format(value)}
