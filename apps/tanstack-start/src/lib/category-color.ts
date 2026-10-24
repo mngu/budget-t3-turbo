@@ -14,10 +14,10 @@ export function useCategoryColor(): (hex: string | null) => string {
     resolveCategoryColor(hex ?? FALLBACK_CATEGORY_COLOR, resolvedTheme);
 }
 
-// Keep these hex equivalents aligned with --card in styles.css; Three cannot read oklch().
-const CARD_HEX: Record<ResolvedTheme, string> = {
-  light: "#ffffff",
-  dark: "#22252b",
+// Hex equivalents of --background (HeroUI's light value, styles.css' dark override): Three cannot read oklch().
+const BACKGROUND_HEX: Record<ResolvedTheme, string> = {
+  light: "#f4f4f4",
+  dark: "#0f0f12",
 };
 
 export function useShadeCategoryColor(): (
@@ -27,7 +27,7 @@ export function useShadeCategoryColor(): (
 ) => string {
   const { resolvedTheme } = useTheme();
   return (color, index, count) =>
-    shadeHex(color, CARD_HEX[resolvedTheme], index, count);
+    shadeHex(color, BACKGROUND_HEX[resolvedTheme], index, count);
 }
 
 export function softCategoryColor(color: string) {

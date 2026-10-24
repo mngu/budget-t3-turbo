@@ -27,13 +27,19 @@ export function BudgetGauge({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between gap-3">
+        {/* Rows are HeroUI buttons, which center their text. */}
+        <div className="flex min-w-0 items-center gap-2 text-left">
           <CategoryIcon name={iconName} aria-hidden color={color} />
-          <span className="text-subheading">{label}</span>
+          <span className="text-subheading truncate" title={label ?? undefined}>
+            {label}
+          </span>
         </div>
         <span
-          className={cn("num text-amount", valueSize === "md" && "text-body")}
+          className={cn(
+            "num text-amount flex-none",
+            valueSize === "md" && "text-body",
+          )}
         >
           {euro.format(value)}
         </span>
@@ -42,7 +48,7 @@ export function BudgetGauge({
 
       {budget && (
         <div className="text-muted num text-label flex justify-between">
-          <span>Budget: {euro.format(budget)}</span>
+          <span>Budget&nbsp;: {euro.format(budget)}</span>
           {balance < 0 ? (
             <span className="text-danger font-semibold">
               +{euro.format(Math.abs(balance))}

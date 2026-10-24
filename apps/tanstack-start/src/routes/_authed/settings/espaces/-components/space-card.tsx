@@ -70,9 +70,7 @@ export function SpaceCard({
               Espace actif
             </Chip>
           )}
-          <Chip size="sm" variant="tertiary">
-            {owner ? "Propriétaire" : "Membre"}
-          </Chip>
+          <Chip size="sm">{owner ? "Propriétaire" : "Membre"}</Chip>
           {!shared && <Chip size="sm">Personnel</Chip>}
         </div>
 

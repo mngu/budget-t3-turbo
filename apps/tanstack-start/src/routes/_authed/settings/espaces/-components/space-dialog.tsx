@@ -66,7 +66,7 @@ export function SpaceDialog({
             <Modal.Heading>{spec.title}</Modal.Heading>
           </Modal.Header>
           <Modal.Body className="flex flex-col gap-4">
-            <p>{spec.body}</p>
+            <p className="text-body">{spec.body}</p>
 
             {spec.choices && (
               <RadioGroup
@@ -107,7 +107,9 @@ export function SpaceDialog({
               </TextField>
             )}
 
-            {spec.footnote && <p className="text-muted">{spec.footnote}</p>}
+            {spec.footnote && (
+              <p className="text-muted text-control">{spec.footnote}</p>
+            )}
           </Modal.Body>
           <Modal.Footer>
             {spec.cancel && (

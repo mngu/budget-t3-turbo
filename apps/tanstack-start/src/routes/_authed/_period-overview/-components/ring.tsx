@@ -80,7 +80,9 @@ export default function Ring() {
   );
 
   return (
-    <CanvasContainer>
+    // DEV is Vite's build mode, not an environment variable turbo should hash.
+    // eslint-disable-next-line turbo/no-undeclared-env-vars
+    <CanvasContainer showTuning={import.meta.env.DEV}>
       {overviewArcs.map((overviewArc) => {
         const { id, arc, rotationZ, color, icon, name, totalAmount } =
           overviewArc;
@@ -107,18 +109,14 @@ export default function Ring() {
                 rotation={rotationZ}
                 color={resolvedColor}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2" title={labelName}>
                   <CategoryIcon
                     name={icon}
-                    color={resolvedColor}
-                    className="size-5"
+                    color="currentColor"
+                    className="size-5 flex-none"
                   />
-                  <div
-                    style={{ color: resolvedColor }}
-                    className="whitespace-nowrap"
-                  >
-                    {labelName}
-                  </div>
+                  {/* Long names would run past the canvas edge, which clips them mid-word. */}
+                  <div className="max-w-40 truncate">{labelName}</div>
                 </div>
               </SegmentLabel>
             )}
@@ -165,7 +163,7 @@ function RingBackButton({ onClick }: { onClick: () => void }) {
       className="border-border bg-surface text-muted hover:border-muted hover:text-foreground text-control pointer-events-auto mt-3 flex h-6 items-center gap-1.5 rounded-full border pr-2.5 pl-2 font-semibold whitespace-nowrap"
     >
       <ArrowLeftIcon className="size-3" aria-hidden />
-      Toutes catégories
+      Toutes les catégories
       <kbd className="border-border bg-surface-secondary num text-muted text-label ml-0.5 flex h-4 items-center rounded-sm border px-1 font-medium tracking-[0.02em]">
         Esc
       </kbd>

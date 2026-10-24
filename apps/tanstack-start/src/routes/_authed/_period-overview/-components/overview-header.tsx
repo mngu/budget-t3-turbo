@@ -8,6 +8,8 @@ import { sharePercent } from "~/lib/format";
 import { sumBy } from "~/lib/sum";
 import { useRevueSearch } from "~/lib/use-revue-search";
 
+import { spendingCategories } from "../-lib/spending";
+
 interface OverviewHeaderProps {
   overview: CategoryOverviewType;
 }
@@ -26,7 +28,7 @@ export function OverviewHeader({ overview }: OverviewHeaderProps) {
 
   const subCount = selected?.children?.length ?? 0;
   const expenses = sumBy(overview, (cat) => cat.totalAmount ?? 0);
-  const postes = overview.filter((cat) => cat.totalAmount !== null).length;
+  const postes = spendingCategories(overview).length;
 
   return (
     <div className="flex min-w-0 flex-none items-center gap-3">
@@ -52,7 +54,7 @@ export function OverviewHeader({ overview }: OverviewHeaderProps) {
       )}
       <div className="flex min-w-0 flex-col lg:flex-row lg:items-center lg:gap-3">
         <span className="text-heading min-w-0 truncate">
-          {selected ? selected.name : "Toutes catégories"}
+          {selected ? selected.name : "Toutes les catégories"}
         </span>
         <span className="text-muted text-control truncate lg:flex-none">
           {selected

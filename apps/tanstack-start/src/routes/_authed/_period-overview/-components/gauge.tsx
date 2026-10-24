@@ -16,7 +16,8 @@ export function Gauge({ max, value, budget, color }: GaugeProps) {
   const budgetPct = pct(budget ?? 0);
 
   return (
-    <span className="bg-default relative block h-2 rounded-full">
+    // Translucent so the track stays visible on hover backgrounds, which use --default too.
+    <span className="bg-foreground/10 relative block h-2 rounded-full">
       <span
         className="absolute inset-y-0 left-0 rounded-full transition-[width] duration-300 ease-in starting:w-0"
         style={

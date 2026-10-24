@@ -22,13 +22,11 @@ function AllTransactions() {
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-      <RefineBar
-        overview={overview}
-        className="border-border bg-surface-secondary mt-4 flex-none rounded-md border px-2.5 py-2"
-      />
-
+    <div className="mt-4 flex min-h-0 min-w-0 flex-1 flex-col">
       <TransactionsTable
+        toolbar={
+          <RefineBar overview={overview} className="flex-none px-3 pt-3 pb-2" />
+        }
         rows={rows}
         page={search.page}
         pageCount={pageCount}

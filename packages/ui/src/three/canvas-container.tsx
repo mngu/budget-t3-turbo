@@ -114,9 +114,11 @@ function ParallaxCamera({ sway, fov }: CameraProps) {
 
 type Props = {
   children?: ReactNode;
+  /** The tuning panel is a development aid; production readers never see it. */
+  showTuning?: boolean;
 };
 
-export function CanvasContainer({ children }: Props) {
+export function CanvasContainer({ children, showTuning = false }: Props) {
   const camera = useControls("Caméra", {
     fov: { value: 50, min: 20, max: 90, step: 1 },
     sway: { value: 2.2, min: 0, max: 6, step: 0.1 },
@@ -212,7 +214,12 @@ export function CanvasContainer({ children }: Props) {
       className="isolate flex min-h-0 min-w-0 flex-1 flex-col"
     >
       <div className="fixed bottom-4 left-4 z-50 hidden w-[280px] md:block">
-        <Leva fill collapsed titleBar={{ title: "Anneau 3D" }} />
+        <Leva
+          fill
+          collapsed
+          hidden={!showTuning}
+          titleBar={{ title: "Anneau 3D" }}
+        />
       </div>
       {/* Disable ACES tone mapping to keep category colors aligned with CSS. */}
       <Canvas flat camera={{ position: CAMERA, fov: camera.fov }}>
