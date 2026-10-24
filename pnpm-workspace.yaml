@@ -28,7 +28,7 @@ catalog:
   tailwindcss: 4.3.3
   typescript: 7.0.2
   vite: 7.1.12
-  zod: ^4.1.12
+  zod: ^4.6.5
 
 catalogs:
   react19:
