@@ -1,0 +1,23 @@
+apps/tanstack-start/e2e/login.e2e.ts
+  s_b1b2deb4589072::t_0ad9492a617666 1-8,11
+  s_b1b2deb4589072::t_0cd54ee8341998 9-10
+apps/tanstack-start/src/routes/login.tsx
+  s_b1b2deb4589072::t_9f5a15c5cb001e 17-20
+  s_b1b2deb4589072::t_31a5ed4ca6c4ab 2,15-16,21-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "749cb7af298f195b0b88b5a07d5f421d48a3887c",
+  "prompts": {},
+  "sessions": {
+    "s_b1b2deb4589072": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a55df620-078d-4e74-b7a2-0c49093a3c7c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
