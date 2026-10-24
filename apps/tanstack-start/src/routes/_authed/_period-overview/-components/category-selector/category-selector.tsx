@@ -2,12 +2,15 @@ import type { CategoryOverviewElementType } from "@budget/api/schemas";
 
 import {
   Autocomplete,
+  Button,
   Header,
   ListBox,
+  Modal,
   SearchField,
   useFilter,
 } from "@heroui/react";
 import { useLoaderData } from "@tanstack/react-router";
+import { ChevronDownIcon } from "lucide-react";
 
 import { getCategoryLabel, NO_CATEGORY_NAME } from "@budget/api/schemas";
 import { CategoryIcon } from "~/component/category-icon";
@@ -39,68 +42,86 @@ export function CategorySelector({ value, onChange }: CategorySelectorProps) {
   };
 
   return (
-    <Autocomplete
-      aria-label="Catégorie"
-      placeholder="Choisir une catégorie"
-      value={value && (value.child?.name ?? keyOf(value.parent.name))}
-      onChange={select}
-    >
-      <Autocomplete.Trigger className="whitespace-nowrap">
+    <Modal>
+      <Button variant="outline" size="sm" className="whitespace-nowrap">
         {/* A parent's own item reads « Toute la catégorie »; the trigger names the category. */}
-        <Autocomplete.Value>
-          {({ defaultChildren }) =>
-            value
-              ? (value.child?.name ?? getCategoryLabel(value.parent.name))
-              : defaultChildren
-          }
-        </Autocomplete.Value>
-        <Autocomplete.Indicator />
-      </Autocomplete.Trigger>
-      <Autocomplete.Popover>
-        <Autocomplete.Filter filter={contains}>
-          {/* The filter is what the popover opens for; typing must work at once. */}
-          {/* oxlint-disable-next-line jsx-a11y/no-autofocus */}
-          <SearchField autoFocus aria-label="Filtrer les catégories">
-            <SearchField.Group>
-              <SearchField.SearchIcon />
-              <SearchField.Input
-                placeholder={`Filtrer parmi ${overview.length} catégories…`}
-              />
-            </SearchField.Group>
-          </SearchField>
-          <ListBox renderEmptyState={() => "Aucune catégorie ne correspond."}>
-            {overview.map((parent) => (
-              <ListBox.Section key={keyOf(parent.name)}>
-                <Header className="flex items-center gap-1.5">
-                  <CategoryIcon
-                    name={parent.icon}
-                    className="size-3"
-                    color={parent.color}
-                  />
-                  {getCategoryLabel(parent.name)}
-                </Header>
-                <ListBox.Item
-                  id={keyOf(parent.name)}
-                  textValue={getCategoryLabel(parent.name)}
-                >
-                  Toute la catégorie
-                  <ListBox.ItemIndicator />
-                </ListBox.Item>
-                {(parent.children ?? []).map((child) => (
-                  <ListBox.Item
-                    key={child.name}
-                    id={child.name}
-                    textValue={`${parent.name} ${child.name}`}
+        {value
+          ? (value.child?.name ?? getCategoryLabel(value.parent.name))
+          : "Choisir une catégorie"}
+        <ChevronDownIcon />
+      </Button>
+      <Modal.Backdrop>
+        <Modal.Container size="sm">
+          {/* A fixed height keeps the filter in place while the list narrows. */}
+          <Modal.Dialog aria-label="Catégorie" className="h-120">
+            {({ close }) => (
+              <Autocomplete.Filter filter={contains}>
+                {/* Header and body split so the filter stays put while the list scrolls. */}
+                <Modal.Header>
+                  {/* The filter is what the dialog opens for; typing must work at once. */}
+                  {/* oxlint-disable-next-line jsx-a11y/no-autofocus */}
+                  <SearchField autoFocus aria-label="Filtrer les catégories">
+                    <SearchField.Group>
+                      <SearchField.SearchIcon />
+                      <SearchField.Input
+                        placeholder={`Filtrer parmi ${overview.length} catégories…`}
+                      />
+                    </SearchField.Group>
+                  </SearchField>
+                </Modal.Header>
+                {/* Body mutes its text for prose; these are choices. */}
+                <Modal.Body className="text-foreground">
+                  <ListBox
+                    aria-label="Catégories"
+                    selectionMode="single"
+                    selectedKeys={
+                      value
+                        ? [value.child?.name ?? keyOf(value.parent.name)]
+                        : []
+                    }
+                    // Picking the current row again empties the selection: just close.
+                    onSelectionChange={(keys) => {
+                      if (keys !== "all") select([...keys][0]);
+                      close();
+                    }}
+                    renderEmptyState={() => "Aucune catégorie ne correspond."}
                   >
-                    {child.name}
-                    <ListBox.ItemIndicator />
-                  </ListBox.Item>
-                ))}
-              </ListBox.Section>
-            ))}
-          </ListBox>
-        </Autocomplete.Filter>
-      </Autocomplete.Popover>
-    </Autocomplete>
+                    {overview.map((parent) => (
+                      <ListBox.Section key={keyOf(parent.name)}>
+                        <Header className="flex items-center gap-1.5">
+                          <CategoryIcon
+                            name={parent.icon}
+                            className="size-3"
+                            color={parent.color}
+                          />
+                          {getCategoryLabel(parent.name)}
+                        </Header>
+                        <ListBox.Item
+                          id={keyOf(parent.name)}
+                          textValue={getCategoryLabel(parent.name)}
+                        >
+                          Toute la catégorie
+                          <ListBox.ItemIndicator />
+                        </ListBox.Item>
+                        {(parent.children ?? []).map((child) => (
+                          <ListBox.Item
+                            key={child.name}
+                            id={child.name}
+                            textValue={`${parent.name} ${child.name}`}
+                          >
+                            {child.name}
+                            <ListBox.ItemIndicator />
+                          </ListBox.Item>
+                        ))}
+                      </ListBox.Section>
+                    ))}
+                  </ListBox>
+                </Modal.Body>
+              </Autocomplete.Filter>
+            )}
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
+    </Modal>
   );
 }

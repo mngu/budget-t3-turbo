@@ -88,7 +88,8 @@ export function RefineBar({
           </ToggleButton>
         ))}
       </ToggleButtonGroup>
-      <Separator orientation="vertical" className="h-5" />
+      {/* On phones the selector wraps under the toggles. */}
+      <Separator orientation="vertical" className="h-5 max-sm:hidden" />
       <CategorySelector
         value={selectedCategory(overview, search.category)}
         onChange={(selected) =>
