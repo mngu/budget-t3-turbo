@@ -53,6 +53,20 @@ const setupPreferredListener = () => {
   return () => mediaQuery.removeEventListener("change", handler);
 };
 
+// The server cannot know the stored mode or the system scheme, and React keeps server-rendered
+// attributes on hydration: a theme read during the first client render would leave light-theme
+// inline colors in a dark page. External stores hydrate on the server snapshot, then re-render.
+const modeListeners = new Set<() => void>();
+const subscribeMode = (onChange: () => void) => {
+  modeListeners.add(onChange);
+  return () => modeListeners.delete(onChange);
+};
+const subscribeSystem = (onChange: () => void) => {
+  const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+  mediaQuery.addEventListener("change", onChange);
+  return () => mediaQuery.removeEventListener("change", onChange);
+};
+
 const themeDetectorScript = (function () {
   function themeFn() {
     const isValidTheme = (theme: string): theme is ThemeMode => {
@@ -86,19 +100,28 @@ const ThemeContext = React.createContext<ThemeContextProps | undefined>(
 );
 
 export function ThemeProvider({ children }: React.PropsWithChildren) {
-  const [themeMode, setThemeMode] = React.useState(getStoredThemeMode);
+  const themeMode = React.useSyncExternalStore(
+    subscribeMode,
+    getStoredThemeMode,
+    () => "auto" as const,
+  );
+  const systemTheme = React.useSyncExternalStore(
+    subscribeSystem,
+    getSystemTheme,
+    () => "light" as const,
+  );
 
   React.useEffect(() => {
     if (themeMode !== "auto") return;
     return setupPreferredListener();
   }, [themeMode]);
 
-  const resolvedTheme = themeMode === "auto" ? getSystemTheme() : themeMode;
+  const resolvedTheme = themeMode === "auto" ? systemTheme : themeMode;
 
   const setTheme = (newTheme: ThemeMode) => {
-    setThemeMode(newTheme);
     setStoredThemeMode(newTheme);
     updateThemeClass(newTheme);
+    modeListeners.forEach((onChange) => onChange());
   };
 
   return (
