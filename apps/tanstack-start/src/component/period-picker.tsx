@@ -13,12 +13,8 @@ import { useLoaderData } from "@tanstack/react-router";
 import {
   addDays,
   differenceInCalendarDays,
-  endOfQuarter,
-  endOfYear,
   isSameDay,
   parseISO,
-  startOfQuarter,
-  startOfYear,
   subDays,
 } from "date-fns";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
@@ -29,6 +25,7 @@ import {
   MONTH_START_DAYS,
   monthBounds,
   monthStartDay,
+  periodPresets,
   setMonthStartDay,
   toISODate,
 } from "~/lib/date";
@@ -64,33 +61,6 @@ function periodLabel(
       ? dayMonth.format(from)
       : date.format(from);
   return `${start} – ${date.format(to)}`;
-}
-
-interface Preset {
-  label: string;
-  from: Date;
-  to: Date;
-}
-
-// Anchor shortcuts to the displayed period so browsing history does not jump to today.
-function buildPresets(anchor: Date, startDay: number): Preset[] {
-  const current = cycleOf(anchor, startDay);
-  const previous = cycleOf(subDays(current.start, 1), startDay);
-  return [
-    { label: "Ce mois", from: current.start, to: current.end },
-    { label: "Mois dernier", from: previous.start, to: previous.end },
-    {
-      label: "30 derniers jours",
-      from: subDays(current.end, 29),
-      to: current.end,
-    },
-    {
-      label: "Ce trimestre",
-      from: startOfQuarter(anchor),
-      to: endOfQuarter(anchor),
-    },
-    { label: "Cette année", from: startOfYear(anchor), to: endOfYear(anchor) },
-  ];
 }
 
 export function PeriodPicker() {
@@ -163,9 +133,9 @@ export function PeriodPicker() {
           </span>
         </Button>
         <Popover.Content>
-          <Popover.Dialog className="flex gap-4">
-            <div className="flex w-32 flex-none flex-col gap-1">
-              {buildPresets(anchor, startDay).map((preset) => (
+          <Popover.Dialog className="flex w-min flex-col gap-4 sm:w-auto sm:flex-row">
+            <div className="flex flex-wrap gap-1 sm:w-32 sm:flex-none sm:flex-col">
+              {periodPresets(today, startDay).map((preset) => (
                 <Button
                   key={preset.label}
                   size="sm"
@@ -178,7 +148,7 @@ export function PeriodPicker() {
                       : "ghost"
                   }
                   // Preserve full periods for monthly budgets; disable rather than clip.
-                  isDisabled={(!!min && preset.to < min) || preset.from > today}
+                  isDisabled={!!min && preset.to < min}
                   onPress={() => commit(preset.from, preset.to)}
                 >
                   {preset.label}
@@ -186,7 +156,7 @@ export function PeriodPicker() {
               ))}
 
               <Select
-                className="mt-2"
+                className="mt-2 w-full"
                 value={startDay}
                 onChange={(day) => changeStartDay(Number(day))}
               >

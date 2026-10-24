@@ -72,3 +72,37 @@ test("le sélecteur de comptes exclut un compte", async ({ page }) => {
 
   await expect(picker).toContainText("2/3");
 });
+
+const iso = (d: Date) => d.toLocaleDateString("sv-SE");
+const day = (month: number, date: number) =>
+  new Date(now.getFullYear(), month, date);
+
+// Shortcuts mean "relative to today", whatever period is on screen.
+const presets = [
+  ["Ce mois", day(now.getMonth(), 1), day(now.getMonth() + 1, 0)],
+  ["Mois dernier", day(now.getMonth() - 1, 1), day(now.getMonth(), 0)],
+  ["30 derniers jours", day(now.getMonth(), now.getDate() - 29), now],
+  [
+    "Ce trimestre",
+    day(now.getMonth() - (now.getMonth() % 3), 1),
+    day(now.getMonth() - (now.getMonth() % 3) + 3, 0),
+  ],
+  ["Cette année", day(0, 1), day(12, 0)],
+] as const;
+
+for (const [label, from, to] of presets) {
+  test(`le raccourci « ${label} » part d'aujourd'hui`, async ({ page }) => {
+    // Start a year back so a shortcut anchored on the displayed period shows.
+    await page.goto(
+      `/?dateFrom=${iso(day(now.getMonth() - 12, 1))}&dateTo=${iso(day(now.getMonth() - 11, 0))}`,
+      hydrated,
+    );
+
+    await page.getByRole("button", { name: "Choisir une période" }).click();
+    await page.getByRole("button", { name: label, exact: true }).click();
+
+    await expect(page).toHaveURL(
+      new RegExp(`dateFrom=${iso(from)}&dateTo=${iso(to)}`),
+    );
+  });
+}
