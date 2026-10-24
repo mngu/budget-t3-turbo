@@ -326,6 +326,7 @@ export interface OrphanBankGroup {
   bankName: string;
   accountCount: number;
   transactionCount: number;
+  lastImportedAt: string | null;
 }
 
 export async function listOrphanAccounts(
@@ -337,6 +338,7 @@ export async function listOrphanAccounts(
       // The transaction join repeats each account row.
       accountCount: countDistinct(bankAccounts.id),
       transactionCount: count(transactions.id),
+      lastImportedAt: max(transactions.importedAt),
     })
     .from(bankAccounts)
     .leftJoin(transactions, eq(transactions.accountId, bankAccounts.id))
@@ -349,7 +351,10 @@ export async function listOrphanAccounts(
     .groupBy(bankAccounts.bankName)
     .orderBy(bankAccounts.bankName);
 
-  return rows;
+  return rows.map((r) => ({
+    ...r,
+    lastImportedAt: r.lastImportedAt?.toISOString() ?? null,
+  }));
 }
 
 export async function getConnectionAccounts(

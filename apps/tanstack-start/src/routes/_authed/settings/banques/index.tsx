@@ -1,4 +1,4 @@
-import type { ConnectionSummary } from "@budget/api";
+import type { ConnectionSummary, OrphanBankGroup } from "@budget/api";
 
 import { buttonVariants, toast } from "@heroui/react";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -102,7 +102,8 @@ function BanquesPage() {
             <OrphanBanner key={orphan.bankName} orphan={orphan} />
           ))}
 
-          {connections.length === 0 && (
+          {/* Orphaned accounts already offer their own "Connecter" call to action. */}
+          {connections.length === 0 && orphans.length === 0 && (
             <div className="bg-surface rounded-lg border px-5 py-11 text-center">
               <p className="text-body font-semibold">
                 Aucune banque connectée pour l'instant
@@ -141,11 +142,7 @@ function BanquesPage() {
   );
 }
 
-function OrphanBanner({
-  orphan,
-}: {
-  orphan: { bankName: string; accountCount: number; transactionCount: number };
-}) {
+function OrphanBanner({ orphan }: { orphan: OrphanBankGroup }) {
   return (
     <div className="border-border flex flex-wrap items-center gap-3.5 rounded-lg border border-dashed px-4.5 py-3.5">
       <UnlinkIcon className="text-muted size-4 flex-none" />
@@ -175,21 +172,17 @@ function OrphanBanner({
 
 function importTotals(
   connections: ConnectionSummary[],
-  orphans: { transactionCount: number }[],
+  orphans: OrphanBankGroup[],
 ) {
-  let total = sumBy(orphans, (orphan) => orphan.transactionCount);
-  let lastImportedAt: string | null = null;
-
-  for (const connection of connections) {
-    for (const account of connection.accounts) {
-      total += account.transactionCount;
-      if (
-        account.lastImportedAt &&
-        (!lastImportedAt || account.lastImportedAt > lastImportedAt)
-      ) {
-        lastImportedAt = account.lastImportedAt;
-      }
-    }
-  }
-  return { total, lastImportedAt };
+  // Orphaned accounts count in the total, so their imports must count in the date too.
+  const groups = [...connections.flatMap((c) => c.accounts), ...orphans];
+  return {
+    total: sumBy(groups, (g) => g.transactionCount),
+    // ISO dates sort chronologically as strings.
+    lastImportedAt:
+      groups
+        .flatMap((g) => g.lastImportedAt ?? [])
+        .sort()
+        .at(-1) ?? null,
+  };
 }
