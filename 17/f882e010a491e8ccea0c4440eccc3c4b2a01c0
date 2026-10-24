@@ -1,0 +1,24 @@
+apps/tanstack-start/src/lib/category-color.ts
+  s_9cda7bb5199b51::t_cc003c49300c6a 18,30
+  s_9cda7bb5199b51::t_595d1ecfc83989 17,19-20
+apps/tanstack-start/src/styles.css
+  s_9cda7bb5199b51::t_004c383f1923e8 71-72,79
+apps/tanstack-start/CLAUDE.md
+  s_9cda7bb5199b51::t_02b17764c172b7 41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "17f882e010a491e8ccea0c4440eccc3c4b2a01c0",
+  "prompts": {},
+  "sessions": {
+    "s_9cda7bb5199b51": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d6d37d3e-27d7-4c76-b163-d40dd1f91e5a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
