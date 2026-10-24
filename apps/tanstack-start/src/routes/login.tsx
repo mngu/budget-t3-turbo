@@ -1,5 +1,5 @@
 import { Alert, Button, Input, Label, Spinner, TextField } from "@heroui/react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod/v4";
 
@@ -12,6 +12,14 @@ export const Route = createFileRoute("/login")({
   validateSearch: z.object({
     redirect: z.string().optional().catch(undefined),
   }),
+  beforeLoad: async ({ context }) => {
+    if (await context.trpcClient.auth.getSession.query()) {
+      throw redirect({
+        to: "/",
+        search: { page: 1, sort: "date", order: "desc" },
+      });
+    }
+  },
   component: LoginPage,
 });
 
