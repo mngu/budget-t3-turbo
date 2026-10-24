@@ -2,7 +2,7 @@ import type { AccountSummary, AspspOption } from "@budget/api";
 
 import { Button, Checkbox, Input, Spinner, toast } from "@heroui/react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ExternalLinkIcon, RefreshCwIcon } from "lucide-react";
+import { ArrowLeftIcon, ExternalLinkIcon, RefreshCwIcon } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod/v4";
 
@@ -50,9 +50,10 @@ function AjouterBanquePage() {
       <header className="bg-background-secondary flex items-center gap-3 border-b px-4.5 py-3">
         <Link
           to="/settings/banques"
-          className="text-muted hover:text-foreground text-control"
+          className="text-muted hover:text-foreground text-control flex items-center gap-1.5"
         >
-          ‹ Retour
+          <ArrowLeftIcon className="size-3.5" aria-hidden />
+          Retour
         </Link>
         <span className="bg-border h-4 w-px" />
         <WizardStep
@@ -126,12 +127,10 @@ function StepBanque() {
 
   return (
     <div className="px-5 pt-4.5 pb-5">
-      <h2 className="text-body font-semibold">Choisissez votre banque</h2>
-
+      {/* The wizard header already names the step. */}
       <SearchInput
         param="q"
         placeholder="Rechercher une banque (ex : Caisse d'Epargne, Revolut…)"
-        className="mt-3 max-w-120"
       />
 
       {aspsps.length === 0 ? (
@@ -157,7 +156,7 @@ function StepBanque() {
                   className="text-control size-8"
                 />
                 <div className="min-w-0">
-                  <div className="text-control truncate font-medium">
+                  <div className="text-body truncate font-medium">
                     {aspsp.name}
                   </div>
                   <div className="text-muted text-meta">{aspsp.country}</div>
@@ -248,8 +247,7 @@ function StepComptes() {
 
   return (
     <div className="px-5 pt-4.5 pb-5">
-      <h2 className="text-body font-semibold">Vos comptes</h2>
-      <p className="text-muted text-control mt-1">
+      <p className="text-muted text-control">
         Comptes découverts — nommez-les et choisissez lesquels suivre.
       </p>
 

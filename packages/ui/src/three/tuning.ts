@@ -1,7 +1,7 @@
 import { createContext, useContext } from "react";
 
 // Share controls through context to avoid creating a Leva panel per segment.
-// TODO: restrict Leva to development or remove it once tuning values are fixed.
+// TODO: Leva is hidden outside development but still bundled; remove it once tuning values are fixed.
 export const RING_RADIUS = 5;
 export const TUBE_RADIUS = 1;
 
@@ -26,7 +26,7 @@ export const DEFAULT_TUNING: Tuning = {
   materialClearcoatRoughness: 0.78,
   materialIridescence: 0,
 
-  labelBlend: 0,
+  labelBlend: 0.3,
   labelSize: 14,
   labelLift: 2,
   labelRadius: 7.8,

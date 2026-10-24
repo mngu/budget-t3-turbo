@@ -1,6 +1,7 @@
 "use client";
 
 import type { TransactionRow } from "@budget/api";
+import type { ReactNode } from "react";
 
 import { Pagination, Table } from "@heroui/react";
 
@@ -14,11 +15,14 @@ import { CategorySelector } from "./category-selector/category-selector";
 import { ExcludeBadge } from "./exclude-badge";
 
 export function TransactionsTable({
+  toolbar,
   rows,
   page,
   pageCount,
   total,
 }: {
+  /** Rendered inside the table's frame so filters and rows read as one block. */
+  toolbar: ReactNode;
   rows: TransactionRow[];
   page: number;
   pageCount: number;
@@ -28,7 +32,10 @@ export function TransactionsTable({
   const { signedEuro } = useFormat(2);
 
   return (
-    <Table className="min-h-0 flex-1">
+    // HeroUI lays the root out as a grid of content-sized rows; a column lets the rows take the
+    // leftover height, so the footer stays at the bottom even when few rows match.
+    <Table className="flex min-h-0 flex-1 flex-col">
+      {toolbar}
       <Table.ScrollContainer className="min-h-0 flex-1 scrollbar-thin overflow-y-auto">
         <Table.Content
           aria-label="Transactions"
@@ -59,10 +66,11 @@ export function TransactionsTable({
             <Table.Column id="description" isRowHeader>
               Libellé
             </Table.Column>
-            <Table.Column id="bank" className="hidden w-36 md:table-cell">
+            {/* Libellé reads first: narrower desktops drop Tiers, which often repeats it, then Compte. */}
+            <Table.Column id="bank" className="hidden w-36 xl:table-cell">
               Compte
             </Table.Column>
-            <Table.Column id="debtor" className="hidden w-32 md:table-cell">
+            <Table.Column id="debtor" className="hidden w-32 2xl:table-cell">
               Tiers
             </Table.Column>
             <Table.Column id="category" className="hidden w-48 md:table-cell">
@@ -74,7 +82,10 @@ export function TransactionsTable({
               className="w-28 text-right md:w-32"
             >
               {({ sortDirection }) => (
-                <Table.SortableColumnHeader sortDirection={sortDirection}>
+                <Table.SortableColumnHeader
+                  sortDirection={sortDirection}
+                  className="justify-end gap-1"
+                >
                   Montant
                 </Table.SortableColumnHeader>
               )}
@@ -109,10 +120,10 @@ export function TransactionsTable({
                       <CategoryCell row={row} />
                     </span>
                   </Table.Cell>
-                  <Table.Cell className="text-muted hidden truncate md:table-cell">
+                  <Table.Cell className="text-muted hidden truncate xl:table-cell">
                     {row.bankName}
                   </Table.Cell>
-                  <Table.Cell className="text-muted hidden truncate md:table-cell">
+                  <Table.Cell className="text-muted hidden truncate 2xl:table-cell">
                     {debtor && titleCase(debtor)}
                   </Table.Cell>
                   <Table.Cell className="hidden md:table-cell">

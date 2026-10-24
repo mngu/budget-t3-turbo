@@ -121,7 +121,8 @@ export function PeriodPicker() {
         <ChevronLeftIcon />
       </Button>
       <Popover isOpen={open} onOpenChange={setOpen}>
-        <Button variant="ghost" size="sm" className="min-w-0">
+        {/* Fits "Septembre 2026" so the arrows stay put from month to month. */}
+        <Button variant="ghost" size="sm" className="min-w-0 sm:min-w-36">
           {/* An aria-label would hide the period itself from screen readers. */}
           <span className="sr-only">Choisir une période : </span>
           {/* SSR does not know the browser's pay-cycle preference. */}
@@ -134,7 +135,7 @@ export function PeriodPicker() {
         </Button>
         <Popover.Content>
           <Popover.Dialog className="flex w-min flex-col gap-4 sm:w-auto sm:flex-row">
-            <div className="flex flex-wrap gap-1 sm:w-32 sm:flex-none sm:flex-col">
+            <div className="flex flex-wrap gap-1 sm:w-40 sm:flex-none sm:flex-col">
               {periodPresets(today, startDay).map((preset) => (
                 <Button
                   key={preset.label}

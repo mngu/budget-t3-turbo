@@ -1,6 +1,6 @@
 import type { ManagedCategory } from "@budget/api/schemas";
 
-import { Button, toast } from "@heroui/react";
+import { Button, Card, toast } from "@heroui/react";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { SparklesIcon } from "lucide-react";
 import { useState } from "react";
@@ -94,7 +94,10 @@ function UncategorizedBanner({ count }: { count: number }) {
   };
 
   return (
-    <div className="border-border bg-surface-secondary mb-5 flex flex-wrap items-center gap-4 rounded-lg border px-5 py-4">
+    <Card
+      variant="secondary"
+      className="mb-5 flex-row flex-wrap items-center gap-4 px-5 py-4"
+    >
       <span className="bg-surface border-border text-accent flex size-8 flex-none items-center justify-center rounded-md border">
         <SparklesIcon className="size-4" />
       </span>
@@ -127,7 +130,7 @@ function UncategorizedBanner({ count }: { count: number }) {
         transactions={preview.preview?.txns ?? []}
         badge={preview.preview?.badge}
       />
-    </div>
+    </Card>
   );
 }
 

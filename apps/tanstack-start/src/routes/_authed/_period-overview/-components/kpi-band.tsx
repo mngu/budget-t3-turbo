@@ -22,7 +22,8 @@ export function KpiBand({ budgetStats, globalStats }: KpiBandProps) {
 
   return (
     <div className="flex flex-col gap-4 lg:flex-row lg:gap-10">
-      <div>
+      {/* Fill the left half so the gauges keep their place whatever the balance's width. */}
+      <div className="lg:flex-1">
         <div className="label-caps">Solde</div>
         <div
           className={cn(

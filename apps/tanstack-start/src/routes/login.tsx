@@ -86,7 +86,7 @@ function LoginPage() {
             Connexion
           </h1>
 
-          <div className="flex flex-col gap-2">
+          <div className="mt-4 flex flex-col gap-3">
             <TextField
               type="email"
               value={email}
@@ -120,7 +120,12 @@ function LoginPage() {
               </Alert>
             )}
 
-            <Button type="submit" isDisabled={incomplete} isPending={pending}>
+            <Button
+              type="submit"
+              fullWidth
+              isDisabled={incomplete}
+              isPending={pending}
+            >
               {pending && <Spinner color="current" size="sm" />}
               {pending
                 ? "Envoi…"

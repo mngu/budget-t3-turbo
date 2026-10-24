@@ -3,6 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   CircleCheckIcon,
   ClockAlertIcon,
+  Link2OffIcon,
   MailCheckIcon,
   UserIcon,
   UserPlusIcon,
@@ -42,7 +43,7 @@ function InvitationPage() {
   if (!invitation) {
     return (
       <Shell
-        icon={<ClockAlertIcon className="size-4" />}
+        icon={<Link2OffIcon className="size-4" />}
         tone="danger"
         title="Cette invitation est introuvable"
         body="Le lien est incomplet ou l'invitation a été supprimée. Demandez-en un nouveau à la personne qui vous a invité."
@@ -261,6 +262,7 @@ function Shell({
   pending?: boolean;
   children?: React.ReactNode;
 }) {
+  const footer = !!(note || secondary || primary);
   return (
     <main className="flex min-h-dvh justify-center px-6 pt-14 pb-20">
       <div className="w-full max-w-118">
@@ -272,7 +274,12 @@ function Shell({
         </div>
 
         <div className="border-border bg-surface mt-5 overflow-hidden rounded-lg border">
-          <div className="border-border border-b px-5 pt-5 pb-4">
+          <div
+            className={cn(
+              "px-5 pt-5 pb-4",
+              (children || footer) && "border-border border-b",
+            )}
+          >
             <span
               className={cn(
                 "flex size-9 items-center justify-center rounded-md",
@@ -289,22 +296,24 @@ function Shell({
 
           {children}
 
-          <div className="flex items-center gap-3 px-5 py-3.5">
-            <span className="text-muted text-control min-w-0 flex-1 text-pretty">
-              {note}
-            </span>
-            {secondary && (
-              <Button variant="ghost" onPress={secondary.onPress}>
-                {secondary.label}
-              </Button>
-            )}
-            {primary && (
-              <Button isPending={pending} onPress={primary.onPress}>
-                {pending && <Spinner color="current" size="sm" />}
-                {primary.label}
-              </Button>
-            )}
-          </div>
+          {footer && (
+            <div className="flex items-center gap-3 px-5 py-3.5">
+              <span className="text-muted text-control min-w-0 flex-1 text-pretty">
+                {note}
+              </span>
+              {secondary && (
+                <Button variant="ghost" onPress={secondary.onPress}>
+                  {secondary.label}
+                </Button>
+              )}
+              {primary && (
+                <Button isPending={pending} onPress={primary.onPress}>
+                  {pending && <Spinner color="current" size="sm" />}
+                  {primary.label}
+                </Button>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="text-muted text-control mt-3.5 text-center text-pretty">

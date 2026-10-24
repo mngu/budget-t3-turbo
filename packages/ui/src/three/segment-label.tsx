@@ -57,6 +57,8 @@ export function SegmentLabel({ angle, rotation, color, children }: Props) {
       <Html position={label}>
         <div
           style={{
+            // Mix perceptually: Three's lerp runs in linear space and barely darkens light shades.
+            color: `color-mix(in oklab, ${color}, var(--foreground) ${labelBlend * 100}%)`,
             fontSize: `${labelSize}px`,
             transform: `translate(${Math.cos(rotation + angle) < 0 ? "-100%" : "0"}, -50%)`,
           }}

@@ -5,6 +5,7 @@ import type { ThemeMode } from "@budget/ui/theme";
 import { Button, Dropdown, Header, Label } from "@heroui/react";
 import { Link, useMatches, useNavigate } from "@tanstack/react-router";
 import {
+  CoinsIcon,
   LandmarkIcon,
   LogOutIcon,
   Monitor,
@@ -176,6 +177,7 @@ function SettingsMenu() {
           >
             <Header>Affichage</Header>
             <Dropdown.Item id="cents" textValue="Centimes">
+              <CoinsIcon />
               <Label>Centimes</Label>
               <Dropdown.ItemIndicator />
             </Dropdown.Item>

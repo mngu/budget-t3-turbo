@@ -99,7 +99,8 @@ export function CategoryOverview({
 
                 return (
                   <Accordion.Item key={id} id={id}>
-                    <div className="flex w-full flex-wrap items-center justify-between gap-2 p-2">
+                    {/* Same inline padding as Accordion.Body, so parent and child columns line up. */}
+                    <div className="flex w-full flex-wrap items-center justify-between gap-2 px-4 py-2">
                       <div className="flex min-w-0 grow basis-full items-center gap-2 md:basis-0">
                         <Accordion.Heading>
                           <Accordion.Trigger
@@ -140,7 +141,7 @@ export function CategoryOverview({
                           label={`Voir les transactions de ${name}`}
                         />
 
-                        <div className="flex w-40 items-center justify-end gap-2">
+                        <div className="flex w-24 items-center justify-end gap-2 md:w-40">
                           {budgetDetailed ? (
                             <div className="flex flex-col items-end">
                               <span className="num text-meta font-medium">
@@ -234,7 +235,7 @@ export function CategoryOverview({
                             return (
                               <div
                                 key={id}
-                                className="flex min-h-10 flex-wrap items-center justify-between px-2 ps-16"
+                                className="flex min-h-10 flex-wrap items-center justify-between md:ps-20"
                               >
                                 <div className="flex min-w-0 grow-2 basis-full items-center gap-2 md:basis-0">
                                   <span
@@ -262,7 +263,7 @@ export function CategoryOverview({
                                       })
                                     }
                                   />
-                                  <div className="flex w-40 items-center justify-end gap-2">
+                                  <div className="flex w-24 items-center justify-end gap-2 md:w-40">
                                     {budgetDetailed ? (
                                       <AmountInput
                                         value={budgetAmount}
@@ -402,7 +403,7 @@ function CountButton({
       isDisabled={count === 0}
       className="num"
     >
-      {count} txns
+      {count} transaction{count > 1 ? "s" : ""}
     </Button>
   );
 }

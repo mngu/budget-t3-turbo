@@ -10,6 +10,7 @@ import { sumBy } from "~/lib/sum";
 import { useFormat } from "~/lib/use-format";
 import { useRevueSearch } from "~/lib/use-revue-search";
 
+import { spendingCategories } from "../-lib/spending";
 import { BudgetGauge } from "./budget-gauge";
 
 interface BreakdownListProps {
@@ -59,7 +60,12 @@ export function BreakdownList({ overview }: BreakdownListProps) {
       }));
 
   const totalAmount = sumBy(rows, (row) => row.value);
-  const childCount = sumBy(overview, (cat) => cat.children?.length ?? 0);
+  const postes = spendingCategories(overview);
+  const childCount = sumBy(
+    postes,
+    (cat) =>
+      cat.children?.filter((child) => (child.totalAmount ?? 0) > 0).length ?? 0,
+  );
 
   const selectedCategoryBudget = selectedCategory
     ? familyBudget(selectedCategory)
@@ -100,16 +106,14 @@ export function BreakdownList({ overview }: BreakdownListProps) {
               </strong>
             </div>
             <div className="text-muted text-meta flex justify-end">
-              {overview.length} poste{overview.length > 1 ? "s" : ""} de dépense
-              · {childCount} sous-catégorie{childCount > 1 ? "s" : ""}
+              {postes.length} poste{postes.length > 1 ? "s" : ""} de dépense ·{" "}
+              {childCount} sous-catégorie{childCount > 1 ? "s" : ""}
             </div>
           </div>
         )}
       </div>
 
-      <div className="flex justify-center">
-        <hr className="w-64" />
-      </div>
+      <hr className="mx-2" />
 
       <Toolbar
         orientation="vertical"
