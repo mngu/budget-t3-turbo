@@ -1,0 +1,76 @@
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/budget-gauge.tsx
+  s_9cda7bb5199b51::t_bdbeb3a05d619e 30-32,34-36,39-42
+  s_9cda7bb5199b51::t_9f410a2d9d6424 51
+packages/ui/src/three/segment-label.tsx
+  s_9cda7bb5199b51::t_634736187209d6 60-61
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/gauge.tsx
+  s_9cda7bb5199b51::t_b191ef6724982d 19-20
+apps/tanstack-start/src/component/period-picker.tsx
+  s_9cda7bb5199b51::t_b191ef6724982d 124-125,138
+apps/tanstack-start/CLAUDE.md
+  s_9cda7bb5199b51::t_828ec7d2847910 35-36
+apps/tanstack-start/src/routes/login.tsx
+  s_9cda7bb5199b51::t_8785f154c970bb 89,123-128
+apps/tanstack-start/src/routes/_authed/settings/categories/index.tsx
+  s_9cda7bb5199b51::t_e7bcb40ad77a4c 3
+  s_9cda7bb5199b51::t_9d6e58e2790a94 97-100,133
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/kpi-band.tsx
+  s_9cda7bb5199b51::t_73d29251c8d3db 25-26
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/overview-header.tsx
+  s_9cda7bb5199b51::t_909811cd4685ef 11-12,31,57
+apps/tanstack-start/src/routes/_authed/settings/espaces/-components/space-dialog.tsx
+  s_9cda7bb5199b51::t_1778871931434a 69,110-112
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/transactions-table.tsx
+  s_9cda7bb5199b51::t_21a8044594b88f 69-70,73,123,126
+  s_9cda7bb5199b51::t_77fcb46a68065d 4,18,24-25,35-38,85-88
+packages/ui/src/three/canvas-container.tsx
+  s_9cda7bb5199b51::t_153d5f829cca4b 117-118,121,217-222
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/ring.tsx
+  s_9cda7bb5199b51::t_909811cd4685ef 166
+  s_9cda7bb5199b51::t_36fc45844194c1 85,112,115-116,118-119
+  s_9cda7bb5199b51::t_80a428537914aa 83-84
+apps/tanstack-start/src/component/app-header.tsx
+  s_9cda7bb5199b51::t_9e65150bf90853 180
+  s_9cda7bb5199b51::t_a63e0165387662 8
+packages/ui/src/three/tuning.ts
+  s_9cda7bb5199b51::t_595d1ecfc83989 29
+  s_9cda7bb5199b51::t_e9ae073b729e1a 4
+apps/tanstack-start/src/routes/_authed/settings/espaces/-components/space-card.tsx
+  s_9cda7bb5199b51::t_80a428537914aa 73
+apps/tanstack-start/src/routes/invitation.$invitationId.tsx
+  s_9cda7bb5199b51::t_e19293e89d4130 277-279,281-282,299-316
+  s_9cda7bb5199b51::t_828ec7d2847910 265,280
+  s_9cda7bb5199b51::t_82ef7f48407ea2 6,46
+apps/tanstack-start/src/routes/_authed/_period-overview/-lib/spending.ts
+  s_9cda7bb5199b51::t_828ec7d2847910 3
+  s_9cda7bb5199b51::t_7b6b80fa25fea9 1-2,4-5
+apps/tanstack-start/src/routes/_authed/settings/categories/-components/category-overview.tsx
+  s_9cda7bb5199b51::t_9d6e58e2790a94 406
+  s_9cda7bb5199b51::t_637fa4bd20c18c 144,266
+  s_9cda7bb5199b51::t_8dd8cd21861f61 102-103
+  s_9cda7bb5199b51::t_c9321d27774ac5 238
+apps/tanstack-start/src/routes/_authed/settings/banques/ajouter.tsx
+  s_9cda7bb5199b51::t_254f9653ee8949 5,53,55-56,130,159,250
+apps/tanstack-start/src/routes/_authed/_period-overview/transactions.tsx
+  s_9cda7bb5199b51::t_77fcb46a68065d 25,27-29
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/breakdown-list.tsx
+  s_9cda7bb5199b51::t_80a428537914aa 66-67
+  s_9cda7bb5199b51::t_9f410a2d9d6424 116
+  s_9cda7bb5199b51::t_bdbeb3a05d619e 13,63-65,68,109-110
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3169c60ae5d766a2ab9c15e74640e1b63996a59f",
+  "prompts": {},
+  "sessions": {
+    "s_9cda7bb5199b51": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d6d37d3e-27d7-4c76-b163-d40dd1f91e5a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
