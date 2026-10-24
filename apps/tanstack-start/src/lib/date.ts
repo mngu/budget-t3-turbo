@@ -1,8 +1,12 @@
 import {
   addMonths,
+  endOfQuarter,
+  endOfYear,
   format,
   getDaysInMonth,
   setDate,
+  startOfQuarter,
+  startOfYear,
   subDays,
   subMonths,
 } from "date-fns";
@@ -48,4 +52,21 @@ export function cycleOf(d: Date, startDay = 1): { start: Date; end: Date } {
 export function monthBounds(d: Date, startDay = 1) {
   const { start, end } = cycleOf(d, startDay);
   return { dateFrom: toISODate(start), dateTo: toISODate(end) };
+}
+
+// Shortcuts are relative to today, never to the period on screen.
+export function periodPresets(today: Date, startDay = 1) {
+  const current = cycleOf(today, startDay);
+  const previous = cycleOf(subDays(current.start, 1), startDay);
+  return [
+    { label: "Ce mois", from: current.start, to: current.end },
+    { label: "Mois dernier", from: previous.start, to: previous.end },
+    { label: "30 derniers jours", from: subDays(today, 29), to: today },
+    {
+      label: "Ce trimestre",
+      from: startOfQuarter(today),
+      to: endOfQuarter(today),
+    },
+    { label: "Cette année", from: startOfYear(today), to: endOfYear(today) },
+  ];
 }
