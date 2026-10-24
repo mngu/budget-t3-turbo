@@ -1,0 +1,30 @@
+apps/tanstack-start/e2e/revue.e2e.ts
+  s_f1b6328c90fec5::t_21675e45da070d 75-94,96,98-108
+  s_f1b6328c90fec5::t_73945938f6c5cb 95,97
+apps/tanstack-start/src/lib/date.ts
+  s_f1b6328c90fec5::t_2ce7a37a1f9b40 3-4,8-9,56-71
+  s_f1b6328c90fec5::t_cc37a98519aad7 72
+apps/tanstack-start/src/component/period-picker.tsx
+  s_f1b6328c90fec5::t_2ce7a37a1f9b40 28,138,151
+  s_f1b6328c90fec5::t_3e1bb0eb6aa584 137,159
+  s_f1b6328c90fec5::t_29bbf4a80fe219 136
+apps/tanstack-start/src/lib/date.test.ts
+  s_f1b6328c90fec5::t_73945938f6c5cb 3,50-93
+  s_f1b6328c90fec5::t_c191ffe1620100 94
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "635dfccf6d2ae97d0b701980f6dca4e14157166c",
+  "prompts": {},
+  "sessions": {
+    "s_f1b6328c90fec5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7eb13d47-009f-48be-beee-1dea3c9823e0",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
