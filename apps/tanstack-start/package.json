@@ -10,7 +10,8 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "with-env": "dotenv -e ../../.env --",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "shot": "playwright test -c playwright.shot.config.ts"
   },
   "dependencies": {
     "@budget/api": "workspace:*",
