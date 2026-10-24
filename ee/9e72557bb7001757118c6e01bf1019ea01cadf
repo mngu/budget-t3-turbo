@@ -1,0 +1,21 @@
+pnpm-workspace.yaml
+  s_6f9b38503370b8::t_7205704c09bc63 31
+pnpm-lock.yaml
+  s_6f9b38503370b8::t_43f4af828a5543 43-44,236,290,336,354,379,385,391,398,487,7754,7759,10890,10895,11729,11734-11735
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ee9e72557bb7001757118c6e01bf1019ea01cadf",
+  "prompts": {},
+  "sessions": {
+    "s_6f9b38503370b8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "438f7594-8078-4064-8988-7459e6b214b1",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
