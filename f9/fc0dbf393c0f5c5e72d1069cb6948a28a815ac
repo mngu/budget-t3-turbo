@@ -1,0 +1,26 @@
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/refine-bar.tsx
+  s_ecd15f13c7dafd::t_392feb1a183851 91-92
+apps/tanstack-start/src/routes/_authed/_period-overview/-components/category-selector/category-selector.tsx
+  s_ecd15f13c7dafd::t_2d4a02bb28d7bc 99,102,104-105
+  s_ecd15f13c7dafd::t_a9b1fc5de2ad7f 55-56
+  s_ecd15f13c7dafd::t_7647d0c4057c4d 120-125
+  s_ecd15f13c7dafd::t_3c362c45d25b99 59-71,74-87,89-98,100-101,103,106-119
+  s_ecd15f13c7dafd::t_4d2f95da752dfd 5,8,13,45-46,48-54,57-58
+  s_ecd15f13c7dafd::t_d9d16a784af45f 72-73
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f9fc0dbf393c0f5c5e72d1069cb6948a28a815ac",
+  "prompts": {},
+  "sessions": {
+    "s_ecd15f13c7dafd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "db709ff6-5f99-4ba0-9987-7daafdaeeede",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
