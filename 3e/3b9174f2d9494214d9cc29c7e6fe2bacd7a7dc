@@ -1,0 +1,27 @@
+apps/tanstack-start/src/routes/_authed/settings/banques/-components/consent-alert.tsx
+  s_4e825942621021::t_c9ba308afe5e08 15-30
+apps/tanstack-start/src/routes/invitation.$invitationId.tsx
+  s_4e825942621021::t_8449e757bc2350 308-309
+  s_4e825942621021::t_614b8cd46e80fc 312-324
+apps/tanstack-start/src/routes/_authed/settings/banques/ajouter.tsx
+  s_4e825942621021::t_8449e757bc2350 301-302
+apps/tanstack-start/src/routes/_authed/settings/banques/-components/onboarding.tsx
+  s_4e825942621021::t_8449e757bc2350 167-168
+  s_4e825942621021::t_b9a8c54b8bd060 65
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3e3b9174f2d9494214d9cc29c7e6fe2bacd7a7dc",
+  "prompts": {},
+  "sessions": {
+    "s_4e825942621021": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7241bf4f-5d81-4999-8d07-2ab33378177c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
