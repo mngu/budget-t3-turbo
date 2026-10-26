@@ -62,7 +62,7 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
   return (
     <Card className="mt-5 gap-0 overflow-hidden p-0">
       <header className="bg-background-secondary border-b px-5 py-3.5">
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2.5">
           <KeyRoundIcon className="text-accent size-3.5" />
           <h2 className="text-body font-semibold">
             Configuration Enable Banking
@@ -164,8 +164,8 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
         )}
       </div>
 
-      <div className="flex items-center gap-3 border-t px-5 py-3">
-        <span className="text-muted text-control min-w-0 flex-1">
+      <div className="flex flex-wrap items-center gap-3 border-t px-5 py-3">
+        <span className="text-muted text-control min-w-60 flex-1">
           Rien n'est envoyé à votre banque à cette étape.
         </span>
         <Button

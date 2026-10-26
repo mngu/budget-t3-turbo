@@ -298,8 +298,8 @@ function StepComptes() {
         ))}
       </div>
 
-      <div className="mt-4 flex items-center gap-3">
-        <span className="text-muted text-control min-w-0 flex-1">
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <span className="text-muted text-control min-w-60 flex-1">
           {kept} compte{kept > 1 ? "s" : ""} suivi{kept > 1 ? "s" : ""} sur{" "}
           {rows.length} · les comptes décochés restent visibles mais ne sont pas
           importés
