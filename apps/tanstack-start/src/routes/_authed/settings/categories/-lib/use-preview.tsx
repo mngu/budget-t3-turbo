@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { TagIcon } from "lucide-react";
 import { useState } from "react";
 
+import { NO_CATEGORY_NAME } from "@budget/api/schemas";
 import { CategoryIcon } from "~/component/category-icon";
 import { useTRPCClient } from "~/lib/trpc";
 
@@ -67,7 +68,7 @@ export function usePreview() {
       page: 1,
       sort: "date",
       order: "desc",
-      category: "none",
+      category: NO_CATEGORY_NAME,
       limit: PREVIEW_LIMIT,
     });
     setPreview({

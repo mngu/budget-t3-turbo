@@ -3,6 +3,7 @@ import type { CategoryOverviewType } from "@budget/api/schemas";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { ArrowLeftIcon, ArrowRightIcon, LayersIcon } from "lucide-react";
 
+import { getCategoryLabel } from "@budget/api/schemas";
 import { softCategoryColor, useCategoryColor } from "~/lib/category-color";
 import { sharePercent } from "~/lib/format";
 import { sumBy } from "~/lib/sum";
@@ -54,11 +55,11 @@ export function OverviewHeader({ overview }: OverviewHeaderProps) {
       )}
       <div className="flex min-w-0 flex-col lg:flex-row lg:items-center lg:gap-3">
         <span className="text-heading min-w-0 truncate">
-          {selected ? selected.name : "Toutes les catégories"}
+          {selected ? getCategoryLabel(selected.name) : "Toutes les catégories"}
         </span>
         <span className="text-muted text-control truncate lg:flex-none">
           {selected
-            ? `${subCount} sous-catégorie${subCount > 1 ? "s" : ""} · ${sharePercent(selected.totalAmount ?? 0, expenses)} des sorties`
+            ? `${subCount ? `${subCount} sous-catégorie${subCount > 1 ? "s" : ""} · ` : ""}${sharePercent(selected.totalAmount ?? 0, expenses)} des sorties`
             : `${postes} poste${postes > 1 ? "s" : ""} de dépense`}
         </span>
       </div>

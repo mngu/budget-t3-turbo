@@ -2,11 +2,7 @@ import { router, Stack, useLocalSearchParams } from "expo-router";
 import { Typography } from "heroui-native";
 import { View } from "react-native";
 
-import {
-  familyBudget,
-  getCategoryLabel,
-  NO_CATEGORY_NAME,
-} from "@budget/api/schemas";
+import { familyBudget, getCategoryLabel } from "@budget/api/schemas";
 import { Breakdown } from "~/components/breakdown";
 import { BudgetGauge } from "~/components/budget-gauge";
 import { TransactionList } from "~/components/transaction-list";
@@ -43,7 +39,7 @@ export default function CategoryDetail() {
         }}
       />
       <TransactionList
-        category={name === NO_CATEGORY_NAME ? "none" : name}
+        category={name}
         header={
           <View className="gap-6 pb-4">
             {/* Inset like the list rows' content, so the column lines up. */}

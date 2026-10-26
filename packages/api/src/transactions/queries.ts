@@ -5,6 +5,7 @@ import { and, eq, exists, sql } from "@budget/db";
 import { db } from "@budget/db/client";
 import { bankAccounts, transactions } from "@budget/db/schema";
 
+import { NO_CATEGORY_NAME } from "../categories/schemas";
 import {
   bankCountSchema,
   bankLabelSchema,
@@ -88,7 +89,7 @@ export async function globalStats(
 function statementFilters({ status, category, q }: TransactionsSearch) {
   const statusCondition = status ? sql`AND (t).status = ${status}` : sql``;
   const categoryCondition =
-    category === "none"
+    category === NO_CATEGORY_NAME
       ? sql`AND (t).category_id IS NULL`
       : category
         ? sql`AND ((c).name = ${category} OR (p).name = ${category})`

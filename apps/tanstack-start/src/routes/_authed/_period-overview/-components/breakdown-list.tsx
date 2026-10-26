@@ -18,12 +18,12 @@ interface BreakdownListProps {
 }
 
 interface BreakdownRow {
+  name: string | null;
   label: string;
   value: number;
   budget: number | null;
   iconName: string | null;
   color: string;
-  drillable: boolean;
 }
 
 export function BreakdownList({ overview }: BreakdownListProps) {
@@ -39,6 +39,7 @@ export function BreakdownList({ overview }: BreakdownListProps) {
 
   const rows: BreakdownRow[] = selectedCategory
     ? children.map((child, index) => ({
+        name: child.name,
         label: child.name,
         value: child.totalAmount ?? 0,
         budget: child.budgetAmount,
@@ -48,15 +49,14 @@ export function BreakdownList({ overview }: BreakdownListProps) {
           index,
           children.length,
         ),
-        drillable: false,
       }))
     : overview.map((cat) => ({
+        name: cat.name,
         label: getCategoryLabel(cat.name),
         value: cat.totalAmount ?? 0,
         budget: familyBudget(cat),
         iconName: cat.icon,
         color: resolveColor(cat.color),
-        drillable: (cat.children?.length ?? 0) > 0,
       }));
 
   const totalAmount = sumBy(rows, (row) => row.value);
@@ -88,7 +88,7 @@ export function BreakdownList({ overview }: BreakdownListProps) {
               selectedCategory.totalAmount ?? 0,
               selectedCategoryBudget ?? 0,
             )}
-            label={selectedCategory.name}
+            label={getCategoryLabel(selectedCategory.name)}
             iconName={selectedCategory.icon}
             color={resolveColor(selectedCategory.color)}
             budget={selectedCategoryBudget}
@@ -128,11 +128,11 @@ export function BreakdownList({ overview }: BreakdownListProps) {
               key={index}
               variant="ghost"
               fullWidth
-              isDisabled={!row.drillable}
-              // A gauge row is taller than a button; rows without sub-categories are not drillable
+              isDisabled={!!selectedCategory || !row.name}
+              // A gauge row is taller than a button; rows below a category are not drillable
               // but still carry data, so they must not fade like a disabled control.
               className="h-auto min-w-0 flex-none flex-col items-stretch gap-1.5 rounded-lg p-2 whitespace-normal disabled:opacity-100"
-              onPress={() => setSearch({ category: row.label })}
+              onPress={() => setSearch({ category: row.name ?? undefined })}
             >
               <BudgetGauge
                 value={row.value}

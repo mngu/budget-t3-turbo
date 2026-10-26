@@ -54,7 +54,7 @@ export function Segment({
     to: { scale: 1, rotateX: 0, rotateY: 0 },
     config: config.gentle,
   });
-  useCursor(hovered);
+  useCursor(hovered && !!onClick);
 
   return (
     <Select enabled={hovered}>
