@@ -1,4 +1,4 @@
-import { buttonVariants, Spinner, toast } from "@heroui/react";
+import { Alert, buttonVariants, Spinner, toast } from "@heroui/react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod/v4";
@@ -62,8 +62,13 @@ function CallbackPage() {
     <main className="mx-auto flex max-w-xl flex-col items-center gap-4 p-16 text-center">
       {failure ? (
         <>
-          <p className="text-danger">❌ La connexion à la banque a échoué.</p>
-          <p className="text-muted text-body">{failure}</p>
+          <Alert status="danger" className="text-left">
+            <Alert.Indicator />
+            <Alert.Content>
+              <Alert.Title>La connexion à la banque a échoué</Alert.Title>
+              <Alert.Description>{failure}</Alert.Description>
+            </Alert.Content>
+          </Alert>
           <Link to="/settings/banques" className={buttonVariants()}>
             Retour aux banques
           </Link>
@@ -71,7 +76,9 @@ function CallbackPage() {
       ) : (
         <>
           <Spinner />
-          <p>Finalisation de la connexion avec votre banque…</p>
+          <p className="text-muted text-control">
+            Finalisation de la connexion avec votre banque…
+          </p>
         </>
       )}
     </main>

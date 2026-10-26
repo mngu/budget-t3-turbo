@@ -1,6 +1,14 @@
 import type { AccountSummary, AspspOption } from "@budget/api";
 
-import { Button, Checkbox, Input, Spinner, toast } from "@heroui/react";
+import {
+  Button,
+  Card,
+  Checkbox,
+  EmptyState,
+  Input,
+  Spinner,
+  toast,
+} from "@heroui/react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeftIcon, ExternalLinkIcon, RefreshCwIcon } from "lucide-react";
 import { useState } from "react";
@@ -46,7 +54,7 @@ function AjouterBanquePage() {
   const { step } = Route.useSearch();
 
   return (
-    <section className="border-border bg-surface mt-5 overflow-hidden rounded-lg border">
+    <Card className="mt-5 gap-0 overflow-hidden p-0">
       <header className="bg-background-secondary flex items-center gap-3 border-b px-4.5 py-3">
         <Link
           to="/settings/banques"
@@ -65,7 +73,7 @@ function AjouterBanquePage() {
       </header>
 
       {step === "comptes" ? <StepComptes /> : <StepBanque />}
-    </section>
+    </Card>
   );
 }
 
@@ -134,13 +142,15 @@ function StepBanque() {
       />
 
       {aspsps.length === 0 ? (
-        <div className="border-border mt-3.5 rounded-xl border border-dashed px-4.5 py-6 text-center">
-          <p className="text-control font-medium">Aucune banque trouvée</p>
+        <EmptyState className="mt-3.5 px-4.5 py-6 text-center">
+          <p className="text-control text-foreground font-medium">
+            Aucune banque trouvée
+          </p>
           <p className="text-muted text-control mt-1">
             Aucun établissement ne correspond à votre recherche. Essayez le nom
             officiel de l'établissement.
           </p>
-        </div>
+        </EmptyState>
       ) : (
         <div className="mt-3.5 overflow-hidden rounded-xl border">
           {aspsps.map((aspsp) => {

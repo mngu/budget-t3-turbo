@@ -7,7 +7,7 @@ import type {
   SpaceRole,
 } from "@budget/api";
 
-import { Button, toast } from "@heroui/react";
+import { Button, Card, toast } from "@heroui/react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   LockIcon,
@@ -288,9 +288,10 @@ function EspacesPage() {
       {incoming.length > 0 && (
         <div className="mt-5 flex flex-col gap-3">
           {incoming.map((invitation) => (
-            <div
+            <Card
               key={invitation.id}
-              className="border-border bg-accent-soft flex flex-wrap items-center gap-4 rounded-lg border px-5 py-4"
+              variant="secondary"
+              className="flex-row flex-wrap items-center gap-4 px-5 py-4"
             >
               <span className="bg-surface border-border text-accent flex size-8 flex-none items-center justify-center rounded-md border">
                 <MailIcon className="size-4" />
@@ -320,7 +321,7 @@ function EspacesPage() {
                   Rejoindre l&apos;espace
                 </Button>
               </div>
-            </div>
+            </Card>
           ))}
         </div>
       )}

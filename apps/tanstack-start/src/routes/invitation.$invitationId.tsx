@@ -1,4 +1,12 @@
-import { Button, Input, Label, Spinner, TextField, toast } from "@heroui/react";
+import {
+  Button,
+  Card,
+  Input,
+  Label,
+  Spinner,
+  TextField,
+  toast,
+} from "@heroui/react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   CircleCheckIcon,
@@ -273,7 +281,7 @@ function Shell({
           </span>
         </div>
 
-        <div className="border-border bg-surface mt-5 overflow-hidden rounded-lg border">
+        <Card className="mt-5 gap-0 overflow-hidden p-0">
           <div
             className={cn(
               "px-5 pt-5 pb-4",
@@ -314,7 +322,7 @@ function Shell({
               )}
             </div>
           )}
-        </div>
+        </Card>
 
         <div className="text-muted text-control mt-3.5 text-center text-pretty">
           {footnote}

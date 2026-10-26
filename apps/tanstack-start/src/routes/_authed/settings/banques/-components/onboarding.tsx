@@ -5,6 +5,7 @@ import type { SetupStatus } from "@budget/api";
 import {
   Alert,
   Button,
+  Card,
   Description,
   Input,
   Label,
@@ -59,7 +60,7 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
   };
 
   return (
-    <section className="border-border bg-surface mt-5 overflow-hidden rounded-lg border">
+    <Card className="mt-5 gap-0 overflow-hidden p-0">
       <header className="bg-background-secondary border-b px-5 py-3.5">
         <div className="flex items-center gap-2.5">
           <KeyRoundIcon className="text-accent size-3.5" />
@@ -177,13 +178,13 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
           Valider la configuration
         </Button>
       </div>
-    </section>
+    </Card>
   );
 }
 
 function Step({ n, children }: { n: string; children: React.ReactNode }) {
   return (
-    <li className="grid grid-cols-[22px_minmax(0,1fr)] items-start gap-3">
+    <li className="grid grid-cols-[24px_minmax(0,1fr)] items-start gap-3">
       <span className="border-border text-muted num text-meta flex size-6 items-center justify-center rounded-full border">
         {n}
       </span>

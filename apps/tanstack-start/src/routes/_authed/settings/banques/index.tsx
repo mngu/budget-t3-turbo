@@ -1,6 +1,6 @@
 import type { ConnectionSummary, OrphanBankGroup } from "@budget/api";
 
-import { buttonVariants, toast } from "@heroui/react";
+import { buttonVariants, Card, EmptyState, toast } from "@heroui/react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { UnlinkIcon } from "lucide-react";
 import { useState } from "react";
@@ -104,23 +104,25 @@ function BanquesPage() {
 
           {/* Orphaned accounts already offer their own "Connecter" call to action. */}
           {connections.length === 0 && orphans.length === 0 && (
-            <div className="bg-surface rounded-lg border px-5 py-11 text-center">
-              <p className="text-body font-semibold">
-                Aucune banque connectée pour l'instant
-              </p>
-              <p className="text-muted text-control mx-auto mt-1.5 max-w-105 text-pretty">
-                La configuration est en place. Ajoutez une première banque :
-                vous serez redirigé vers elle pour autoriser l'accès, puis
-                ramené ici.
-              </p>
-              <Link
-                to="/settings/banques/ajouter"
-                search={{ step: "banque" }}
-                className={buttonVariants({ className: "mt-4" })}
-              >
-                Ajouter une banque
-              </Link>
-            </div>
+            <Card className="p-0">
+              <EmptyState className="px-5 py-11 text-center">
+                <p className="text-body text-foreground font-semibold">
+                  Aucune banque connectée pour l'instant
+                </p>
+                <p className="text-muted text-control mx-auto mt-1.5 max-w-105 text-pretty">
+                  La configuration est en place. Ajoutez une première banque :
+                  vous serez redirigé vers elle pour autoriser l'accès, puis
+                  ramené ici.
+                </p>
+                <Link
+                  to="/settings/banques/ajouter"
+                  search={{ step: "banque" }}
+                  className={buttonVariants({ className: "mt-4" })}
+                >
+                  Ajouter une banque
+                </Link>
+              </EmptyState>
+            </Card>
           )}
         </div>
       )}
@@ -144,7 +146,10 @@ function BanquesPage() {
 
 function OrphanBanner({ orphan }: { orphan: OrphanBankGroup }) {
   return (
-    <div className="border-border flex flex-wrap items-center gap-3.5 rounded-lg border border-dashed px-4.5 py-3.5">
+    <Card
+      variant="secondary"
+      className="flex-row flex-wrap items-center gap-3.5 px-4.5 py-3.5"
+    >
       <UnlinkIcon className="text-muted size-4 flex-none" />
       <div className="min-w-65 flex-1">
         <p className="text-control font-medium">
@@ -162,11 +167,11 @@ function OrphanBanner({ orphan }: { orphan: OrphanBankGroup }) {
       <Link
         to="/settings/banques/ajouter"
         search={{ step: "banque", q: orphan.bankName }}
-        className="border-border hover:bg-default text-control flex h-8 items-center rounded-md border px-3.5 font-medium whitespace-nowrap"
+        className={buttonVariants({ variant: "outline", size: "sm" })}
       >
         Connecter {orphan.bankName}
       </Link>
-    </div>
+    </Card>
   );
 }
 

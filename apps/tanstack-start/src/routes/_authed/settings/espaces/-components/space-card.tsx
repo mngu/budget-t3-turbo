@@ -9,6 +9,7 @@ import type {
 
 import {
   Button,
+  Card,
   Chip,
   Dropdown,
   Input,
@@ -53,7 +54,7 @@ export function SpaceCard({
   const owner = space.role === "owner";
 
   return (
-    <div className="bg-surface border-border overflow-hidden rounded-lg border">
+    <Card className="gap-0 overflow-hidden p-0">
       <div className="grid grid-cols-[36px_minmax(0,1fr)_auto] items-center gap-3.5 px-4 py-3.5">
         <span className="bg-surface-secondary text-muted flex size-9 items-center justify-center rounded-md">
           {shared ? (
@@ -171,7 +172,7 @@ export function SpaceCard({
           )}
         </div>
       )}
-    </div>
+    </Card>
   );
 }
 
