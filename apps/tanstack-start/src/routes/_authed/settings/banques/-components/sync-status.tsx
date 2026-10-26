@@ -4,6 +4,7 @@ import { Button } from "@heroui/react";
 import { RefreshCwIcon } from "lucide-react";
 
 import { cn } from "@budget/ui";
+import { Stat } from "~/component/stat";
 import { dateFr } from "~/lib/format";
 import { useSync } from "~/lib/sync-toast";
 
@@ -26,9 +27,8 @@ export function SyncStatus({
 
   return (
     <div className="flex items-center gap-4">
-      <div className="border-border border-r pr-4 text-right">
-        <div className={cn("num text-body font-medium", tone)}>{value}</div>
-        <div className="label-caps mt-0.5">{meta}</div>
+      <div className="border-border border-r pr-4">
+        <Stat value={value} label={meta} tone={tone} />
       </div>
 
       <Button
@@ -63,10 +63,10 @@ function describe(
     };
   }
   return {
-    value: `${totalTransactions} transaction${totalTransactions > 1 ? "s" : ""}`,
+    value: `${totalTransactions.toLocaleString("fr-FR")} transaction${totalTransactions > 1 ? "s" : ""}`,
     meta: lastImportedAt
       ? `dernier import le ${dateFr.format(new Date(lastImportedAt))}`
       : "aucun import pour l'instant",
-    tone: "text-muted",
+    tone: undefined,
   };
 }

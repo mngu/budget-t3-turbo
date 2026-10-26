@@ -5,6 +5,7 @@ import type { SetupStatus } from "@budget/api";
 import {
   Alert,
   Button,
+  Card,
   Description,
   Input,
   Label,
@@ -59,9 +60,9 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
   };
 
   return (
-    <section className="border-border bg-surface mt-5 overflow-hidden rounded-lg border">
+    <Card className="mt-5 gap-0 overflow-hidden p-0">
       <header className="bg-background-secondary border-b px-5 py-3.5">
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2.5">
           <KeyRoundIcon className="text-accent size-3.5" />
           <h2 className="text-body font-semibold">
             Configuration Enable Banking
@@ -163,8 +164,8 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
         )}
       </div>
 
-      <div className="flex items-center gap-3 border-t px-5 py-3">
-        <span className="text-muted text-control min-w-0 flex-1">
+      <div className="flex flex-wrap items-center gap-3 border-t px-5 py-3">
+        <span className="text-muted text-control min-w-60 flex-1">
           Rien n'est envoyé à votre banque à cette étape.
         </span>
         <Button
@@ -177,13 +178,13 @@ export function Onboarding({ setup }: { setup: SetupStatus }) {
           Valider la configuration
         </Button>
       </div>
-    </section>
+    </Card>
   );
 }
 
 function Step({ n, children }: { n: string; children: React.ReactNode }) {
   return (
-    <li className="grid grid-cols-[22px_minmax(0,1fr)] items-start gap-3">
+    <li className="grid grid-cols-[24px_minmax(0,1fr)] items-start gap-3">
       <span className="border-border text-muted num text-meta flex size-6 items-center justify-center rounded-full border">
         {n}
       </span>

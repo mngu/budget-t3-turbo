@@ -2,7 +2,7 @@
 
 import type { AccountSummary, ConnectionSummary } from "@budget/api";
 
-import { Button, Chip, ProgressBar, Spinner } from "@heroui/react";
+import { Button, Card, Chip, ProgressBar, Spinner } from "@heroui/react";
 
 import { cn } from "@budget/ui";
 
@@ -21,7 +21,7 @@ export function ConnectionCard({
   const { renew, busy } = useRenewConnection();
 
   return (
-    <section className="bg-surface rounded-lg border">
+    <Card className="gap-0 overflow-hidden p-0">
       <div className="grid grid-cols-[38px_minmax(0,1fr)] items-center gap-3.5 px-4.5 py-3.5 md:grid-cols-[38px_minmax(0,1fr)_auto]">
         <BankLogo
           name={connection.aspspName}
@@ -34,9 +34,7 @@ export function ConnectionCard({
             <span className="text-subheading truncate">
               {connection.aspspName}
             </span>
-            <span className="text-muted text-meta rounded-sm border px-1.5">
-              {connection.aspspCountry}
-            </span>
+            <Chip size="sm">{connection.aspspCountry}</Chip>
           </div>
 
           <div className="mt-1.5 flex flex-wrap items-center gap-2.5">
@@ -80,7 +78,7 @@ export function ConnectionCard({
         </div>
       </div>
 
-      <div className="border-t">
+      <div className="divide-y border-t">
         {connection.accounts.length === 0 ? (
           <p className="text-muted text-control px-4.5 py-2.5">
             Aucun compte rattaché — la prochaine autorisation les découvrira.
@@ -95,7 +93,7 @@ export function ConnectionCard({
           ))
         )}
       </div>
-    </section>
+    </Card>
   );
 }
 
@@ -107,7 +105,7 @@ function AccountRow({
   fallbackName: string;
 }) {
   return (
-    <div className="hover:bg-surface-secondary grid min-h-10 grid-cols-[minmax(0,1fr)_auto] items-center gap-3.5 border-t px-4.5">
+    <div className="hover:bg-surface-secondary grid min-h-10 grid-cols-[minmax(0,1fr)_auto] items-center gap-3.5 px-4.5">
       <div className="flex min-w-0 flex-wrap items-baseline gap-2.5">
         <span
           className={cn(
@@ -127,11 +125,7 @@ function AccountRow({
             {account.iban}
           </span>
         )}
-        {!account.enabled && (
-          <span className="text-muted text-meta rounded-sm border px-1.5">
-            exclu du suivi
-          </span>
-        )}
+        {!account.enabled && <Chip size="sm">exclu du suivi</Chip>}
       </div>
       {/* Disabled accounts retain their imported transactions and count toward totals. */}
       <span className="text-muted num text-meta whitespace-nowrap">

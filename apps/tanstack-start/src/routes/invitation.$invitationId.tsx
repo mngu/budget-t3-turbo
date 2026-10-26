@@ -1,4 +1,12 @@
-import { Button, Input, Label, Spinner, TextField, toast } from "@heroui/react";
+import {
+  Button,
+  Card,
+  Input,
+  Label,
+  Spinner,
+  TextField,
+  toast,
+} from "@heroui/react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   CircleCheckIcon,
@@ -273,7 +281,7 @@ function Shell({
           </span>
         </div>
 
-        <div className="border-border bg-surface mt-5 overflow-hidden rounded-lg border">
+        <Card className="mt-5 gap-0 overflow-hidden p-0">
           <div
             className={cn(
               "px-5 pt-5 pb-4",
@@ -297,24 +305,26 @@ function Shell({
           {children}
 
           {footer && (
-            <div className="flex items-center gap-3 px-5 py-3.5">
-              <span className="text-muted text-control min-w-0 flex-1 text-pretty">
+            <div className="flex flex-wrap items-center gap-3 px-5 py-3.5">
+              <span className="text-muted text-control min-w-40 flex-1 text-pretty">
                 {note}
               </span>
-              {secondary && (
-                <Button variant="ghost" onPress={secondary.onPress}>
-                  {secondary.label}
-                </Button>
-              )}
-              {primary && (
-                <Button isPending={pending} onPress={primary.onPress}>
-                  {pending && <Spinner color="current" size="sm" />}
-                  {primary.label}
-                </Button>
-              )}
+              <div className="ml-auto flex items-center gap-3">
+                {secondary && (
+                  <Button variant="ghost" onPress={secondary.onPress}>
+                    {secondary.label}
+                  </Button>
+                )}
+                {primary && (
+                  <Button isPending={pending} onPress={primary.onPress}>
+                    {pending && <Spinner color="current" size="sm" />}
+                    {primary.label}
+                  </Button>
+                )}
+              </div>
             </div>
           )}
-        </div>
+        </Card>
 
         <div className="text-muted text-control mt-3.5 text-center text-pretty">
           {footnote}
