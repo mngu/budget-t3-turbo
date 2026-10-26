@@ -106,7 +106,7 @@ export function TransactionsTable({
                 <Table.Row
                   key={row.id}
                   id={row.id}
-                  className={cn(row.excluded && "opacity-50")}
+                  className={cn("group", row.excluded && "opacity-50")}
                 >
                   <Table.Cell className="num text-muted whitespace-nowrap">
                     {dayMonthFr.format(new Date(row.bookingDate))}
