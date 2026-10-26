@@ -5,7 +5,7 @@ import { ArrowLeftIcon } from "lucide-react";
 import { useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
-import { getCategoryLabel, NO_CATEGORY_NAME } from "@budget/api/schemas";
+import { getCategoryLabel } from "@budget/api/schemas";
 import { CanvasContainer } from "@budget/ui/canvas-container";
 import { Segment, SegmentDetail } from "@budget/ui/segment";
 import { SegmentLabel } from "@budget/ui/segment-label";
@@ -34,8 +34,9 @@ export default function Ring() {
   const { search, setSearch } = useRevueSearch();
 
   const selectedCategory = search.category;
-  const selectedOverview =
-    selectedCategory && overview.find(({ name }) => name === selectedCategory);
+  const selectedOverview = selectedCategory
+    ? overview.find(({ name }) => name === selectedCategory)
+    : undefined;
 
   const back = () => {
     setSearch({ category: undefined });
@@ -46,16 +47,20 @@ export default function Ring() {
   const total = selectedOverview
     ? (selectedOverview.totalAmount ?? 0)
     : sumBy(overview, ({ totalAmount }) => totalAmount ?? 0);
+  const children = selectedOverview?.children ?? [];
+  // A category without sub-categories opens on a single arc: itself.
   const elements = selectedOverview
-    ? (selectedOverview.children?.map((childElement, index) => ({
-        ...childElement,
-        color: shadeCategoryColor(
-          resolveColor(selectedOverview.color),
-          index,
-          selectedOverview.children?.length ?? 0,
-        ),
-        icon: selectedOverview.icon,
-      })) ?? [])
+    ? children.length
+      ? children.map((childElement, index) => ({
+          ...childElement,
+          color: shadeCategoryColor(
+            resolveColor(selectedOverview.color),
+            index,
+            children.length,
+          ),
+          icon: selectedOverview.icon,
+        }))
+      : [selectedOverview]
     : overview;
 
   // Keep accumulation in the loop so React Compiler can prove it is render-local.
@@ -75,8 +80,9 @@ export default function Ring() {
     });
     rotation += arc;
   }
+  // Hover tracks labels: the uncategorized arc's name is the API sentinel.
   const [currentHover, setCurrentHover] = useState<string | null>(
-    overviewArcs[0]?.name ?? null,
+    overviewArcs[0] ? getCategoryLabel(overviewArcs[0].name) : null,
   );
 
   return (
@@ -99,8 +105,11 @@ export default function Ring() {
             onPointerOver={() => {
               setCurrentHover(labelName);
             }}
-            onClick={() =>
-              name && name !== NO_CATEGORY_NAME && setSearch({ category: name })
+            // Below a category there is no level left to open.
+            onClick={
+              selectedOverview || !name
+                ? undefined
+                : () => setSearch({ category: name })
             }
           >
             {shouldDisplayName && (

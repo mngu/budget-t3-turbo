@@ -94,9 +94,8 @@ export function RefineBar({
         value={selectedCategory(overview, search.category)}
         onChange={(selected) =>
           setSearch({
-            category: !selected
-              ? undefined
-              : (selected.child?.name ?? selected.parent.name ?? "none"),
+            category:
+              selected?.child?.name ?? selected?.parent.name ?? undefined,
           })
         }
       />

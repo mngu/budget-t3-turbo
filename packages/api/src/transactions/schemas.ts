@@ -11,10 +11,7 @@ export const transactionsSearchSchema = z.object({
     .catch(undefined),
   direction: z.enum(["debit", "credit"]).optional().catch(undefined),
   status: z.enum(["booked", "pending"]).optional().catch(undefined),
-  category: z
-    .union([z.string(), z.literal("none")])
-    .optional()
-    .catch(undefined),
+  category: z.string().optional().catch(undefined),
   dateFrom: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/)

@@ -106,3 +106,39 @@ for (const [label, from, to] of presets) {
     );
   });
 }
+
+test("le filtre « Sans catégorie » liste les transactions non classées", async ({
+  page,
+}) => {
+  await page.goto(`/transactions?${previousMonth}`, hydrated);
+
+  await page.getByRole("button", { name: "Choisir une catégorie" }).click();
+  await page
+    .getByRole("group", { name: "Sans catégorie" })
+    .getByRole("option")
+    .click();
+
+  await expect(page).toHaveURL(/category=None/);
+  await expect(
+    page.getByRole("button", { name: "Sans catégorie", exact: true }),
+  ).toBeVisible();
+  await expect(page.locator("tbody tr").first()).toContainText(
+    "Sans catégorie",
+  );
+});
+
+test("une catégorie sans sous-catégorie s'ouvre depuis la colonne", async ({
+  page,
+}) => {
+  await page.goto(`/?${previousMonth}`, hydrated);
+
+  await page
+    .getByRole("toolbar", { name: "Répartition par poste" })
+    .getByRole("button", { name: /^Sans catégorie/ })
+    .click();
+
+  await expect(page).toHaveURL(/category=None/);
+  await expect(
+    page.getByText("Sans catégorie", { exact: true }).first(),
+  ).toBeVisible();
+});
