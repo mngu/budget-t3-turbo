@@ -30,7 +30,7 @@ export function ExcludeBadge({ row }: { row: TransactionRow }) {
           // Keep the action visible on touch screens, where hover is unavailable.
           row.excluded
             ? "border-border bg-surface-secondary text-muted"
-            : "border-border text-muted md:opacity-0 md:group-hover:opacity-100",
+            : "border-border text-muted md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100",
         )}
       >
         <EyeOffIcon className="size-2.5" />

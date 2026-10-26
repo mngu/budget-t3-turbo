@@ -27,7 +27,7 @@ export function KpiBand({ budgetStats, globalStats }: KpiBandProps) {
         <div className="label-caps">Solde</div>
         <div
           className={cn(
-            "num text-hero mt-0.5",
+            "num text-hero text-shadow-glow mt-0.5",
             balance < 0 ? "text-danger" : "text-success",
           )}
         >
