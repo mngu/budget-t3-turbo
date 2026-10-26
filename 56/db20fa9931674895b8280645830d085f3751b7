@@ -1,0 +1,19 @@
+apps/tanstack-start/src/lib/sync-toast.ts
+  s_2fdb8591eb7a12::t_1d25bf826e7b74 37-40,44,49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "56db20fa9931674895b8280645830d085f3751b7",
+  "prompts": {},
+  "sessions": {
+    "s_2fdb8591eb7a12": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "daff0d5d-90cd-4d9d-baef-fc10e07fe354",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
