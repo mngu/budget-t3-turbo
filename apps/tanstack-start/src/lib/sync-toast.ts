@@ -34,13 +34,19 @@ export function useSync() {
 
   const sync = async () => {
     setState("running");
+    const pending = toast("Synchronisation des comptes en cours…", {
+      isLoading: true,
+      timeout: 0,
+    });
     try {
       const outcome = await trpcClient.sync.run.mutate();
       await router.invalidate();
+      toast.close(pending);
       toastSyncOutcome(outcome);
       setState("idle");
       return true;
     } catch (err) {
+      toast.close(pending);
       toast.danger(
         err instanceof Error ? err.message : "Échec de la synchronisation.",
       );
