@@ -18,3 +18,7 @@ export function useOverview() {
     placeholderData: keepPreviousData,
   });
 }
+
+// Settings count over the whole space, not a period, as on the web.
+export const useSpaceCategories = () =>
+  useQuery(trpc.categories.overview.queryOptions());

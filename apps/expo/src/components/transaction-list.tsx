@@ -1,6 +1,6 @@
 import type { TransactionRow } from "@budget/api";
+import type { TransactionsSearch } from "@budget/api/schemas";
 import type { ReactElement } from "react";
-import type { StatementFilters } from "~/lib/filters";
 
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
@@ -23,7 +23,7 @@ export function TransactionList({
   filters,
   header,
 }: {
-  filters?: Partial<StatementFilters>;
+  filters?: Partial<TransactionsSearch>;
   header?: ReactElement;
 }) {
   const { scope, label } = usePeriod();

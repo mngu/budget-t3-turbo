@@ -1,7 +1,7 @@
 import type { ThemeMode } from "~/lib/preferences";
 
 import { useQuery } from "@tanstack/react-query";
-import { useFocusEffect } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { ListGroup, Switch } from "heroui-native";
 import { useCallback } from "react";
 import { Alert, ScrollView } from "react-native";
@@ -66,6 +66,15 @@ export default function Settings() {
       contentContainerClassName="gap-6 p-4"
       contentInsetAdjustmentBehavior="automatic"
     >
+      <SettingsGroup>
+        <ListGroup.Item onPress={() => router.push("/reglages/categories")}>
+          <ListGroup.ItemContent>
+            <ListGroup.ItemTitle>Catégories</ListGroup.ItemTitle>
+          </ListGroup.ItemContent>
+          <ListGroup.ItemSuffix />
+        </ListGroup.Item>
+      </SettingsGroup>
+
       {spaces.length > 1 && (
         <SettingsGroup title="Espace">
           {spaces.map((space) => (

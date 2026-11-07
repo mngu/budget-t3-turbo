@@ -1,7 +1,7 @@
 import { useIsMutating, useMutation } from "@tanstack/react-query";
 import { useToast } from "heroui-native";
 
-import { queryClient, trpc } from "./trpc";
+import { trpc } from "./trpc";
 
 const SYNC_TOAST = "sync";
 
@@ -10,9 +10,8 @@ export function useSync() {
   const { toast } = useToast();
   const { mutate } = useMutation({
     ...trpc.sync.run.mutationOptions(),
-    onSuccess: async ({ expired, rateLimited }) => {
-      await queryClient.invalidateQueries();
-      toast.hide(SYNC_TOAST);
+    onSettled: () => toast.hide(SYNC_TOAST),
+    onSuccess: ({ expired, rateLimited }) => {
       const issues = [
         expired.length > 0 &&
           `${expired.length} banque(s) à renouveler : ${expired.join(", ")}`,
@@ -28,10 +27,6 @@ export function useSync() {
             }
           : { variant: "success", label: "Synchronisation terminée." },
       );
-    },
-    onError: (error) => {
-      toast.hide(SYNC_TOAST);
-      toast.show({ variant: "danger", label: error.message });
     },
   });
   // Every header has its own picker: the running state must be shared, or a

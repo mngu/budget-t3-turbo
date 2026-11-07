@@ -8,7 +8,7 @@ import { CategoryIcon } from "~/components/category-icon";
 import { ActionItem, SettingsGroup } from "~/components/settings-group";
 import { useCategoryColors } from "~/lib/category-color";
 import { signedEuro } from "~/lib/format";
-import { queryClient, trpc } from "~/lib/trpc";
+import { trpc } from "~/lib/trpc";
 
 const longDate = new Intl.DateTimeFormat("fr-FR", {
   weekday: "long",
@@ -26,17 +26,13 @@ export default function TransactionDetail() {
   const { toast } = useToast();
   const exclude = useMutation({
     ...trpc.transactions.setExcluded.mutationOptions(),
-    // Every total, gauge and list may count this line.
-    onSuccess: async (_, { excluded }) => {
-      await queryClient.invalidateQueries();
+    onSuccess: (_, { excluded }) =>
       toast.show({
         variant: "success",
         label: excluded
           ? "La ligne est écartée des analyses."
           : "La ligne compte de nouveau dans les analyses.",
-      });
-    },
-    onError: (err) => toast.show({ variant: "danger", label: err.message }),
+      }),
   });
 
   if (error) {

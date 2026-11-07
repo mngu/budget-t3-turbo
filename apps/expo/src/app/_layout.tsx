@@ -6,6 +6,7 @@ import { HeroUINativeProvider } from "heroui-native";
 import { useColorScheme } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
+import { MutationErrors } from "~/components/mutation-errors";
 import { authClient } from "~/lib/auth";
 import { FiltersProvider } from "~/lib/filters";
 import { PeriodProvider } from "~/lib/period";
@@ -20,6 +21,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <HeroUINativeProvider>
         <QueryClientProvider client={queryClient}>
+          <MutationErrors />
           {/* Headers and the tab bar are React Navigation's, outside HeroUI's theme. */}
           <ThemeProvider value={dark ? DarkTheme : DefaultTheme}>
             {/* Remounted on a space switch, like the document the web reloads: the
