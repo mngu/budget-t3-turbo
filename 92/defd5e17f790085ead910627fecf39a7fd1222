@@ -1,0 +1,67 @@
+packages/api/CLAUDE.md
+  s_44f15ef362c815::t_eab390264e8907 13
+packages/auth/src/index.ts
+  s_44f15ef362c815::t_9d9dd1ba3c19dc 116-121
+packages/api/src/spaces/queries.ts
+  s_44f15ef362c815::t_5bc60144397b1c 15,121-126
+  s_44f15ef362c815::t_b84a79c70b9ec8 127
+packages/api/src/spaces/schemas.ts
+  s_44f15ef362c815::t_5bc60144397b1c 53-54
+packages/api/src/transactions/period.test.ts
+  s_44f15ef362c815::t_8ea865638ccc2e 1-49
+apps/expo/src/components/period-picker.tsx
+  s_44f15ef362c815::t_3fbe430dcce5b3 6-7,10,13,19-21,28-34,44,57
+  s_44f15ef362c815::t_11abac9ed5b26a 25
+packages/api/src/schemas.ts
+  s_44f15ef362c815::t_e000c59a04d658 2
+packages/api/src/spaces/mutations.ts
+  s_44f15ef362c815::t_5bc60144397b1c 87-96
+apps/tanstack-start/src/routes/_authed/_period-overview/route.tsx
+  s_44f15ef362c815::t_3806d4e819e6a9 4,9,11,22-26,28-35,75
+  s_44f15ef362c815::t_11abac9ed5b26a 27
+apps/tanstack-start/src/lib/date.ts
+  s_44f15ef362c815::t_11abac9ed5b26a 9
+apps/expo/src/app/_layout.tsx
+  s_44f15ef362c815::t_9c039c1b31e73b 23
+packages/api/src/router/spaces.ts
+  s_44f15ef362c815::t_5bc60144397b1c 16,21,25-26,42-49
+  s_44f15ef362c815::t_ba5eb6fa297935 50
+packages/db/drizzle/0006_month_start_day.sql
+  s_44f15ef362c815::t_e62330fadf8f53 1
+apps/tanstack-start/src/component/period-picker.tsx
+  s_44f15ef362c815::t_6f68bf7210815e 19,23-24,32,47,58,64,95,122,125,155
+  s_44f15ef362c815::t_11abac9ed5b26a 14
+  s_44f15ef362c815::t_b2d46469232fae 10,93-94,96-101
+packages/api/script/seed-demo.ts
+  s_44f15ef362c815::t_a1cdefd08a0e7d 446-450
+apps/expo/src/lib/period.tsx
+  s_44f15ef362c815::t_efc75520b69b6d 3,6-8,16-19,28-30,35-42,44-49,51-53,66-69
+  s_44f15ef362c815::t_c7e07a40cd22de 61,64-65
+apps/tanstack-start/src/lib/date.test.ts
+  s_44f15ef362c815::t_8ea865638ccc2e 3,5
+packages/db/src/auth-schema.ts
+  s_44f15ef362c815::t_9d9dd1ba3c19dc 93
+  s_44f15ef362c815::t_5d1c20f59508cc 2-9
+packages/api/src/transactions/period.ts
+  s_44f15ef362c815::t_ed232c1f950cb1 1-27
+packages/db/drizzle/meta/0006_snapshot.json
+  s_44f15ef362c815::t_162cde89adae9e 1-1398
+packages/db/drizzle/meta/_journal.json
+  s_44f15ef362c815::t_7fa64e966e732a 46-52
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "92defd5e17f790085ead910627fecf39a7fd1222",
+  "prompts": {},
+  "sessions": {
+    "s_44f15ef362c815": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eafa832e-8b3a-476f-8df6-a7a617abe76b",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
