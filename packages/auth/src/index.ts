@@ -113,6 +113,12 @@ export function initAuth(options: {
                 defaultValue: false,
                 input: false,
               },
+              // The household's budget month: members must see the same totals.
+              monthStartDay: {
+                type: "number",
+                defaultValue: 1,
+                input: false,
+              },
             },
           },
         },

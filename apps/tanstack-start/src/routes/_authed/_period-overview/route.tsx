@@ -1,17 +1,14 @@
 import {
   createFileRoute,
   Outlet,
+  redirect,
   stripSearchParams,
   useRouterState,
 } from "@tanstack/react-router";
 
-import { transactionsSearchSchema } from "@budget/api/schemas";
+import { monthBounds, transactionsSearchSchema } from "@budget/api/schemas";
 import { cn } from "@budget/ui";
-import {
-  defaultToCurrentMonth,
-  SEARCH_DEFAULTS,
-  wholePeriod,
-} from "~/lib/transactions-search";
+import { SEARCH_DEFAULTS, wholePeriod } from "~/lib/transactions-search";
 
 import { BreakdownList } from "./-components/breakdown-list";
 import { KpiBand } from "./-components/kpi-band";
@@ -22,7 +19,20 @@ import { OverviewHeader } from "./-components/overview-header";
 export const Route = createFileRoute("/_authed/_period-overview")({
   validateSearch: transactionsSearchSchema,
   search: {
-    middlewares: [stripSearchParams(SEARCH_DEFAULTS), defaultToCurrentMonth],
+    middlewares: [stripSearchParams(SEARCH_DEFAULTS)],
+  },
+  // The space's pay cycle is server state, so a search middleware cannot default the
+  // period; the redirect puts it in the URL for the picker and loaders to share.
+  beforeLoad: async ({ context, search, location }) => {
+    const monthStartDay = await context.trpcClient.spaces.monthStartDay.query();
+    if (!search.dateFrom && !search.dateTo) {
+      throw redirect({
+        to: location.pathname,
+        search: { ...search, ...monthBounds(new Date(), monthStartDay) },
+        replace: true,
+      });
+    }
+    return { monthStartDay };
   },
   loaderDeps: ({ search }) => search,
   loader: async ({ deps, context }) => {
@@ -62,6 +72,7 @@ export const Route = createFileRoute("/_authed/_period-overview")({
       bankCounts,
       banks,
       earliestDate,
+      monthStartDay: context.monthStartDay,
     };
   },
   errorComponent: ({ error }) => (

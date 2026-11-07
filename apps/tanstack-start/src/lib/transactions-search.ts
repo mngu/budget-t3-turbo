@@ -1,25 +1,5 @@
 import type { TransactionsSearch } from "@budget/api/schemas";
 
-import { monthBounds, monthStartDay } from "./date";
-
-// Apply defaults after next(), which may replace search entirely during navigation.
-// Put dates in the URL so the picker and loaders share the same period.
-export const defaultToCurrentMonth = <
-  TSearch extends Pick<TransactionsSearch, "dateFrom" | "dateTo">,
->({
-  search,
-  next,
-}: {
-  search: TSearch;
-  next: (search: TSearch) => TSearch;
-}) => {
-  const result = next(search);
-  return (result.dateFrom ?? result.dateTo)
-    ? result
-    : // SSR uses calendar months; the client applies its saved pay cycle.
-      { ...result, ...monthBounds(new Date(), monthStartDay()) };
-};
-
 export const SEARCH_DEFAULTS = {
   page: 1,
   sort: "date",

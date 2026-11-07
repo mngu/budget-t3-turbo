@@ -443,7 +443,11 @@ async function seed() {
         isPersonal: true,
         createdAt: new Date(),
       })
-      .onConflictDoNothing();
+      // The pay cycle is the only space setting the UI changes; reset it with the data.
+      .onConflictDoUpdate({
+        target: organization.id,
+        set: { monthStartDay: 1 },
+      });
     await tx
       .insert(member)
       .values({

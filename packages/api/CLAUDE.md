@@ -10,7 +10,7 @@ Détail du package API. Le `CLAUDE.md` de la racine garde la vue d'ensemble et l
   - `spaces/` — `queries.ts`, `mutations.ts` (voir « Espaces » à la racine).
   - `categorization.ts` — un seul fichier : similarité, court-circuit, LLM, écriture (voir « Catégorisation » plus bas).
   - `pipeline.ts` — `performSync` / `performImport`, cross-domaine. `lib/` ne garde que le transverse (`data-dir.ts`, `single-flight.ts`).
-  - `schemas.ts` — **le point d'entrée `@budget/api/schemas`** : ré-exporte `transactions/schemas` et `categories/schemas`, rien d'autre. C'est le seul module du package que le navigateur importe comme valeur ; tout ce qui touche la base ou un SDK reste hors de lui (voir la racine).
+  - `schemas.ts` — **le point d'entrée `@budget/api/schemas`** : ré-exporte les `schemas` de `transactions/`, `categories/` et `banking/`, plus `transactions/period.ts` (cycle de paie : `cycleOf`, `monthBounds`, `cycleMonth`, en `Date` natif pour ne pas imposer date-fns au mobile), rien d'autre. C'est le seul module du package que le navigateur importe comme valeur ; tout ce qui touche la base ou un SDK reste hors de lui (voir la racine).
 
   Le sens des dépendances est `router/` → domaines → `lib/`, jamais l'inverse. Les services importent `db` directement (il n'est pas dans le contexte tRPC). `lib/single-flight.ts` sérialise les opérations longues : clé `sync:${orgId}` (sync + import) et clé `categorize:${orgId}`.
 
