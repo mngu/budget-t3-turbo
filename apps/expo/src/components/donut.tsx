@@ -3,7 +3,7 @@ import { View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 
 import { sumBy } from "@budget/api/schemas";
-import { euro } from "~/lib/format";
+import { useFormat } from "~/lib/format";
 
 const SIZE = 200;
 const STROKE = 22;
@@ -19,6 +19,7 @@ export function Donut({
   slices: { value: number; color: string }[];
   label: string;
 }) {
+  const { euro } = useFormat();
   const total = sumBy(slices, (slice) => slice.value);
   // A lone slice is a full ring; a gap would read as a missing share.
   const gap = slices.length > 1 ? GAP : 0;

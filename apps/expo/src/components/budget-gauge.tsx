@@ -1,7 +1,7 @@
 import { Typography } from "heroui-native";
 import { View } from "react-native";
 
-import { euro } from "~/lib/format";
+import { useFormat } from "~/lib/format";
 
 import { CategoryIcon } from "./category-icon";
 import { Gauge } from "./gauge";
@@ -23,6 +23,7 @@ export function BudgetGauge({
   budget,
   max,
 }: BudgetGaugeProps) {
+  const { euro } = useFormat();
   const balance = (budget ?? 0) - value;
 
   return (

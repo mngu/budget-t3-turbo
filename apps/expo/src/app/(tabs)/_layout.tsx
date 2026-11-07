@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { ChartPie, List } from "lucide-react-native";
+import { ChartPie, List, Settings } from "lucide-react-native";
 
 import { BankPicker } from "~/components/bank-picker";
 import { PeriodPicker } from "~/components/period-picker";
@@ -27,6 +27,16 @@ export default function TabsLayout() {
         options={{
           title: "Transactions",
           tabBarIcon: ({ color, size }) => <List color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="reglages"
+        options={{
+          title: "Réglages",
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+            <Settings color={color} size={size} />
+          ),
         }}
       />
     </Tabs>

@@ -6,10 +6,11 @@ import {
   Typography,
   useThemeColor,
 } from "heroui-native";
-import { Landmark } from "lucide-react-native";
+import { Landmark, RefreshCw } from "lucide-react-native";
 
 import { sumBy } from "@budget/api/schemas";
 import { usePeriod } from "~/lib/period";
+import { useSync } from "~/lib/sync";
 import { trpc } from "~/lib/trpc";
 
 export function BankPicker() {
@@ -26,6 +27,7 @@ export function BankPicker() {
     placeholderData: keepPreviousData,
   });
   const iconColor = useThemeColor("foreground");
+  const { sync, running } = useSync();
 
   // A space switch can leave banks this space does not have.
   const included = bank ? banks.filter((name) => bank.includes(name)) : banks;
@@ -87,6 +89,13 @@ export function BankPicker() {
               </Menu.Item>
             </>
           )}
+          <Separator className="my-1" />
+          <Menu.Item isDisabled={running} onPress={sync}>
+            <RefreshCw size={16} color={iconColor} />
+            <Menu.ItemTitle>
+              {running ? "Synchronisation…" : "Synchroniser"}
+            </Menu.ItemTitle>
+          </Menu.Item>
         </Menu.Content>
       </Menu.Portal>
     </Menu>

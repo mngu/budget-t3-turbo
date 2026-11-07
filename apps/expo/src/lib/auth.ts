@@ -3,7 +3,10 @@ import {
   getSetCookie,
   storageAdapter,
 } from "@better-auth/expo/client";
-import { magicLinkClient } from "better-auth/client/plugins";
+import {
+  magicLinkClient,
+  organizationClient,
+} from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 import Constants from "expo-constants";
 import * as SecureStore from "expo-secure-store";
@@ -29,6 +32,7 @@ export const authClient = createAuthClient({
       storage: SecureStore,
     }),
     magicLinkClient(),
+    organizationClient(),
   ],
 });
 
