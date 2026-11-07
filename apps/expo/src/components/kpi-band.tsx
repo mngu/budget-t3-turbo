@@ -3,13 +3,14 @@ import { Typography } from "heroui-native";
 import { View } from "react-native";
 
 import { useCategoryColors } from "~/lib/category-color";
-import { euro, signedEuro } from "~/lib/format";
+import { useFormat } from "~/lib/format";
 import { usePeriod } from "~/lib/period";
 import { trpc } from "~/lib/trpc";
 
 import { Gauge } from "./gauge";
 
 export function KpiBand() {
+  const { signedEuro } = useFormat();
   const { scope } = usePeriod();
   const { data } = useQuery({
     ...trpc.transactions.globalStats.queryOptions(scope),
@@ -80,6 +81,7 @@ function KpiBar({
   max: number;
   color: string;
 }) {
+  const { euro } = useFormat();
   return (
     <View className="flex-row items-center gap-3">
       <Typography

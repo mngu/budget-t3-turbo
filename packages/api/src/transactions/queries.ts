@@ -100,6 +100,25 @@ function statementFilters({ status, category, q }: TransactionsSearch) {
   return sql`WHERE true ${statusCondition} ${categoryCondition} ${qCondition}`;
 }
 
+const rowColumns = sql`(t).id,
+             (t).booking_date::text AS "bookingDate",
+             (t).description,
+             (t).counterparty,
+             bank_name AS "bankName",
+             (t).raw,
+             (t).amount,
+             (t).currency,
+             (t).direction,
+             (t).status,
+             (c).name AS category,
+             (t).category_source AS "categorySource",
+             (t).category_id AS "categoryId",
+             CASE WHEN (p).name IS NULL THEN (c).name
+                  ELSE (p).name || ' › ' || (c).name END AS "categoryPath",
+             coalesce((p).color, (c).color) AS "categoryColor",
+             coalesce((p).icon, (c).icon) AS "categoryIcon",
+             (t).excluded`;
+
 export async function listTransactions(
   organizationId: string,
   input: TransactionsSearch,
@@ -121,24 +140,7 @@ export async function listTransactions(
   const [list, counted] = await Promise.all([
     db.execute(sql`
       ${scope}
-      SELECT (t).id,
-             (t).booking_date::text AS "bookingDate",
-             (t).description,
-             (t).counterparty,
-             bank_name AS "bankName",
-             (t).raw,
-             (t).amount,
-             (t).currency,
-             (t).direction,
-             (t).status,
-             (c).name AS category,
-             (t).category_source AS "categorySource",
-             (t).category_id AS "categoryId",
-             CASE WHEN (p).name IS NULL THEN (c).name
-                  ELSE (p).name || ' › ' || (c).name END AS "categoryPath",
-             coalesce((p).color, (c).color) AS "categoryColor",
-             coalesce((p).icon, (c).icon) AS "categoryIcon",
-             (t).excluded
+      SELECT ${rowColumns}
       FROM filtered_transactions
       ${filters}
       ORDER BY ${orderBy}
@@ -154,6 +156,19 @@ export async function listTransactions(
     rows: transactionRowSchema.array().parse(list.rows),
     total: totalSchema.parse(counted.rows[0]).total,
   };
+}
+
+// The space scope comes from the shared CTE: an id from another space finds nothing.
+export async function getTransaction(organizationId: string, id: number) {
+  const result = await db.execute(sql`
+    ${filterTransactions(organizationId, {}, { includeExcluded: true })}
+    SELECT ${rowColumns}
+    FROM filtered_transactions
+    WHERE (t).id = ${id}
+  `);
+  const [row] = transactionRowSchema.array().parse(result.rows);
+  if (!row) throw new Error("Transaction introuvable.");
+  return row;
 }
 
 export async function listBankLabels(organizationId: string) {

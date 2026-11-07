@@ -39,7 +39,7 @@ export default function CategoryDetail() {
         }}
       />
       <TransactionList
-        category={name}
+        filters={{ category: name }}
         header={
           <View className="gap-6 pb-4">
             {/* Inset like the list rows' content, so the column lines up. */}

@@ -1,11 +1,14 @@
 import type { TransactionRow } from "@budget/api";
+import type { TransactionsSearch } from "@budget/api/schemas";
 import type { ReactElement } from "react";
 
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
+import { router } from "expo-router";
 import { ListGroup, Spinner, Typography } from "heroui-native";
-import { FlatList } from "react-native";
+import { FlatList, RefreshControl } from "react-native";
 
 import { signedAmount } from "@budget/api/schemas";
+import { DEFAULT_FILTERS } from "~/lib/filters";
 import { signedEuro } from "~/lib/format";
 import { usePeriod } from "~/lib/period";
 import { trpc, trpcClient } from "~/lib/trpc";
@@ -15,17 +18,25 @@ const dayMonth = new Intl.DateTimeFormat("fr-FR", {
   month: "short",
 });
 
-// The period's transactions, newest first, loaded page by page as the list scrolls.
+// The period's transactions, loaded page by page as the list scrolls.
 export function TransactionList({
-  category,
+  filters,
   header,
 }: {
-  category?: string;
+  filters?: Partial<TransactionsSearch>;
   header?: ReactElement;
 }) {
   const { scope, label } = usePeriod();
-  const search = { ...scope, category, sort: "date", order: "desc" } as const;
-  const { data, fetchNextPage, hasNextPage, isPending } = useInfiniteQuery({
+  const search = { ...DEFAULT_FILTERS, ...scope, ...filters };
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isPending,
+    isRefetching,
+    isFetchingNextPage,
+    refetch,
+  } = useInfiniteQuery({
     queryKey: trpc.transactions.list.queryKey(search),
     queryFn: ({ pageParam }) =>
       trpcClient.transactions.list.query({ ...search, page: pageParam }),
@@ -36,12 +47,14 @@ export function TransactionList({
         : undefined,
     placeholderData: keepPreviousData,
   });
+  const filtered = !!(search.q ?? search.direction ?? search.category);
 
   return (
     <FlatList
       className="bg-background flex-1"
       contentContainerClassName="p-4"
       contentInsetAdjustmentBehavior="automatic"
+      keyboardDismissMode="on-drag"
       data={data?.pages.flatMap((p) => p.rows)}
       keyExtractor={(row) => String(row.id)}
       ListHeaderComponent={header}
@@ -50,12 +63,20 @@ export function TransactionList({
           <Spinner className="self-center" />
         ) : (
           <Typography color="muted" className="text-center">
-            Aucune transaction en {label}.
+            {filtered
+              ? "Aucune transaction ne correspond à ces filtres."
+              : `Aucune transaction en ${label}.`}
           </Typography>
         )
       }
       renderItem={({ item }) => <Row row={item} />}
       onEndReached={() => hasNextPage && void fetchNextPage()}
+      refreshControl={
+        <RefreshControl
+          refreshing={isRefetching && !isFetchingNextPage}
+          onRefresh={() => void refetch()}
+        />
+      }
     />
   );
 }
@@ -63,14 +84,22 @@ export function TransactionList({
 function Row({ row }: { row: TransactionRow }) {
   const amount = signedAmount(row);
   return (
-    <ListGroup.Item>
+    <ListGroup.Item
+      className={row.excluded ? "opacity-50" : undefined}
+      onPress={() =>
+        router.push({
+          pathname: "/transaction/[id]",
+          params: { id: row.id },
+        })
+      }
+    >
       <ListGroup.ItemContent>
         <ListGroup.ItemTitle numberOfLines={1}>
           {row.counterparty ?? row.description}
         </ListGroup.ItemTitle>
-        <ListGroup.ItemDescription>
+        <ListGroup.ItemDescription numberOfLines={1}>
           {dayMonth.format(new Date(row.bookingDate))} ·{" "}
-          {row.categoryPath ?? "Sans catégorie"}
+          {row.excluded ? "Exclue" : (row.categoryPath ?? "Sans catégorie")}
         </ListGroup.ItemDescription>
       </ListGroup.ItemContent>
       <ListGroup.ItemSuffix>

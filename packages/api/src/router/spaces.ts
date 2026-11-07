@@ -83,7 +83,13 @@ export const spacesRouter = {
     ),
 
   invite: protectedProcedure
-    .input(z.object({ id: spaceId, email: z.email(), role }))
+    .input(
+      z.object({
+        id: spaceId,
+        email: z.email({ error: "Adresse email invalide." }),
+        role,
+      }),
+    )
     .mutation(({ ctx, input }) =>
       inviteMember(ctx.session.user.id, input.id, input.email, input.role),
     ),
