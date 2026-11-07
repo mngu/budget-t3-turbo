@@ -1,0 +1,19 @@
+apps/expo/src/app/_layout.tsx
+  s_9bfda3a75a1d2f::t_1751d510237003 25-27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f9dae213eb3b495969492120d0a92dea533b33ba",
+  "prompts": {},
+  "sessions": {
+    "s_9bfda3a75a1d2f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b572c11c-cab4-41c3-8a26-e1ee125765ae",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
