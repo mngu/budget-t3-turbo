@@ -119,8 +119,9 @@ test("le filtre « Sans catégorie » liste les transactions non classées", asy
     .click();
 
   await expect(page).toHaveURL(/category=None/);
+  // Each uncategorized row has its own "Sans catégorie" selector; the filter's is the one with a remove button.
   await expect(
-    page.getByRole("button", { name: "Sans catégorie", exact: true }),
+    page.getByRole("button", { name: "Retirer le filtre de catégorie" }),
   ).toBeVisible();
   await expect(page.locator("tbody tr").first()).toContainText(
     "Sans catégorie",
