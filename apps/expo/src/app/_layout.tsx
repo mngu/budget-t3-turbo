@@ -22,7 +22,9 @@ export default function RootLayout() {
           <ThemeProvider value={dark ? DarkTheme : DefaultTheme}>
             <PeriodProvider>
               <Stack>
-                <Stack.Protected guard={!!session}>
+                {/* The default fallback is the first unguarded route, which can be `auth`:
+                    its redirect to `/` lands back on this guard and loops. */}
+                <Stack.Protected guard={!!session} redirectTo="/login">
                   <Stack.Screen
                     name="(tabs)"
                     options={{ headerShown: false }}
