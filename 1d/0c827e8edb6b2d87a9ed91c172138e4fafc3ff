@@ -1,0 +1,60 @@
+apps/expo/src/app/(tabs)/reglages/_layout.tsx
+  s_30e6a19d64651a::t_1f394703c0616a 1-10
+apps/expo/src/components/donut.tsx
+  s_30e6a19d64651a::t_616e4d6d9ba369 5,21
+apps/expo/src/app/(tabs)/reglages/index.tsx
+  s_30e6a19d64651a::t_1255e3a78e02fe 4,7,48-56
+  s_30e6a19d64651a::t_7bb44834d9f627 61,63
+  s_30e6a19d64651a::t_c1d586c9080640 1-3,5-6,8-47,57-60,62,64-127
+apps/expo/src/lib/sync.ts
+  s_30e6a19d64651a::t_1c121e3b792672 1-40,50
+  s_30e6a19d64651a::t_9d4a73265c234f 41-49
+apps/expo/src/lib/format.ts
+  s_30e6a19d64651a::t_f205b1849304fb 1-13,16-25
+apps/expo/src/app/_layout.tsx
+  s_30e6a19d64651a::t_b1dce5c0321acc 24-25
+  s_30e6a19d64651a::t_6fe1dd7b215052 2,26-28
+apps/expo/src/lib/auth.ts
+  s_44f15ef362c815::t_1d689138e3983b 6-9,35
+apps/expo/src/components/budget-gauge.tsx
+  s_30e6a19d64651a::t_616e4d6d9ba369 4,26
+apps/expo/src/components/bank-picker.tsx
+  s_30e6a19d64651a::t_5607031663e039 9,12,29,91-97
+apps/expo/src/app/(tabs)/_layout.tsx
+  s_30e6a19d64651a::t_b4bcdb3d168b3a 32-41
+  s_30e6a19d64651a::t_0f484412c43774 2
+apps/expo/src/components/settings-group.tsx
+  s_30e6a19d64651a::t_b210d32a194250 1-43
+apps/expo/src/lib/preferences.ts
+  s_30e6a19d64651a::t_d439a745e9cc87 1-43
+apps/expo/src/components/kpi-band.tsx
+  s_30e6a19d64651a::t_616e4d6d9ba369 6,13,84
+apps/expo/src/lib/trpc.ts
+  s_30e6a19d64651a::t_0435dc304a0f13 6
+  s_30e6a19d64651a::t_b2d652c0d502e2 13-20
+  s_30e6a19d64651a::t_3b0ee71777d6f1 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1d0c827e8edb6b2d87a9ed91c172138e4fafc3ff",
+  "prompts": {},
+  "sessions": {
+    "s_30e6a19d64651a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ee89cae2-6958-4846-b2c7-5ab3a6121b22",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    },
+    "s_44f15ef362c815": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eafa832e-8b3a-476f-8df6-a7a617abe76b",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
