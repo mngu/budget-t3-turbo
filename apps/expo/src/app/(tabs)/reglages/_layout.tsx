@@ -25,6 +25,7 @@ export default function SettingsLayout() {
       <Stack.Screen name="espaces/inviter" options={form} />
       <Stack.Screen name="espaces/supprimer" options={form} />
       <Stack.Screen name="banques" options={{ title: "Banques" }} />
+      <Stack.Screen name="debut-du-mois" options={{ title: "Début du mois" }} />
     </Stack>
   );
 }

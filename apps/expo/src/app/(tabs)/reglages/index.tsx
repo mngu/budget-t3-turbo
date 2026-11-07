@@ -2,7 +2,7 @@ import type { ThemeMode } from "~/lib/preferences";
 
 import { useQuery } from "@tanstack/react-query";
 import { router, useFocusEffect } from "expo-router";
-import { ListGroup, Switch, useThemeColor } from "heroui-native";
+import { ListGroup, Switch, Typography, useThemeColor } from "heroui-native";
 import { Landmark, Tags, Users } from "lucide-react-native";
 import { useCallback } from "react";
 import { Alert, ScrollView } from "react-native";
@@ -13,6 +13,7 @@ import {
   SettingsGroup,
 } from "~/components/settings-group";
 import { authClient } from "~/lib/auth";
+import { usePeriod } from "~/lib/period";
 import {
   setCents,
   setThemeMode,
@@ -63,6 +64,7 @@ export default function Settings() {
   const themeMode = useThemeMode();
   const cents = useCents();
   const iconColor = useThemeColor("muted");
+  const { startDay } = usePeriod();
 
   return (
     <ScrollView
@@ -96,6 +98,18 @@ export default function Settings() {
           ))}
         </SettingsGroup>
       )}
+
+      <SettingsGroup title="Budget">
+        <ListGroup.Item onPress={() => router.push("/reglages/debut-du-mois")}>
+          <ListGroup.ItemContent>
+            <ListGroup.ItemTitle>Le mois commence le</ListGroup.ItemTitle>
+          </ListGroup.ItemContent>
+          <Typography color="muted">
+            {startDay === 1 ? "1er" : startDay}
+          </Typography>
+          <ListGroup.ItemSuffix />
+        </ListGroup.Item>
+      </SettingsGroup>
 
       <SettingsGroup title="Thème">
         {THEMES.map(({ mode, label }) => (
