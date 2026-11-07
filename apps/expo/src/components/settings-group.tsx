@@ -1,9 +1,10 @@
 import type { ReactNode } from "react";
+import type { TextInputProps } from "react-native";
 
 import { ListGroup, Separator, Typography, useThemeColor } from "heroui-native";
 import { Check } from "lucide-react-native";
-import { Children, Fragment } from "react";
-import { View } from "react-native";
+import { Children, Fragment, useState } from "react";
+import { TextInput, View } from "react-native";
 
 // A titled group of rows, as in the platform's own settings screens.
 export function SettingsGroup({
@@ -95,5 +96,42 @@ export function ActionItem({
         <ListGroup.ItemTitle style={{ color }}>{label}</ListGroup.ItemTitle>
       </ListGroup.ItemContent>
     </ListGroup.Item>
+  );
+}
+
+// A bare text field filling its row, as in the platform's own forms.
+export function TextItem(props: TextInputProps) {
+  const muted = useThemeColor("muted");
+  return (
+    <TextInput
+      placeholderTextColor={muted}
+      autoCorrect={false}
+      returnKeyType="done"
+      className="text-foreground px-4 py-3.5 text-base"
+      {...props}
+    />
+  );
+}
+
+// Committed on leaving the field, as the web's inputs on blur. Key it on the
+// value so a rename made elsewhere resets the draft.
+export function RenameItem({
+  value,
+  onCommit,
+}: {
+  value: string;
+  onCommit: (value: string) => void;
+}) {
+  const [text, setText] = useState(value);
+  return (
+    <TextItem
+      value={text}
+      onChangeText={setText}
+      onEndEditing={() => {
+        const trimmed = text.trim();
+        if (trimmed && trimmed !== value) onCommit(trimmed);
+        else setText(value);
+      }}
+    />
   );
 }

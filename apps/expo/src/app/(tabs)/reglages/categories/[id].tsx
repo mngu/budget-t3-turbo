@@ -14,7 +14,11 @@ import { Alert, Pressable, ScrollView, TextInput, View } from "react-native";
 import { familyBudget, isManagedCategory } from "@budget/api/schemas";
 import { CATEGORY_COLOR_PALETTE } from "@budget/shared";
 import { CategoryIcon } from "~/components/category-icon";
-import { ActionItem, SettingsGroup } from "~/components/settings-group";
+import {
+  ActionItem,
+  RenameItem,
+  SettingsGroup,
+} from "~/components/settings-group";
 import { useCategoryColors } from "~/lib/category-color";
 import { useFormat } from "~/lib/format";
 import { useSpaceCategories } from "~/lib/overview";
@@ -91,7 +95,7 @@ export default function CategoryEditor() {
         keyboardShouldPersistTaps="handled"
       >
         <SettingsGroup title="Nom">
-          <TextRow
+          <RenameItem
             key={node.name}
             value={node.name}
             onCommit={(name) => rename.mutate({ id, name })}
@@ -280,31 +284,6 @@ export default function CategoryEditor() {
         </SettingsGroup>
       </ScrollView>
     </>
-  );
-}
-
-// Committed on leaving the field, as the web's inputs on blur.
-function TextRow({
-  value,
-  onCommit,
-}: {
-  value: string;
-  onCommit: (value: string) => void;
-}) {
-  const [text, setText] = useState(value);
-  return (
-    <TextInput
-      value={text}
-      onChangeText={setText}
-      autoCorrect={false}
-      onEndEditing={() => {
-        const trimmed = text.trim();
-        if (trimmed && trimmed !== value) onCommit(trimmed);
-        else setText(value);
-      }}
-      returnKeyType="done"
-      className="text-foreground px-4 py-3.5 text-base"
-    />
   );
 }
 

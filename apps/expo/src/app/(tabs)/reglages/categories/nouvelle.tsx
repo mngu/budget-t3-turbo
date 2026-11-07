@@ -2,10 +2,10 @@ import { useMutation } from "@tanstack/react-query";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { Button } from "heroui-native";
 import { useState } from "react";
-import { ScrollView, TextInput } from "react-native";
+import { ScrollView } from "react-native";
 
 import { isManagedCategory } from "@budget/api/schemas";
-import { SettingsGroup } from "~/components/settings-group";
+import { SettingsGroup, TextItem } from "~/components/settings-group";
 import { useSpaceCategories } from "~/lib/overview";
 import { trpc } from "~/lib/trpc";
 
@@ -54,16 +54,13 @@ export default function NewCategory() {
               : "Sa couleur et son icône se choisissent ensuite."
           }
         >
-          <TextInput
+          <TextItem
             value={name}
             onChangeText={setName}
-            autoCorrect={false}
             onSubmitEditing={create}
             // The name is the whole form: typing must work at once.
             // oxlint-disable-next-line jsx-a11y/no-autofocus
             autoFocus
-            returnKeyType="done"
-            className="text-foreground px-4 py-3.5 text-base"
           />
         </SettingsGroup>
       </ScrollView>

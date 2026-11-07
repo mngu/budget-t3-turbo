@@ -21,16 +21,21 @@ export const createTRPCContext = async (opts: {
 
 const t = initTRPC.context<typeof createTRPCContext>().create({
   transformer: superjson,
-  errorFormatter: ({ shape, error }) => ({
-    ...shape,
-    data: {
-      ...shape.data,
-      zodError:
-        error.cause instanceof ZodError
-          ? z.flattenError(error.cause as ZodError<Record<string, unknown>>)
-          : null,
-    },
-  }),
+  errorFormatter: ({ shape, error }) => {
+    const zodError =
+      error.cause instanceof ZodError
+        ? (error.cause as ZodError<Record<string, unknown>>)
+        : null;
+    return {
+      ...shape,
+      // Clients show the message as is: one readable sentence, not the issue dump.
+      message: zodError?.issues[0]?.message ?? shape.message,
+      data: {
+        ...shape.data,
+        zodError: zodError && z.flattenError(zodError),
+      },
+    };
+  },
 });
 
 export const createTRPCRouter = t.router;

@@ -16,6 +16,26 @@ const INVITATION_DAYS = 7;
 
 const expiry = () => new Date(Date.now() + INVITATION_DAYS * 24 * 3600 * 1000);
 
+// The active space is only chosen when a session is created: once a membership
+// goes, sessions still pointing at it would fail every space-scoped request.
+// Move them to a space their user still holds, the personal one first.
+async function repointSessions(organizationId: string) {
+  await db.execute(sql`
+    UPDATE session s
+       SET active_organization_id = (
+             SELECT m.organization_id
+               FROM member m
+               JOIN organization o ON o.id = m.organization_id
+              WHERE m.user_id = s.user_id
+              ORDER BY o.is_personal DESC, m.created_at
+              LIMIT 1)
+     WHERE s.active_organization_id = ${organizationId}
+       AND NOT EXISTS (SELECT 1 FROM member m
+                        WHERE m.user_id = s.user_id
+                          AND m.organization_id = ${organizationId})
+  `);
+}
+
 async function assertOwner(userId: string, organizationId: string) {
   if (!(await hasRole(userId, organizationId, "owner"))) {
     throw new Error("Réservé au propriétaire de l'espace.");
@@ -108,6 +128,7 @@ export async function deleteSpace(
     throw new Error("L'espace personnel ne peut pas être supprimé.");
   }
   await db.delete(organization).where(eq(organization.id, organizationId));
+  await repointSessions(organizationId);
 }
 
 export async function inviteMember(
@@ -210,6 +231,7 @@ export async function removeMember(
         eq(member.userId, memberUserId),
       ),
     );
+  await repointSessions(organizationId);
 }
 
 // Keep an owner in every space and at least one accessible space per user.
@@ -237,6 +259,7 @@ export async function leaveSpace(
     .where(
       and(eq(member.organizationId, organizationId), eq(member.userId, userId)),
     );
+  await repointSessions(organizationId);
 }
 
 // Match the authenticated email: possession of a forwarded invitation is not authorization.
