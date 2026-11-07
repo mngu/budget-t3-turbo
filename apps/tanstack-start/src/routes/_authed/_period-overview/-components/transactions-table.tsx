@@ -5,8 +5,9 @@ import type { ReactNode } from "react";
 
 import { Pagination, Table } from "@heroui/react";
 
+import { signedAmount } from "@budget/api/schemas";
 import { cn } from "@budget/ui";
-import { dayMonthFr, signedAmount, titleCase } from "~/lib/format";
+import { dayMonthFr, titleCase } from "~/lib/format";
 import { useFormat } from "~/lib/use-format";
 import { useRevueSearch } from "~/lib/use-revue-search";
 

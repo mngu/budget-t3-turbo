@@ -1,5 +1,7 @@
 import { z } from "zod/v4";
 
+import { sumBy } from "../transactions/schemas";
+
 export const NO_CATEGORY_NAME = "None";
 
 const categoryOverviewChildSchema = z.object({
@@ -48,8 +50,5 @@ export const getCategoryLabel = (name: string | null) =>
 // A detailed parent holds no amount of its own: its budget is its children's sum.
 export const familyBudget = (category: CategoryOverviewElementType) =>
   category.budgetDetailed
-    ? (category.children ?? []).reduce(
-        (sum, child) => sum + (child.budgetAmount ?? 0),
-        0,
-      ) || null
+    ? sumBy(category.children ?? [], (child) => child.budgetAmount ?? 0) || null
     : category.budgetAmount;

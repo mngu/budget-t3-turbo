@@ -2,6 +2,7 @@ import { ListGroup, Separator, Typography } from "heroui-native";
 import { Fragment } from "react";
 import { View } from "react-native";
 
+import { sumBy } from "@budget/api/schemas";
 import { usePeriod } from "~/lib/period";
 
 import { BudgetGauge } from "./budget-gauge";
@@ -28,7 +29,7 @@ export function Breakdown({
 }) {
   const { label: month } = usePeriod();
   const spent = rows.filter((row) => row.value > 0);
-  const total = spent.reduce((sum, row) => sum + row.value, 0);
+  const total = sumBy(spent, (row) => row.value);
   const max = Math.max(total, totalBudget ?? 0);
 
   if (spent.length === 0) {

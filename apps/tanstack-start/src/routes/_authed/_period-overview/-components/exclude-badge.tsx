@@ -6,8 +6,8 @@ import { Button, Modal, toast } from "@heroui/react";
 import { EyeOffIcon } from "lucide-react";
 import { useState } from "react";
 
+import { signedAmount } from "@budget/api/schemas";
 import { cn } from "@budget/ui";
-import { signedAmount } from "~/lib/format";
 import { useTRPCClient } from "~/lib/trpc";
 import { useFormat } from "~/lib/use-format";
 import { useRun } from "~/lib/use-run";

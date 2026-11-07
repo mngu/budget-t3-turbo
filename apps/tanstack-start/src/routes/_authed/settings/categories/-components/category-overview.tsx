@@ -19,13 +19,13 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
+import { sumBy } from "@budget/api/schemas";
 import { CategoryIcon } from "~/component/category-icon";
 import {
   softCategoryColor,
   useShadeCategoryColor,
   useCategoryColor,
 } from "~/lib/category-color";
-import { sumBy } from "~/lib/sum";
 import { useTRPCClient } from "~/lib/trpc";
 import { useFormat } from "~/lib/use-format";
 import { useRun } from "~/lib/use-run";

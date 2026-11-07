@@ -4,8 +4,8 @@ import { Button, Dropdown, Header, Label } from "@heroui/react";
 import { useLoaderData } from "@tanstack/react-router";
 import { ChevronDownIcon, LandmarkIcon, RefreshCwIcon } from "lucide-react";
 
+import { sumBy } from "@budget/api/schemas";
 import { cn } from "@budget/ui";
-import { sumBy } from "~/lib/sum";
 import { useSync } from "~/lib/sync-toast";
 import { selectedBanks } from "~/lib/transactions-search";
 import { useRevueSearch } from "~/lib/use-revue-search";

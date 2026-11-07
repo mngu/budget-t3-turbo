@@ -6,6 +6,7 @@ import {
   familyBudget,
   getCategoryLabel,
   NO_CATEGORY_NAME,
+  sumBy,
 } from "@budget/api/schemas";
 import { Breakdown } from "~/components/breakdown";
 import { KpiBand } from "~/components/kpi-band";
@@ -39,10 +40,7 @@ export default function Review() {
       <KpiBand />
       <Breakdown
         label="Dépenses"
-        totalBudget={overview.reduce(
-          (sum, category) => sum + (familyBudget(category) ?? 0),
-          0,
-        )}
+        totalBudget={sumBy(overview, (category) => familyBudget(category) ?? 0)}
         rows={overview.map((category) => ({
           label: getCategoryLabel(category.name),
           iconName: category.icon,
