@@ -17,6 +17,8 @@
     "db:studio": "turbo -F @budget/db studio",
     "dev": "turbo watch dev --continue",
     "mobile": "pnpm -F @budget/expo ios",
+    "mobile:login": "sh apps/expo/script/login.sh",
+    "mobile:apk": "sh apps/expo/script/apk.sh",
     "format": "oxfmt --check .",
     "format:fix": "oxfmt .",
     "lint": "oxlint",
