@@ -1,0 +1,32 @@
+apps/expo/script/login.sh
+  s_9bfda3a75a1d2f::t_7ea52431f75b3e 1,4-6,10,12-14,16-17
+  s_9bfda3a75a1d2f::t_00f0a8b0c4712d 2-3,7-9,11,15,18-22,25
+  s_9bfda3a75a1d2f::t_633e10bc6538d6 23-24
+CLAUDE.md
+  s_9bfda3a75a1d2f::t_58656d3d06534c 37
+  s_9bfda3a75a1d2f::t_0b2cc72c27fe82 38-39
+  s_9bfda3a75a1d2f::t_4ea8c87bde7a1b 36
+apps/expo/.env.production
+  s_9bfda3a75a1d2f::t_3af5b1f1ea63ec 1
+apps/expo/script/apk.sh
+  s_9bfda3a75a1d2f::t_a239bce47fa6c3 1-16
+package.json
+  s_9bfda3a75a1d2f::t_0e7af9e655ece3 21
+  s_9bfda3a75a1d2f::t_ed4a46ea059912 20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d84d223a067de52d4940e7ad7f435da7a016bc67",
+  "prompts": {},
+  "sessions": {
+    "s_9bfda3a75a1d2f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b572c11c-cab4-41c3-8a26-e1ee125765ae",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
