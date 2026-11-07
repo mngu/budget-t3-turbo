@@ -7,6 +7,7 @@ import { useColorScheme } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { authClient } from "~/lib/auth";
+import { FiltersProvider } from "~/lib/filters";
 import { PeriodProvider } from "~/lib/period";
 import { queryClient } from "~/lib/trpc";
 
@@ -27,24 +28,38 @@ export default function RootLayout() {
               key={`${session?.user.id}:${session?.session.activeOrganizationId}`}
               signedIn={!!session}
             >
-              <Stack>
-                {/* The default fallback is the first unguarded route, which can be `auth`:
+              <FiltersProvider>
+                <Stack>
+                  {/* The default fallback is the first unguarded route, which can be `auth`:
                     its redirect to `/` lands back on this guard and loops. */}
-                <Stack.Protected guard={!!session} redirectTo="/login">
-                  <Stack.Screen
-                    name="(tabs)"
-                    options={{ headerShown: false }}
-                  />
-                  <Stack.Screen
-                    name="categorie/[name]"
-                    options={{ headerBackTitle: "Revue" }}
-                  />
-                </Stack.Protected>
-                <Stack.Protected guard={!session}>
-                  <Stack.Screen name="login" options={{ headerShown: false }} />
-                </Stack.Protected>
-                <Stack.Screen name="auth" options={{ headerShown: false }} />
-              </Stack>
+                  <Stack.Protected guard={!!session} redirectTo="/login">
+                    <Stack.Screen
+                      name="(tabs)"
+                      options={{ headerShown: false }}
+                    />
+                    <Stack.Screen
+                      name="categorie/[name]"
+                      options={{ headerBackTitle: "Revue" }}
+                    />
+                    {/* Sheets with their own stack: the header comes from inside. */}
+                    <Stack.Screen
+                      name="filtres"
+                      options={{ presentation: "modal", headerShown: false }}
+                    />
+                    <Stack.Screen
+                      name="transaction/[id]"
+                      options={{ presentation: "modal", headerShown: false }}
+                    />
+                  </Stack.Protected>
+                  <Stack.Protected guard={!session}>
+                    <Stack.Screen
+                      name="login"
+                      options={{ headerShown: false }}
+                    />
+                  </Stack.Protected>
+                  <Stack.Screen name="auth" options={{ headerShown: false }} />
+                </Stack>
+              </FiltersProvider>
             </PeriodProvider>
           </ThemeProvider>
         </QueryClientProvider>

@@ -2,12 +2,15 @@ import type { ThemeMode } from "~/lib/preferences";
 
 import { useQuery } from "@tanstack/react-query";
 import { useFocusEffect } from "expo-router";
-import { ListGroup, Switch, useThemeColor } from "heroui-native";
-import { Check } from "lucide-react-native";
+import { ListGroup, Switch } from "heroui-native";
 import { useCallback } from "react";
 import { Alert, ScrollView } from "react-native";
 
-import { SettingsGroup } from "~/components/settings-group";
+import {
+  ActionItem,
+  CheckItem,
+  SettingsGroup,
+} from "~/components/settings-group";
 import { authClient } from "~/lib/auth";
 import {
   setCents,
@@ -56,13 +59,6 @@ export default function Settings() {
   );
   const themeMode = useThemeMode();
   const cents = useCents();
-  const [accent, danger] = useThemeColor(["accent", "danger"]);
-  const checked = (selected: boolean) => (
-    // Transparent rather than absent: an empty suffix renders the default chevron.
-    <ListGroup.ItemSuffix>
-      <Check size={18} color={selected ? accent : "transparent"} />
-    </ListGroup.ItemSuffix>
-  );
 
   return (
     <ScrollView
@@ -73,27 +69,24 @@ export default function Settings() {
       {spaces.length > 1 && (
         <SettingsGroup title="Espace">
           {spaces.map((space) => (
-            <ListGroup.Item
+            <CheckItem
               key={space.id}
+              label={space.name}
+              selected={space.isActive}
               onPress={() => !space.isActive && void switchSpace(space.id)}
-            >
-              <ListGroup.ItemContent>
-                <ListGroup.ItemTitle>{space.name}</ListGroup.ItemTitle>
-              </ListGroup.ItemContent>
-              {checked(space.isActive)}
-            </ListGroup.Item>
+            />
           ))}
         </SettingsGroup>
       )}
 
       <SettingsGroup title="Thème">
         {THEMES.map(({ mode, label }) => (
-          <ListGroup.Item key={mode} onPress={() => setThemeMode(mode)}>
-            <ListGroup.ItemContent>
-              <ListGroup.ItemTitle>{label}</ListGroup.ItemTitle>
-            </ListGroup.ItemContent>
-            {checked(themeMode === mode)}
-          </ListGroup.Item>
+          <CheckItem
+            key={mode}
+            label={label}
+            selected={themeMode === mode}
+            onPress={() => setThemeMode(mode)}
+          />
         ))}
       </SettingsGroup>
 
@@ -114,13 +107,11 @@ export default function Settings() {
             <ListGroup.ItemTitle>{session?.user.email}</ListGroup.ItemTitle>
           </ListGroup.ItemContent>
         </ListGroup.Item>
-        <ListGroup.Item onPress={confirmSignOut}>
-          <ListGroup.ItemContent>
-            <ListGroup.ItemTitle style={{ color: danger }}>
-              Se déconnecter
-            </ListGroup.ItemTitle>
-          </ListGroup.ItemContent>
-        </ListGroup.Item>
+        <ActionItem
+          label="Se déconnecter"
+          tone="danger"
+          onPress={confirmSignOut}
+        />
       </SettingsGroup>
     </ScrollView>
   );

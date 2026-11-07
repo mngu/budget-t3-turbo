@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 import { Spinner, Typography } from "heroui-native";
-import { ScrollView, View } from "react-native";
+import { useState } from "react";
+import { RefreshControl, ScrollView, View } from "react-native";
 
 import {
   familyBudget,
@@ -12,10 +13,18 @@ import { Breakdown } from "~/components/breakdown";
 import { KpiBand } from "~/components/kpi-band";
 import { useCategoryColors } from "~/lib/category-color";
 import { useOverview } from "~/lib/overview";
+import { queryClient } from "~/lib/trpc";
 
 export default function Review() {
   const { data: overview, error } = useOverview();
   const { resolve: resolveColor } = useCategoryColors();
+  const [refreshing, setRefreshing] = useState(false);
+  // The band, the donut and the list each own a query: refresh whatever is on screen.
+  const refresh = async () => {
+    setRefreshing(true);
+    await queryClient.refetchQueries({ type: "active" });
+    setRefreshing(false);
+  };
 
   if (error) {
     return (
@@ -36,6 +45,9 @@ export default function Review() {
     <ScrollView
       className="bg-background flex-1"
       contentContainerClassName="gap-6 p-4"
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={refresh} />
+      }
     >
       <KpiBand />
       <Breakdown

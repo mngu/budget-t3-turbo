@@ -6,6 +6,7 @@ import {
   bankCounts,
   budgetStats,
   earliestTransactionDate,
+  getTransaction,
   globalStats,
   listBankLabels,
   listTransactions,
@@ -29,6 +30,10 @@ export const transactionsRouter = {
     .query(({ ctx, input }) =>
       listTransactions(ctx.organizationId, input, input.limit),
     ),
+
+  get: orgProcedure
+    .input(z.object({ id: z.number().int().positive() }))
+    .query(({ ctx, input }) => getTransaction(ctx.organizationId, input.id)),
 
   globalStats: orgProcedure
     .input(statsInputSchema)

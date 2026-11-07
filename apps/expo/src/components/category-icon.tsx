@@ -9,12 +9,14 @@ const toPascal = (name: string) =>
 export function CategoryIcon({
   name,
   color,
+  size = 18,
 }: {
   name: string | null;
   color: string;
+  size?: number;
 }) {
   const Icon =
     (name && (icons as Record<string, LucideIcon>)[toPascal(name)]) ||
     icons.Tag;
-  return <Icon size={18} color={color} />;
+  return <Icon size={size} color={color} />;
 }
