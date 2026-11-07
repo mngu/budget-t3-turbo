@@ -7,28 +7,21 @@ import {
   Popover,
   RangeCalendar,
   Select,
+  toast,
 } from "@heroui/react";
 import { parseDate } from "@internationalized/date";
 import { useLoaderData } from "@tanstack/react-router";
-import {
-  addDays,
-  differenceInCalendarDays,
-  isSameDay,
-  parseISO,
-  subDays,
-} from "date-fns";
+import { addDays, isSameDay, parseISO, subDays } from "date-fns";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useState } from "react";
 
 import {
+  cycleMonth,
   cycleOf,
-  MONTH_START_DAYS,
   monthBounds,
-  monthStartDay,
-  periodPresets,
-  setMonthStartDay,
   toISODate,
-} from "~/lib/date";
+} from "@budget/api/schemas";
+import { MONTH_START_DAYS, periodPresets } from "~/lib/date";
 import {
   dateFr,
   dateNumFr,
@@ -36,11 +29,11 @@ import {
   dayMonthNumFr,
   monthFr,
 } from "~/lib/format";
+import { useTRPCClient } from "~/lib/trpc";
 import { useRevueSearch } from "~/lib/use-revue-search";
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-// Name full cycles by their midpoint's month: a cycle starting June 28 is July.
 function periodLabel(
   from: Date | undefined,
   to: Date | undefined,
@@ -51,11 +44,7 @@ function periodLabel(
   if (!from || !to) return "Toute la période";
   const cycle = cycleOf(from, startDay);
   if (isSameDay(cycle.start, from) && isSameDay(cycle.end, to))
-    return capitalize(
-      monthFr.format(
-        addDays(from, Math.floor(differenceInCalendarDays(to, from) / 2)),
-      ),
-    );
+    return capitalize(monthFr.format(cycleMonth(cycle)));
   const start =
     from.getFullYear() === to.getFullYear()
       ? dayMonth.format(from)
@@ -66,14 +55,13 @@ function periodLabel(
 export function PeriodPicker() {
   const { search, setSearch } = useRevueSearch();
   const [open, setOpen] = useState(false);
-  // SSR cannot read the saved pay cycle; the client corrects the URL and reloads data.
-  const [startDay, setStartDay] = useState(monthStartDay);
+  const trpcClient = useTRPCClient();
 
   const from = search.dateFrom ? parseISO(search.dateFrom) : undefined;
   const to = search.dateTo ? parseISO(search.dateTo) : undefined;
   const anchor = from ?? new Date();
 
-  const { earliestDate: earliest } = useLoaderData({
+  const { earliestDate: earliest, monthStartDay: startDay } = useLoaderData({
     from: "/_authed/_period-overview",
   });
   const today = new Date();
@@ -102,9 +90,15 @@ export function PeriodPicker() {
     setSearch(monthBounds(target, startDay));
   };
 
-  const changeStartDay = (day: number) => {
-    setStartDay(day);
-    setMonthStartDay(day);
+  // Navigating reloads the cycle with the new bounds; useRun's invalidate would
+  // first repaint the old bounds under the new cycle.
+  const changeStartDay = async (day: number) => {
+    try {
+      await trpcClient.spaces.setMonthStartDay.mutate(day);
+    } catch {
+      toast.danger("Impossible d'enregistrer le début du mois.");
+      return;
+    }
     setSearch(monthBounds(anchor, day));
   };
 
@@ -125,11 +119,10 @@ export function PeriodPicker() {
         <Button variant="ghost" size="sm" className="min-w-0 sm:min-w-36">
           {/* An aria-label would hide the period itself from screen readers. */}
           <span className="sr-only">Choisir une période : </span>
-          {/* SSR does not know the browser's pay-cycle preference. */}
-          <span className="truncate sm:hidden" suppressHydrationWarning>
+          <span className="truncate sm:hidden">
             {periodLabel(from, to, startDay, dayMonthNumFr, dateNumFr)}
           </span>
-          <span className="hidden truncate sm:inline" suppressHydrationWarning>
+          <span className="hidden truncate sm:inline">
             {periodLabel(from, to, startDay)}
           </span>
         </Button>
@@ -159,7 +152,7 @@ export function PeriodPicker() {
               <Select
                 className="mt-2 w-full"
                 value={startDay}
-                onChange={(day) => changeStartDay(Number(day))}
+                onChange={(day) => void changeStartDay(Number(day))}
               >
                 <Label>Le mois commence le</Label>
                 <Select.Trigger>

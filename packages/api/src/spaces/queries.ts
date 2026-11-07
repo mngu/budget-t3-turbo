@@ -12,6 +12,7 @@ import {
   incomingInvitationsSchema,
   invitationDetailSchema,
   membershipGuardsSchema,
+  monthStartDaySchema,
   spacesSchema,
 } from "./schemas";
 
@@ -116,4 +117,11 @@ export async function hasRole(
        ${role ? sql`AND role = ${role}` : sql``}
   `);
   return result.rows.length > 0;
+}
+
+export async function getMonthStartDay(organizationId: string) {
+  const result = await db.execute(sql`
+    SELECT month_start_day AS "monthStartDay" FROM organization WHERE id = ${organizationId}
+  `);
+  return monthStartDaySchema.parse(result.rows[0]?.monthStartDay);
 }

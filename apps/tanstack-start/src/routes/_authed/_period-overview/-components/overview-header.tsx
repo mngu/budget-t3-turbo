@@ -4,9 +4,9 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { ArrowLeftIcon, ArrowRightIcon, LayersIcon } from "lucide-react";
 
 import { getCategoryLabel } from "@budget/api/schemas";
+import { sumBy } from "@budget/api/schemas";
 import { softCategoryColor, useCategoryColor } from "~/lib/category-color";
 import { sharePercent } from "~/lib/format";
-import { sumBy } from "~/lib/sum";
 import { useRevueSearch } from "~/lib/use-revue-search";
 
 import { spendingCategories } from "../-lib/spending";

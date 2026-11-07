@@ -17,6 +17,7 @@
     "**/routeTree.gen.ts",
     "**/*.config.*",
     "design_handoff_budget/**",
+    ".claude/worktrees/**",
     ".claude/skills/**"
   ],
   "rules": {

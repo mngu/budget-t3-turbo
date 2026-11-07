@@ -5,6 +5,7 @@ import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import { ListGroup, Spinner, Typography } from "heroui-native";
 import { FlatList } from "react-native";
 
+import { signedAmount } from "@budget/api/schemas";
 import { signedEuro } from "~/lib/format";
 import { usePeriod } from "~/lib/period";
 import { trpc, trpcClient } from "~/lib/trpc";
@@ -60,7 +61,7 @@ export function TransactionList({
 }
 
 function Row({ row }: { row: TransactionRow }) {
-  const amount = (row.direction === "debit" ? -1 : 1) * Number(row.amount);
+  const amount = signedAmount(row);
   return (
     <ListGroup.Item>
       <ListGroup.ItemContent>

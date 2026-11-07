@@ -5,8 +5,9 @@ import type { TransactionRow } from "@budget/api";
 
 import { Drawer } from "@heroui/react";
 
+import { signedAmount } from "@budget/api/schemas";
 import { cn } from "@budget/ui";
-import { dateFr, signedAmount } from "~/lib/format";
+import { dateFr } from "~/lib/format";
 import { useFormat } from "~/lib/use-format";
 
 import { PREVIEW_LIMIT } from "../-lib/use-preview";

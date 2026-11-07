@@ -50,3 +50,5 @@ export const membershipGuardsSchema = z.object({
   spaceCount: z.number().int(),
   isLastOwner: z.boolean(),
 });
+
+export const monthStartDaySchema = z.int().min(1).max(31);

@@ -13,14 +13,17 @@ import {
   removeMember,
   renameSpace,
   resendInvitation,
+  setMonthStartDay,
   shareSpace,
 } from "../spaces/mutations";
 import {
   getInvitation,
+  getMonthStartDay,
   listIncomingInvitations,
   listSpaces,
 } from "../spaces/queries";
-import { protectedProcedure, publicProcedure } from "../trpc";
+import { monthStartDaySchema } from "../spaces/schemas";
+import { orgProcedure, protectedProcedure, publicProcedure } from "../trpc";
 
 const spaceId = z.string().min(1);
 const invitationId = z.string().min(1);
@@ -35,6 +38,15 @@ export const spacesRouter = {
       ctx.session.session.activeOrganizationId ?? null,
     ),
   ),
+
+  // The active space's budget month, shared by its members on web and mobile.
+  monthStartDay: orgProcedure.query(({ ctx }) =>
+    getMonthStartDay(ctx.organizationId),
+  ),
+
+  setMonthStartDay: orgProcedure
+    .input(monthStartDaySchema)
+    .mutation(({ ctx, input }) => setMonthStartDay(ctx.organizationId, input)),
 
   incoming: protectedProcedure.query(({ ctx }) =>
     listIncomingInvitations(ctx.session.user.email),

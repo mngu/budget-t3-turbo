@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { sumBy } from "./sum";
+import { sumBy } from "./schemas";
 
 describe("sumBy", () => {
   it("additionne le champ projeté", () => {

@@ -6,8 +6,8 @@ import { SparklesIcon } from "lucide-react";
 import { useState } from "react";
 
 import { isManagedCategory, NO_CATEGORY_NAME } from "@budget/api/schemas";
+import { sumBy } from "@budget/api/schemas";
 import { Stat } from "~/component/stat";
-import { sumBy } from "~/lib/sum";
 import { useTRPCClient } from "~/lib/trpc";
 import { useFormat } from "~/lib/use-format";
 

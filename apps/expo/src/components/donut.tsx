@@ -2,6 +2,7 @@ import { Typography } from "heroui-native";
 import { View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 
+import { sumBy } from "@budget/api/schemas";
 import { euro } from "~/lib/format";
 
 const SIZE = 200;
@@ -18,7 +19,7 @@ export function Donut({
   slices: { value: number; color: string }[];
   label: string;
 }) {
-  const total = slices.reduce((sum, slice) => sum + slice.value, 0);
+  const total = sumBy(slices, (slice) => slice.value);
   // A lone slice is a full ring; a gap would read as a missing share.
   const gap = slices.length > 1 ? GAP : 0;
   const arcs = slices.reduce<

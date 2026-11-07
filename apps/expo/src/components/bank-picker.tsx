@@ -8,6 +8,7 @@ import {
 } from "heroui-native";
 import { Landmark } from "lucide-react-native";
 
+import { sumBy } from "@budget/api/schemas";
 import { usePeriod } from "~/lib/period";
 import { trpc } from "~/lib/trpc";
 
@@ -31,7 +32,7 @@ export function BankPicker() {
   const offCount = banks.length - included.length;
   const count = (name: string) =>
     counts.find((entry) => entry.bank === name)?.count ?? 0;
-  const total = included.reduce((sum, name) => sum + count(name), 0);
+  const total = sumBy(included, count);
 
   return (
     <Menu>

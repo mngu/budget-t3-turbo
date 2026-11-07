@@ -84,6 +84,16 @@ export async function renameSpace(
     .where(eq(organization.id, organizationId));
 }
 
+export async function setMonthStartDay(
+  organizationId: string,
+  day: number,
+): Promise<void> {
+  await db
+    .update(organization)
+    .set({ monthStartDay: day })
+    .where(eq(organization.id, organizationId));
+}
+
 export async function deleteSpace(
   userId: string,
   organizationId: string,

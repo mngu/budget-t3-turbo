@@ -6,13 +6,13 @@ import { useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
 import { getCategoryLabel } from "@budget/api/schemas";
+import { sumBy } from "@budget/api/schemas";
 import { CanvasContainer } from "@budget/ui/canvas-container";
 import { Segment, SegmentDetail } from "@budget/ui/segment";
 import { SegmentLabel } from "@budget/ui/segment-label";
 import { CategoryIcon } from "~/component/category-icon";
 import { useCategoryColor, useShadeCategoryColor } from "~/lib/category-color";
 import { sharePercent } from "~/lib/format";
-import { sumBy } from "~/lib/sum";
 import { useFormat } from "~/lib/use-format";
 import { useRevueSearch } from "~/lib/use-revue-search";
 

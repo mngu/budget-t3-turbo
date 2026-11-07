@@ -84,3 +84,13 @@ export const transactionRowSchema = z.object({
 });
 
 export type TransactionRow = z.infer<typeof transactionRowSchema>;
+
+export function signedAmount(
+  row: Pick<TransactionRow, "direction" | "amount">,
+) {
+  return (row.direction === "debit" ? -1 : 1) * Number(row.amount);
+}
+
+export function sumBy<T>(items: readonly T[], value: (item: T) => number) {
+  return items.reduce((total, item) => total + value(item), 0);
+}

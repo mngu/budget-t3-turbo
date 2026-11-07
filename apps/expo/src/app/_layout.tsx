@@ -20,7 +20,7 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           {/* Headers and the tab bar are React Navigation's, outside HeroUI's theme. */}
           <ThemeProvider value={dark ? DarkTheme : DefaultTheme}>
-            <PeriodProvider>
+            <PeriodProvider signedIn={!!session}>
               <Stack>
                 {/* The default fallback is the first unguarded route, which can be `auth`:
                     its redirect to `/` lands back on this guard and loops. */}

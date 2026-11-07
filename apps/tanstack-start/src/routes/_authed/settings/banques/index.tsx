@@ -5,7 +5,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { UnlinkIcon } from "lucide-react";
 import { useState } from "react";
 
-import { sumBy } from "~/lib/sum";
+import { sumBy } from "@budget/api/schemas";
 import { useTRPCClient } from "~/lib/trpc";
 import { useRun } from "~/lib/use-run";
 
