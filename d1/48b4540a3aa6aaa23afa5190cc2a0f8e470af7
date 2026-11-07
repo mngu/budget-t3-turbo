@@ -1,0 +1,21 @@
+apps/expo/src/app/(tabs)/reglages/categories/[id].tsx
+  s_30e6a19d64651a::t_f54e5da7ceaea8 314
+apps/tanstack-start/e2e/revue.e2e.ts
+  s_30e6a19d64651a::t_009ef5a2e05d76 122,124
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d148b4540a3aa6aaa23afa5190cc2a0f8e470af7",
+  "prompts": {},
+  "sessions": {
+    "s_30e6a19d64651a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ee89cae2-6958-4846-b2c7-5ab3a6121b22",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
