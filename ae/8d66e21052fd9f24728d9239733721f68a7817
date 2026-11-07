@@ -33,6 +33,7 @@ packages/api/src/transactions/queries.ts
 apps/expo/src/app/transaction/[id]/index.tsx
   s_30e6a19d64651a::t_03bc24ef91dbd4 68
   s_30e6a19d64651a::t_e7cdbe97574052 1-5,7-9,11-67,69-143
+  s_30e6a19d64651a::t_a6a207c3bfc0d1 6,10
 apps/expo/src/lib/filters.tsx
   s_30e6a19d64651a::t_e1310c4568efbe 1-55
 apps/expo/src/app/filtres/index.tsx
