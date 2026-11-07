@@ -1,0 +1,66 @@
+apps/expo/src/app/(tabs)/transactions.tsx
+  s_30e6a19d64651a::t_03bc24ef91dbd4 37-38
+  s_30e6a19d64651a::t_89a66e18d81c84 22-24,26
+  s_30e6a19d64651a::t_e23b911371e0fe 16-18
+  s_30e6a19d64651a::t_e551f9a186abae 1-6,8-10,13-15,19-21,25,27-36,39-55
+apps/expo/src/app/transaction/[id]/_layout.tsx
+  s_30e6a19d64651a::t_ad97e265bf2f8b 1-25
+apps/expo/src/components/settings-group.tsx
+  s_30e6a19d64651a::t_3de45f21e89844 4,50-99
+  s_30e6a19d64651a::t_602e48d8996721 11,16,23-32
+  s_30e6a19d64651a::t_e23b911371e0fe 3
+apps/expo/src/app/(tabs)/reglages/index.tsx
+  s_30e6a19d64651a::t_ec5d4086024a0a 5,9-13,72,74-75,77,84-89,110-114
+apps/expo/src/app/transaction/[id]/categorie.tsx
+  s_30e6a19d64651a::t_fdc8f6c71e6f4d 1-29
+apps/expo/src/components/transaction-list.tsx
+  s_30e6a19d64651a::t_4c22e2d737f8c7 3,6,8,11,21,23,26,30-39,50,57,66-68,74-79,85,87-95,100,102
+apps/expo/src/app/filtres/categorie.tsx
+  s_30e6a19d64651a::t_77b1c1124cda60 1-17
+apps/expo/src/app/(tabs)/index.tsx
+  s_30e6a19d64651a::t_7acd0724f8572d 3-4,16,21-27,48-50
+packages/api/src/router/transactions.ts
+  s_30e6a19d64651a::t_431cc95fe303c2 9,34-36
+  s_30e6a19d64651a::t_627e8955d14d5f 37
+apps/expo/src/components/category-list.tsx
+  s_30e6a19d64651a::t_f4adbe9fb4c82f 1-11,13-30,38-41,43-48,50-70
+  s_30e6a19d64651a::t_e8a2e1988eeee0 12,31-37,42,49
+apps/expo/src/components/category-icon.tsx
+  s_30e6a19d64651a::t_602e48d8996721 12,16,21
+packages/api/src/transactions/queries.ts
+  s_30e6a19d64651a::t_d5ea316ce214c5 103-121,143,161-171
+  s_30e6a19d64651a::t_9d269097d83697 172-173
+apps/expo/src/app/transaction/[id]/index.tsx
+  s_30e6a19d64651a::t_03bc24ef91dbd4 68
+  s_30e6a19d64651a::t_e7cdbe97574052 1-5,7-9,11-67,69-143
+apps/expo/src/lib/filters.tsx
+  s_30e6a19d64651a::t_e1310c4568efbe 1-55
+apps/expo/src/app/filtres/index.tsx
+  s_30e6a19d64651a::t_e23b911371e0fe 13
+  s_30e6a19d64651a::t_9b2a76e515e496 4,9-12,39-46,61-65,70-77,82-92
+  s_30e6a19d64651a::t_800edb83ba5149 8,80
+  s_30e6a19d64651a::t_830c0f9722d00c 1-3,5-7,14-38,47-60,66-69,78-79,81,93-97
+apps/expo/src/app/categorie/[name].tsx
+  s_30e6a19d64651a::t_fef36f8ebfd192 42
+apps/expo/src/app/filtres/_layout.tsx
+  s_30e6a19d64651a::t_3805b987ef0c07 1-25
+apps/expo/src/app/_layout.tsx
+  s_30e6a19d64651a::t_e23b911371e0fe 32-33,35-61
+  s_30e6a19d64651a::t_9b961b7fcc95e8 10,31,62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ae8d66e21052fd9f24728d9239733721f68a7817",
+  "prompts": {},
+  "sessions": {
+    "s_30e6a19d64651a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ee89cae2-6958-4846-b2c7-5ab3a6121b22",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}

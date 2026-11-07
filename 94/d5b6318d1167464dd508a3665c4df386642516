@@ -1,0 +1,67 @@
+apps/expo/src/components/settings-group.tsx
+  s_30e6a19d64651a::t_a88388ea43d1bf 2,6-7,101-137
+packages/api/src/spaces/mutations.ts
+  s_30e6a19d64651a::t_10d9153258bf1e 131,234,262
+  s_30e6a19d64651a::t_302ebe25af6374 19-38
+packages/api/src/trpc.test.ts
+  s_30e6a19d64651a::t_8285b68eedcd52 1-34
+CLAUDE.md
+  s_30e6a19d64651a::t_d6475536df0bf8 39-43
+  s_30e6a19d64651a::t_64d0a24c2f4fc6 70-72
+packages/api/src/router/spaces.ts
+  s_30e6a19d64651a::t_753df8f329d483 86-92
+apps/expo/src/app/(tabs)/reglages/categories/[id].tsx
+  s_30e6a19d64651a::t_f35ddd50470450 17-21,98
+apps/expo/src/lib/spaces.ts
+  s_30e6a19d64651a::t_83dcee1e4009ee 1-9,15
+  s_30e6a19d64651a::t_ce83bde0ee23ab 10-14
+apps/expo/src/app/(tabs)/reglages/_layout.tsx
+  s_30e6a19d64651a::t_ea194b879df377 1-13,22,24-26
+  s_30e6a19d64651a::t_49956953bbad53 23,27
+apps/expo/src/app/(tabs)/reglages/espaces/supprimer.tsx
+  s_30e6a19d64651a::t_2d66fafb687838 1-2,21-28,31-36,49
+  s_30e6a19d64651a::t_8ff26fdb39f740 3-9,11-20,37-42,44-48,50-76
+  s_30e6a19d64651a::t_f26235e7bc923b 10,29-30,43
+apps/expo/src/app/(tabs)/reglages/banques.tsx
+  s_30e6a19d64651a::t_38cfd6447ff372 117-122
+  s_30e6a19d64651a::t_fb2c2572bfff9f 150-151
+  s_30e6a19d64651a::t_8be9709d5f3748 47-48,96-98
+  s_30e6a19d64651a::t_99ddb4fbc499b9 12-14
+  s_30e6a19d64651a::t_0f458634b0ef3e 1-11,15-46,49-95,99-116,123-149,152-166
+apps/expo/src/app/(tabs)/reglages/index.tsx
+  s_30e6a19d64651a::t_16efd588e25c5b 74-84
+  s_30e6a19d64651a::t_539550b20cec22 22
+  s_30e6a19d64651a::t_8279c3bf3c628d 5-6,25-31,65
+apps/expo/src/app/(tabs)/reglages/categories/nouvelle.tsx
+  s_30e6a19d64651a::t_f35ddd50470450 5,8,57
+apps/expo/src/app/(tabs)/reglages/espaces/nouveau.tsx
+  s_30e6a19d64651a::t_2f7700d72f3537 1-112
+apps/expo/src/app/(tabs)/reglages/espaces/[id].tsx
+  s_30e6a19d64651a::t_f26235e7bc923b 13,85-86
+  s_30e6a19d64651a::t_aaa6a5e6c79893 1-12,14-36,38-79,91-236
+  s_30e6a19d64651a::t_2d66fafb687838 37,80-84,87-90
+apps/expo/src/app/(tabs)/reglages/espaces/inviter.tsx
+  s_30e6a19d64651a::t_4b437438a085ce 1-39,41-60,62-92
+  s_30e6a19d64651a::t_8be9709d5f3748 40,61
+packages/api/src/trpc.ts
+  s_30e6a19d64651a::t_753df8f329d483 26
+  s_30e6a19d64651a::t_1a75633b0a0688 24-25,27-38
+apps/expo/src/app/(tabs)/reglages/espaces/index.tsx
+  s_30e6a19d64651a::t_b9efc683ae0ad7 1-126
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "94d5b6318d1167464dd508a3665c4df386642516",
+  "prompts": {},
+  "sessions": {
+    "s_30e6a19d64651a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ee89cae2-6958-4846-b2c7-5ab3a6121b22",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
