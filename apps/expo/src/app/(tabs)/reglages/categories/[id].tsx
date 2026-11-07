@@ -301,7 +301,7 @@ function AmountRow({
       <ListGroup.ItemContent>
         <ListGroup.ItemTitle>Montant</ListGroup.ItemTitle>
       </ListGroup.ItemContent>
-      <View className="flex-row items-baseline gap-1">
+      <View className="flex-row items-center gap-1">
         <TextInput
           value={text}
           onChangeText={(next) => setText(next.replace(/\D/g, "").slice(0, 5))}
@@ -311,12 +311,12 @@ function AmountRow({
           }}
           keyboardType="number-pad"
           returnKeyType="done"
-          placeholder="—"
+          placeholder="-"
           placeholderTextColor={muted}
           accessibilityLabel="Budget mensuel"
-          className="text-foreground min-w-20 py-0 text-right text-base tabular-nums"
+          className="text-foreground min-w-20 py-0 text-right text-base leading-5 tabular-nums"
         />
-        <Typography color="muted" className="text-base">
+        <Typography color="muted" className="text-base leading-5">
           €
         </Typography>
       </View>
