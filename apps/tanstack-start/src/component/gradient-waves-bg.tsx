@@ -288,7 +288,8 @@ export function GradientWavesBg() {
       removeEventListener("pointermove", onMove);
       removeEventListener("pointerleave", onLeave);
       cancelAnimationFrame(raf);
-      gl.getExtension("WEBGL_lose_context")?.loseContext();
+      // Not loseContext(): the effect re-runs on the same canvas (theme change, StrictMode) and would get the dead context back.
+      gl.deleteProgram(prog);
     };
   }, [resolvedTheme]);
 
