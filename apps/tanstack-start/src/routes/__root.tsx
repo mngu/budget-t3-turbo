@@ -13,7 +13,7 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
-import { ThemeProvider } from "@budget/ui/theme";
+import { ThemeProvider, themeDetectorScript } from "@budget/ui/theme";
 
 import appCss from "~/styles.css?url";
 
@@ -30,6 +30,7 @@ export const Route = createRootRouteWithContext<{
       { rel: "stylesheet", href: appCss },
       { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
     ],
+    scripts: [{ children: themeDetectorScript }],
   }),
   component: RootComponent,
 });
