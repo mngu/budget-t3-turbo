@@ -1,0 +1,19 @@
+apps/tanstack-start/src/component/gradient-waves-bg.tsx
+  s_d1c3e0fb1a2f94::t_1baf16f088e5cd 291-292
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3f59bf5304f0a3d91e9304dcf1559e8c62d880a5",
+  "prompts": {},
+  "sessions": {
+    "s_d1c3e0fb1a2f94": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3624c8a9-c1c3-4cfa-9700-952aac086dd4",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Maxime Nguyen <maxime.nguyen@gmail.com>"
+    }
+  }
+}
