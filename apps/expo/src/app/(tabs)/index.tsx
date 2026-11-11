@@ -1,7 +1,7 @@
 import { router } from "expo-router";
 import { Spinner, Typography } from "heroui-native";
-import { useState } from "react";
-import { RefreshControl, ScrollView, View } from "react-native";
+import { useEffect, useState } from "react";
+import { AppState, RefreshControl, ScrollView, View } from "react-native";
 
 import {
   familyBudget,
@@ -13,16 +13,42 @@ import { Breakdown } from "~/components/breakdown";
 import { KpiBand } from "~/components/kpi-band";
 import { useCategoryColors } from "~/lib/category-color";
 import { useOverview } from "~/lib/overview";
-import { queryClient } from "~/lib/trpc";
+import { queryClient, trpc, trpcClient } from "~/lib/trpc";
+
+// Bypasses useMutation: the global MutationCache would refetch every query
+// even when no balance moved.
+async function refreshBalances() {
+  try {
+    if (await trpcClient.connections.refreshBalances.mutate()) {
+      await queryClient.invalidateQueries(
+        trpc.connections.balances.queryFilter(),
+      );
+    }
+  } catch {
+    // A stale balance stays on screen with its date; nothing to tell the user.
+  }
+}
 
 export default function Review() {
   const { data: overview, error } = useOverview();
   const { resolve: resolveColor } = useCategoryColors();
   const [refreshing, setRefreshing] = useState(false);
+
+  // The tab stays mounted in the background: coming back is "opening the app".
+  useEffect(() => {
+    void refreshBalances();
+    const subscription = AppState.addEventListener("change", (state) => {
+      if (state === "active") void refreshBalances();
+    });
+    return () => subscription.remove();
+  }, []);
   // The band, the donut and the list each own a query: refresh whatever is on screen.
   const refresh = async () => {
     setRefreshing(true);
-    await queryClient.refetchQueries({ type: "active" });
+    await Promise.all([
+      queryClient.refetchQueries({ type: "active" }),
+      refreshBalances(),
+    ]);
     setRefreshing(false);
   };
 

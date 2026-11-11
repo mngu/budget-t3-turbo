@@ -2,6 +2,8 @@ import type { TRPCRouterRecord } from "@trpc/server";
 
 import { z } from "zod/v4";
 
+import { listBalances, refreshBalances } from "../banking/balances";
+import { psuHeaders } from "../banking/client";
 import {
   completeAuth,
   getConnectionAccounts,
@@ -37,6 +39,13 @@ export const connectionsRouter = {
     .mutation(({ input }) => completeAuth(input.code, input.state)),
 
   list: orgProcedure.query(({ ctx }) => listConnections(ctx.organizationId)),
+
+  balances: orgProcedure.query(({ ctx }) => listBalances(ctx.organizationId)),
+
+  // Called when the review opens: the user is present, so no PSD2 daily quota applies.
+  refreshBalances: orgProcedure.mutation(({ ctx }) =>
+    refreshBalances(ctx.organizationId, psuHeaders(ctx.headers)),
+  ),
 
   orphans: orgProcedure.query(({ ctx }) =>
     listOrphanAccounts(ctx.organizationId),

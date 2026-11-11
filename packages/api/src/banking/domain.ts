@@ -103,3 +103,20 @@ export function reconcileAccounts(
 
   return { updates, creates };
 }
+
+export interface EbBalance {
+  balance_type: string;
+  balance_amount: { amount: string; currency: string };
+  last_change_date_time?: string;
+}
+
+// Booked balances first: available ones may include the overdraft allowance.
+const BALANCE_PREFERENCE = ["ITBD", "XPCD", "CLBD", "ITAV", "CLAV"];
+
+export function pickBalance(balances: EbBalance[]): EbBalance | undefined {
+  const rank = (b: EbBalance) => {
+    const i = BALANCE_PREFERENCE.indexOf(b.balance_type);
+    return i === -1 ? BALANCE_PREFERENCE.length : i;
+  };
+  return balances.toSorted((a, b) => rank(a) - rank(b))[0];
+}

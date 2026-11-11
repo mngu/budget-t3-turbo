@@ -1,14 +1,33 @@
 "use client";
 
-import { Button, Dropdown, Header, Label } from "@heroui/react";
+import { Button, Description, Dropdown, Header, Label } from "@heroui/react";
 import { useLoaderData } from "@tanstack/react-router";
 import { ChevronDownIcon, LandmarkIcon, RefreshCwIcon } from "lucide-react";
 
 import { sumBy } from "@budget/api/schemas";
 import { cn } from "@budget/ui";
+import { dayMonthFr } from "~/lib/format";
 import { useSync } from "~/lib/sync-toast";
 import { selectedBanks } from "~/lib/transactions-search";
 import { useRevueSearch } from "~/lib/use-revue-search";
+
+const timeFr = new Intl.DateTimeFormat("fr-FR", { timeStyle: "short" });
+
+// Exact figures like a bank statement, in the account's own currency.
+function formatBalance(amount: number, currency: string, at: Date) {
+  const money = new Intl.NumberFormat("fr-FR", { style: "currency", currency });
+  const when =
+    at.toDateString() === new Date().toDateString()
+      ? timeFr.format(at)
+      : dayMonthFr.format(at);
+  // Breaks between the amount and its date on narrow screens, never inside either.
+  return (
+    <>
+      <span className="whitespace-nowrap">{money.format(amount)}</span>{" "}
+      <span className="whitespace-nowrap">· {when}</span>
+    </>
+  );
+}
 
 export function BankPicker() {
   const { search, setSearch } = useRevueSearch();
@@ -16,7 +35,7 @@ export function BankPicker() {
   const syncing = state === "running";
 
   // Use the full roster so accounts without transactions remain selectable.
-  const { banks, bankCounts } = useLoaderData({
+  const { banks, bankCounts, balances } = useLoaderData({
     from: "/_authed/_period-overview",
   });
 
@@ -46,7 +65,7 @@ export function BankPicker() {
         </span>
         <ChevronDownIcon className="hidden sm:block" />
       </Button>
-      <Dropdown.Popover placement="bottom end">
+      <Dropdown.Popover placement="bottom end" className="min-w-72">
         <Dropdown.Menu aria-label="Comptes inclus">
           <Dropdown.Section
             selectionMode="multiple"
@@ -69,8 +88,17 @@ export function BankPicker() {
             {banks.map((bank) => (
               <Dropdown.Item key={bank} id={bank} textValue={bank}>
                 <Dropdown.ItemIndicator />
-                <Label>{bank}</Label>
-                <span className="text-muted num ms-auto">
+                <div className="flex min-w-0 flex-col">
+                  <Label>{bank}</Label>
+                  {balances
+                    .filter((balance) => balance.bank === bank)
+                    .map(({ amount, currency, at }) => (
+                      <Description key={currency} className="num">
+                        {formatBalance(amount, currency, at)}
+                      </Description>
+                    ))}
+                </div>
+                <span className="text-muted num ms-auto shrink-0">
                   {bankCounts.find((entry) => entry.bank === bank)?.count ?? 0}
                 </span>
               </Dropdown.Item>

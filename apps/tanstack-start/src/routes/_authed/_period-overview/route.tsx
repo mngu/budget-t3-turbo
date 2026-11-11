@@ -3,12 +3,15 @@ import {
   Outlet,
   redirect,
   stripSearchParams,
+  useRouter,
   useRouterState,
 } from "@tanstack/react-router";
+import { useEffect } from "react";
 
 import { monthBounds, transactionsSearchSchema } from "@budget/api/schemas";
 import { cn } from "@budget/ui";
 import { SEARCH_DEFAULTS, wholePeriod } from "~/lib/transactions-search";
+import { useTRPCClient } from "~/lib/trpc";
 
 import { BreakdownList } from "./-components/breakdown-list";
 import { KpiBand } from "./-components/kpi-band";
@@ -43,6 +46,7 @@ export const Route = createFileRoute("/_authed/_period-overview")({
       overview,
       bankCounts,
       banks,
+      balances,
       earliestDate,
     ] = await Promise.all([
       context.trpcClient.transactions.globalStats.query({
@@ -62,6 +66,7 @@ export const Route = createFileRoute("/_authed/_period-overview")({
       }),
       context.trpcClient.transactions.bankCounts.query(deps),
       context.trpcClient.transactions.banks.query(),
+      context.trpcClient.connections.balances.query(),
       context.trpcClient.transactions.earliestDate.query(),
     ]);
 
@@ -71,6 +76,7 @@ export const Route = createFileRoute("/_authed/_period-overview")({
       overview,
       bankCounts,
       banks,
+      balances,
       earliestDate,
       monthStartDay: context.monthStartDay,
     };
@@ -86,6 +92,19 @@ export const Route = createFileRoute("/_authed/_period-overview")({
 
 function RevueLayout() {
   const { globalStats, budgetStats, overview } = Route.useLoaderData();
+  const router = useRouter();
+  const trpcClient = useTRPCClient();
+
+  // Not in the loader: it reruns on every search change, and the bank can take seconds.
+  useEffect(() => {
+    trpcClient.connections.refreshBalances
+      .mutate()
+      .then(async (refreshed) => {
+        if (refreshed) await router.invalidate();
+      })
+      // A stale balance stays on screen with its date; nothing to tell the user.
+      .catch(() => {});
+  }, [router, trpcClient]);
   const isTable =
     useRouterState({ select: (s) => s.location.pathname }) === "/transactions";
 

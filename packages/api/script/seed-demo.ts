@@ -130,11 +130,21 @@ const CATEGORIES: Record<string, CategorySeed> = {
   },
 };
 
+// Balances cover the picker's three cases: read today, read earlier, never read.
 const ACCOUNTS = {
-  courant: { bankName: "Boursorama", displayName: "Compte courant" },
+  courant: {
+    bankName: "Boursorama",
+    displayName: "Compte courant",
+    balance: "2184.37",
+    balanceCurrency: "EUR",
+    balanceAt: new Date(),
+  },
   joint: {
     bankName: "Crédit Agricole",
     displayName: "Compte joint Crédit Agricole Île-de-France",
+    balance: "-312.08",
+    balanceCurrency: "EUR",
+    balanceAt: new Date(Date.now() - 2 * 24 * 3600 * 1000),
   },
   revolut: { bankName: "Revolut", displayName: "Revolut" },
 } as const;

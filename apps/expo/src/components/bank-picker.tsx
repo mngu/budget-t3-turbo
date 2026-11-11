@@ -7,11 +7,28 @@ import {
   useThemeColor,
 } from "heroui-native";
 import { Landmark, RefreshCw } from "lucide-react-native";
+import { View } from "react-native";
 
 import { sumBy } from "@budget/api/schemas";
 import { usePeriod } from "~/lib/period";
 import { useSync } from "~/lib/sync";
 import { trpc } from "~/lib/trpc";
+
+const timeFr = new Intl.DateTimeFormat("fr-FR", { timeStyle: "short" });
+const dayMonthFr = new Intl.DateTimeFormat("fr-FR", {
+  day: "2-digit",
+  month: "short",
+});
+
+// Exact figures like a bank statement, in the account's own currency.
+function formatBalance(amount: number, currency: string, at: Date) {
+  const money = new Intl.NumberFormat("fr-FR", { style: "currency", currency });
+  const when =
+    at.toDateString() === new Date().toDateString()
+      ? timeFr.format(at)
+      : dayMonthFr.format(at);
+  return `${money.format(amount)} · ${when}`;
+}
 
 export function BankPicker() {
   const { scope, bank, setBank } = usePeriod();
@@ -26,6 +43,9 @@ export function BankPicker() {
     }),
     placeholderData: keepPreviousData,
   });
+  const { data: balances = [] } = useQuery(
+    trpc.connections.balances.queryOptions(),
+  );
   const iconColor = useThemeColor("foreground");
   const { sync, running } = useSync();
 
@@ -71,7 +91,19 @@ export function BankPicker() {
             {banks.map((name) => (
               <Menu.Item key={name} id={name}>
                 <Menu.ItemIndicator />
-                <Menu.ItemTitle>{name}</Menu.ItemTitle>
+                <View className="flex-1">
+                  <Menu.ItemTitle>{name}</Menu.ItemTitle>
+                  {balances
+                    .filter((balance) => balance.bank === name)
+                    .map(({ amount, currency, at }) => (
+                      <Menu.ItemDescription
+                        key={currency}
+                        className="tabular-nums"
+                      >
+                        {formatBalance(amount, currency, at)}
+                      </Menu.ItemDescription>
+                    ))}
+                </View>
                 <Typography color="muted" className="tabular-nums">
                   {count(name)}
                 </Typography>

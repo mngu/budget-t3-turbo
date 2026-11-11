@@ -53,9 +53,14 @@ const SETTINGS_PAGES = [
 export function AppHeader({ title }: { title?: string }) {
   const isSettings = title !== undefined;
 
-  // Check the layout match: selectors read its loader and throw outside it.
+  // Check the layout match: selectors read its loader data, absent outside it
+  // and when the loader failed (its error screen must render, not crash the page).
   const isRevue = useMatches({
-    select: (m) => m.some((x) => x.routeId === "/_authed/_period-overview"),
+    select: (m) =>
+      m.some(
+        (x) =>
+          x.routeId === "/_authed/_period-overview" && x.status !== "error",
+      ),
   });
 
   // Only read this search on overview routes; other routes use different schemas.

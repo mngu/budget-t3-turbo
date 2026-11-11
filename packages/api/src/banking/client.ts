@@ -39,6 +39,16 @@ export function appJwt(settings: EbSettings): string {
   return makeJwt(settings.applicationId, settings.privateKeyPem);
 }
 
+// User-present access is exempt from the PSD2 quota on unattended access (~4/day).
+export function psuHeaders(headers: Headers): Record<string, string> {
+  const psu: Record<string, string> = {};
+  const ip = headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  const userAgent = headers.get("user-agent");
+  if (ip) psu["Psu-Ip-Address"] = ip;
+  if (userAgent) psu["Psu-User-Agent"] = userAgent;
+  return psu;
+}
+
 export async function ebApi(
   path: string,
   jwt: string,

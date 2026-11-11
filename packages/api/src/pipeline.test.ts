@@ -7,6 +7,7 @@ import { importTransactions } from "./transactions/import";
 
 // Explicit factories avoid loading the database client and requiring POSTGRES_URL.
 vi.mock("./banking/fetch-transactions", () => ({ syncBanks: vi.fn() }));
+vi.mock("./banking/balances", () => ({ refreshBalances: vi.fn() }));
 vi.mock("./transactions/import", () => ({ importTransactions: vi.fn() }));
 vi.mock("./categorization", () => ({ categorizeUncategorized: vi.fn() }));
 

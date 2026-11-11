@@ -79,6 +79,10 @@ export const bankAccounts = pgTable(
     connectionId: integer("connection_id").references(() => bankConnections.id),
     displayName: text("display_name"),
     enabled: boolean("enabled").notNull().default(true),
+    // Last balance read from the bank, shown until the next successful read.
+    balance: numeric("balance", { precision: 12, scale: 2 }),
+    balanceCurrency: text("balance_currency"),
+    balanceAt: timestamp("balance_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

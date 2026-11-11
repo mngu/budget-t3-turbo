@@ -73,6 +73,17 @@ test("le sélecteur de comptes exclut un compte", async ({ page }) => {
   await expect(picker).toContainText("2/3");
 });
 
+test("le sélecteur de comptes affiche le dernier solde lu", async ({
+  page,
+}) => {
+  await page.goto("/", hydrated);
+  await page.getByRole("button", { name: "Comptes inclus" }).click();
+
+  await expect(
+    page.getByRole("menuitemcheckbox", { name: /^Compte courant/ }),
+  ).toContainText(/2\s184,37\s€ · \d{2}:\d{2}/);
+});
+
 const iso = (d: Date) => d.toLocaleDateString("sv-SE");
 const day = (month: number, date: number) =>
   new Date(now.getFullYear(), month, date);

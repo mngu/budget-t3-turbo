@@ -7,6 +7,7 @@ import {
   consentBadge,
   makeJwt,
   parseSessionAccounts,
+  pickBalance,
   reconcileAccounts,
 } from "./domain";
 
@@ -151,5 +152,24 @@ describe("reconcileAccounts", () => {
     ]);
     expect(updates).toEqual([]);
     expect(creates).toEqual([{ uid: "uid-c", iban: "FR76CCCC" }]);
+  });
+});
+
+describe("pickBalance", () => {
+  const balance = (balance_type: string) => ({
+    balance_type,
+    balance_amount: { amount: "1.00", currency: "EUR" },
+  });
+
+  it("prefers a booked balance over an available one", () => {
+    expect(
+      pickBalance([balance("ITAV"), balance("CLBD"), balance("XPCD")])
+        ?.balance_type,
+    ).toBe("XPCD");
+  });
+
+  it("falls back to an unknown type rather than nothing", () => {
+    expect(pickBalance([balance("OTHR")])?.balance_type).toBe("OTHR");
+    expect(pickBalance([])).toBeUndefined();
   });
 });

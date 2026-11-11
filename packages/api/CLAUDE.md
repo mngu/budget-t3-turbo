@@ -4,7 +4,7 @@ Détail du package API. Le `CLAUDE.md` de la racine garde la vue d'ensemble et l
 
 - **Tout est piloté depuis la webapp, il n'y a aucun script CLI métier** (`script/seed-demo.ts` est un outil de dev, voir `pnpm db:seed` à la racine). Organisation en dossiers par domaine sous `src/` :
   - `router/` — adaptateurs tRPC uniquement (`auth`, `transactions`, `categories`, `connections`, `settings`, `spaces`, `sync`) : schéma zod d'entrée + délégation, aucune requête SQL. **Y remettre de la logique métier est une régression.**
-  - `banking/` — Enable Banking : `client.ts`, `domain.ts`, `settings.ts`, `connections.ts`, `fetch-transactions.ts`.
+  - `banking/` — Enable Banking : `client.ts`, `domain.ts`, `settings.ts`, `connections.ts`, `fetch-transactions.ts`, `balances.ts`.
   - `transactions/` — `normalize.ts`, `import.ts`, `queries.ts`, `schemas.ts` (`transactionsSearchSchema`, `PAGE_SIZE`, `globalStatsSchema`/`budgetStatsSchema`).
   - `categories/` — `queries.ts` (`listCategoryTree`, `categoriesOverview`), `mutations.ts`, `budgets.ts`, `schemas.ts` (`categoryOverviewSchema`, `NO_CATEGORY_NAME`, `isManagedCategory`).
   - `spaces/` — `queries.ts`, `mutations.ts` (voir « Espaces » à la racine).
@@ -55,6 +55,13 @@ This was a deliberate decision after research, not an assumption — do not reve
 - Trade-off to keep in mind: among mainstream providers, it is close to the _only_ one offering free self-serve access for individuals — Powens, Bridge/Bankin, Tink, Yapily are B2B/sales-led only; Plaid's free tier is US/Canada-only. That's a single-vendor dependency risk (the same kind of risk that just killed the GoCardless setup), acceptable for a hobby project but worth remembering if this ever needs a second provider.
 - Regulatory note independent of provider: PSD2 consent must be renewed periodically (~180 days for most EEA ASPSPs) — periodic sync will never be fully unattended long-term; expect to re-authenticate roughly twice a year regardless of provider.
 - `sync.run` relaie l'IP et le user-agent du navigateur en en-têtes PSU (`Psu-Ip-Address`, `Psu-User-Agent`) : un accès « PSU présent » est exempté du plafond PSD2 des accès non assistés (~4/jour).
+- **Soldes des comptes** (`bank_accounts.balance` / `balance_currency` / `balance_at`, depuis le 2026-11-11) : `connections.refreshBalances` est appelée à l'ouverture de la revue (web et mobile), avec les mêmes en-têtes PSU (`psuHeaders`, `client.ts`), et `sync.run` la force.
+  Sans `Psu-Ip-Address` elle ne fait rien (sauf forcée) : l'accès compterait comme non assisté et mangerait le quota dont dépend le bouton Synchroniser.
+  En développement sur `localhost`, sans `X-Forwarded-For`, seul `sync.run` rafraîchit donc les soldes.
+  Elle n'interroge la banque qu'une fois par quart d'heure et par espace, compté sur la **dernière tentative** et non sur le dernier succès : une banque qui répond 429 serait sinon rappelée à chaque ouverture.
+  Ses erreurs sont journalisées, jamais affichées ; le solde précédent reste à l'écran avec sa date (`last_change_date_time` de la banque, à défaut l'heure de lecture).
+  Elle n'est pas dans le loader de la revue, qui se rejoue à chaque changement de search.
+  Le mobile l'appelle hors `useMutation`, dont le `MutationCache` rechargerait toutes les requêtes même sans nouveau solde, au montage et à chaque retour au premier plan.
 
 ### Verified coverage for this project's 3 banks (checked against `enablebanking.com/docs/markets/fr/` and `/docs/markets/lt/`)
 

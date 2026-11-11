@@ -50,6 +50,13 @@
       "when": 1794059917558,
       "tag": "0006_month_start_day",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794386219653,
+      "tag": "0007_account_balance",
+      "breakpoints": true
     }
   ]
 }

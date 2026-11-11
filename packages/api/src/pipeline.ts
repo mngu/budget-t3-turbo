@@ -1,6 +1,7 @@
 import type { SyncOutcome } from "./banking/fetch-transactions";
 import type { CategorizeResult } from "./categorization";
 
+import { refreshBalances } from "./banking/balances";
 import { syncBanks } from "./banking/fetch-transactions";
 import { categorizeUncategorized } from "./categorization";
 import { withSingleFlight } from "./lib/single-flight";
@@ -38,6 +39,12 @@ export async function performSync(
   return withSyncLock(organizationId, async () => {
     const outcome = await syncBanks(organizationId, psuHeaders);
     await importAndCategorize(organizationId);
+    // Best-effort like categorization; syncBanks has already marked expired connections.
+    try {
+      await refreshBalances(organizationId, psuHeaders, { force: true });
+    } catch (err) {
+      console.error("⚠️  Soldes non rafraîchis après la sync :", err);
+    }
     return outcome;
   });
 }
