@@ -67,7 +67,8 @@ const subscribeSystem = (onChange: () => void) => {
   return () => mediaQuery.removeEventListener("change", onChange);
 };
 
-const themeDetectorScript = (function () {
+// Goes in <head> so the theme class is set before first paint.
+export const themeDetectorScript = (function () {
   function themeFn() {
     const isValidTheme = (theme: string): theme is ThemeMode => {
       const validThemes = ["light", "dark", "auto"] as const;
@@ -132,10 +133,6 @@ export function ThemeProvider({ children }: React.PropsWithChildren) {
         setTheme,
       }}
     >
-      <script
-        dangerouslySetInnerHTML={{ __html: themeDetectorScript }}
-        suppressHydrationWarning
-      />
       {children}
     </ThemeContext>
   );
